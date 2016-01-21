@@ -21,20 +21,26 @@ void loop() {
 }
 
 void move() {
-  int num = atoi(sc.next());
-  int direction = atoi(sc.next());
-  int power = atoi(sc.next());
   int time = atoi(sc.next());
+  int count = atoi(sc.next());
   
-  if (direction) {
-    motorForward(num, power);
-  } else {
-    motorBackward(num, power);
+  for (int i = 0; i < count; ++i) {
+    int motor = atoi(sc.next());
+    int power = atoi(sc.next());
+    Serial.println(motor);
+    Serial.println(power);
+    if (power > 0) {
+      motorForward(motor, power);
+    } else {
+      motorBackward(motor, -power);
+    }
   }
+    Serial.println(time);
+    Serial.println(count);
   Serial.println("DONE");
   
   delay(time);
-  motorStop(num);
+  motorAllStop();
 }
 
 void stop() {
