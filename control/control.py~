@@ -18,7 +18,7 @@ class RobotProtocol:
 
         self.ser.write(' '.join(out) + '\r')
         print ' '.join(out)
-# hello world
+
 
 class Milestone1:
     def __init__(self):
