@@ -21,19 +21,22 @@ class RobotProtocol:
 # hello world
 
 class Milestone1:
+
+
+
     def __init__(self):
         self.p = RobotProtocol()
 
     def move_forwards(self, x , time):
         self.p.move(time, [
-            (1, x),
-            (2, -x),
+            (1, -x),
+            (2, x),
             ])
 
     def move_backwards(self, x, time):
         self.p.move(time, [
-            (1, -x),
-            (2, x),
+            (1, x),
+            (2, -x),
             ])
 
     def move_left(self, x, time):
@@ -48,10 +51,7 @@ class Milestone1:
             (4, -x),
             ])
 
-    def kick(self, x, time):
-        self.p.move(time, [
-            (5, x)
-            ])
+
 
     def move_clockwise(self, time):
         self.p.move(time, [
@@ -94,14 +94,7 @@ class Milestone1:
             (4, x),
             ])
 
-# Goes right while moving forward
-    def backward_diagonal_left(self, x, time):
-        self.p.move(time, [
-            (1, -x),
-            (2, -x),
-            (3, x),
-            (4, x),
-            ])
+
 
 # Gives a demo of all the funvctionality 
     '''
