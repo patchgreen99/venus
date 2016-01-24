@@ -12,6 +12,7 @@ void setup() {
   
   sc.addCommand("M", move);
   sc.addCommand("S", stop);
+  sc.addCommand("T", transferByte);
   sc.addDefaultHandler(unknown);
 }
 
@@ -43,6 +44,15 @@ void move() {
 void stop() {
   motorAllStop();
   Serial.println("DONE");
+}
+
+void transferByte() {
+  byte value = atoi(sc.next());
+  Wire.beginTransmission(69);
+  Wire.write(value);
+  Wire.endTransmission();
+  Serial.print("RECEIVED ");
+  Serial.println(value);
 }
 
 void unknown() {
