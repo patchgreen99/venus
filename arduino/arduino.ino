@@ -27,16 +27,13 @@ void move() {
   for (int i = 0; i < count; ++i) {
     int motor = atoi(sc.next());
     int power = atoi(sc.next());
-    Serial.println(motor);
-    Serial.println(power);
+    
     if (power > 0) {
       motorForward(motor, power);
     } else {
       motorBackward(motor, -power);
     }
   }
-    Serial.println(time);
-    Serial.println(count);
   Serial.println("DONE");
   
   delay(time);
