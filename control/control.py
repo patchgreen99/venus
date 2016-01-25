@@ -5,8 +5,8 @@ import sys
 
 MOTOR_LEFT = 0
 MOTOR_RIGHT = 1
-MOTOR_TURN = 3
-MOTOR_KICK = 4
+MOTOR_TURN = 2
+MOTOR_KICK = 3
 
 
 class RobotProtocol:
@@ -99,7 +99,10 @@ class Milestone1:
         y = int(y)
         deg = int(deg)
         self.forward(self.calc_move(x), 100)
-        self.clockwise(self.calc_turn(90), 100)
+        if x > 0:
+            self.clockwise(self.calc_turn(-90), 100)
+        else:
+            self.clockwise(self.calc_turn(90), 100)
         self.forward(self.calc_move(y), 100)
         self.clockwise(self.calc_move(deg), 100)
 
