@@ -34,35 +34,62 @@ class Milestone1:
     def __init__(self):
         device = sys.argv[1] if len(sys.argv) == 2 else '/dev/ttyACM0'
         self.p = RobotProtocol(device)
+        
+    def calc_move(self, x):
+        return 45.0 * x# 38.0 * x + 100.0
+        
+    def calc_clockwise(self, deg):
+        return 5.9 * deg + 45.0
+        
+    def calc_anticlockwise(self, deg):
+        return 6.4 * deg + 50.0
+        
+    def calc_turn(self, deg):
+        if deg < 0:
+            return self.calc_anticlockwise(deg)
+        else:
+            return self.calc_clockwise(deg)
 
-    def f(self, *args):
+    def f(self, x):
         """Shortcut for forward"""
-        self.forward(*args)
+        x = int(x)
+        if x < 0:
+            x = -x
+            power = -100
+        else:
+            power = 100
+        self.forward(self.calc_move(x), power)
 
-    def c(self, *args):
+    def c(self, deg):
         """Shortcut for backward"""
-        self.clockwise(*args)
+        deg = int(deg)
+        if deg < 0:
+            deg = -deg
+            power = -100
+        else:
+            power = 100
+        self.clockwise(self.calc_turn(deg), power)
 
     def forward(self, time, power):
         """Move forward, negative power means backward"""
-        time = int(time)
+        time = int(time) if int(time) > 0 else 0
         power = int(power)
         self.p.move(time, [(MOTOR_LEFT, -power),
                            (MOTOR_RIGHT, -power)])
 
     def clockwise(self, time, power):
         """Rotate clockwise, negative power means counter-clockwise"""
-        time = int(time)
+        time = int(time) if int(time) > 0 else 0
         power = int(power)
-        self.p.move(time, [(MOTOR_LEFT, power),
-                           (MOTOR_RIGHT, -power),
-                           (MOTOR_TURN, -power)])
+        self.p.move(time, [(MOTOR_LEFT, -power),
+                           (MOTOR_RIGHT, power),
+                           (MOTOR_TURN, power)])
 
     def kicker(self, time, power):
         """Move kicker forward"""
         time = int(time)
         power = int(power)
-        self.p.move(time, [(MOTOR_KICK, -power)])
+        self.p.move(time, [(MOTOR_KICK, power)])
 
     def move(self, x, y, deg):
         """Milestone 1: Move"""
@@ -71,16 +98,23 @@ class Milestone1:
         x = int(x)
         y = int(y)
         deg = int(deg)
-        self.forward(100 * x, 100)
-        self.clockwise(500, 100)
-        self.forward(100 * y, 100)
-        self.clockwise(100 * deg, 100)
+        self.forward(self.calc_move(x), 100)
+        self.clockwise(self.calc_turn(90), 100)
+        self.forward(self.calc_move(y), 100)
+        self.clockwise(self.calc_move(deg), 100)
 
     def kick(self, distance):
         """Milestone 1: Kick"""
-        # The same goes for kicker
-        self.kicker(distance, 100)
-        self.kicker(200, -100)
+        distance = int(distance)
+        if distance == 50:
+            time = 260
+        elif distance == 100:
+            time = 290
+        elif distance == 150:
+            time = 320 # 330
+        else:
+            time = 0
+        self.kicker(time, 100)
 
     def transfer(self, filename, freq_hz):
         """Milestone 1: Communications and Timing"""
