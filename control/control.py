@@ -82,11 +82,12 @@ class Milestone1:
         self.kicker(distance, 100)
         self.kicker(200, -100)
 
-    def transfer(self, filename, period):
+    def transfer(self, filename, freq_hz):
         """Milestone 1: Communications and Timing"""
-        period = int(period)
-        seconds = period / 1000.0
-        print("Transferring file '%s' at period %dms" % (filename, period))
+        freq_hz = float(freq_hz)
+        seconds = 1.0 / freq_hz
+        print("Transferring file '%s' at freq %fHz, %fs" %
+              (filename, freq_hz, seconds))
         with open(filename, "rb") as f:
             byte = f.read(1)
             while byte != "":
