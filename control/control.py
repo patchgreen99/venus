@@ -169,7 +169,7 @@ class Milestone1:
                 self.p.transfer(byte)
                 time.sleep(seconds)
                 byte = f.read(1)
-        self.p.read_all()
+        #self.p.read_all()
 
     def prompt(self):
         text = raw_input('> ')
