@@ -16,9 +16,14 @@ class RobotProtocol:
     def stop(self):
         self.write('S\r')
 
-    def move(self, time, motor_powers):
+    def move_time(self, time, motor_powers):
         # motor_powers consists of tuples (num, power)
         out = ['M', time, len(motor_powers)] + list(sum(motor_powers, ()))
+        self.write(' '.join(str(x) for x in out))
+
+    def move_rotary(self, rotary, motor_powers):
+        # motor_powers consists of tuples (num, power)
+        out = ['M', rotary, len(motor_powers)] + list(sum(motor_powers, ()))
         self.write(' '.join(str(x) for x in out))
         
     def transfer(self, byte):
@@ -27,6 +32,11 @@ class RobotProtocol:
     def write(self, message):
         self.ser.write(message + '\r')
         print("Message sent: %s" % message)
+        s = self.ser.readline()
+        while s != 'DONE\r\n':
+            print("Got unknown response '%s'" % s)
+            s = self.ser.readline()
+        print("Got done")
 
 
 class Milestone1:
@@ -35,89 +45,92 @@ class Milestone1:
         device = sys.argv[1] if len(sys.argv) == 2 else '/dev/ttyACM0'
         self.p = RobotProtocol(device)
         
-    def calc_move(self, x):
-        return 45.0 * x# 38.0 * x + 100.0
+    def calc_forward(self, x):
+        return 41.0 * x
+        
+    def calc_backward(self, x):
+        return 38.0 * x
         
     def calc_clockwise(self, deg):
-        return 5.9 * deg + 45.0
+        return 6.2 * deg
         
     def calc_anticlockwise(self, deg):
-        return 6.4 * deg + 50.0
-        
-    def calc_turn(self, deg):
-        if deg < 0:
-            return self.calc_anticlockwise(deg)
-        else:
-            return self.calc_clockwise(deg)
+        return 6.2 * deg
 
     def f(self, x):
         """Shortcut for forward"""
         x = int(x)
         if x < 0:
-            x = -x
+            x = self.calc_backward(-x)
             power = -100
         else:
+            x = self.calc_forward(x)
             power = 100
-        self.forward(self.calc_move(x), power)
+        self.forward(x, power)
 
     def c(self, deg):
         """Shortcut for backward"""
         deg = int(deg)
         if deg < 0:
-            deg = -deg
+            deg = self.calc_anticlockwise(-deg)
             power = -100
         else:
+            deg = self.calc_clockwise(deg)
             power = 100
-        self.clockwise(self.calc_turn(deg), power)
+        self.clockwise_rotary(deg, power)
 
-    def forward(self, time, power):
+    def forward(self, rotary, power):
         """Move forward, negative power means backward"""
-        time = int(time) if int(time) > 0 else 0
+        rotary = int(rotary) if int(rotary) > 0 else 0
         power = int(power)
-        self.p.move(time, [(MOTOR_LEFT, -power),
-                           (MOTOR_RIGHT, -power)])
-
-    def clockwise(self, time, power):
+        self.p.move_rotary(rotary, [(MOTOR_LEFT, -power),
+                                    (MOTOR_RIGHT, -power)])
+                                  
+    def clockwise_rotary(self, rotary, power):
         """Rotate clockwise, negative power means counter-clockwise"""
-        time = int(time) if int(time) > 0 else 0
+        rotary = int(rotary) if int(rotary) > 0 else 0
         power = int(power)
-        self.p.move(time, [(MOTOR_LEFT, -power),
-                           (MOTOR_RIGHT, power),
-                           (MOTOR_TURN, power)])
+        self.p.move_rotary(rotary, [(MOTOR_LEFT, -power),
+                                  (MOTOR_RIGHT, power),
+                                  (MOTOR_TURN, power)])                              
 
-    def kicker(self, time, power):
+    def kicker(self, rotary, power):
         """Move kicker forward"""
-        time = int(time)
+        rotary = int(rotary)
         power = int(power)
-        self.p.move(time, [(MOTOR_KICK, power)])
+        self.p.move_rotary(rotary, [(MOTOR_KICK, power)])
 
     def move(self, x, y, deg):
         """Milestone 1: Move"""
-        # x and y are supplied in meters, deg in degrees
-        # Commands are going to be issued like this, we have to tweak the coefficients for time
         x = int(x)
         y = int(y)
         deg = int(deg)
-        self.forward(self.calc_move(x), 100)
+        self.f(x)
+        time.sleep(1)
         if x > 0:
-            self.clockwise(self.calc_turn(-90), 100)
+            self.c(-90)
         else:
-            self.clockwise(self.calc_turn(90), 100)
-        self.forward(self.calc_move(y), 100)
-        self.clockwise(self.calc_move(deg), 100)
+            self.c(90)
+        time.sleep(1)
+        self.f(y)
+        time.sleep(1)
+        self.c(deg)
 
     def kick(self, distance):
         """Milestone 1: Kick"""
         distance = int(distance)
         if distance == 50:
-            time = 260
+            #time = 260
+            rotary = 242
         elif distance == 100:
-            time = 290
+            #time = 290
+            rotary = 275 #295?
         elif distance == 150:
-            time = 320 # 330
+            #time = 310
+            rotary = 303
         else:
-            time = 0
-        self.kicker(time, 100)
+            rotary = 0
+        self.kicker(rotary, 100)
 
     def transfer(self, filename, freq_hz):
         """Milestone 1: Communications and Timing"""
@@ -139,8 +152,8 @@ class Milestone1:
             if tokens:
                 try:
                     getattr(self, tokens[0])(*tokens[1:])
-                except AttributeError:
-                    print("No such command")
+                except AttributeError as e:
+                    print("Attribute error: %s" % e)
                 except ValueError as e:
                     print("Value error: %s" % e)
                 except TypeError as e:
