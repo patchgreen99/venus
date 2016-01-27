@@ -106,14 +106,14 @@ void moveRotaryUnits() {
   } while (count_completed < count);
   
   // This is the 'go to the other direction' stop trick
-  for (int i = 0; i < ROTARY_COUNT; ++i) {
+  /*for (int i = 0; i < ROTARY_COUNT; ++i) {
     if (power[i] > 0) {
       motorBackward(i, 100);
     } else if (power[i] < 0) {
       motorForward(i, 100);
     }
   }
-  delay(20);
+  delay(500);*/
   motorAllStop();
   
   Serial.println("DONE");

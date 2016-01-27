@@ -52,10 +52,16 @@ class Milestone1:
         return 38.0 * x
         
     def calc_clockwise(self, deg):
+        if deg <= 30:
+            deg = 47
+        elif deg > 30 and deg <= 45:
+            deg = 55
+        elif deg > 45 and deg <= 60:
+            deg = 70 
         return 6.2 * deg
         
     def calc_anticlockwise(self, deg):
-        return 6.2 * deg
+        return self.calc_clockwise(deg)
 
     def f(self, x):
         """Shortcut for forward"""
@@ -105,14 +111,23 @@ class Milestone1:
         x = int(x)
         y = int(y)
         deg = int(deg)
+        
+        print("First turn, clockwise")
+        self.c(90)
+        time.sleep(1)
+        
+        print("Go x")
         self.f(x)
         time.sleep(1)
-        if x > 0:
-            self.c(-90)
-        else:
-            self.c(90)
+        
+        print("Second turn, counterclockwise")
+        self.c(-85)
+        
+        print("Go y")
         time.sleep(1)
         self.f(y)
+        
+        print("Do final turn")
         time.sleep(1)
         self.c(deg)
 
