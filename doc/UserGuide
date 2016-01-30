@@ -1,0 +1,55 @@
+User Guide - Group 15
+
+Installation
+
+ - how to install from github?
+ - pip install pyserial
+
+An overview of the robot:
+   Structural (how it can move/grab/kick, what sensors it has)
+	It can't grab :)
+        It moves because it has wheels and motors, and we can send commands that power the certain motors (depending which move we want to make).   
+	Sensors: only Rotary Encoder Board so far (check Technical Specifications document for details)
+
+   Use (turning it on, swapping batteries etc.)
+	In order to turn the robot on, connect the battery pack to the board.
+        In order to swap batteries, take them out, put them charging and put new batteries into the battery pack. (really?)
+
+Running Instructions (To be changed after the first milestone)
+   Run the command in the terminal from the project root directory: 
+			
+			source env/bin/activate
+
+   Then in order to send the commands the robot: 
+
+			python control/control.py
+
+   After that you should be able to send commands to the robot (make sure the usb stick is plugged in).
+   NB: In case you make changes to Arduino code, you should upload the changes to the board!
+   The list of possible commands is below:
+
+	For moving to the target for the milestone:
+	At the begging it turns 90 degrees to the left or to the right (if "distance" parameter is positive the robot will move to the right, if negative to the left). After covering the first distance it turns 90 degrees so that it faces the same way as at the start. The "degrees" parameter is amount of degrees the robot turns (positive - clockwise, negative - anticlockwise)
+
+		maybe worth putting a diagram here!
+
+		move <distance> <distance> <degrees>
+
+ 	For kicking:
+	
+	        kick [50|100|150]
+
+	For moving forward and turning:
+
+	        f <distance>
+		c <degrees>
+
+A troubleshooting guide
+
+	processing.app.SerialNotFoundException: Serial port '<port>' not found. Did you select the right one from the Tools > Serial Port menu?
+	Problem: it can't detect the arduino board.
+	Solution: make sure it's connected to the computer through the USB stick or the cable. If it is, disconnect and connect again, or power the board off and on again. Make sure you are not running 'python control/control.py' when you're uploading the changes.
+
+	Problem: When sending commands the robot doesn't do anything and you're sure it should move.
+	Solution: power the arduino board off and on again.
+
