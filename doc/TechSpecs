@@ -7,28 +7,26 @@ Technical Specifications - Group 15
 
 	Photo!
 
-
 	Based on? Our fantasy?
 	Advantage of such design is that it is simple, but the robot can still move fast enough and we could control the power of the kicker. 
  
   - Hardware (components, what the choice was based on, motivation for changes)
 
-	The initial robot had four holonomic wheels. The later design had two main wheels, and one back holonomic wheel, which allowed the robot to turn as well as move forwards/backwards without difficulty. 
+	The initial robot had four holonomic wheels. The later design had two main wheels, and one back holonomic wheel, which allowed the robot to turn as well as move forwards/backwards without difficulties. 
 	Even though we liked an idea of kicker that uses elastic (this made it more powerful). It was almost impossible to predict the distance. That's why the design that we used for the milestone has a kicker that is powered by the NXT motor and gears.
  
   - Documentation of code (high level! think diagrams!)
 
-	Diagram -> contol.py has commands we send from the console, it sends them to arduino? arduino sends back which command it received and when it's done. Do we need this at this stage?  
+	Diagram -> contol.py has commands we send from the console, it sends them to arduino? arduino answers back which command it received and when it's done. 
 
   - How we control the robot? (Diagrams, pseudocode?)
 
-	same as before?
-	emmm... usb stick? signals, commands.. I totally know what I'm writing about..
+	See above
 
   - Vision, communications, planning, strategy, etc. (how they work, what they are based on, motivation for changes)
         - for communication -> list all command that are used
 
-		Copy from user guide...
+		This will change soon, current commands are in User Guide.
 
         - sensors (what data and in which format they provide, how it's read and utilised)
 
