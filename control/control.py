@@ -27,7 +27,7 @@ class RobotProtocol:
         self.write(' '.join(str(x) for x in out))
         
     def transfer(self, byte):
-        self.write('T %d' % ord(byte))
+        self.write_unsafe('T %d' % ord(byte))
         
     def write(self, message):
         self.ser.write(message + '\r')
@@ -37,6 +37,16 @@ class RobotProtocol:
             print("Got unknown response '%s'" % s)
             s = self.ser.readline()
         print("Got done")
+        
+    def write_unsafe(self, message):
+        self.ser.write(message + '\r')
+        print("Message sent: %s" % message)
+        
+    def read_all(self):
+        s = self.ser.readline()
+        while s == 'DONE\r\n':
+            print("Got response '%s'" % s)
+            s = self.ser.readline()
 
 
 class Milestone1:
@@ -159,6 +169,7 @@ class Milestone1:
                 self.p.transfer(byte)
                 time.sleep(seconds)
                 byte = f.read(1)
+        #self.p.read_all()
 
     def prompt(self):
         text = raw_input('> ')
