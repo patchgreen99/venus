@@ -3,7 +3,20 @@ User Guide - Group 15
 Installation
 
  - how to install from github?
- - pip install pyserial
+
+	$ git clone https://github.com/julijonas/venus.git
+
+	Python part:
+	$ cd sdp
+	$ virtualenv env
+	$ source env/bin/activate
+	$ pip install -r requirements.txt
+
+	Arduino part:
+	$ arduino
+	You'll need to add three libraries: ArduinoSerialCommand, SDPArduino, SimpleTimer
+
+	In order to add a library go to: Sketch -> Import Library... -> Add Library... and choose the library folder you want to import.
 
 An overview of the robot:
    Structural (how it can move/grab/kick, what sensors it has)
