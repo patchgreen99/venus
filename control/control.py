@@ -158,8 +158,18 @@ class Milestone1:
             rotary = 0
         self.kicker(rotary, 100)
         
-    def g(self, time, power):
+    def grab(self, time, power):
         self.p.move_time(time, [(MOTOR_GRAB, power)])
+        
+    def g(self):  # grab
+        self.p.move_time(200, [(MOTOR_GRAB, 70)])
+        
+    def r(self):  # release
+        self.p.move_time(230, [(MOTOR_GRAB, -100)])
+        
+    def k(self, rotary):  # kick and release
+        self.p.move_rotary(rotary, [(MOTOR_KICK, 100)])
+        self.r()
 
     def transfer(self, filename, freq_hz):
         """Milestone 1: Communications and Timing"""
