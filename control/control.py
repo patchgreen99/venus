@@ -7,6 +7,7 @@ MOTOR_LEFT = 0
 MOTOR_RIGHT = 1
 MOTOR_TURN = 2
 MOTOR_KICK = 3
+MOTOR_GRAB = 4
 
 
 class RobotProtocol:
@@ -101,7 +102,7 @@ class Milestone1:
         power = int(power)
         self.p.move_rotary(rotary, [(MOTOR_LEFT, -power),
                                     (MOTOR_RIGHT, -power)])
-                                  
+
     def clockwise_rotary(self, rotary, power):
         """Rotate clockwise, negative power means counter-clockwise"""
         rotary = int(rotary) if int(rotary) > 0 else 0
@@ -156,6 +157,9 @@ class Milestone1:
         else:
             rotary = 0
         self.kicker(rotary, 100)
+        
+    def g(self, time, power):
+        self.p.move_time(time, [(MOTOR_GRAB, power)])
 
     def transfer(self, filename, freq_hz):
         """Milestone 1: Communications and Timing"""
