@@ -17,14 +17,13 @@ class RobotProtocol:
     def stop(self):
         self.write('S\r')
 
-    def move_time(self, time, motor_powers):
+    def move(self, units, motor_powers, time=False):
         # motor_powers consists of tuples (num, power)
-        out = ['M', time, len(motor_powers)] + list(sum(motor_powers, ()))
-        self.write(' '.join(str(x) for x in out))
-
-    def move_rotary(self, rotary, motor_powers):
-        # motor_powers consists of tuples (num, power)
-        out = ['M', rotary, len(motor_powers)] + list(sum(motor_powers, ()))
+        command = 'M' if time else 'R'
+        out = [command, int(abs(units)), len(motor_powers)]
+        for num, power in motor_powers:
+            out.append(int(num))
+            out.append(int(power))
         self.write(' '.join(str(x) for x in out))
         
     def transfer(self, byte):
@@ -50,72 +49,50 @@ class RobotProtocol:
             s = self.ser.readline()
 
 
+def sign(x):
+    return 1 if x >= 0 else -1
+
+
 class Milestone1:
 
     def __init__(self):
         device = sys.argv[1] if len(sys.argv) == 2 else '/dev/ttyACM0'
         self.p = RobotProtocol(device)
-        
-    def calc_forward(self, x):
-        return 41.0 * x
-        
-    def calc_backward(self, x):
-        return 38.0 * x
-        
-    def calc_clockwise(self, deg):
-        if deg <= 30:
-            deg = 47
-        elif deg > 30 and deg <= 45:
-            deg = 55
-        elif deg > 45 and deg <= 60:
-            deg = 70 
-        return 6.2 * deg
-        
-    def calc_anticlockwise(self, deg):
-        return self.calc_clockwise(deg)
 
     def f(self, x):
-        """Shortcut for forward"""
+        """Move forward, negative x means backward"""
+        x = 13.5 * int(x)
+        self.p.move(abs(x), [(MOTOR_LEFT,  -100 * sign(x)),
+                             (MOTOR_RIGHT, -100 * sign(x))])
+
+    def c(self, x):
+        """Rotate clockwise, negative x means counter-clockwise"""
+        x = 1.25 * int(x)
+        self.p.move(abs(x), [(MOTOR_LEFT,  -100 * sign(x)),
+                             (MOTOR_RIGHT,  100 * sign(x)),
+                             (MOTOR_TURN,   100 * sign(x))])
+
+    def k(self, x):
+        """Kick"""
         x = int(x)
-        if x < 0:
-            x = self.calc_backward(-x)
-            power = -100
-        else:
-            x = self.calc_forward(x)
-            power = 100
-        self.forward(x, power)
+        # Not using rotary encoders, granularity too low
+        self.p.move(x, [(MOTOR_KICK, 100)], time=True)
 
-    def c(self, deg):
-        """Shortcut for backward"""
-        deg = int(deg)
-        if deg < 0:
-            deg = self.calc_anticlockwise(-deg)
-            power = -100
-        else:
-            deg = self.calc_clockwise(deg)
-            power = 100
-        self.clockwise_rotary(deg, power)
+    def g(self, x=200):
+        """Grab, negative x means release"""
+        x = int(x)
+        # This motor does not have rotary encoders
+        self.p.move(abs(x), [(MOTOR_GRAB, 100 * sign(x))], time=True)
+        
+    def r(self):
+        """Release"""
+        self.g(-180)
 
-    def forward(self, rotary, power):
-        """Move forward, negative power means backward"""
-        rotary = int(rotary) if int(rotary) > 0 else 0
-        power = int(power)
-        self.p.move_rotary(rotary, [(MOTOR_LEFT, -power),
-                                    (MOTOR_RIGHT, -power)])
-
-    def clockwise_rotary(self, rotary, power):
-        """Rotate clockwise, negative power means counter-clockwise"""
-        rotary = int(rotary) if int(rotary) > 0 else 0
-        power = int(power)
-        self.p.move_rotary(rotary, [(MOTOR_LEFT, -power),
-                                  (MOTOR_RIGHT, power),
-                                  (MOTOR_TURN, power)])                              
-
-    def kicker(self, rotary, power):
-        """Move kicker forward"""
-        rotary = int(rotary)
-        power = int(power)
-        self.p.move_rotary(rotary, [(MOTOR_KICK, power)])
+    def x(self, x):
+        """Kick and release"""
+        x = int(x)
+        self.k(x)
+        self.r()
 
     def move(self, x, y, deg):
         """Milestone 1: Move"""
@@ -147,29 +124,16 @@ class Milestone1:
         distance = int(distance)
         if distance == 50:
             #time = 260
-            rotary = 242
+            time = 242
         elif distance == 100:
             #time = 290
-            rotary = 275 #295?
+            time = 275 #295?
         elif distance == 150:
             #time = 310
-            rotary = 303
+            time = 303
         else:
-            rotary = 0
-        self.kicker(rotary, 100)
-        
-    def grab(self, time, power):
-        self.p.move_time(time, [(MOTOR_GRAB, power)])
-        
-    def g(self):  # grab
-        self.p.move_time(200, [(MOTOR_GRAB, 70)])
-        
-    def r(self):  # release
-        self.p.move_time(230, [(MOTOR_GRAB, -100)])
-        
-    def k(self, rotary):  # kick and release
-        self.p.move_rotary(rotary, [(MOTOR_KICK, 100)])
-        self.r()
+            time = 0
+        self.k(time)
 
     def transfer(self, filename, freq_hz):
         """Milestone 1: Communications and Timing"""
