@@ -28,7 +28,7 @@ class Room():
 			self.mtx = np.loadtxt("mtx1.txt")
 			self.dist = np.loadtxt("dist1.txt")
 			self.pts1 = np.float32([[10, 2], [634, 37], [596, 478], [6, 456]])
-		elif(self.room_id==2):
+		elif(self.room_id==0):
 			self.mtx = np.loadtxt("mtx2.txt")
 			self.dist = np.loadtxt("dist2.txt")
 			self.pts1 = np.float32([[7, 5], [607, 4], [593, 451], [17, 450]])
