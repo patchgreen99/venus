@@ -61,16 +61,27 @@ class Milestone1:
 
     def f(self, x):
         """Move forward, negative x means backward"""
-        x = 13.5 * int(x)
-        self.p.move(abs(x), [(MOTOR_LEFT,  -100 * sign(x)),
-                             (MOTOR_RIGHT, -100 * sign(x))])
+        x = int(x)
+        s = sign(x)
+        if x > 0:
+            x = 13.7627360975 * x - 53.5734818271
+        else:
+            x = 13.964509832 * -x - 75.2448595458
+        self.p.move(abs(x), [(MOTOR_LEFT,  -100 * s),
+                             (MOTOR_RIGHT, -100 * s)])
 
     def c(self, x):
         """Rotate clockwise, negative x means counter-clockwise"""
-        x = 1.25 * int(x)
-        self.p.move(abs(x), [(MOTOR_LEFT,  -100 * sign(x)),
-                             (MOTOR_RIGHT,  100 * sign(x)),
-                             (MOTOR_TURN,   100 * sign(x))])
+        x = int(x)
+        s = sign(x)
+        x = abs(x)
+        if x > 90:
+            x = 1.89444 * x - 59.5
+        else:
+            x = 0.0083027347 * (x ** 2) + 0.4557515777 * x
+        self.p.move(abs(x), [(MOTOR_LEFT,  -100 * s),
+                             (MOTOR_RIGHT,  100 * s),
+                             (MOTOR_TURN,   100 * s)])
 
     def k(self, x):
         """Kick"""
@@ -93,6 +104,9 @@ class Milestone1:
         x = int(x)
         self.k(x)
         self.r()
+
+    def s(self):
+        self.p.stop()
 
     def move(self, x, y, deg):
         """Milestone 1: Move"""
