@@ -2,6 +2,8 @@ import serial
 import time
 import sys
 
+from vision import Room
+
 
 MOTOR_LEFT = 0
 MOTOR_RIGHT = 1
@@ -56,8 +58,9 @@ def sign(x):
 class Milestone1:
 
     def __init__(self):
-        device = sys.argv[1] if len(sys.argv) == 2 else '/dev/ttyACM0'
-        self.p = RobotProtocol(device)
+        #device = sys.argv[1] if len(sys.argv) == 2 else '/dev/ttyACM0'
+        #self.p = RobotProtocol(device)
+        pass
 
     def f(self, x):
         """Move forward, negative x means backward"""
@@ -132,6 +135,10 @@ class Milestone1:
         print("Do final turn")
         time.sleep(1)
         self.c(deg)
+        
+    def vision(self, room_num, team_color, our_color):
+        r = Room.Room(int(room_num), team_color, our_color, debug=True)
+        objects = r.frame()
 
     def kick(self, distance):
         """Milestone 1: Kick"""
@@ -168,18 +175,13 @@ class Milestone1:
         while text != 'exit':
             tokens = text.split()
             if tokens:
-                try:
-                    getattr(self, tokens[0])(*tokens[1:])
-                except AttributeError as e:
-                    print("Attribute error: %s" % e)
-                except ValueError as e:
-                    print("Value error: %s" % e)
-                except TypeError as e:
-                    print("Type error: %s" % e)
+                #try:
+                getattr(self, tokens[0])(*tokens[1:])
+                #except AttributeError as e:
+                #    print("Attribute error: %s" % e)
+                #except ValueError as e:
+                #    print("Value error: %s" % e)
+                #except TypeError as e:
+                #    print("Type error: %s" % e)
             text = raw_input('> ')
-
-
-if __name__ == '__main__':
-    milestone1 = Milestone1()
-    milestone1.prompt()
 
