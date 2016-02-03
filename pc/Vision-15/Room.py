@@ -8,15 +8,10 @@ from Objects import*
 
 Redball = Objects("Red Ball",[(0, 100, 200), (10, 200, 255)],[(170, 100, 200), (180, 200, 255)])
 Blueball = Objects("Blue Ball",[(110, 100, 100), (115, 200, 200)],[(115, 100, 200), (120, 200, 200)])
-#Green spot 2 per robot
+Yellowball = Objects("Yellow Ball",[(27, 73, 240), (30, 255, 255)], [(0, 0, 0), (0, 0, 0)]) # Yellow spot 2 per game
+Greenball = Objects("Green Ball",[(50, 65, 230), (65, 255, 255)], [(0, 0, 0), (0, 0, 0)]) # Green spot 2 per robot
 #Pink spot 2 per robot
 #Blue spot 2 per game
-#Yellow spot 2 per game
-
-
-
-
-
 
 
 class Room():
@@ -68,7 +63,8 @@ class Room():
 		self.TrackObjects(Redball,imgOriginal)
                 self.TrackObjects(Blueball,imgOriginal)
 		
-
+		self.TrackObjects(Yellowball,imgOriginal)
+		self.TrackObjects(Greenball,imgOriginal)
 
 
 		cv2.namedWindow("Room", cv2.WINDOW_AUTOSIZE) 
