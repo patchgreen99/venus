@@ -7,11 +7,14 @@ from Objects import*
 
 
 Redball = Objects("Red Ball",[(0, 100, 200), (10, 200, 255)],[(170, 100, 200), (180, 200, 255)])
-Blueball = Objects("Blue Ball",[(110, 100, 100), (115, 200, 200)],[(115, 100, 200), (120, 200, 200)])
-#Green spot 2 per robot
-#Pink spot 2 per robot
-#Blue spot 2 per game
-#Yellow spot 2 per game
+#Blueball = Objects("Blue Ball",[(110, 100, 100), (115, 200, 200)],[(115, 100, 200), (120, 200, 200)])
+Bluespot = Objects("Blue Spot",[(105, 100,100), (120, 255, 255)],[(120, 100, 100), (135, 255, 255)]) #Blue spot 2 per game 105 - 135 :( 
+Pinkspot = Objects("Pink Spot",[(150, 45,180), (150, 255, 255)],[(150, 45, 180), (160, 255, 255)]) #Pink spot 4 per game  135-150 :)
+# as it was: Yellowspot = Objects("Yellow Spot",[(15, 100,100), (30, 255, 255)],[(30, 100, 100), (45, 255, 255)]) #Yellow spot 2 per game  15-45
+Yellowspot = Objects("Yellow Spot",[(15, 0,0), (30, 255, 0)],[(30, 0, 0), (45, 255, 0)]) #Yellow spot 2 per game  15-45
+Greenspot = Objects("Green Spot",[(45, 100,100), (60, 255, 255)],[(60, 100, 100), (75, 255, 255)]) #Green spot 4 per game  45 - 75
+Greensquare = Objects("Green Square",[(45, 100,100), (60, 255, 255)],[(60, 100, 100), (75, 255, 255)]) #Green square 4 per game  45 - 75
+
 
 
 
@@ -65,8 +68,8 @@ class Room():
 
 
 
-		self.TrackObjects(Redball,imgOriginal)
-                self.TrackObjects(Blueball,imgOriginal)
+		#self.TrackObjects(Redball,imgOriginal)
+                self.TrackObjects(Pinkspot,imgOriginal)
 		
 
 
