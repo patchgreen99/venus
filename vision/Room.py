@@ -6,17 +6,16 @@ from scipy.spatial import distance
 
 
 VISION_ROOT = 'vision/'
-pattern={"yellow","pink"}
+KNOWN_ANGLE = 225 
 COLOR_RANGES = {
     'red':    [((0, 170, 170), (10, 255, 255)), ((170, 170, 170), (180, 255, 255))],
     'blue':   [((110, 130, 130), (120, 255, 255))],
     'yellow': [((27, 73, 240), (30, 255, 255))],
     'green':  [((50, 65, 230), (65, 255, 255))],
-    'pink':  [((150, 45,180), (160, 255, 255))],
+    'pink':  [((150, 45,180), (160, 255, 255))]
 	
 }
-teamcolors={'red'}
-secondarycolors = {'blue'}
+
 VENUS = 0
 TEAMMATE = 1
 ENEMY_1 = 2
@@ -24,29 +23,27 @@ ENEMY_2 = 3
 
 
 class Ball:
-    def __init__(self, circle):
-        self.label = circle.label
-        self.x = circle.x
-        self.y = circle.y
+    def __init__(self, pos):
+        self.x = pos[0]
+        self.y = pos[1]
+    def printball(self):
+	print ('BALL POSITION ' + str((self.x,self.y)))
+	print('')
 
 
 class Robot:
-    def __init__(self, circle1, circle2, circle3):
-        self.x = (circle1[0] + circle2[0] + circle3[0]) / 3.0
-        self.y = (circle1[1] + circle2[1] + circle3[1]) / 3.0
-        if circle1[2]==pattern[0] and circle2[2]==circle3[2]==pattern[1]:
-            self.id=1
-        if circle1[2]==pattern[0] and circle2[2]!=pattern[1]:
-            self.id=2
-        if circle1[2]!=pattern[0] and circle2[2]==circle3[2]==pattern[1]:
-            self.id=3
-        if circle1[2]!=pattern[0] and circle2[2]!=pattern[1]:
-            self.id=4
+    def __init__(self, pos , orientation , rid):
+      	self.pos = pos
+	self.orientation = orientation
+	self.rid= rid
+    def printrobot(self):
+	print('ROBOT ' + str(self.rid))	
+	print('POSITION ' + str(self.pos))
+	print('ORIENTATION ' + str(self.orientation))
+	print('') 
 
 
 class Room():
-        
-
     def __init__(self,r_id,team_color, our_color, debug=False):
         self.debug = debug
         self.team_color = team_color
@@ -66,15 +63,13 @@ class Room():
         self.capture = cv2.VideoCapture(0)
 
     def vision(self):        
-        c = True
-        while c != 27:   #patrick you mad man
+        while cv2.waitKey(1) != 27:   #patrick you mad man
             self.frame()
         cv2.destroyAllWindows()
         return
 
 
     def frame(self):
-
         status, frame = self.capture.read()
         h,  w = frame.shape[:2]    
         newcameramtx, roi=cv2.getOptimalNewCameraMatrix(self.mtx,self.dist,(w,h),0,(w,h))
@@ -99,69 +94,77 @@ class Room():
             for x, y in positions:
                 cv2.circle(imgOriginal, (int(x), int(y)), 6, (0, 0, 255), 3)
         
-        print circles
-        
-        robots = []
-        
-	 # Code to classify green and pink points to a team - either the blue team or the yellow team
+        robots = self.getRobots(circles)
+	ball = self.getBall(circles)
+	ball.printball()
+	for robot in robots:
+	    robot.printrobot()
 	
-	'''
-	greenPoints = circles["green"]
-	pinkPoints = circles["pink"]
-	bluePoints = circles["blue"]
-	yellowPoints = circles["yellow"]
-       
-        greenPointDict = {}
-	for greenPoint in greenPoints:
-                distanceList = []
-                bluemin = 10000
-                yellowmin = 10000 
-		for point in bluePoints:
-	        	bluedst = distance.euclidean(greenPoint,point)
-                        if (bluedst < bluemin):
-                            bluemin = bluedst
-                for point in yellowPoints:
-	        	yellowdst = distance.euclidean(greenPoint,point)
-                        if (yellowdst < yellowmin):
-                            yellowmin = yellowdst
-                if (bluemin < yellowmin):
-                	greenPointDict[greenPoint] = "Blue Team"
-                else:
-                        greenPointDict[greenPoint] = "Yellow Team"
- 
-        pinkPointDict = {}
-        for pinkPoint in pinkPoints:
-                distanceList = []
-                bluemin = 10000
-                yellowmin = 10000 
-		for point in bluePoints:
-	        	bluedst = distance.euclidean(greenPoint,point)
-                        if (bluedst < bluemin):
-                            bluemin = bluedst
-                for point in yellowPoints:
-	        	yellowdst = distance.euclidean(greenPoint,point)
-                        if (yellowdst < yellowmin):
-                            yellowmin = yellowdst
-                if (bluemin < yellowmin):
-                	pinkPointDict[pinkPoint] = "Blue Team"
-                else:
-                        pinkPointDict[pinkPoint] = "Yellow Team"
-	'''
-        
-        #for color1 in teamcolors:
-        #    for color2 in secondarycolors:
-        #        distances = distance.cdist(circles[color1], circles[color2], 'euclidean')
-        #        distances.sort()
-        #        print(distances)
-        #        #robots.append(Robot(x, y, VENUS))
-        #        a=Robot()
         
         if self.debug:
             cv2.namedWindow("Room", cv2.WINDOW_AUTOSIZE) 
             cv2.imshow('Room',imgOriginal)
             cv2.waitKey(0)
-            
-            
+
+    def getBall(self,circles):
+	if len(circles['red']) == 0:
+		return Ball((0,0))	
+	pos= circles['red'][0]
+	return Ball(pos)
+
+    def getRobots(self,circles):
+	robots= []
+	greenPoints = circles["green"]
+	pinkPoints = circles["pink"]
+	bluePoints = circles["blue"]
+	yellowPoints = circles["yellow"]
+	greenandpink=[]
+	for i in range(0, len(greenPoints)):
+	    greenandpink.append((greenPoints[i],'green'))
+	for i in range(0, len(pinkPoints)):
+	    greenandpink.append((pinkPoints[i],'pink'))
+	for ypoint in yellowPoints:
+	    greenandpink.sort(key = lambda p: sqrt((ypoint[0] - p[0][0])**2 + (ypoint[1] - p[0][1])**2))
+	    orientation = self.getorientation(ypoint,greenandpink[:4])
+	    rid = self.getid(ypoint,greenandpink[:4],'yellow')
+	    robots.append(Robot(ypoint,orientation,rid))
+	for bpoint in bluePoints:
+	    greenandpink.sort(key = lambda p: sqrt((bpoint[0] - p[0][0])**2 + (bpoint[1] - p[0][1])**2))
+	    orientation = self.getorientation(bpoint,greenandpink[:4])
+	    rid = self.getid(bpoint,greenandpink[:4],'blue')
+	    robots.append(Robot(bpoint,orientation,rid))    
+	return robots
+
+    def getid(self,cpoint,greenandpink,tcolor):
+        if tcolor == self.team_color:
+	    greencount = 0
+	    pinkcount = 0
+	    for gnppoint in greenandpink:
+		if gnppoint[1] == 'green' :
+		    greencount = greencount+1
+		else:
+		    pinkcount=pinkcount+1
+	    if greencount == 3:
+		return 1
+	    else:
+		return 0
+	else:
+	    greencount = 0
+	    pinkcount = 0
+	    for gnppoint in greenandpink:
+		if gnppoint[1] == 'green' :
+		    greencount = greencount+1
+		else:
+		    pinkcount=pinkcount+1
+	    if greencount == 3:
+		return 3
+	    else:
+		return 2
+#TODO:
+    def getorientation(self, cpoint, greenandpink):
+	return 0 
+		
+#####
 
     def TrackCircle(self, color_ranges, imgOriginal):
         global l
