@@ -197,8 +197,7 @@ class Room():
 
         # Calculate areas
         area = measurements.sum(z, lw, index = l)
-    
-############################################################################################################     
+
         cluster = 1
         while(cluster < len(area)):
             i = area.argmax()
@@ -216,7 +215,7 @@ class Room():
             
             cluster = cluster + 1
             #area = np.delete(area, i)
-############################################################################################################
+
         return positions
         
     
