@@ -1,6 +1,7 @@
 import math
 
 #We have moveStraight, turn , kick , ungrab , grab
+
 #Positions and orientation to be calculated by vision
 ourRobotPos = (0,0)
 teamRobotPos = (0,0)
@@ -30,7 +31,7 @@ class simple:
 	def calcOrientation(self,(x1,y1), (x2,y2) ):
 		if(x2-x1 == 0):
 			return 0
-		angle= math.atan((y2-y1)/(x2-x1)) + (math.pi/2) 
+		angle= math.atan((y2-y1)/(x2-x1)) + (math.pi/2) #not 100% correct
 		return (angle * 180 )/ math.pi
 
 	def moveToPoint(self,point):
