@@ -6,7 +6,7 @@ from scipy.spatial import distance
 
 
 VISION_ROOT = 'vision/'
-
+pattern={"yellow","pink"}
 COLOR_RANGES = {
     'red':    [((0, 170, 170), (10, 255, 255)), ((170, 170, 170), (180, 255, 255))],
     'blue':   [((110, 130, 130), (120, 255, 255))],
@@ -30,16 +30,16 @@ class Ball:
 
 
 class Robot:
-    def __init__(self, circle1, circle2, circle3, pattern):
-        self.x = (circle[0] + circle2.x + circle3.x) / 3.0
-        self.y = (circle[1] + circle2.y + circle3.y) / 3.0
-        if circle1.label==pattern[0] and circle2.label==circle3.label==pattern[1]:
+    def __init__(self, circle1, circle2, circle3):
+        self.x = (circle1[0] + circle2[0] + circle3[0]) / 3.0
+        self.y = (circle1[1] + circle2[1] + circle3[1]) / 3.0
+        if circle1[2]==pattern[0] and circle2[2]==circle3[2]==pattern[1]:
             self.id=1
-        if circle1.label==pattern[0] and circle2.label!=pattern[1]:
+        if circle1[2]==pattern[0] and circle2[2]!=pattern[1]:
             self.id=2
-        if circle1.label!=pattern[0] and circle2.label==circle3.label==pattern[1]:
+        if circle1[2]!=pattern[0] and circle2[2]==circle3[2]==pattern[1]:
             self.id=3
-        if circle1.label!=pattern[0] and circle2.label!=pattern[1]:
+        if circle1[2]!=pattern[0] and circle2[2]!=pattern[1]:
             self.id=4
 
 
@@ -101,6 +101,51 @@ class Room():
         print circles
         
         robots = []
+        
+	 # Code to classify green and pink points to a team - either the blue team or the yellow team
+	
+	'''
+	greenPoints = circles["green"]
+	pinkPoints = circles["pink"]
+	bluePoints = circles["blue"]
+	yellowPoints = circles["yellow"]
+       
+        greenPointDict = {}
+	for greenPoint in greenPoints:
+                distanceList = []
+                bluemin = 10000
+                yellowmin = 10000 
+		for point in bluePoints:
+	        	bluedst = distance.euclidean(greenPoint,point)
+                        if (bluedst < bluemin):
+                            bluemin = bluedst
+                for point in yellowPoints:
+	        	yellowdst = distance.euclidean(greenPoint,point)
+                        if (yellowdst < yellowmin):
+                            yellowmin = yellowdst
+                if (bluemin < yellowmin):
+                	greenPointDict[greenPoint] = "Blue Team"
+                else:
+                        greenPointDict[greenPoint] = "Yellow Team"
+ 
+        pinkPointDict = {}
+        for pinkPoint in pinkPoints:
+                distanceList = []
+                bluemin = 10000
+                yellowmin = 10000 
+		for point in bluePoints:
+	        	bluedst = distance.euclidean(greenPoint,point)
+                        if (bluedst < bluemin):
+                            bluemin = bluedst
+                for point in yellowPoints:
+	        	yellowdst = distance.euclidean(greenPoint,point)
+                        if (yellowdst < yellowmin):
+                            yellowmin = yellowdst
+                if (bluemin < yellowmin):
+                	pinkPointDict[pinkPoint] = "Blue Team"
+                else:
+                        pinkPointDict[pinkPoint] = "Yellow Team"
+	'''
         
         #for color1 in teamcolors:
         #    for color2 in secondarycolors:
