@@ -27,7 +27,7 @@ class Prompt:
         device = sys.argv[1] if len(sys.argv) == 2 else '/dev/ttyACM0'
         self.protocol = RobotProtocol(device)
 
-    def vision(self, room_num, team_color, our_color):
+    def vision(self, room_num, team_color='red', our_color='red'):
         room = Room(int(room_num), team_color, our_color, debug=False)
         self.process = Process(target=room.vision, args=())
         self.process.start()

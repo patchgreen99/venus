@@ -1,22 +1,41 @@
 import cv2
 from pylab import *
 from scipy.ndimage import measurements
+from scipy.spatial import distance
 
 VISION_ROOT = 'vision/'
 KNOWN_ANGLE = 225
 COLOR_RANGES = {
-    'red': [((0, 170, 170), (10, 255, 255)), ((170, 170, 170), (180, 255, 255))],
-    #'blue': [((87, 204, 89), (95, 242, 127))],
-    'yellow': [((27, 249, 140), (41, 255, 167))],
-    'green': [((57, 229, 158), (60, 255, 204))],
-    'pink': [((170, 30, 60), (180, 255, 247))],
-    'blue': [((110, 130, 130), (120, 255, 255))],
-    #'yellow': [((27, 73, 240), (30, 255, 255))],
-    #'green': [((50, 65, 230), (65, 255, 255))],
-    #'pink': [((150, 45, 180), (160, 255, 255))]
-
+    'red': [((0, 170, 130), (8, 255, 255)), ((175, 170, 130), (180, 255, 255))],
+    'blue': [((80, 100, 130), (95, 255, 255))],
+    'yellow': [((27, 249, 140), (41, 255, 255))],
+    'pink': [((149, 130, 60), (175, 255, 255))],
+    'green': [((57, 229, 158), (60, 255, 255))],
 }
 
+MAX_COLOR_COUNTS = {
+    'red': 1,
+    'blue': 2,
+    'yellow': 2,
+    'pink': 8,
+    'green': 8,
+}
+
+COLORS = {
+    'red': (0, 0, 255),
+    'blue': (255, 0, 0),
+    'yellow': (0, 255, 255),
+    'pink': (153, 51, 255),
+    'green': (0, 255, 0),
+}
+
+MIN_COLOR_AREA = {
+    'red': 6000.0,
+    'blue': 6000.0,
+    'yellow': 2000.0,
+    'pink': 6000.0,
+    'green': 6000.0,
+}
 
 VENUS = 0
 TEAMMATE = 1
@@ -92,18 +111,23 @@ class Room:
 
         circles = {}
         for color_name, color_ranges in COLOR_RANGES.iteritems():
-            circles[color_name] = self.TrackCircle(color_ranges, imgOriginal)
+            circles[color_name] = self.TrackCircle(color_name, color_ranges, imgOriginal)
 
-        #draws circles spotted
+        # draws circles spotted
+        print '----------'
         for color_name, positions in circles.iteritems():
+            print 'Detected ' + color_name + ' : ' + str(len(positions))
             for x, y in positions:
-                cv2.circle(imgOriginal, (int(x), int(y)), 8, (0, 0, 0), 1)
+                cv2.circle(imgOriginal, (int(x), int(y)), 8, COLORS[color_name], 1)
 
         robots = self.getRobots(circles)
         ball = self.getBall(circles)
-        #ball.printball()
-        #for robot in robots:
-        #    robot.printrobot()
+
+        print 'Detected robots : ' + str(len(robots))
+
+        for robot in robots:
+            cv2.rectangle(imgOriginal, (int(robot.pos[0]), int(robot.pos[1])),
+                          (int(robot.pos[0]) + 100, int(robot.pos[1]) + 100), (0, 0, 0))
 
         cv2.namedWindow("Room", cv2.WINDOW_AUTOSIZE)
         cv2.imshow('Room', imgOriginal)
@@ -122,21 +146,33 @@ class Room:
         pinkPoints = circles["pink"]
         bluePoints = circles["blue"]
         yellowPoints = circles["yellow"]
-        greenandpink = []
-        for i in range(0, len(greenPoints)):
-            greenandpink.append((greenPoints[i], 'green'))
-        for i in range(0, len(pinkPoints)):
-            greenandpink.append((pinkPoints[i], 'pink'))
+        if greenPoints and pinkPoints:
+            greenandpink = np.concatenate((greenPoints, pinkPoints))
+        elif not greenPoints:
+            greenandpink = np.array(pinkPoints)
+        elif not pinkPoints:
+            greenandpink = np.array(greenPoints)
+        else:
+            print("There are no robots!")
+            return
         for ypoint in yellowPoints:
-            greenandpink.sort(key=lambda p: sqrt((ypoint[0] - p[0][0]) ** 2 + (ypoint[1] - p[0][1]) ** 2))
-            orientation = self.getorientation(ypoint, greenandpink[:4])
-            rid = self.getid(greenandpink[:4], 'yellow')
-            robots.append(Robot(ypoint, orientation, rid))
+            distances = distance.cdist(greenandpink, [ypoint])
+            greenandpink_indices = np.argsort(distances)
+            if distances[greenandpink_indices[:1]] < 15:
+                greenandpink_tuples = [(greenandpink[i], 'green' if i < len(greenPoints) else 'pink') for i in
+                                       greenandpink_indices[:4]]
+                orientation = self.getorientation(ypoint, greenandpink_tuples)
+                rid = self.getid(greenandpink_tuples, 'yellow')
+                robots.append(Robot(ypoint, orientation, rid))
         for bpoint in bluePoints:
-            greenandpink.sort(key=lambda p: sqrt((bpoint[0] - p[0][0]) ** 2 + (bpoint[1] - p[0][1]) ** 2))
-            orientation = self.getorientation(bpoint, greenandpink[:4])
-            rid = self.getid(greenandpink[:4], 'blue')
-            robots.append(Robot(bpoint, orientation, rid))
+            distances = distance.cdist(greenandpink, [bpoint])
+            greenandpink_indices = np.argsort(distances)
+            if distances[greenandpink_indices[:1]] < 15:
+                greenandpink_tuples = [(greenandpink[i], 'green' if i < len(greenPoints) else 'pink') for i in
+                                       greenandpink_indices[:4]]
+                orientation = self.getorientation(bpoint, greenandpink_tuples)
+                rid = self.getid(greenandpink_tuples, 'blue')
+                robots.append(Robot(bpoint, orientation, rid))
         return robots
 
     def getid(self, greenandpink, tcolor):
@@ -171,7 +207,7 @@ class Room:
 
     #####
 
-    def TrackCircle(self, color_ranges, imgOriginal):
+    def TrackCircle(self, color_name, color_ranges, imgOriginal):
         positions = []
 
         # Image Masking
@@ -186,8 +222,11 @@ class Room:
 
         imgThresh = cv2.GaussianBlur(imgThresh, (3, 3), 2)  # blur
 
-        imgThresh = cv2.dilate(imgThresh, np.ones((5, 5), np.uint8))  # close image (dilate, then erode)
-        imgThresh = cv2.erode(imgThresh, np.ones((5, 5), np.uint8))  # closing "closes" (i.e. fills in) foreground gaps
+        # imgThresh = cv2.dilate(imgThresh, np.ones((5, 5), np.uint8))  # close image (dilate, then erode)
+        # imgThresh = cv2.erode(imgThresh, np.ones((5, 5), np.uint8))  # closing "closes" (i.e. fills in) foreground gaps
+
+        cv2.namedWindow(color_name, cv2.WINDOW_AUTOSIZE)
+        cv2.imshow(color_name, imgThresh)
 
         # intRows, intColumns = imgThresh.shape
 
@@ -195,14 +234,20 @@ class Room:
 
         # Label the clusters
         lw, num = measurements.label(z)
-        l = range(1, num)
 
         # Calculate areas
-        area = measurements.sum(z, lw, index=l)
+        area = measurements.sum(z, lw, xrange(1, num + 1))
 
+        relevant_indices = area.argsort()[-MAX_COLOR_COUNTS[color_name]:]
+
+        for index in relevant_indices:
+            if area[index] > MIN_COLOR_AREA[color_name]:
+                y, x = measurements.center_of_mass(z, lw, index=index + 1)
+                positions.append((x, y))
+
+        '''
         cluster = 1
-        while (cluster < len(area)):
-            i = area.argmax()
+        while cluster < len(area):
             y, x = measurements.center_of_mass(z, lw, index=cluster)
 
             # if self.debug:
@@ -217,5 +262,6 @@ class Room:
 
             cluster = cluster + 1
             # area = np.delete(area, i)
+        '''
 
         return positions
