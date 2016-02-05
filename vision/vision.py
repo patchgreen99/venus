@@ -5,12 +5,18 @@ from scipy.ndimage import measurements
 VISION_ROOT = 'vision/'
 KNOWN_ANGLE = 225
 COLOR_RANGES = {
-    'red': [((0, 170, 170), (10, 255, 255)), ((170, 170, 170), (180, 255, 255))],
+    'red': [((0, 170, 170), (10, 255, 255)), ((180, 170, 170), (180, 255, 255))],
+    #'blue': [((87, 204, 89), (95, 242, 127))],
+    'yellow': [((27, 249, 140), (41, 255, 167))],
+    'green': [((57, 229, 158), (60, 255, 204))],
+    'pink': [((170, 30, 60), (180, 255, 247))],
     'blue': [((110, 130, 130), (120, 255, 255))],
-    'yellow': [((27, 73, 240), (30, 255, 255))],
-    'green': [((50, 65, 230), (65, 255, 255))],
-    'pink': [((150, 45, 180), (160, 255, 255))]
+    #'yellow': [((27, 73, 240), (30, 255, 255))],
+    #'green': [((50, 65, 230), (65, 255, 255))],
+    #'pink': [((150, 45, 180), (160, 255, 255))]
+
 }
+
 
 VENUS = 0
 TEAMMATE = 1
@@ -88,9 +94,10 @@ class Room:
         for color_name, color_ranges in COLOR_RANGES.iteritems():
             circles[color_name] = self.TrackCircle(color_ranges, imgOriginal)
 
+        #draws circles spotted
         for color_name, positions in circles.iteritems():
             for x, y in positions:
-                cv2.circle(imgOriginal, (int(x), int(y)), 6, (0, 0, 255), 3)
+                cv2.circle(imgOriginal, (int(x), int(y)), 8, (0, 0, 0), 1)
 
         robots = self.getRobots(circles)
         ball = self.getBall(circles)
@@ -102,6 +109,7 @@ class Room:
         cv2.imshow('Room', imgOriginal)
         self.pressed_key = cv2.waitKey(2) & 0xFF
 
+    # returns one ball
     def getBall(self, circles):
         if len(circles['red']) == 0:
             return Ball((0, 0))
@@ -122,16 +130,16 @@ class Room:
         for ypoint in yellowPoints:
             greenandpink.sort(key=lambda p: sqrt((ypoint[0] - p[0][0]) ** 2 + (ypoint[1] - p[0][1]) ** 2))
             orientation = self.getorientation(ypoint, greenandpink[:4])
-            rid = self.getid(ypoint, greenandpink[:4], 'yellow')
+            rid = self.getid(greenandpink[:4], 'yellow')
             robots.append(Robot(ypoint, orientation, rid))
         for bpoint in bluePoints:
             greenandpink.sort(key=lambda p: sqrt((bpoint[0] - p[0][0]) ** 2 + (bpoint[1] - p[0][1]) ** 2))
             orientation = self.getorientation(bpoint, greenandpink[:4])
-            rid = self.getid(bpoint, greenandpink[:4], 'blue')
+            rid = self.getid(greenandpink[:4], 'blue')
             robots.append(Robot(bpoint, orientation, rid))
         return robots
 
-    def getid(self, cpoint, greenandpink, tcolor):
+    def getid(self, greenandpink, tcolor):
         if tcolor == self.team_color:
             greencount = 0
             pinkcount = 0
