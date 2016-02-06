@@ -7,10 +7,10 @@ VISION_ROOT = 'vision/'
 KNOWN_ANGLE = 225
 COLOR_RANGES = {
     'red': [((0, 170, 130), (8, 255, 255)), ((175, 170, 130), (180, 255, 255))],
-    'blue': [((80, 100, 130), (95, 255, 255))],
-    'yellow': [((27, 249, 140), (41, 255, 255))],
+    'blue': [((83, 150, 150), (94, 230, 230))],
+    'yellow': [((30, 150, 150), (37, 255, 255))],
     'pink': [((149, 130, 60), (175, 255, 255))],
-    'green': [((57, 229, 158), (60, 255, 255))],
+    'green': [((50, 188, 200), (60, 255, 255))],
 }
 
 MAX_COLOR_COUNTS = {
@@ -30,11 +30,11 @@ COLORS = {
 }
 
 MIN_COLOR_AREA = {
-    'red': 6000.0,
-    'blue': 6000.0,
-    'yellow': 2000.0,
-    'pink': 6000.0,
-    'green': 6000.0,
+    'red': 0.0,
+    'blue': 0.0,
+    'yellow': 0.0,
+    'pink': 0.0,
+    'green': 0.0,
 }
 
 VENUS = 0
@@ -85,6 +85,8 @@ class Room:
             print("invalid room id")
 
         self.capture = cv2.VideoCapture(0)
+        #self.capture.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+        #self.capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 1024)
 
     def vision(self):
         while self.pressed_key != 27:
@@ -126,8 +128,8 @@ class Room:
         print 'Detected robots : ' + str(len(robots))
 
         for robot in robots:
-            cv2.rectangle(imgOriginal, (int(robot.pos[0]), int(robot.pos[1])),
-                          (int(robot.pos[0]) + 100, int(robot.pos[1]) + 100), (0, 0, 0))
+            cv2.rectangle(imgOriginal, (int(robot.pos[0]) - 20, int(robot.pos[1]) - 20),
+                          (int(robot.pos[0]) + 20, int(robot.pos[1]) + 20), (0, 0, 0))
 
         cv2.namedWindow("Room", cv2.WINDOW_AUTOSIZE)
         cv2.imshow('Room', imgOriginal)
@@ -158,7 +160,7 @@ class Room:
         for ypoint in yellowPoints:
             distances = distance.cdist(greenandpink, [ypoint])
             greenandpink_indices = np.argsort(distances)
-            if distances[greenandpink_indices[:1]] < 15:
+            if distances[greenandpink_indices[:1]] < 20:
                 greenandpink_tuples = [(greenandpink[i], 'green' if i < len(greenPoints) else 'pink') for i in
                                        greenandpink_indices[:4]]
                 orientation = self.getorientation(ypoint, greenandpink_tuples)
@@ -167,7 +169,7 @@ class Room:
         for bpoint in bluePoints:
             distances = distance.cdist(greenandpink, [bpoint])
             greenandpink_indices = np.argsort(distances)
-            if distances[greenandpink_indices[:1]] < 15:
+            if distances[greenandpink_indices[:1]] < 20:
                 greenandpink_tuples = [(greenandpink[i], 'green' if i < len(greenPoints) else 'pink') for i in
                                        greenandpink_indices[:4]]
                 orientation = self.getorientation(bpoint, greenandpink_tuples)
