@@ -116,16 +116,19 @@ class Room:
             circles[color_name] = self.TrackCircle(color_name, color_ranges, imgOriginal)
 
         # draws circles spotted
-        print '----------'
+        if self.debug:
+            print '----------'
         for color_name, positions in circles.iteritems():
-            print 'Detected ' + color_name + ' : ' + str(len(positions))
+            if self.debug:
+                print 'Detected ' + color_name + ' : ' + str(len(positions))
             for x, y in positions:
                 cv2.circle(imgOriginal, (int(x), int(y)), 8, COLORS[color_name], 1)
 
         robots = self.getRobots(circles)
         ball = self.getBall(circles)
 
-        print 'Detected robots : ' + str(len(robots))
+        if self.debug:
+            print 'Detected robots : ' + str(len(robots))
 
         for robot in robots:
             cv2.rectangle(imgOriginal, (int(robot.pos[0]) - 20, int(robot.pos[1]) - 20),
