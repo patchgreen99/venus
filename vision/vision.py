@@ -158,7 +158,7 @@ class Room:
             print("There are no robots!")
             return
         for ypoint in yellowPoints:
-            distances = distance.cdist(greenandpink, [ypoint])
+            distances = distance.cdist(greenandpink, [ypoint]).flatten()
             greenandpink_indices = np.argsort(distances)
             if distances[greenandpink_indices[:1]] < 20:
                 greenandpink_tuples = [(greenandpink[i], 'green' if i < len(greenPoints) else 'pink') for i in
@@ -167,7 +167,7 @@ class Room:
                 rid = self.getid(greenandpink_tuples, 'yellow')
                 robots.append(Robot(ypoint, orientation, rid))
         for bpoint in bluePoints:
-            distances = distance.cdist(greenandpink, [bpoint])
+            distances = distance.cdist(greenandpink, [bpoint]).flatten()
             greenandpink_indices = np.argsort(distances)
             if distances[greenandpink_indices[:1]] < 20:
                 greenandpink_tuples = [(greenandpink[i], 'green' if i < len(greenPoints) else 'pink') for i in
