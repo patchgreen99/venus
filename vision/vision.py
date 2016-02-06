@@ -85,8 +85,8 @@ class Room:
             print("invalid room id")
 
         self.capture = cv2.VideoCapture(0)
-        #self.capture.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-        #self.capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 1024)
+        # self.capture.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+        # self.capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 1024)
 
     def vision(self):
         while self.pressed_key != 27:
@@ -133,6 +133,7 @@ class Room:
         for robot in robots:
             cv2.rectangle(imgOriginal, (int(robot.pos[0]) - 20, int(robot.pos[1]) - 20),
                           (int(robot.pos[0]) + 20, int(robot.pos[1]) + 20), (0, 0, 0))
+            print("Robot", robot.pos, robot.orientation, robot.rid)
 
         cv2.namedWindow("Room", cv2.WINDOW_AUTOSIZE)
         cv2.imshow('Room', imgOriginal)
@@ -208,7 +209,61 @@ class Room:
                 # TODO:
 
     def getorientation(self, cpoint, greenandpink):
-        return 0
+        greenList = []
+        pinkList = []
+        savedi = 0
+        savedj = 0
+        midpointxcoord = (0, 0)
+        midpointycoord = (0, 0)
+        for (coordinate, color) in greenandpink:
+            if (color == "green"):
+                greenList.append(coordinate)
+            if (color == "pink"):
+                pinkList.append(coordinate)
+        if (len(greenList)) == 3:
+            distances = distance.cdist(greenList, greenList)
+            smallestdist = distances[0][1]
+            for i in range(len(distances)):
+                for j in range(len(distances[i])):
+                    if (distances[i][j] != 0 and distances[i][j] < smallestdist):
+                        smallestdist = distances[i][j]
+                        savedi = i
+                        savedj = j
+
+            midpointxcoord = (greenList[savedi][0] + greenList[savedj][0]) / 2.0
+            midpointycoord = (greenList[savedi][1] + greenList[savedj][1]) / 2.0
+
+        elif (len(pinkList)) == 3:
+            distances = distance.cdist(pinkList, pinkList)
+            smallestdist = distances[0][1]
+            for i in range(len(distances)):
+                for j in range(len(distances[i])):
+                    if (distances[i][j] != 0 and distances[i][j] < smallestdist):
+                        smallestdist = distances[i][j]
+                        savedi = i
+                        savedj = j
+
+            midpointxcoord = (pinkList[savedi][0] + pinkList[savedj][0]) / 2.0
+            midpointycoord = (pinkList[savedi][1] + pinkList[savedj][1]) / 2.0
+
+        centerPointOfInterest = (midpointxcoord, midpointycoord)
+        perpendicularPoint = (cpoint[0], 0)
+        slopeVerticalLine = self.findslope(perpendicularPoint, cpoint)
+        slopeDirection = self.findslope(centerPointOfInterest, cpoint)
+        numerator = slopeDirection - slopeVerticalLine
+        denominator = 1 + (slopeVerticalLine * slopeDirection)
+        angle = math.atan2(numerator, denominator)
+        angle = math.degrees(angle)
+        return angle
+
+    def findslope(self, point1, point2):
+        numerator = point1[1] - point2[1]
+        denominator = point1[0] - point2[0]
+        if denominator == 0:
+            ans = 0 # todo: change!!!!
+        else:
+            ans = (float(numerator)) / denominator
+        return ans
 
     #####
 
