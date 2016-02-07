@@ -23,11 +23,10 @@ class Prompt:
         self.process = None
         print("Remember to call connect and vision")
 
-    def connect(self):
-        device = sys.argv[1] if len(sys.argv) == 2 else '/dev/ttyACM0'
-        self.protocol = RobotProtocol(device)
+    def connect(self, device_no='0'):
+        self.protocol = RobotProtocol('/dev/ttyACM' + device_no)
 
-    def vision(self, room_num, team_color='red', our_color='red'):
+    def vision(self, room_num=0, team_color='blue', our_color='green'):
         room = Room(int(room_num), team_color, our_color, debug=False)
         self.process = Process(target=room.vision, args=())
         self.process.start()
