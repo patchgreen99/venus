@@ -30,11 +30,11 @@ COLORS = {
 }
 
 MIN_COLOR_AREA = {
-    'red': 0.0,
-    'blue': 0.0,
-    'yellow': 0.0,
-    'pink': 0.0,
-    'green': 0.0,
+    'red': 2000.0,
+    'blue': 2000.0,
+    'yellow': 2000.0,
+    'pink': 2000.0,
+    'green': 2000.0,
 }
 
 VENUS = 0
@@ -268,9 +268,9 @@ class Room:
         else:
             slopeDirection = self.findslope(centerPointOfInterest, cpoint)
         # print "slopeDirection " , slopeDirection
-        numerator = slopeDirection
+        (numerator,denominator) = slopeDirection
         # print numerator
-        angle = math.atan2(numerator, 1)
+        angle = math.atan2(denominator,numerator)
         angle = math.degrees(angle)
         # if (angle &lt; 0):
         #    return -angle
@@ -281,7 +281,7 @@ class Room:
     def findslope(self, point1, point2):
         numerator = point1[1] - point2[1]
         denominator = point1[0] - point2[0]  # sometimes it's not a point?? like [292. 292.]
-        ans = (float(numerator)) / denominator
+        ans = (numerator,denominator)
         return ans
 
     def TrackCircle(self, color_name, color_ranges, imgOriginal):
