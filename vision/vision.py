@@ -245,27 +245,29 @@ class Room:
 
             midpointxcoord = (pinkList[savedi][0] + pinkList[savedj][0]) / 2.0
             midpointycoord = (pinkList[savedi][1] + pinkList[savedj][1]) / 2.0
+	    print "center point interest ", (midpointxcoord, midpointycoord)    
+	    print "center pioint ", cpoint
 
         centerPointOfInterest = (midpointxcoord, midpointycoord)
-        perpendicularPoint = (cpoint[0], 0)
-        slopeVerticalLine = self.findslope(perpendicularPoint, cpoint)
+	slopeVerticalLine = 0.0
         slopeDirection = self.findslope(centerPointOfInterest, cpoint)
-        numerator = slopeDirection - slopeVerticalLine
-        denominator = 1 + (slopeVerticalLine * slopeDirection)
-        angle = math.atan2(numerator, denominator)
-        angle = math.degrees(angle)
+	print "slopeDirection " , slopeDirection
+        numerator = slopeDirection 
+	print numerator
+        angle = math.atan2(numerator, 1)
+        angle = math.degrees(abs(angle))
         return angle
 
     def findslope(self, point1, point2):
         numerator = point1[1] - point2[1]
-        denominator = point1[0] - point2[0]
-        if denominator == 0:
-            ans = 0 # todo: change!!!!
-        else:
-            ans = (float(numerator)) / denominator
+        denominator = point1[0] - point2[0]   # sometimes it's not a point?? like [292. 292.]
+	print "denominator ", denominator
+        #if denominator == 0:
+        #    ans = 0 # todo: change!!!!
+        # else:
+	print "numerator ", numerator
+        ans = (float(numerator)) / denominator
         return ans
-
-    #####
 
     def TrackCircle(self, color_name, color_ranges, imgOriginal):
         positions = []
