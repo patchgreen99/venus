@@ -221,51 +221,64 @@ class Room:
             if (color == "pink"):
                 pinkList.append(coordinate)
         if (len(greenList)) == 3:
-            distances = distance.cdist(greenList, greenList)
-            smallestdist = distances[0][1]
+            isolatedPoint = []
+            for (coordinate, color) in greenandpink:
+                if (color == "pink"):
+                    isolatedPoint.append(coordinate)
+            distances = distance.cdist(isolatedPoint, greenList)
+            smallestdist = distances[0][0]
             for i in range(len(distances)):
                 for j in range(len(distances[i])):
                     if (distances[i][j] != 0 and distances[i][j] < smallestdist):
                         smallestdist = distances[i][j]
                         savedi = i
                         savedj = j
-
-            midpointxcoord = (greenList[savedi][0] + greenList[savedj][0]) / 2.0
-            midpointycoord = (greenList[savedi][1] + greenList[savedj][1]) / 2.0
+            print greenList
+            del greenList[savedj]
+            midpointxcoord = (greenList[0][0] + greenList[1][0]) / 2.0
+            midpointycoord = (greenList[0][1] + greenList[1][1]) / 2.0
 
         elif (len(pinkList)) == 3:
-            distances = distance.cdist(pinkList, pinkList)
-            smallestdist = distances[0][1]
+            isolatedPoint = []
+            for (coordinate, color) in greenandpink:
+                if (color == "green"):
+                    isolatedPoint.append(coordinate)
+            distances = distance.cdist(isolatedPoint, pinkList)
+            smallestdist = distances[0][0]
             for i in range(len(distances)):
                 for j in range(len(distances[i])):
                     if (distances[i][j] != 0 and distances[i][j] < smallestdist):
                         smallestdist = distances[i][j]
                         savedi = i
                         savedj = j
+            print pinkList
+            del pinkList[savedj]
+            midpointxcoord = (pinkList[0][0] + pinkList[1][0]) / 2.0
+            midpointycoord = (pinkList[0][1] + pinkList[1][1]) / 2.0
 
-            midpointxcoord = (pinkList[savedi][0] + pinkList[savedj][0]) / 2.0
-            midpointycoord = (pinkList[savedi][1] + pinkList[savedj][1]) / 2.0
-	    print "center point interest ", (midpointxcoord, midpointycoord)    
-	    print "center pioint ", cpoint
+            # print "center point interest ", (midpointxcoord, midpointycoord)
+            # print "center pioint ", cpoint
 
         centerPointOfInterest = (midpointxcoord, midpointycoord)
-	slopeVerticalLine = 0.0
-        slopeDirection = self.findslope(centerPointOfInterest, cpoint)
-	print "slopeDirection " , slopeDirection
-        numerator = slopeDirection 
-	print numerator
+        slopeHorizontalLine = 0.0
+        if (centerPointOfInterest[0] == cpoint[0]):
+            return 270
+        else:
+            slopeDirection = self.findslope(centerPointOfInterest, cpoint)
+        # print "slopeDirection " , slopeDirection
+        numerator = slopeDirection
+        # print numerator
         angle = math.atan2(numerator, 1)
-        angle = math.degrees(abs(angle))
+        angle = math.degrees(angle)
+        # if (angle &lt; 0):
+        #    return -angle
+        # elif (angle &gt; 0):
+        #    return 180 + (180-angle)
         return angle
 
     def findslope(self, point1, point2):
         numerator = point1[1] - point2[1]
-        denominator = point1[0] - point2[0]   # sometimes it's not a point?? like [292. 292.]
-	print "denominator ", denominator
-        #if denominator == 0:
-        #    ans = 0 # todo: change!!!!
-        # else:
-	print "numerator ", numerator
+        denominator = point1[0] - point2[0]  # sometimes it's not a point?? like [292. 292.]
         ans = (float(numerator)) / denominator
         return ans
 
