@@ -69,8 +69,8 @@ class Robot:
 class Room:
     def __init__(self, r_id, team_color, our_color, debug=False):
         self.debug = debug
-        self.team_color = team_color
-        self.our_color = our_color
+        self.team_color = team_color  # yellow or blue
+        self.our_color = our_color  # green or pink
         self.room_id = r_id
         self.pressed_key = None
         if (self.room_id == 1):
@@ -133,7 +133,11 @@ class Room:
         for robot in robots:
             cv2.rectangle(imgOriginal, (int(robot.pos[0]) - 20, int(robot.pos[1]) - 20),
                           (int(robot.pos[0]) + 20, int(robot.pos[1]) + 20), (0, 0, 0))
-            print("Robot", robot.pos, robot.orientation, robot.rid)
+            rad = math.radians(robot.orientation)
+            cv2.line(imgOriginal, (int(robot.pos[0]), int(robot.pos[1])),
+                     (int(robot.pos[0] + math.sin(rad) * 50.0), int(robot.pos[1] + math.cos(rad) * 50.0)), (0, 0, 0))
+            if self.debug:
+                print("Robot", robot.pos, robot.orientation, robot.rid)
 
         cv2.namedWindow("Room", cv2.WINDOW_AUTOSIZE)
         cv2.imshow('Room', imgOriginal)
@@ -213,8 +217,8 @@ class Room:
         pinkList = []
         savedi = 0
         savedj = 0
-        midpointxcoord = (0, 0)
-        midpointycoord = (0, 0)
+        midpointxcoord = 0
+        midpointycoord = 0
         for (coordinate, color) in greenandpink:
             if (color == "green"):
                 greenList.append(coordinate)
@@ -233,7 +237,6 @@ class Room:
                         smallestdist = distances[i][j]
                         savedi = i
                         savedj = j
-            print greenList
             del greenList[savedj]
             midpointxcoord = (greenList[0][0] + greenList[1][0]) / 2.0
             midpointycoord = (greenList[0][1] + greenList[1][1]) / 2.0
@@ -251,7 +254,6 @@ class Room:
                         smallestdist = distances[i][j]
                         savedi = i
                         savedj = j
-            print pinkList
             del pinkList[savedj]
             midpointxcoord = (pinkList[0][0] + pinkList[1][0]) / 2.0
             midpointycoord = (pinkList[0][1] + pinkList[1][1]) / 2.0
