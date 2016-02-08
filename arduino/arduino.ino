@@ -14,7 +14,6 @@
 #define MOTOR_KICK 3
 #define MOTOR_GRAB 4
 
-
 SerialCommand sc;
 SimpleTimer timer;
 
@@ -31,7 +30,7 @@ timer_callback stopMotorCallbacks[] = {
 };
 
 /* Current positions and target positions when moving motors
- * by an amount of rotaty units.
+ * by an amount of rotary units.
  */
 int positions[ROTARY_COUNT] = {0};
 int targetPositions[ROTARY_COUNT] = {0};
@@ -62,6 +61,7 @@ void stopMotor2() { motorStop(2); }
 void stopMotor3() { motorStop(3); }
 void stopMotor4() { motorStop(4); }
 void stopMotor5() { motorStop(5); }
+void notifyFinished() { Serial.print('F'); }
 
 /* Callback that stops motors after they moved for some rotary units */
 void rotaryTimerCallback() {
@@ -73,17 +73,30 @@ void rotaryTimerCallback() {
     positions[i] += (int8_t) Wire.read();  // Must cast to signed 8-bit type
   }
   
+  bool motorWasStopped = false;
+  bool allMotorsAreStopped = true;
+  
   for (int i = 0; i < ROTARY_COUNT; ++i) {
     if (targetPositions[i] > 0 && positions[i] >= targetPositions[i] ||
         targetPositions[i] < 0 && positions[i] <= targetPositions[i]) {
       motorStop(i);
       positions[i] = 0;
       targetPositions[i] = 0;
+      motorWasStopped = true;
+    } else if (targetPositions[i]) {
+      allMotorsAreStopped = false;
     }
+  }
+  
+  // Acknowledgement that the motion is finished
+  if (motorWasStopped && allMotorsAreStopped) {
+    Serial.print('F');
   }
 }
 
 void moveTimeUnits() {
+  Serial.print('D');
+
   int time = atoi(sc.next());
   int count = atoi(sc.next());
   int power[ROTARY_COUNT] = {0};
@@ -100,11 +113,14 @@ void moveTimeUnits() {
     
     timer.setTimeout(time, stopMotorCallbacks[motor]);
   }
-  
-  Serial.println("DONE");
+
+  // Acknowledgement that the motion is finished
+  timer.setTimeout(time, notifyFinished);
 }
 
 void moveRotaryUnits() {
+  Serial.print('D');
+
   int target = atoi(sc.next());
   int count = atoi(sc.next());
   int power[ROTARY_COUNT] = {0};
@@ -122,14 +138,12 @@ void moveRotaryUnits() {
       motorBackward(motor, -power[motor]);
     }
   }
-  
-  Serial.println("DONE");
 }
 
 void stop() {
+  Serial.print('D');
+
   motorAllStop();
-  
-  Serial.println("DONE");
 }
 
 void transferByte() {
@@ -138,9 +152,9 @@ void transferByte() {
   Wire.write(value);
   Wire.endTransmission();
   
-  Serial.println("DONE");
+  Serial.print('D');
 }
 
 void unknown() {
-  Serial.println("UNKNOWN");
+  Serial.print('U');
 }

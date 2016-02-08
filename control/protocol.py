@@ -8,7 +8,7 @@ class RobotProtocol:
     def stop(self):
         self.write('S\r')
 
-    def move(self, units, motor_powers, time=False):
+    def move(self, units, motor_powers, time=False, wait_done=False, wait_finished=False):
         # motor_powers consists of tuples (num, power)
         command = 'M' if time else 'R'
         out = [command, int(abs(units)), len(motor_powers)]
@@ -16,6 +16,18 @@ class RobotProtocol:
             out.append(int(num))
             out.append(int(power))
         self.write(' '.join(str(x) for x in out))
+        if wait_done or wait_finished:
+            s = self.ser.read()
+            if wait_done:
+                while s != 'D':
+                    print("Got unknown response '%s'" % s)
+                    s = self.ser.read()
+                print("Got done")
+            if wait_finished:
+                while s != 'F':
+                    print("Got unknown response '%s'" % s)
+                    s = self.ser.read()
+                print("Got finished")
 
     def transfer(self, byte):
         self.write_unsafe('T %d' % ord(byte))
@@ -23,18 +35,7 @@ class RobotProtocol:
     def write(self, message):
         self.ser.write(message + '\r')
         print("Message sent: %s" % message)
-        s = self.ser.readline()
-        while s != 'DONE\r\n':
-            print("Got unknown response '%s'" % s)
-            s = self.ser.readline()
-        print("Got done")
 
     def write_unsafe(self, message):
         self.ser.write(message + '\r')
         print("Message sent: %s" % message)
-
-    def read_all(self):
-        s = self.ser.readline()
-        while s == 'DONE\r\n':
-            print("Got response '%s'" % s)
-            s = self.ser.readline()
