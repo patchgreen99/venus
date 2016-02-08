@@ -5,8 +5,9 @@ NO_VALUE = -1
 
 class Robot:
     def __init__(self):
-        self.position = Array('i', 2)
+        self.position = Array('i', [NO_VALUE, NO_VALUE])
         self.orientation = Value('i')
+        self.orientation.value = NO_VALUE
 
     def __str__(self):
         return "(pos: {} {}, ori: {})".format(self.position[0], self.position[1], self.orientation.value)
@@ -18,7 +19,7 @@ class World:
         self.team_color = team_color  # yellow or blue
         self.our_color = our_color  # green or pink
 
-        self.ball = Array('i', 2)
+        self.ball = Array('i', [NO_VALUE, NO_VALUE])
         self.venus = Robot()
         self.friend = Robot()
         self.enemy1 = Robot()

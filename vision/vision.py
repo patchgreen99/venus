@@ -103,12 +103,13 @@ class Vision:
         self.getBall(circles)
 
         for robot in [self.world.venus, self.world.friend, self.world.enemy1, self.world.enemy2]:
-            cv2.rectangle(imgOriginal, (robot.position[0] - 20, robot.position[1] - 20),
-                          (robot.position[0] + 20, robot.position[1] + 20), (0, 0, 0))
-            rad = math.radians(robot.orientation.value)
-            cv2.line(imgOriginal, (robot.position[0], robot.position[1]),
-                     (int(robot.position[0] + math.sin(rad) * 50.0), int(robot.position[1] + math.cos(rad) * 50.0)),
-                     (0, 0, 0))
+            if robot.position[0] != NO_VALUE:
+                cv2.rectangle(imgOriginal, (robot.position[0] - 20, robot.position[1] - 20),
+                              (robot.position[0] + 20, robot.position[1] + 20), (0, 0, 0))
+                rad = math.radians(robot.orientation.value)
+                cv2.line(imgOriginal, (robot.position[0], robot.position[1]),
+                         (int(robot.position[0] + math.sin(rad) * 50.0), int(robot.position[1] + math.cos(rad) * 50.0)),
+                         (0, 0, 0))
 
         cv2.namedWindow("Room", cv2.WINDOW_AUTOSIZE)
         cv2.imshow('Room', imgOriginal)
