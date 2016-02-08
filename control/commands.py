@@ -23,6 +23,7 @@ class Commands:
         self.vision_process = None
         self.world = None
         self.strategy = None
+        self.vision()
         print("Remember to call connect and vision")
 
     def connect(self, device_no='0'):
@@ -45,8 +46,10 @@ class Commands:
             x = 13.7627360975 * x - 53.5734818271
         else:
             x = 13.964509832 * -x - 75.2448595458
-        self.protocol.move(abs(x), [(MOTOR_LEFT, -100 * s),
-                                    (MOTOR_RIGHT, -100 * s)], wait_done=wait_done, wait_finished=wait_finished)
+        x = int(x)
+        if x > 0:
+            self.protocol.move(x, [(MOTOR_LEFT, -100 * s),
+                                   (MOTOR_RIGHT, -100 * s)], wait_done=wait_done, wait_finished=wait_finished)
 
     def c(self, x, wait_done=False, wait_finished=False):
         """Rotate clockwise, negative x means counter-clockwise"""
@@ -57,9 +60,11 @@ class Commands:
             x = 1.89444 * x - 59.5
         else:
             x = 0.0083027347 * (x ** 2) + 0.4557515777 * x
-        self.protocol.move(abs(x), [(MOTOR_LEFT, -100 * s),
-                                    (MOTOR_RIGHT, 100 * s),
-                                    (MOTOR_TURN, 100 * s)], wait_done=wait_done, wait_finished=wait_finished)
+        x = int(x)
+        if x > 0:
+            self.protocol.move(x, [(MOTOR_LEFT, -100 * s),
+                                   (MOTOR_RIGHT, 100 * s),
+                                   (MOTOR_TURN, 100 * s)], wait_done=wait_done, wait_finished=wait_finished)
 
     def k(self, x):
         """Kick"""

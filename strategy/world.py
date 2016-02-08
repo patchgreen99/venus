@@ -6,11 +6,11 @@ NO_VALUE = -1
 class Robot:
     def __init__(self):
         self.position = Array('i', [NO_VALUE, NO_VALUE])
-        self.orientation = Value('i')
-        self.orientation.value = NO_VALUE
+        self.orientation = Array('d', [NO_VALUE, NO_VALUE])
 
     def __str__(self):
-        return "(pos: {} {}, ori: {})".format(self.position[0], self.position[1], self.orientation.value)
+        return "(pos: {} {}, ori: {})".format(self.position[0], self.position[1],
+                                              self.orientation[0], self.orientation[1])
 
 
 class World:

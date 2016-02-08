@@ -97,9 +97,13 @@ void rotaryTimerCallback() {
 void moveTimeUnits() {
   Serial.print('D');
 
-  int time = atoi(sc.next());
+  int time = atoi(sc.next()); 
   int count = atoi(sc.next());
   int power[ROTARY_COUNT] = {0};
+  
+  if (time <= 0) {
+    return;
+  }
 
   for (int i = 0; i < count; ++i) {
     int motor = atoi(sc.next());
@@ -124,6 +128,10 @@ void moveRotaryUnits() {
   int target = atoi(sc.next());
   int count = atoi(sc.next());
   int power[ROTARY_COUNT] = {0};
+  
+  if (target <= 0) {
+    return;
+  }
 
   for (int i = 0; i < count; ++i) {
     int motor = atoi(sc.next());
