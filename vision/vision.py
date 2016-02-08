@@ -2,6 +2,7 @@ import cv2
 from pylab import *
 from scipy.ndimage import measurements
 from scipy.spatial import distance
+from strategy.world import NO_VALUE
 
 VISION_ROOT = 'vision/'
 KNOWN_ANGLE = 225
@@ -116,9 +117,11 @@ class Vision:
     # returns one ball
     def getBall(self, circles):
         if len(circles['red']) == 0:
-            self.world.ball.value = [None, None]
+            self.world.ball[0] = NO_VALUE
+            self.world.ball[1] = NO_VALUE
         else:
-            self.world.ball.value = circles['red'][0]
+            self.world.ball[0] = int(circles['red'][0][1])
+            self.world.ball[1] = int(circles['red'][0][1])
 
     def getRobots(self, circles):
         greenPoints = circles["green"]
@@ -134,6 +137,7 @@ class Vision:
         else:
             print("There are no robots!")
             return
+        self.detected_robots = [False] * 4
         for ypoint in yellowPoints:
             distances = distance.cdist(greenandpink, [ypoint]).flatten()
             greenandpink_indices = np.argsort(distances)
@@ -152,8 +156,15 @@ class Vision:
                 orientation = self.getorientation(bpoint, greenandpink_tuples)
                 rid = self.getid(greenandpink_tuples, 'blue')
                 self.save_robot(bpoint, orientation, rid)
+        for robot_id, is_detected in enumerate(self.detected_robots):
+            if not is_detected:
+                robot = [self.world.venus, self.world.friend, self.world.enemy1, self.world.enemy2][robot_id]
+                robot.position[0] = NO_VALUE
+                robot.position[1] = NO_VALUE
+                robot.orientation.value = NO_VALUE
 
     def save_robot(self, position, orientation, robot_id):
+        self.detected_robots[robot_id] = True
         robot = [self.world.venus, self.world.friend, self.world.enemy1, self.world.enemy2][robot_id]
         robot.position[0] = int(position[0])
         robot.position[1] = int(position[1])
@@ -203,34 +214,36 @@ class Vision:
             for (coordinate, color) in greenandpink:
                 if (color == "pink"):
                     isolatedPoint.append(coordinate)
-            distances = distance.cdist(isolatedPoint, greenList)
-            smallestdist = distances[0][0]
-            for i in range(len(distances)):
-                for j in range(len(distances[i])):
-                    if (distances[i][j] != 0 and distances[i][j] < smallestdist):
-                        smallestdist = distances[i][j]
-                        savedi = i
-                        savedj = j
-            del greenList[savedj]
-            midpointxcoord = (greenList[0][0] + greenList[1][0]) / 2.0
-            midpointycoord = (greenList[0][1] + greenList[1][1]) / 2.0
+            if isolatedPoint:
+                distances = distance.cdist(isolatedPoint, greenList)
+                smallestdist = distances[0][0]
+                for i in range(len(distances)):
+                    for j in range(len(distances[i])):
+                        if (distances[i][j] != 0 and distances[i][j] < smallestdist):
+                            smallestdist = distances[i][j]
+                            savedi = i
+                            savedj = j
+                del greenList[savedj]
+                midpointxcoord = (greenList[0][0] + greenList[1][0]) / 2.0
+                midpointycoord = (greenList[0][1] + greenList[1][1]) / 2.0
 
         elif (len(pinkList)) == 3:
             isolatedPoint = []
             for (coordinate, color) in greenandpink:
                 if (color == "green"):
                     isolatedPoint.append(coordinate)
-            distances = distance.cdist(isolatedPoint, pinkList)
-            smallestdist = distances[0][0]
-            for i in range(len(distances)):
-                for j in range(len(distances[i])):
-                    if (distances[i][j] != 0 and distances[i][j] < smallestdist):
-                        smallestdist = distances[i][j]
-                        savedi = i
-                        savedj = j
-            del pinkList[savedj]
-            midpointxcoord = (pinkList[0][0] + pinkList[1][0]) / 2.0
-            midpointycoord = (pinkList[0][1] + pinkList[1][1]) / 2.0
+            if isolatedPoint:
+                distances = distance.cdist(isolatedPoint, pinkList)
+                smallestdist = distances[0][0]
+                for i in range(len(distances)):
+                    for j in range(len(distances[i])):
+                        if (distances[i][j] != 0 and distances[i][j] < smallestdist):
+                            smallestdist = distances[i][j]
+                            savedi = i
+                            savedj = j
+                del pinkList[savedj]
+                midpointxcoord = (pinkList[0][0] + pinkList[1][0]) / 2.0
+                midpointycoord = (pinkList[0][1] + pinkList[1][1]) / 2.0
 
             # print "center point interest ", (midpointxcoord, midpointycoord)
             # print "center pioint ", cpoint

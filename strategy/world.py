@@ -1,5 +1,7 @@
 from multiprocessing import Array, Value
 
+NO_VALUE = -1
+
 
 class Robot:
     def __init__(self):
