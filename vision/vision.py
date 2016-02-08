@@ -16,7 +16,7 @@ COLOR_RANGES = {
 
 MAX_COLOR_COUNTS = {
     'red': 1,
-    'blue': 10,
+    'blue': 2,
     'yellow': 2,
     'pink': 8,
     'green': 8,
@@ -32,7 +32,7 @@ COLORS = {
 
 MIN_COLOR_AREA = {
     'red': 2000.0,
-    'blue': 0.0,
+    'blue': 3000.0,
     'yellow': 2000.0,
     'pink': 2000.0,
     'green': 2000.0,
@@ -52,17 +52,19 @@ class Vision:
         if self.world.room_num == 1:
             self.mtx = np.loadtxt(VISION_ROOT + "mtx1.txt")
             self.dist = np.loadtxt(VISION_ROOT + "dist1.txt")
-            self.pts1 = np.float32([[10, 2], [634, 37], [596, 478], [6, 456]])
+            self.pts1 = np.float32([[33, 12], [609, 16], [607, 475], [22, 462]])
+	    #self.pts1 = np.float32([[10, 2], [634, 37], [596, 478], [6, 456]])
         elif self.world.room_num == 0:
             self.mtx = np.loadtxt(VISION_ROOT + "mtx2.txt")
             self.dist = np.loadtxt(VISION_ROOT + "dist2.txt")
-            self.pts1 = np.float32([[7, 5], [607, 4], [593, 451], [17, 450]])
+	    self.pts1 = np.float32([[33, 12], [609, 16], [607, 475], [22, 462]])
+            #self.pts1 = np.float32([[7, 5], [607, 4], [593, 451], [17, 450]])
         else:
             print("invalid room id")
 
         self.capture = cv2.VideoCapture(0)
-        # self.capture.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-        # self.capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 1024)
+        self.capture.set(cv2.CAP_PROP_FRAME_WIDTH, 560)
+        self.capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 420)
 
         while self.pressed_key != 27:
             self.frame()

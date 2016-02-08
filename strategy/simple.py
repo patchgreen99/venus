@@ -2,7 +2,7 @@ import math
 
 import numpy as np
 
-PIXEL_TO_CENTIMETERS = 0.5
+CENTIMETERS_TO_PIXELS = (300.0/560.0)
 
 
 class SimpleStrategy:
@@ -29,11 +29,11 @@ class SimpleStrategy:
             else:
                 angle = -(180 + temp_angle)
 
-        motion_length = np.linalg.norm(motion_vec) * PIXEL_TO_CENTIMETERS
+        motion_length = np.linalg.norm(motion_vec) * CENTIMETERS_TO_PIXELS
 
         print("Turning " + str(angle) + " deg")
         self.commands.c(angle, wait_done=True, wait_finished=True)
-        # self.commands.f(motion_length - 10.0, wait_done=True, wait_finished=True)
-        # self.commands.r()
+        self.commands.f(motion_length - 10.0, wait_done=True, wait_finished=True)
+         #self.commands.r()
         # self.commands.f(10.0, wait_done=True, wait_finished=True)
         # self.commands.g()
