@@ -1,9 +1,11 @@
 import time
 import traceback
-from multiprocessing import Process
+import multiprocessing
 
 from control.protocol import RobotProtocol
-from vision.vision import Room
+from strategy.simple import SimpleStrategy
+from strategy.world import World
+from vision.vision import Vision
 
 MOTOR_LEFT = 0
 MOTOR_RIGHT = 1
@@ -19,16 +21,22 @@ def sign(x):
 class Prompt:
     def __init__(self):
         self.protocol = None
-        self.process = None
+        self.vision_process = None
+        self.world = None
+        self.strategy = None
         print("Remember to call connect and vision")
 
     def connect(self, device_no='0'):
         self.protocol = RobotProtocol('/dev/ttyACM' + device_no)
 
     def vision(self, room_num=0, team_color='blue', our_color='green'):
-        room = Room(int(room_num), team_color, our_color, debug=False)
-        self.process = Process(target=room.vision, args=())
-        self.process.start()
+        self.world = World(int(room_num), team_color, our_color)
+        self.strategy = SimpleStrategy(self.world)
+        self.vision_process = multiprocessing.Process(target=Vision, args=(self.world,))
+        self.vision_process.start()
+
+    def grab_ball(self):
+        self.strategy.grab_ball()
 
     def f(self, x):
         """Move forward, negative x means backward"""

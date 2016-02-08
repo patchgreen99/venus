@@ -43,41 +43,16 @@ ENEMY_1 = 2
 ENEMY_2 = 3
 
 
-class Ball:
-    def __init__(self, pos):
-        self.x = pos[0]
-        self.y = pos[1]
-
-    def printball(self):
-        print ('BALL POSITION ' + str((self.x, self.y)))
-        print('')
-
-
-class Robot:
-    def __init__(self, pos, orientation, rid):
-        self.pos = pos
-        self.orientation = orientation
-        self.rid = rid
-
-    def printrobot(self):
-        print('ROBOT ' + str(self.rid))
-        print('POSITION ' + str(self.pos))
-        print('ORIENTATION ' + str(self.orientation))
-        print('')
-
-
-class Room:
-    def __init__(self, r_id, team_color, our_color, debug=False):
+class Vision:
+    def __init__(self, world, debug=False):
         self.debug = debug
-        self.team_color = team_color  # yellow or blue
-        self.our_color = our_color  # green or pink
-        self.room_id = r_id
+        self.world = world
         self.pressed_key = None
-        if (self.room_id == 1):
+        if self.world.room_num == 1:
             self.mtx = np.loadtxt(VISION_ROOT + "mtx1.txt")
             self.dist = np.loadtxt(VISION_ROOT + "dist1.txt")
             self.pts1 = np.float32([[10, 2], [634, 37], [596, 478], [6, 456]])
-        elif (self.room_id == 0):
+        elif self.world.room_num == 0:
             self.mtx = np.loadtxt(VISION_ROOT + "mtx2.txt")
             self.dist = np.loadtxt(VISION_ROOT + "dist2.txt")
             self.pts1 = np.float32([[7, 5], [607, 4], [593, 451], [17, 450]])
@@ -88,7 +63,6 @@ class Room:
         # self.capture.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
         # self.capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 1024)
 
-    def vision(self):
         while self.pressed_key != 27:
             self.frame()
         cv2.destroyAllWindows()
@@ -124,20 +98,16 @@ class Room:
             for x, y in positions:
                 cv2.circle(imgOriginal, (int(x), int(y)), 8, COLORS[color_name], 1)
 
-        robots = self.getRobots(circles)
-        ball = self.getBall(circles)
+        self.getRobots(circles)
+        self.getBall(circles)
 
-        if self.debug:
-            print 'Detected robots : ' + str(len(robots))
-
-        for robot in robots:
-            cv2.rectangle(imgOriginal, (int(robot.pos[0]) - 20, int(robot.pos[1]) - 20),
-                          (int(robot.pos[0]) + 20, int(robot.pos[1]) + 20), (0, 0, 0))
-            rad = math.radians(robot.orientation)
-            cv2.line(imgOriginal, (int(robot.pos[0]), int(robot.pos[1])),
-                     (int(robot.pos[0] + math.sin(rad) * 50.0), int(robot.pos[1] + math.cos(rad) * 50.0)), (0, 0, 0))
-            if self.debug:
-                print("Robot", robot.pos, robot.orientation, robot.rid)
+        for robot in [self.world.venus, self.world.friend, self.world.enemy1, self.world.enemy2]:
+            cv2.rectangle(imgOriginal, (robot.position[0] - 20, robot.position[1] - 20),
+                          (robot.position[0] + 20, robot.position[1] + 20), (0, 0, 0))
+            rad = math.radians(robot.orientation.value)
+            cv2.line(imgOriginal, (robot.position[0], robot.position[1]),
+                     (int(robot.position[0] + math.sin(rad) * 50.0), int(robot.position[1] + math.cos(rad) * 50.0)),
+                     (0, 0, 0))
 
         cv2.namedWindow("Room", cv2.WINDOW_AUTOSIZE)
         cv2.imshow('Room', imgOriginal)
@@ -146,12 +116,11 @@ class Room:
     # returns one ball
     def getBall(self, circles):
         if len(circles['red']) == 0:
-            return Ball((0, 0))
-        pos = circles['red'][0]
-        return Ball(pos)
+            self.world.ball.value = [None, None]
+        else:
+            self.world.ball.value = circles['red'][0]
 
     def getRobots(self, circles):
-        robots = []
         greenPoints = circles["green"]
         pinkPoints = circles["pink"]
         bluePoints = circles["blue"]
@@ -173,7 +142,7 @@ class Room:
                                        greenandpink_indices[:4]]
                 orientation = self.getorientation(ypoint, greenandpink_tuples)
                 rid = self.getid(greenandpink_tuples, 'yellow')
-                robots.append(Robot(ypoint, orientation, rid))
+                self.save_robot(ypoint, orientation, rid)
         for bpoint in bluePoints:
             distances = distance.cdist(greenandpink, [bpoint]).flatten()
             greenandpink_indices = np.argsort(distances)
@@ -182,11 +151,16 @@ class Room:
                                        greenandpink_indices[:4]]
                 orientation = self.getorientation(bpoint, greenandpink_tuples)
                 rid = self.getid(greenandpink_tuples, 'blue')
-                robots.append(Robot(bpoint, orientation, rid))
-        return robots
+                self.save_robot(bpoint, orientation, rid)
+
+    def save_robot(self, position, orientation, robot_id):
+        robot = [self.world.venus, self.world.friend, self.world.enemy1, self.world.enemy2][robot_id]
+        robot.position[0] = int(position[0])
+        robot.position[1] = int(position[1])
+        robot.orientation.value = int(orientation)
 
     def getid(self, greenandpink, tcolor):
-        if tcolor == self.team_color:
+        if tcolor == self.world.team_color:
             greencount = 0
             pinkcount = 0
             for gnppoint in greenandpink:
@@ -268,9 +242,9 @@ class Room:
         else:
             slopeDirection = self.findslope(centerPointOfInterest, cpoint)
         # print "slopeDirection " , slopeDirection
-        (numerator,denominator) = slopeDirection
+        (numerator, denominator) = slopeDirection
         # print numerator
-        angle = math.atan2(denominator,numerator)
+        angle = math.atan2(denominator, numerator)
         angle = math.degrees(angle)
         # if (angle &lt; 0):
         #    return -angle
@@ -281,7 +255,7 @@ class Room:
     def findslope(self, point1, point2):
         numerator = point1[1] - point2[1]
         denominator = point1[0] - point2[0]  # sometimes it's not a point?? like [292. 292.]
-        ans = (numerator,denominator)
+        ans = (numerator, denominator)
         return ans
 
     def TrackCircle(self, color_name, color_ranges, imgOriginal):
