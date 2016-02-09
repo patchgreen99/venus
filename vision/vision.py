@@ -63,8 +63,8 @@ class Vision:
             print("invalid room id")
 
         self.capture = cv2.VideoCapture(0)
-        self.capture.set(cv2.CAP_PROP_FRAME_WIDTH, 560)
-        self.capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 420)
+        self.capture.set(cv2.CAP_PROP_FRAME_WIDTH, 600)
+        self.capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 440)
 
         while self.pressed_key != 27:
             self.frame()
@@ -238,6 +238,7 @@ class Vision:
                 del greenList[savedj]
                 midpointxcoord = (greenList[0][0] + greenList[1][0]) / 2.0
                 midpointycoord = (greenList[0][1] + greenList[1][1]) / 2.0
+		centerPointOfInterest2 = (mid2x,mid2y)
 
         elif (len(pinkList)) == 3:
             isolatedPoint = []
@@ -258,13 +259,13 @@ class Vision:
                 del pinkList[savedj]
                 midpointxcoord = (pinkList[0][0] + pinkList[1][0]) / 2.0
                 midpointycoord = (pinkList[0][1] + pinkList[1][1]) / 2.0
-
+		centerPointOfInterest2 = cpoint
             # print "center point interest ", (midpointxcoord, midpointycoord)
             # print "center pioint ", cpoint
 
         centerPointOfInterest = (midpointxcoord, midpointycoord)
         # slopeHorizontalLine = 0.0
-        centerPointOfInterest2 = (mid2x,mid2y)
+        #centerPointOfInterest2 = (mid2x,mid2y)
         if (centerPointOfInterest[0] == cpoint[0]):
             return 270
         else:
