@@ -8,7 +8,7 @@ VISION_ROOT = 'vision/'
 KNOWN_ANGLE = 225
 COLOR_RANGES = {
     'red': [((0, 170, 130), (8, 255, 255)), ((175, 170, 130), (180, 255, 255))],
-    'blue': [((83, 150, 150), (94, 230, 230))],
+    'blue': [((83, 110, 150), (99, 230, 230))],
     'yellow': [((30, 150, 150), (37, 255, 255))],
     'pink': [((149, 130, 60), (175, 255, 255))],
     'green': [((50, 188, 200), (60, 255, 255))],
@@ -16,7 +16,7 @@ COLOR_RANGES = {
 
 MAX_COLOR_COUNTS = {
     'red': 1,
-    'blue': 2,
+    'blue': 10,
     'yellow': 2,
     'pink': 8,
     'green': 8,
@@ -135,9 +135,9 @@ class Vision:
         yellowPoints = circles["yellow"]
         if greenPoints and pinkPoints:
             greenandpink = np.concatenate((greenPoints, pinkPoints))
-        elif not greenPoints:
+        elif not greenPoints and pinkPoints:
             greenandpink = np.array(pinkPoints)
-        elif not pinkPoints:
+        elif not pinkPoints and pinkPoints:
             greenandpink = np.array(greenPoints)
         else:
             print("There are no robots!")
