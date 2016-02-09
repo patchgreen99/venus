@@ -33,7 +33,7 @@ COLORS = {
 
 MIN_COLOR_AREA = {
     'red': 2000.0,
-    'blue': 3000.0,
+    'blue': 0.0,
     'yellow': 2000.0,
     'pink': 2000.0,
     'green': 2000.0,
@@ -293,7 +293,7 @@ class Vision:
                 del pinkList[savedj]
                 midpointxcoord = (pinkList[0][0] + pinkList[1][0]) / 2.0
                 midpointycoord = (pinkList[0][1] + pinkList[1][1]) / 2.0
-                centerPointOfInterest2 = cpoint
+                # centerPointOfInterest2 = cpoint
                 # print "center point interest ", (midpointxcoord, midpointycoord)
                 # print "center pioint ", cpoint
 

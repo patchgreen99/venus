@@ -41,6 +41,9 @@ class Commands:
     def goal(self):
         self.strategy.goal()
 
+    def grab_goal(self):
+        self.strategy.grab_goal()
+
     def pw(self):
         print(self.world)
 

@@ -14,9 +14,9 @@ class SimpleStrategy:
     def calculate_angle_length_ball(self):
         return self.calculate_angle_length(np.array([self.world.ball[0], self.world.ball[1]]))
 
-    def calculate_angle_length_goal(self, goal_num):
+    def calculate_angle_length_goal(self):
         # computer goal
-        if goal_num == 0:
+        if self.world.venus.position[0] > 300:
             return self.calculate_angle_length(np.array([589, 221]))
         # white board goal
         else:
@@ -77,16 +77,20 @@ class SimpleStrategy:
 
         print("LAST: Going " + str(motion_length) + " cm")
 
-        motion_length -= 13
+        motion_length -= 12 #13
         if motion_length < 5:
             motion_length = 5
 
         self.commands.f(motion_length, wait=True)
-        time.sleep(1)
         self.commands.g()
+        time.sleep(1)
 
     def goal(self):
-        angle, motion_length = self.calculate_angle_length_goal(0)
+        angle, motion_length = self.calculate_angle_length_goal()
         self.commands.c(angle)
         self.commands.x(500)
         self.commands.g()
+
+    def grab_goal(self):
+        self.grab_ball()
+        self.goal()
