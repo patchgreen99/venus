@@ -38,7 +38,13 @@ class Commands:
     def grab_ball(self):
         self.strategy.grab_ball()
 
-    def f(self, x, wait_done=True, wait_finished=True):
+    def goal(self):
+        self.strategy.goal()
+
+    def pw(self):
+        print(self.world)
+
+    def f(self, x, wait=True):
         """Move forward, negative x means backward"""
         x = int(x)
         s = sign(x)
@@ -49,9 +55,9 @@ class Commands:
         x = int(x)
         if x > 0:
             self.protocol.move(x, [(MOTOR_LEFT, -100 * s),
-                                   (MOTOR_RIGHT, -100 * s)], wait_done=wait_done, wait_finished=wait_finished)
+                                   (MOTOR_RIGHT, -100 * s)], wait=wait)
 
-    def c(self, x, wait_done=True, wait_finished=True):
+    def c(self, x):
         """Rotate clockwise, negative x means counter-clockwise"""
         x = int(x)
         s = sign(x)
@@ -64,7 +70,7 @@ class Commands:
         if x > 0:
             self.protocol.move(x, [(MOTOR_LEFT, -100 * s),
                                    (MOTOR_RIGHT, 100 * s),
-                                   (MOTOR_TURN, 100 * s)], wait_done=wait_done, wait_finished=wait_finished)
+                                   (MOTOR_TURN, 100 * s)])
 
     def k(self, x):
         """Kick"""
@@ -72,7 +78,7 @@ class Commands:
         # Not using rotary encoders, granularity too low
         self.protocol.move(x, [(MOTOR_KICK, 100)], time=True)
 
-    def g(self, x=200):
+    def g(self, x=300):
         """Grab, negative x means release"""
         x = int(x)
         # This motor does not have rotary encoders
@@ -80,7 +86,7 @@ class Commands:
 
     def r(self):
         """Release"""
-        self.g(-180)
+        self.g(-250)
 
     def x(self, x):
         """Kick and release"""

@@ -9,10 +9,10 @@ VISION_ROOT = 'vision/'
 KNOWN_ANGLE = 225
 COLOR_RANGES = {
     'red': [((0, 170, 130), (8, 255, 255)), ((175, 170, 130), (180, 255, 255))],
-    'blue': [((83, 110, 150), (99, 230, 230))],
+    'blue': [((83, 110, 150), (102, 230, 230))],
     'yellow': [((30, 150, 150), (37, 255, 255))],
     'pink': [((149, 130, 60), (175, 255, 255))],
-    'green': [((50, 130, 200), (60, 255, 255))],
+    'green': [((50, 130, 200), (55, 255, 255))],
 }
 
 MAX_COLOR_COUNTS = {
@@ -50,7 +50,7 @@ class Vision:
         self.debug = debug
         self.world = world
         self.pressed_key = None
-        self.trajectory_list = [(0, 0)]*5
+        self.trajectory_list = [(0, 0)]*6
         if self.world.room_num == 1:
             self.mtx = np.loadtxt(VISION_ROOT + "mtx1.txt")
             self.dist = np.loadtxt(VISION_ROOT + "dist1.txt")
@@ -114,12 +114,14 @@ class Vision:
                     self.trajectory_list.pop(0)
 
         # draw balls trajectory
-        delta_x = x-self.trajectory_list[0][0]
+        delta_x = self.trajectory_list[len(self.trajectory_list) - 1][0] - self.trajectory_list[0][0]
         if abs(delta_x) > 2:
-            future_x = x + 100*delta_x
-            m = (y-self.trajectory_list[0][1])/(x-self.trajectory_list[0][0])
-            future_y = (future_x-self.trajectory_list[0][0])*m + self.trajectory_list[0][1]
-            cv2.line(imgOriginal, (int(x), int(y)), (int(future_x), int(future_y)), COLORS['red'], 1)
+            future_x = self.trajectory_list[len(self.trajectory_list) - 1][0] + 100 * delta_x
+            m = (self.trajectory_list[len(self.trajectory_list) - 1][1] - self.trajectory_list[0][1]) / delta_x
+            future_y = (future_x - self.trajectory_list[0][0]) * m + self.trajectory_list[0][1]
+            cv2.line(imgOriginal, (int(self.trajectory_list[len(self.trajectory_list) - 1][0])
+                                   , int(self.trajectory_list[len(self.trajectory_list) - 1][1]))
+                     , (int(future_x), int(future_y)), COLORS['red'], 1)
 
         self.getRobots(circles)
         self.getBall(circles)
@@ -127,18 +129,28 @@ class Vision:
         for robot_id, robot in enumerate([self.world.venus, self.world.friend, self.world.enemy1, self.world.enemy2]):
             if robot.position[0] != NO_VALUE:
                 cv2.rectangle(imgOriginal, (robot.position[0] - 20, robot.position[1] - 20),
-                              (robot.position[0] + 20, robot.position[1] + 20), (0, 0, 0))
-                cv2.line(imgOriginal, (robot.position[0], robot.position[1]),
-                         (int(robot.position[0] + robot.orientation[0] * 50.0),
-                          int(robot.position[1] + robot.orientation[1] * 50.0)),
-                         (0, 0, 0))
-                cv2.putText(imgOriginal, str(robot_id), (robot.position[0], robot.position[1]),
+                              (robot.position[0] + 20, robot.position[1] + 20), self.robot_color(robot_id), 2)
+                cv2.arrowedLine(imgOriginal, (robot.position[0], robot.position[1]),
+                                (int(robot.position[0] + robot.orientation[0] * 50.0),
+                                 int(robot.position[1] + robot.orientation[1] * 50.0)),
+                                self.robot_color(robot_id), 2)
+                cv2.putText(imgOriginal, str(robot_id), (robot.position[0] + 20, robot.position[1] + 40),
                             cv2.FONT_HERSHEY_SIMPLEX,
-                            1, (0, 0, 0))
+                            2, self.robot_color(robot_id))
 
         cv2.namedWindow("Room", cv2.WINDOW_AUTOSIZE)
         cv2.imshow('Room', imgOriginal)
         self.pressed_key = cv2.waitKey(2) & 0xFF
+
+    def robot_color(self, r_id):
+        if r_id == 0:
+            return COLORS['green']
+        elif r_id == 1:
+            return COLORS['yellow']
+        elif r_id == 2:
+            return COLORS['red']
+        elif r_id == 3:
+            return COLORS['red']
 
     # returns one ball
     def getBall(self, circles):
@@ -287,7 +299,7 @@ class Vision:
 
         centerPointOfInterest = (midpointxcoord, midpointycoord)
         # slopeHorizontalLine = 0.0
-        # centerPointOfInterest2 = (mid2x,mid2y)
+        centerPointOfInterest2 = (mid2x, mid2y)
         if (centerPointOfInterest[0] == cpoint[0]):
             return 270
         else:

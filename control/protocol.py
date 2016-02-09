@@ -8,7 +8,7 @@ class RobotProtocol:
     def stop(self):
         self.write('S\r')
 
-    def move(self, units, motor_powers, time=False, wait_done=True, wait_finished=True):
+    def move(self, units, motor_powers, time=False, wait=True):
         # motor_powers consists of tuples (num, power)
         command = 'M' if time else 'R'
         out = [command, int(abs(units)), len(motor_powers)]
@@ -17,15 +17,16 @@ class RobotProtocol:
             out.append(int(power))
         self.write(' '.join(str(x) for x in out))
         s = self.ser.read()
-        while s != 'D':
-            print("Got unknown response '%s'" % s)
+        if wait:
+            while s != 'D':
+                print("Got unknown response '%s'" % s)
+                s = self.ser.read()
+            print("Got done")
             s = self.ser.read()
-        print("Got done")
-        s = self.ser.read()
-        while s != 'F':
-            print("Got unknown response '%s'" % s)
-            s = self.ser.read()
-        print("Got finished")
+            while s != 'F':
+                print("Got unknown response '%s'" % s)
+                s = self.ser.read()
+            print("Got finished")
 
     def transfer(self, byte):
         self.write_unsafe('T %d' % ord(byte))
