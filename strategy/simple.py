@@ -3,7 +3,7 @@ import time
 
 import numpy as np
 
-CENTIMETERS_TO_PIXELS = (300.0 / 560.0)
+CENTIMETERS_TO_PIXELS = (300.0 / 600.0)
 
 
 class SimpleStrategy:
@@ -32,24 +32,28 @@ class SimpleStrategy:
 
         motion_length = np.linalg.norm(motion_vec) * CENTIMETERS_TO_PIXELS
 
-        return angle, motion_length - 20.0
+        return angle, motion_length
 
     def approach(self, angle, motion_length):
         print("Turning " + str(angle) + " deg then going " + str(motion_length) + " cm")
-        self.commands.c(angle, wait_done=True, wait_finished=True)
+        self.commands.c(angle)
         time.sleep(0.5)
-        self.commands.f(motion_length, wait_done=True, wait_finished=True)
+        self.commands.f(motion_length)
         time.sleep(0.5)
 
     def grab_ball(self):
 
         angle, motion_length = self.calculate_angle_length()
-        while motion_length > 10.0:
-            if motion_length > 40.0:
-                motion_length = 40.0
-            self.approach(angle, motion_length)
+        while motion_length > 40.0:
+            self.approach(angle, 40.0)
             angle, motion_length = self.calculate_angle_length()
 
+        motion_length -= 30.0
+        if motion_length > 0:
+            self.approach(angle, motion_length)
+
         self.commands.r()
-        self.commands.f(10.0, wait_done=True, wait_finished=True)
+        time.sleep(0.5)
+        self.commands.f(10.0)
+        time.sleep(0.5)
         self.commands.g()

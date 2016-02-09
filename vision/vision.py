@@ -2,6 +2,7 @@ import cv2
 from pylab import *
 from scipy.ndimage import measurements
 from scipy.spatial import distance
+
 from strategy.world import NO_VALUE
 
 VISION_ROOT = 'vision/'
@@ -11,7 +12,7 @@ COLOR_RANGES = {
     'blue': [((83, 110, 150), (99, 230, 230))],
     'yellow': [((30, 150, 150), (37, 255, 255))],
     'pink': [((149, 130, 60), (175, 255, 255))],
-    'green': [((50, 188, 200), (60, 255, 255))],
+    'green': [((50, 130, 200), (60, 255, 255))],
 }
 
 MAX_COLOR_COUNTS = {
@@ -53,18 +54,22 @@ class Vision:
             self.mtx = np.loadtxt(VISION_ROOT + "mtx1.txt")
             self.dist = np.loadtxt(VISION_ROOT + "dist1.txt")
             self.pts1 = np.float32([[33, 12], [609, 16], [607, 475], [22, 462]])
-	    #self.pts1 = np.float32([[10, 2], [634, 37], [596, 478], [6, 456]])
+            # self.pts1 = np.float32([[10, 2], [634, 37], [596, 478], [6, 456]])
         elif self.world.room_num == 0:
             self.mtx = np.loadtxt(VISION_ROOT + "mtx2.txt")
             self.dist = np.loadtxt(VISION_ROOT + "dist2.txt")
-	    self.pts1 = np.float32([[33, 12], [609, 16], [607, 475], [22, 462]])
-            #self.pts1 = np.float32([[7, 5], [607, 4], [593, 451], [17, 450]])
+            self.pts1 = np.float32([[33, 12], [609, 16], [607, 475], [22, 462]])
+            # self.pts1 = np.float32([[7, 5], [607, 4], [593, 451], [17, 450]])
         else:
             print("invalid room id")
 
         self.capture = cv2.VideoCapture(0)
         self.capture.set(cv2.CAP_PROP_FRAME_WIDTH, 600)
         self.capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 440)
+        self.capture.set(cv2.CAP_PROP_BRIGHTNESS, .5)
+        self.capture.set(cv2.CAP_PROP_CONTRAST, .5)
+        self.capture.set(cv2.CAP_PROP_SATURATION, .5)
+        self.capture.set(cv2.CAP_PROP_HUE, .5)
 
         while self.pressed_key != 27:
             self.frame()
@@ -112,7 +117,8 @@ class Vision:
                          (int(robot.position[0] + robot.orientation[0] * 50.0),
                           int(robot.position[1] + robot.orientation[1] * 50.0)),
                          (0, 0, 0))
-                cv2.putText(imgOriginal, str(robot_id), (robot.position[0], robot.position[1]), cv2.FONT_HERSHEY_SIMPLEX,
+                cv2.putText(imgOriginal, str(robot_id), (robot.position[0], robot.position[1]),
+                            cv2.FONT_HERSHEY_SIMPLEX,
                             1, (0, 0, 0))
 
         cv2.namedWindow("Room", cv2.WINDOW_AUTOSIZE)
@@ -211,8 +217,9 @@ class Vision:
         savedj = 0
         midpointxcoord = 0
         midpointycoord = 0
-        mid2x=0
-        mid2y=0
+        mid2x = 0
+        mid2y = 0
+        centerPointOfInterest2 = cpoint
         for (coordinate, color) in greenandpink:
             if (color == "green"):
                 greenList.append(coordinate)
@@ -232,13 +239,13 @@ class Vision:
                             smallestdist = distances[i][j]
                             savedi = i
                             savedj = j
-                #del greenList[savedj]
-                mid2x = (pinkList[0][0] + greenList[savedj][0])/2.0
-                mid2y = (pinkList[0][1] + greenList[savedj][1])/2.0
+                # del greenList[savedj]
+                mid2x = (pinkList[0][0] + greenList[savedj][0]) / 2.0
+                mid2y = (pinkList[0][1] + greenList[savedj][1]) / 2.0
                 del greenList[savedj]
                 midpointxcoord = (greenList[0][0] + greenList[1][0]) / 2.0
                 midpointycoord = (greenList[0][1] + greenList[1][1]) / 2.0
-		centerPointOfInterest2 = (mid2x,mid2y)
+                centerPointOfInterest2 = (mid2x, mid2y)
 
         elif (len(pinkList)) == 3:
             isolatedPoint = []
@@ -254,18 +261,18 @@ class Vision:
                             smallestdist = distances[i][j]
                             savedi = i
                             savedj = j
-                mid2x = (greenList[0][0] + pinkList[savedj][0])/2.0
-                mid2y = (greenList[0][1] + pinkList[savedj][1])/2.0
+                mid2x = (greenList[0][0] + pinkList[savedj][0]) / 2.0
+                mid2y = (greenList[0][1] + pinkList[savedj][1]) / 2.0
                 del pinkList[savedj]
                 midpointxcoord = (pinkList[0][0] + pinkList[1][0]) / 2.0
                 midpointycoord = (pinkList[0][1] + pinkList[1][1]) / 2.0
-		centerPointOfInterest2 = cpoint
-            # print "center point interest ", (midpointxcoord, midpointycoord)
-            # print "center pioint ", cpoint
+                centerPointOfInterest2 = cpoint
+                # print "center point interest ", (midpointxcoord, midpointycoord)
+                # print "center pioint ", cpoint
 
         centerPointOfInterest = (midpointxcoord, midpointycoord)
         # slopeHorizontalLine = 0.0
-        #centerPointOfInterest2 = (mid2x,mid2y)
+        # centerPointOfInterest2 = (mid2x,mid2y)
         if (centerPointOfInterest[0] == cpoint[0]):
             return 270
         else:

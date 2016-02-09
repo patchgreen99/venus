@@ -38,7 +38,7 @@ class Commands:
     def grab_ball(self):
         self.strategy.grab_ball()
 
-    def f(self, x, wait_done=False, wait_finished=False):
+    def f(self, x, wait_done=True, wait_finished=True):
         """Move forward, negative x means backward"""
         x = int(x)
         s = sign(x)
@@ -51,7 +51,7 @@ class Commands:
             self.protocol.move(x, [(MOTOR_LEFT, -100 * s),
                                    (MOTOR_RIGHT, -100 * s)], wait_done=wait_done, wait_finished=wait_finished)
 
-    def c(self, x, wait_done=False, wait_finished=False):
+    def c(self, x, wait_done=True, wait_finished=True):
         """Rotate clockwise, negative x means counter-clockwise"""
         x = int(x)
         s = sign(x)
@@ -145,3 +145,6 @@ class Commands:
                 time.sleep(seconds)
                 byte = f.read(1)
                 # self.p.read_all()
+
+    def reset_input(self):
+        self.protocol.reset_input()
