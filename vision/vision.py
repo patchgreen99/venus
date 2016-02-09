@@ -50,6 +50,7 @@ class Vision:
         self.debug = debug
         self.world = world
         self.pressed_key = None
+        self.trajectory_list = [(0, 0)]*5
         if self.world.room_num == 1:
             self.mtx = np.loadtxt(VISION_ROOT + "mtx1.txt")
             self.dist = np.loadtxt(VISION_ROOT + "dist1.txt")
@@ -105,6 +106,20 @@ class Vision:
                 print 'Detected ' + color_name + ' : ' + str(len(positions))
             for x, y in positions:
                 cv2.circle(imgOriginal, (int(x), int(y)), 8, COLORS[color_name], 1)
+
+            # save balls trajectory
+            if color_name == 'red':
+                for x, y in positions:
+                    self.trajectory_list.append((x, y))
+                    self.trajectory_list.pop(0)
+
+        # draw balls trajectory
+        delta_x = x-self.trajectory_list[0][0]
+        if abs(delta_x) > 2:
+            future_x = x + 100*delta_x
+            m = (y-self.trajectory_list[0][1])/(x-self.trajectory_list[0][0])
+            future_y = (future_x-self.trajectory_list[0][0])*m + self.trajectory_list[0][1]
+            cv2.line(imgOriginal, (int(x), int(y)), (int(future_x), int(future_y)), COLORS['red'], 1)
 
         self.getRobots(circles)
         self.getBall(circles)
