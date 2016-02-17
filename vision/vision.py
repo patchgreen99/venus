@@ -35,7 +35,7 @@ MIN_COLOR_AREA = {
     'red': 2000.0,
     'blue': 0.0,
     'yellow': 2000.0,
-    'pink': 2000.0,
+    'pink': 1000.0,
     'green': 2000.0,
 }
 
