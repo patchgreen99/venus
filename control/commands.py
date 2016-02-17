@@ -48,6 +48,12 @@ class Commands:
     def grab_goal(self):
         self.strategy.grab_goal()
 
+    def pass_ball(self):
+        self.strategy.pass_ball()
+
+    def catch_ball(self):
+        self.strategy.catch_ball()
+
     def pw(self):
         print(self.world)
 
@@ -132,6 +138,10 @@ class Commands:
     def kick(self, distance):
         """Milestone 1: Kick"""
         distance = int(distance)
+        time_value = 1.131147541 * distance + 82.7868852459
+        print("Time for kicking motor: " + str(time_value))
+        self.k(time_value)
+        '''
         if distance == 50:
             # time = 260
             time = 242
@@ -144,6 +154,7 @@ class Commands:
         else:
             time = 0
         self.k(time)
+        '''
 
     def transfer(self, filename, freq_hz):
         """Milestone 1: Communications and Timing"""

@@ -94,3 +94,17 @@ class SimpleStrategy:
     def grab_goal(self):
         self.grab_ball()
         self.goal()
+
+    def pass_ball(self):
+        friend_pos = np.array([self.world.friend.position[0], self.world.friend.position[1]])
+        angle, motion_length = self.calculate_angle_length(friend_pos)
+        print("Turning " + str(angle) + " deg then kicking " + str(motion_length) + " cm")
+        self.commands.c(angle)
+        time.sleep(1)
+        self.commands.kick(motion_length)
+        self.commands.r()
+        time.sleep(1)
+        self.commands.g()
+
+    def catch_ball(self):
+        pass
