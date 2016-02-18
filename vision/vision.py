@@ -1,3 +1,5 @@
+import time
+
 import cv2
 from pylab import *
 from scipy.ndimage import measurements
@@ -73,11 +75,15 @@ class Vision:
         self.capture.set(cv2.CAP_PROP_HUE, .5)
 
         while self.pressed_key != 27:
+        #for a in xrange(0, 10):
             self.frame()
         cv2.destroyAllWindows()
         return
 
     def frame(self):
+        # print "--------------------"
+        # self.start = time.time()
+
         status, frame = self.capture.read()
         h, w = frame.shape[:2]
         newcameramtx, roi = cv2.getOptimalNewCameraMatrix(self.mtx, self.dist, (w, h), 0, (w, h))
@@ -85,18 +91,36 @@ class Vision:
         # These are the actual values needed to undistort:
         dst = cv2.undistort(frame, self.mtx, self.dist, None, newcameramtx)
 
+        # print "undistort", time.time() - self.start
+        # self.start = time.time()
+
         # crop the image
         x, y, w, h = roi
         dst = dst[y:y + h, x:x + w]
+
+        # print "crop", time.time() - self.start
+        # self.start = time.time()
 
         # Apply perspective transformation
         pts2 = np.float32([[0, 0], [639, 0], [639, 479], [0, 479]])
         M = cv2.getPerspectiveTransform(self.pts1, pts2)
         imgOriginal = cv2.warpPerspective(dst, M, (639, 479))
 
+        # print "transform", time.time() - self.start
+        # self.start = time.time()
+
+        # Image Masking
+        imgHSV = cv2.cvtColor(imgOriginal, cv2.COLOR_BGR2HSV)
+
+        # print "bgr2hsv", time.time() - self.start
+        # self.start = time.time()
+
         circles = {}
         for color_name, color_ranges in COLOR_RANGES.iteritems():
-            circles[color_name] = self.TrackCircle(color_name, color_ranges, imgOriginal)
+            circles[color_name] = self.TrackCircle(color_name, color_ranges, imgOriginal, imgHSV)
+
+            # print "trackcircle", color_name, time.time() - self.start
+            # self.start = time.time()
 
         # draws circles spotted
         if self.debug:
@@ -113,21 +137,32 @@ class Vision:
                     self.trajectory_list.append((x, y))
                     self.trajectory_list.pop(0)
 
+        # print "drawing", time.time() - self.start
+        # self.start = time.time()
+
         # draw balls trajectory
         delta_x = self.trajectory_list[len(self.trajectory_list) - 1][0] - self.trajectory_list[0][0]
         if abs(delta_x) > 2:
             self.world.ball_moving.value = True
-            future_x = self.trajectory_list[len(self.trajectory_list) - 1][0] + 100 * delta_x
-            m = (self.trajectory_list[len(self.trajectory_list) - 1][1] - self.trajectory_list[0][1]) / delta_x
+            future_x = self.trajectory_list[len(self.trajectory_list) - 1][0] + 2.0 * delta_x
+            m = (self.trajectory_list[len(self.trajectory_list) - 1][1] - self.trajectory_list[0][1]) / float(delta_x)
             future_y = (future_x - self.trajectory_list[0][0]) * m + self.trajectory_list[0][1]
+            self.world.future_ball[0] = int(future_x)
+            self.world.future_ball[1] = int(future_y)
             cv2.line(imgOriginal, (int(self.trajectory_list[len(self.trajectory_list) - 1][0])
                                    , int(self.trajectory_list[len(self.trajectory_list) - 1][1]))
                      , (int(future_x), int(future_y)), COLORS['red'], 1)
         else:
             self.world.ball_moving.value = False
 
+        # print "trajectory", time.time() - self.start
+        # self.start = time.time()
+
         self.getRobots(circles)
         self.getBall(circles)
+
+        # print "robots", time.time() - self.start
+        # self.start = time.time()
 
         for robot_id, robot in enumerate([self.world.venus, self.world.friend, self.world.enemy1, self.world.enemy2]):
             if robot.position[0] != NO_VALUE:
@@ -140,6 +175,9 @@ class Vision:
                 cv2.putText(imgOriginal, str(robot_id), (robot.position[0] + 20, robot.position[1] + 40),
                             cv2.FONT_HERSHEY_SIMPLEX,
                             2, self.robot_color(robot_id))
+
+        # print "drawrobots", time.time() - self.start
+        # self.start = time.time()
 
         cv2.namedWindow("Room", cv2.WINDOW_AUTOSIZE)
         cv2.imshow('Room', imgOriginal)
@@ -324,11 +362,8 @@ class Vision:
         ans = (numerator, denominator)
         return ans
 
-    def TrackCircle(self, color_name, color_ranges, imgOriginal):
-        positions = []
-
-        # Image Masking
-        imgHSV = cv2.cvtColor(imgOriginal, cv2.COLOR_BGR2HSV)
+    def TrackCircle(self, color_name, color_ranges, imgOriginal, imgHSV):
+        # self.trackstart = time.time()
 
         if len(color_ranges) == 2:
             imgThreshLow = cv2.inRange(imgHSV, color_ranges[0][0], color_ranges[0][1])
@@ -337,13 +372,22 @@ class Vision:
         else:
             imgThresh = cv2.inRange(imgHSV, color_ranges[0][0], color_ranges[0][1])
 
+        # print "threshold combine", time.time() - self.trackstart
+        # self.trackstart = time.time()
+
         imgThresh = cv2.GaussianBlur(imgThresh, (3, 3), 2)  # blur
+
+        #print "gaussian", time.time() - self.trackstart
+        #self.trackstart = time.time()
 
         # imgThresh = cv2.dilate(imgThresh, np.ones((5, 5), np.uint8))  # close image (dilate, then erode)
         # imgThresh = cv2.erode(imgThresh, np.ones((5, 5), np.uint8))  # closing "closes" (i.e. fills in) foreground gaps
 
         cv2.namedWindow(color_name, cv2.WINDOW_AUTOSIZE)
         cv2.imshow(color_name, imgThresh)
+
+        # print "show window", time.time() - self.trackstart
+        # self.trackstart = time.time()
 
         # intRows, intColumns = imgThresh.shape
 
@@ -352,15 +396,28 @@ class Vision:
         # Label the clusters
         lw, num = measurements.label(z)
 
+        # print "label", time.time() - self.trackstart
+        # self.trackstart = time.time()
+
         # Calculate areas
         area = measurements.sum(z, lw, xrange(1, num + 1))
 
+        # print "sum", time.time() - self.trackstart
+        # self.trackstart = time.time()
+
         relevant_indices = area.argsort()[-MAX_COLOR_COUNTS[color_name]:]
 
+        # print "relevant indices", time.time() - self.trackstart
+        # self.trackstart = time.time()
+
+        positions = []
         for index in relevant_indices:
             if area[index] > MIN_COLOR_AREA[color_name]:
                 y, x = measurements.center_of_mass(z, lw, index=index + 1)
                 positions.append((x, y))
+
+        # print "center of mass", time.time() - self.trackstart
+        # self.trackstart = time.time()
 
         '''
         cluster = 1

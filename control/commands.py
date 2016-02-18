@@ -26,14 +26,16 @@ class Commands:
         print("! Remember to call:")
         print("! vision <room: 0/1> <team_color: blue/yellow> <our_single_spot_color: green/pink>")
         print("! connect")
+        self.vision()
+        self.connect()
 
     def connect(self, device_no='0'):
         print("Connecting to RF stick")
         self.protocol = RobotProtocol('/dev/ttyACM' + device_no)
 
-    def vision(self, room_num=0, team_color='blue', our_color='green'):
+    def vision(self, room_num=0, team_color='yellow', our_color='green'):
         print("Starting vision")
-        print("Room: %d, team color: %s, our single spot color: %s" % (room_num, team_color, our_color))
+        print("Room: %s, team color: %s, our single spot color: %s" % (str(room_num), team_color, our_color))
         self.world = World(int(room_num), team_color, our_color)
         self.strategy = SimpleStrategy(self.world, self)
         self.vision_process = multiprocessing.Process(target=Vision, args=(self.world,))
@@ -53,6 +55,9 @@ class Commands:
 
     def catch_ball(self):
         self.strategy.catch_ball()
+
+    def intercept(self):
+        self.strategy.intercept()
 
     def pw(self):
         print(self.world)

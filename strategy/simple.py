@@ -101,7 +101,7 @@ class SimpleStrategy:
         print("Turning " + str(angle) + " deg then kicking " + str(motion_length) + " cm")
         self.commands.c(angle)
         time.sleep(1)
-        self.commands.kick(motion_length)
+        self.commands.kick(motion_length + 50)
         self.commands.r()
         time.sleep(1)
         self.commands.g()
@@ -117,12 +117,31 @@ class SimpleStrategy:
         angle, length = self.calculate_angle_length_ball()
         print("Turning " + str(angle) + " deg, releasing grabber")
         self.commands.c(angle)
-        self.commands.r()
+        self.commands.g(-250)
 
         angle, length = self.calculate_angle_length_ball()
-        while length > 50:
+        while length > 60:
             angle, length = self.calculate_angle_length_ball()
 
         print("The ball is " + str(length) + " m away, " + str(angle) + " deg")
 
         self.commands.g()
+
+        angle, length = self.calculate_angle_length_ball()
+        print("The ball is " + str(length) + " m away")
+        if length > 10:
+            self.grab_ball()
+
+    def intercept(self):
+        print("Waiting for the ball to move")
+
+        while not self.world.ball_moving.value:
+            pass
+
+        print("The ball is moving")
+
+        time.sleep(.1)
+
+        future_pos = np.array([self.world.future_ball[0], self.world.future_ball[1]])
+        angle, length = self.calculate_angle_length(future_pos)
+        self.approach(angle, length)
