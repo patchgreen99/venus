@@ -102,15 +102,17 @@ class Commands:
         # This motor does not have rotary encoders
         self.protocol.move(abs(x), [(MOTOR_GRAB, 100 * sign(x))], time=True)
 
-    def r(self):
-        """Release"""
-        self.g(-150)
+    def open_wide(self):
+        self.g(-250)
+
+    def open_narrow(self):
+        self.g(-200)
 
     def x(self, x):
         """Kick and release"""
         x = int(x)
         self.k(x)
-        self.r()
+        self.open_narrow()
 
     def s(self):
         self.protocol.stop()

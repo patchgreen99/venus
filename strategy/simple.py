@@ -72,7 +72,7 @@ class SimpleStrategy:
         print("LAST: Turning " + str(angle) + " deg")
         self.commands.c(angle)
 
-        self.commands.r()
+        self.commands.open_wide()
         time.sleep(.4)
 
         print("LAST: Going " + str(motion_length) + " cm")
@@ -102,7 +102,7 @@ class SimpleStrategy:
         self.commands.c(angle)
         time.sleep(1)
         self.commands.kick(motion_length + 50)
-        self.commands.r()
+        self.commands.open_narrow()
         time.sleep(1)
         self.commands.g()
 
@@ -120,16 +120,18 @@ class SimpleStrategy:
         self.commands.g(-250)
 
         angle, length = self.calculate_angle_length_ball()
-        while length > 60:
+        while length > 55:
             angle, length = self.calculate_angle_length_ball()
 
         print("The ball is " + str(length) + " m away, " + str(angle) + " deg")
 
         self.commands.g()
 
+        time.sleep(1)
+
         angle, length = self.calculate_angle_length_ball()
         print("The ball is " + str(length) + " m away")
-        if length > 10:
+        if length > 18:
             self.grab_ball()
 
     def intercept(self):
