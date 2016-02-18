@@ -99,7 +99,7 @@ class Commands:
 
     def r(self):
         """Release"""
-        self.g(-250)
+        self.g(-150)
 
     def x(self, x):
         """Kick and release"""
@@ -138,7 +138,7 @@ class Commands:
     def kick(self, distance):
         """Milestone 1: Kick"""
         distance = int(distance)
-        time_value = 1.131147541 * distance + 82.7868852459
+        time_value = 0.7517522044 * distance + 199.265204612
         print("Time for kicking motor: " + str(time_value))
         self.k(time_value)
         '''

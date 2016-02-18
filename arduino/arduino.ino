@@ -115,11 +115,17 @@ void moveTimeUnits() {
       motorBackward(motor, -power[motor]);
     }
     
-    timer.setTimeout(time, stopMotorCallbacks[motor]);
+    //timer.setTimeout(time, stopMotorCallbacks[motor]);
   }
 
+  delay(time);
+
+  motorAllStop();
+
+  Serial.print('F');
+
   // Acknowledgement that the motion is finished
-  timer.setTimeout(time, notifyFinished);
+  //timer.setTimeout(time, notifyFinished);
 }
 
 void moveRotaryUnits() {

@@ -107,4 +107,22 @@ class SimpleStrategy:
         self.commands.g()
 
     def catch_ball(self):
-        pass
+        print("Waiting for the ball to move")
+
+        while not self.world.ball_moving.value:
+            pass
+
+        print("The ball is moving")
+
+        angle, length = self.calculate_angle_length_ball()
+        print("Turning " + str(angle) + " deg, releasing grabber")
+        self.commands.c(angle)
+        self.commands.r()
+
+        angle, length = self.calculate_angle_length_ball()
+        while length > 50:
+            angle, length = self.calculate_angle_length_ball()
+
+        print("The ball is " + str(length) + " m away, " + str(angle) + " deg")
+
+        self.commands.g()

@@ -20,12 +20,15 @@ class World:
         self.our_color = our_color  # green or pink
 
         self.ball = Array('i', [NO_VALUE, NO_VALUE])
+        self.ball_moving = Value('b')
         self.venus = Robot()
         self.friend = Robot()
         self.enemy1 = Robot()
         self.enemy2 = Robot()
 
     def __str__(self):
-        return "World state: ball {} {}, venus {}, friend {}, enemy1 {}, enemy2 {}".format(self.ball[0], self.ball[1],
-                                                                                           self.venus, self.friend,
-                                                                                           self.enemy1, self.enemy2)
+        return "World state: ball {} {} {}, venus {}, friend {}, enemy1 {}, enemy2 {}".format(self.ball[0],
+                                                                                              self.ball[1],
+                                                                                              self.ball_moving.value,
+                                                                                              self.venus, self.friend,
+                                                                                              self.enemy1, self.enemy2)

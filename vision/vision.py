@@ -116,12 +116,15 @@ class Vision:
         # draw balls trajectory
         delta_x = self.trajectory_list[len(self.trajectory_list) - 1][0] - self.trajectory_list[0][0]
         if abs(delta_x) > 2:
+            self.world.ball_moving.value = True
             future_x = self.trajectory_list[len(self.trajectory_list) - 1][0] + 100 * delta_x
             m = (self.trajectory_list[len(self.trajectory_list) - 1][1] - self.trajectory_list[0][1]) / delta_x
             future_y = (future_x - self.trajectory_list[0][0]) * m + self.trajectory_list[0][1]
             cv2.line(imgOriginal, (int(self.trajectory_list[len(self.trajectory_list) - 1][0])
                                    , int(self.trajectory_list[len(self.trajectory_list) - 1][1]))
                      , (int(future_x), int(future_y)), COLORS['red'], 1)
+        else:
+            self.world.ball_moving.value = False
 
         self.getRobots(circles)
         self.getBall(circles)
