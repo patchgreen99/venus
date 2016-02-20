@@ -1,7 +1,6 @@
 import cv2
 from pylab import *
 from scipy.ndimage import measurements
-from scipy.spatial import distance
 
 from strategy.world import NO_VALUE
 
@@ -16,7 +15,6 @@ COLOR_RANGES = {
 }
 
 COLOR_AVERAGES = np.array(COLOR_RANGES.values()).mean(1)
-
 
 MAX_COLOR_COUNTS = {
     'red': 1,
@@ -38,8 +36,8 @@ MIN_COLOR_AREA = {
     'red': 6000.0,
     'blue': 1000.0,
     'yellow': 2000.0,
-    'pink': 6000.0,
-    'green': 2000.0,
+    'pink': 1000.0,
+    'green': 1000.0,
 }
 
 VENUS = 0
@@ -114,7 +112,7 @@ class Vision:
             else:
                 mask += color_mask
 
-        #mask = cv2.GaussianBlur(mask, (3, 3), 2)
+        # mask = cv2.GaussianBlur(mask, (3, 3), 2)
 
         cv2.imshow('Mask', mask)
 
@@ -134,10 +132,11 @@ class Vision:
             for color_name, (begin, end) in COLOR_RANGES.iteritems():
                 if cv2.inRange(np.array([[self.image[center]]]), begin, end):
                     color = color_name
-            #if color is None:
+            # if color is None:
             #    color = COLOR_RANGES.keys()[np.linalg.norm(COLOR_AVERAGES - self.image[center], axis=1).argmin()]
-            if color is not None and len(circles[color]) < MAX_COLOR_COUNTS[color] and areas[center_index] > MIN_COLOR_AREA[color]:
-                circles[color].append((center[1], center[0]))
+            if color is not None and len(circles[color]) < MAX_COLOR_COUNTS[color] and areas[center_index] > \
+                    MIN_COLOR_AREA[color]:
+                circles[color].append((center[1], center[0], areas[center_index], color))
 
         # draws circles spotted
         for color_name, positions in circles.iteritems():
@@ -221,7 +220,7 @@ class Vision:
                 counter = 0
                 if pointsSorted is not None:
                     for localPoint in pointsSorted:
-                        if sqrt((point[0] - localPoint[0])**2 + (point[1] - localPoint[1])**2) < 25:
+                        if sqrt((point[0] - localPoint[0]) ** 2 + (point[1] - localPoint[1]) ** 2) < 25:
                             counter += 1
                             localPoints.append(localPoint)
                             pointsUsed.append(localPoint)
@@ -274,22 +273,21 @@ class Vision:
                     robot['yellow']) < 2 and len(robot['blue']) == 0 and len(robot['pink']) < 2:
                 self.findEnemy2(robot)
                 enemy2 = True
-            else:
-                print "missing robot"
-        if venus is False :
+
+        if venus is False:
             angle = math.degrees(math.atan2(self.world.venus.orientation[0], self.world.venus.orientation[1]))
             self.save_robot((self.world.venus.position[0], self.world.venus.position[1]), angle, 0)
-        if friend is False :
+        if friend is False:
             angle = math.degrees(math.atan2(self.world.friend.orientation[0], self.world.friend.orientation[1]))
             self.save_robot((self.world.friend.position[0], self.world.friend.position[1]), angle, 1)
-        if enemy1 is False :
+        if enemy1 is False:
             angle = math.degrees(math.atan2(self.world.enemy1.orientation[0], self.world.enemy1.orientation[1]))
             self.save_robot((self.world.enemy1.position[0], self.world.enemy1.position[1]), angle, 2)
-        if enemy2 is False :
+        if enemy2 is False:
             angle = math.degrees(math.atan2(self.world.enemy2.orientation[0], self.world.enemy2.orientation[1]))
             self.save_robot((self.world.enemy2.position[0], self.world.enemy2.position[1]), angle, 3)
-                # venus
-                ###################################################################################################################
+            # venus
+            ###################################################################################################################
 
     def findVenus(self, robot):
         if len(robot['green']) == 1 and len(robot['blue']) == 1:
@@ -341,13 +339,13 @@ class Vision:
             point_1 = []
             point_2 = []
             dist.append(sqrt((robot['green'][0][0] - robot['green'][1][0]) ** 2 + (
-            robot['green'][0][1] - robot['green'][1][1]) ** 2))
+                robot['green'][0][1] - robot['green'][1][1]) ** 2))
 
             dist.append(sqrt((robot['green'][1][0] - robot['green'][2][0]) ** 2 + (
-            robot['green'][1][1] - robot['green'][2][1]) ** 2))
+                robot['green'][1][1] - robot['green'][2][1]) ** 2))
 
             dist.append(sqrt((robot['green'][2][0] - robot['green'][0][0]) ** 2 + (
-            robot['green'][2][1] - robot['green'][0][1]) ** 2))
+                robot['green'][2][1] - robot['green'][0][1]) ** 2))
 
             point_1.append((robot['green'][(dist.index(max(dist))) % 3][0] +
                             robot['green'][(dist.index(max(dist)) + 1) % 3][0]) / 2.0)
@@ -357,11 +355,13 @@ class Vision:
             point_2.append(robot['green'][(dist.index(max(dist)) + 2) % 3][1])
             angle = math.degrees(math.atan2(point_2[0] - point_1[0], point_2[1] - point_1[1])) + self.triple_angle
             center_x = (
-                       robot['green'][(dist.index(max(dist))) % 3][0] + robot['green'][(dist.index(max(dist)) + 1) % 3][
-                           0]) / 2.0  # add something here
+                           robot['green'][(dist.index(max(dist))) % 3][0] +
+                           robot['green'][(dist.index(max(dist)) + 1) % 3][
+                               0]) / 2.0  # add something here
             center_y = (
-                       robot['green'][(dist.index(max(dist))) % 3][1] + robot['green'][(dist.index(max(dist)) + 1) % 3][
-                           1]) / 2.0  # add something here
+                           robot['green'][(dist.index(max(dist))) % 3][1] +
+                           robot['green'][(dist.index(max(dist)) + 1) % 3][
+                               1]) / 2.0  # add something here
             self.save_robot((center_x, center_y), angle, 1)
         elif len(robot['blue']) == 1:
             angle = math.degrees(math.atan2(self.world.friend.orientation[0], self.world.friend.orientation[1]))
@@ -423,13 +423,13 @@ class Vision:
             point_1 = []
             point_2 = []
             dist.append(sqrt((robot['green'][0][0] - robot['green'][1][0]) ** 2 + (
-            robot['green'][0][1] - robot['green'][1][1]) ** 2))
+                robot['green'][0][1] - robot['green'][1][1]) ** 2))
 
             dist.append(sqrt((robot['green'][1][0] - robot['green'][2][0]) ** 2 + (
-            robot['green'][1][1] - robot['green'][2][1]) ** 2))
+                robot['green'][1][1] - robot['green'][2][1]) ** 2))
 
             dist.append(sqrt((robot['green'][2][0] - robot['green'][0][0]) ** 2 + (
-            robot['green'][2][1] - robot['green'][0][1]) ** 2))
+                robot['green'][2][1] - robot['green'][0][1]) ** 2))
 
             point_1.append((robot['green'][(dist.index(max(dist))) % 3][0] +
                             robot['green'][(dist.index(max(dist)) + 1) % 3][0]) / 2.0)
@@ -439,11 +439,13 @@ class Vision:
             point_2.append(robot['green'][(dist.index(max(dist)) + 2) % 3][1])
             angle = math.degrees(math.atan2(point_2[0] - point_1[0], point_2[1] - point_1[1])) + self.triple_angle
             center_x = (
-                       robot['green'][(dist.index(max(dist))) % 3][0] + robot['green'][(dist.index(max(dist)) + 1) % 3][
-                           0]) / 2.0  # add something here
+                           robot['green'][(dist.index(max(dist))) % 3][0] +
+                           robot['green'][(dist.index(max(dist)) + 1) % 3][
+                               0]) / 2.0  # add something here
             center_y = (
-                       robot['green'][(dist.index(max(dist))) % 3][1] + robot['green'][(dist.index(max(dist)) + 1) % 3][
-                           1]) / 2.0  # add something here
+                           robot['green'][(dist.index(max(dist))) % 3][1] +
+                           robot['green'][(dist.index(max(dist)) + 1) % 3][
+                               1]) / 2.0  # add something here
             self.save_robot((center_x, center_y), angle, 3)
         elif len(robot['yellow']) == 1:
             angle = math.degrees(math.atan2(self.world.enemy2.orientation[0], self.world.enemy2.orientation[1]))
@@ -465,81 +467,3 @@ class Vision:
         denominator = point1[0] - point2[0]  # sometimes it's not a point?? like [292. 292.]
         ans = (numerator, denominator)
         return ans
-
-    def TrackCircle(self, color_name, color_ranges, imgOriginal, imgHSV):
-        # self.trackstart = time.time()
-
-        if len(color_ranges) == 2:
-            imgThreshLow = cv2.inRange(imgHSV, color_ranges[0][0], color_ranges[0][1])
-            imgThreshHigh = cv2.inRange(imgHSV, color_ranges[1][0], color_ranges[1][1])
-            imgThresh = cv2.add(imgThreshLow, imgThreshHigh)
-        else:
-            imgThresh = cv2.inRange(imgHSV, color_ranges[0][0], color_ranges[0][1])
-
-        # print "threshold combine", time.time() - self.trackstart
-        # self.trackstart = time.time()
-
-        imgThresh = cv2.GaussianBlur(imgThresh, (3, 3), 2)  # blur
-
-        #print "gaussian", time.time() - self.trackstart
-        #self.trackstart = time.time()
-
-        # imgThresh = cv2.dilate(imgThresh, np.ones((5, 5), np.uint8))  # close image (dilate, then erode)
-        # imgThresh = cv2.erode(imgThresh, np.ones((5, 5), np.uint8))  # closing "closes" (i.e. fills in) foreground gaps
-
-        cv2.namedWindow(color_name, cv2.WINDOW_AUTOSIZE)
-        cv2.imshow(color_name, imgThresh)
-
-        # print "show window", time.time() - self.trackstart
-        # self.trackstart = time.time()
-
-        # intRows, intColumns = imgThresh.shape
-
-        z = imgThresh
-
-        # Label the clusters
-        lw, num = measurements.label(z)
-
-        # print "label", time.time() - self.trackstart
-        # self.trackstart = time.time()
-
-        # Calculate areas
-        area = measurements.sum(z, lw, xrange(1, num + 1))
-
-        # print "sum", time.time() - self.trackstart
-        # self.trackstart = time.time()
-
-        relevant_indices = area.argsort()[-MAX_COLOR_COUNTS[color_name]:]
-
-        # print "relevant indices", time.time() - self.trackstart
-        # self.trackstart = time.time()
-
-        positions = []
-        for index in relevant_indices:
-            if area[index] > MIN_COLOR_AREA[color_name]:
-                y, x = measurements.center_of_mass(z, lw, index=index + 1)
-                positions.append((x, y))
-
-        # print "center of mass", time.time() - self.trackstart
-        # self.trackstart = time.time()
-
-        '''
-        cluster = 1
-        while cluster < len(area):
-            y, x = measurements.center_of_mass(z, lw, index=cluster)
-
-            # if self.debug:
-            #    print obj.label + " " + str(int(pos[1])) +","+ str(int(pos[0]))
-
-            positions.append((x, y))
-
-            # cv2.circle(imgOriginal, (x,y), 3, (0, 255, 0), cv2.FILLED)
-
-            # cv2.line(imgOriginal, (x,y),(0,0), (0, 255, 0), 2) # Trajectory drawn
-
-
-            cluster = cluster + 1
-            # area = np.delete(area, i)
-        '''
-
-        return positions
