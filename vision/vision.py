@@ -1,5 +1,3 @@
-import time
-
 import cv2
 from pylab import *
 from scipy.ndimage import measurements
@@ -8,14 +6,17 @@ from scipy.spatial import distance
 from strategy.world import NO_VALUE
 
 VISION_ROOT = 'vision/'
-KNOWN_ANGLE = 225
+
 COLOR_RANGES = {
-    'red': [((0, 170, 130), (8, 255, 255)), ((175, 170, 130), (180, 255, 255))],
-    'blue': [((83, 110, 150), (102, 230, 230))],
-    'yellow': [((30, 150, 150), (37, 255, 255))],
-    'pink': [((149, 130, 60), (175, 255, 255))],
-    'green': [((50, 130, 200), (55, 255, 255))],
+    'red': ((0, 170, 130), (8, 255, 255)),
+    'blue': ((78, 100, 110), (102, 230, 230)),
+    'yellow': ((30, 150, 150), (37, 255, 255)),
+    'pink': ((149, 130, 60), (175, 255, 255)),
+    'green': ((47, 130, 200), (59, 255, 255)),
 }
+
+COLOR_AVERAGES = np.array(COLOR_RANGES.values()).mean(1)
+
 
 MAX_COLOR_COUNTS = {
     'red': 1,
@@ -34,11 +35,11 @@ COLORS = {
 }
 
 MIN_COLOR_AREA = {
-    'red': 1000.0,
-    'blue': 0.0,
-    'yellow': 1000.0,
-    'pink': 1000.0,
-    'green': 1000.0,
+    'red': 6000.0,
+    'blue': 1000.0,
+    'yellow': 2000.0,
+    'pink': 6000.0,
+    'green': 2000.0,
 }
 
 VENUS = 0
@@ -52,7 +53,8 @@ class Vision:
         self.debug = debug
         self.world = world
         self.pressed_key = None
-        self.trajectory_list = [(0, 0)]*6
+        self.image = None
+        self.trajectory_list = [(0, 0)] * 6
         if self.world.room_num == 1:
             self.mtx = np.loadtxt(VISION_ROOT + "mtx1.txt")
             self.dist = np.loadtxt(VISION_ROOT + "dist1.txt")
@@ -67,23 +69,25 @@ class Vision:
             print("invalid room id")
 
         self.capture = cv2.VideoCapture(0)
+
         self.capture.set(cv2.CAP_PROP_FRAME_WIDTH, 600)
         self.capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 440)
-        self.capture.set(cv2.CAP_PROP_BRIGHTNESS, .5)
-        self.capture.set(cv2.CAP_PROP_CONTRAST, .5)
-        self.capture.set(cv2.CAP_PROP_SATURATION, .5)
-        self.capture.set(cv2.CAP_PROP_HUE, .5)
+
+        self.capture.set(cv2.CAP_PROP_BRIGHTNESS, 0.5)
+        self.capture.set(cv2.CAP_PROP_CONTRAST, 0.5)
+        self.capture.set(cv2.CAP_PROP_SATURATION, 0.5)
+        self.capture.set(cv2.CAP_PROP_HUE, 0.5)
+
+        # Only need to create windows at the beginning
+        cv2.namedWindow("Mask")
+        cv2.namedWindow("Room")
 
         while self.pressed_key != 27:
-        #for a in xrange(0, 10):
             self.frame()
+
         cv2.destroyAllWindows()
-        return
 
     def frame(self):
-        # print "--------------------"
-        # self.start = time.time()
-
         status, frame = self.capture.read()
         h, w = frame.shape[:2]
         newcameramtx, roi = cv2.getOptimalNewCameraMatrix(self.mtx, self.dist, (w, h), 0, (w, h))
@@ -91,43 +95,52 @@ class Vision:
         # These are the actual values needed to undistort:
         dst = cv2.undistort(frame, self.mtx, self.dist, None, newcameramtx)
 
-        # print "undistort", time.time() - self.start
-        # self.start = time.time()
-
         # crop the image
         x, y, w, h = roi
         dst = dst[y:y + h, x:x + w]
-
-        # print "crop", time.time() - self.start
-        # self.start = time.time()
 
         # Apply perspective transformation
         pts2 = np.float32([[0, 0], [639, 0], [639, 479], [0, 479]])
         M = cv2.getPerspectiveTransform(self.pts1, pts2)
         imgOriginal = cv2.warpPerspective(dst, M, (639, 479))
 
-        # print "transform", time.time() - self.start
-        # self.start = time.time()
+        self.image = cv2.cvtColor(imgOriginal, cv2.COLOR_BGR2HSV)
 
-        # Image Masking
-        imgHSV = cv2.cvtColor(imgOriginal, cv2.COLOR_BGR2HSV)
+        mask = None
+        for begin, end in COLOR_RANGES.itervalues():
+            color_mask = cv2.inRange(self.image, begin, end)
+            if mask is None:
+                mask = color_mask
+            else:
+                mask += color_mask
 
-        # print "bgr2hsv", time.time() - self.start
-        # self.start = time.time()
+        #mask = cv2.GaussianBlur(mask, (3, 3), 2)
 
-        circles = {}
-        for color_name, color_ranges in COLOR_RANGES.iteritems():
-            circles[color_name] = self.TrackCircle(color_name, color_ranges, imgOriginal, imgHSV)
+        cv2.imshow('Mask', mask)
 
-            # print "trackcircle", color_name, time.time() - self.start
-            # self.start = time.time()
+        # Label the clusters
+        labels, num = measurements.label(mask)
+
+        areas = measurements.sum(mask, labels, xrange(1, num + 1))
+
+        # All centers can be calculated in one numpy call
+        centers = measurements.center_of_mass(mask, labels, xrange(1, num + 1))
+        center_indices = areas.argsort()[::-1]
+
+        circles = {color_name: [] for color_name in COLOR_RANGES}
+        for center_index in center_indices:
+            center = centers[center_index]
+            color = None
+            for color_name, (begin, end) in COLOR_RANGES.iteritems():
+                if cv2.inRange(np.array([[self.image[center]]]), begin, end):
+                    color = color_name
+            #if color is None:
+            #    color = COLOR_RANGES.keys()[np.linalg.norm(COLOR_AVERAGES - self.image[center], axis=1).argmin()]
+            if color is not None and len(circles[color]) < MAX_COLOR_COUNTS[color] and areas[center_index] > MIN_COLOR_AREA[color]:
+                circles[color].append((center[1], center[0]))
 
         # draws circles spotted
-        if self.debug:
-            print '----------'
         for color_name, positions in circles.iteritems():
-            if self.debug:
-                print 'Detected ' + color_name + ' : ' + str(len(positions))
             for x, y, area, color in positions:
                 cv2.circle(imgOriginal, (int(x), int(y)), 8, COLORS[color_name], 1)
 
@@ -136,9 +149,6 @@ class Vision:
                 for x, y, area, color in positions:
                     self.trajectory_list.append((x, y))
                     self.trajectory_list.pop(0)
-
-        # print "drawing", time.time() - self.start
-        # self.start = time.time()
 
         # draw balls trajectory
         delta_x = self.trajectory_list[len(self.trajectory_list) - 1][0] - self.trajectory_list[0][0]
@@ -155,14 +165,8 @@ class Vision:
         else:
             self.world.ball_moving.value = False
 
-        # print "trajectory", time.time() - self.start
-        # self.start = time.time()
-
         self.getRobots(circles)
         self.getBall(circles)
-
-        # print "robots", time.time() - self.start
-        # self.start = time.time()
 
         for robot_id, robot in enumerate([self.world.venus, self.world.friend, self.world.enemy1, self.world.enemy2]):
             if robot.position[0] != NO_VALUE:
@@ -176,10 +180,6 @@ class Vision:
                             cv2.FONT_HERSHEY_SIMPLEX,
                             2, self.robot_color(robot_id))
 
-        # print "drawrobots", time.time() - self.start
-        # self.start = time.time()
-
-        cv2.namedWindow("Room", cv2.WINDOW_AUTOSIZE)
         cv2.imshow('Room', imgOriginal)
         self.pressed_key = cv2.waitKey(2) & 0xFF
 
@@ -518,7 +518,10 @@ class Vision:
         for index in relevant_indices:
             if area[index] > MIN_COLOR_AREA[color_name]:
                 y, x = measurements.center_of_mass(z, lw, index=index + 1)
-                positions.append((x, y, area[index], color_name))
+                positions.append((x, y))
+
+        # print "center of mass", time.time() - self.trackstart
+        # self.trackstart = time.time()
 
         '''
         cluster = 1

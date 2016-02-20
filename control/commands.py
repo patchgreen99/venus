@@ -36,10 +36,11 @@ class Commands:
     def vision(self, room_num=0, team_color='yellow', our_color='green'):
         print("Starting vision")
         print("Room: %s, team color: %s, our single spot color: %s" % (str(room_num), team_color, our_color))
-        self.world = World(int(room_num), team_color, our_color)
-        self.strategy = SimpleStrategy(self.world, self)
-        self.vision_process = multiprocessing.Process(target=Vision, args=(self.world,))
-        self.vision_process.start()
+        if not self.vision_process:
+            self.world = World(int(room_num), team_color, our_color)
+            self.strategy = SimpleStrategy(self.world, self)
+            self.vision_process = multiprocessing.Process(target=Vision, args=(self.world,))
+            self.vision_process.start()
 
     def grab_ball(self):
         self.strategy.grab_ball()
