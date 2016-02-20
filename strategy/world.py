@@ -18,6 +18,8 @@ class World:
         self.room_num = room_num
         self.team_color = team_color  # yellow or blue
         self.our_color = our_color  # green or pink
+        self.enemy_color = 'yellow' if team_color == 'blue' else 'blue'
+        self.other_color = 'green' if our_color == 'pink' else 'pink'
 
         self.ball = Array('i', [NO_VALUE, NO_VALUE])
         self.future_ball = Array('i', [NO_VALUE, NO_VALUE])

@@ -8,7 +8,7 @@ VISION_ROOT = 'vision/'
 
 COLOR_RANGES = {
     'red': ((0, 170, 130), (8, 255, 255)),
-    'blue': ((78, 100, 110), (102, 230, 230)),
+    'blue': ((85, 100, 110), (102, 230, 230)),
     'yellow': ((30, 150, 150), (37, 255, 255)),
     'pink': ((149, 130, 60), (175, 255, 255)),
     'green': ((47, 130, 200), (59, 255, 255)),
@@ -34,7 +34,7 @@ COLORS = {
 
 MIN_COLOR_AREA = {
     'red': 6000.0,
-    'blue': 1000.0,
+    'blue': 2000.0,
     'yellow': 2000.0,
     'pink': 1000.0,
     'green': 1000.0,
@@ -153,7 +153,7 @@ class Vision:
         delta_x = self.trajectory_list[len(self.trajectory_list) - 1][0] - self.trajectory_list[0][0]
         if abs(delta_x) > 2:
             self.world.ball_moving.value = True
-            future_x = self.trajectory_list[len(self.trajectory_list) - 1][0] + 2.0 * delta_x
+            future_x = self.trajectory_list[len(self.trajectory_list) - 1][0] + 10.0 * delta_x
             m = (self.trajectory_list[len(self.trajectory_list) - 1][1] - self.trajectory_list[0][1]) / float(delta_x)
             future_y = (future_x - self.trajectory_list[0][0]) * m + self.trajectory_list[0][1]
             self.world.future_ball[0] = int(future_x)
@@ -240,37 +240,46 @@ class Vision:
         friend = False
         enemy1 = False
         enemy2 = False
+
         for robot in robots:
-            if len(robot['blue']) == 1 and len(robot['yellow']) == 0 and len(robot['pink']) == 3 or len(
-                    robot['blue']) == 1 and len(robot['yellow']) == 0 and len(robot['green']) == 1:
+            if len(robot[self.world.team_color]) > 0 and len(robot[self.world.enemy_color]) == 0 and len(robot[self.world.other_color]) > 1 or len(
+                    robot[self.world.team_color]) > 0 and len(robot[self.world.enemy_color]) == 0 and len(robot[self.world.our_color]) < 2:
                 self.findVenus(robot)
                 venus = True
-            elif len(robot['blue']) == 1 and len(robot['yellow']) == 0 and len(robot['green']) == 3 or len(
-                    robot['blue']) == 1 and len(robot['yellow']) == 0 and len(robot['pink']) == 1:
+            elif len(robot[self.world.team_color]) > 0 and len(robot[self.world.enemy_color]) == 0 and len(robot[self.world.our_color]) > 1 or len(
+                    robot[self.world.team_color]) > 0 and len(robot[self.world.enemy_color]) == 0 and len(robot[self.world.other_color]) < 2:
                 self.findFriend(robot)
                 friend = True
-            elif len(robot['yellow']) == 1 and len(robot['blue']) == 0 and len(robot['pink']) == 3 or len(
-                    robot['yellow']) == 1 and len(robot['blue']) == 0 and len(robot['green']) == 1:
+            elif len(robot[self.world.enemy_color]) > 0 and len(robot[self.world.team_color]) == 0 and len(robot[self.world.other_color]) > 1 or len(
+                    robot[self.world.enemy_color]) > 0 and len(robot[self.world.team_color]) == 0 and len(robot[self.world.our_color]) < 2:
                 self.findEnemy1(robot)
                 enemy1 = True
-            elif len(robot['yellow']) == 1 and len(robot['blue']) == 0 and len(robot['green']) == 3 or len(
-                    robot['yellow']) == 1 and len(robot['blue']) == 0 and len(robot['pink']) == 1:
+            elif len(robot[self.world.enemy_color]) > 0 and len(robot[self.world.team_color]) == 0 and len(robot[self.world.our_color]) > 1 or len(
+                    robot[self.world.enemy_color]) > 0 and len(robot[self.world.team_color]) == 0 and len(robot[self.world.other_color]) < 2:
                 self.findEnemy2(robot)
                 enemy2 = True
-            elif len(robot['blue']) < 2 and len(robot['yellow']) == 0 and len(robot['pink']) > 1 or len(
-                    robot['blue']) < 2 and len(robot['yellow']) == 0 and len(robot['green']) < 2:
+            elif len(robot[self.world.enemy_color]) == 0 and len(robot[self.world.other_color]) > 1 and not venus or len(robot[self.world.enemy_color]) == 0 and len(robot[self.world.our_color]) < 2 and not venus:
                 self.findVenus(robot)
                 venus = True
-            elif len(robot['blue']) < 2 and len(robot['yellow']) == 0 and len(robot['green']) > 1 or len(
-                    robot['blue']) < 2 and len(robot['yellow']) == 0 and len(robot['pink']) < 2:
+            elif len(robot[self.world.enemy_color]) == 0 and len(robot[self.world.our_color]) > 1 and not friend or len(robot[self.world.enemy_color]) == 0 and len(robot[self.world.other_color]) < 2 and not friend:
                 self.findFriend(robot)
                 friend = True
-            elif len(robot['yellow']) < 2 and len(robot['blue']) == 0 and len(robot['pink']) > 1 or len(
-                    robot['yellow']) < 2 and len(robot['blue']) == 0 and len(robot['green']) < 2:
+            elif len(robot[self.world.team_color]) == 0 and len(robot[self.world.other_color]) > 1 and not enemy1 or len(robot[self.world.team_color]) == 0 and len(robot[self.world.our_color]) < 2 and not enemy1:
                 self.findEnemy1(robot)
                 enemy1 = True
-            elif len(robot['yellow']) < 2 and len(robot['blue']) == 0 and len(robot['green']) > 1 or len(
-                    robot['yellow']) < 2 and len(robot['blue']) == 0 and len(robot['pink']) < 2:
+            elif len(robot[self.world.team_color]) == 0 and len(robot[self.world.our_color]) > 1 and not enemy2 or len(robot[self.world.team_color]) == 0 and len(robot[self.world.other_color]) < 2 and not enemy2:
+                self.findEnemy2(robot)
+                enemy2 = True
+            elif len(robot[self.world.other_color]) > 1 and not venus and len(robot[self.world.our_color]) < 2 :
+                self.findVenus(robot)
+                venus = True
+            elif len(robot[self.world.our_color]) > 1 and not friend and len(robot[self.world.other_color]) < 2 :
+                self.findFriend(robot)
+                friend = True
+            elif len(robot[self.world.other_color]) > 1 and not enemy1 and len(robot[self.world.our_color]) < 2 :
+                self.findEnemy1(robot)
+                enemy1 = True
+            elif len(robot[self.world.our_color]) > 1 and not enemy2 and len(robot[self.world.other_color]) < 2 :
                 self.findEnemy2(robot)
                 enemy2 = True
 
@@ -290,38 +299,38 @@ class Vision:
             ###################################################################################################################
 
     def findVenus(self, robot):
-        if len(robot['green']) == 1 and len(robot['blue']) == 1:
-            angle = math.degrees(math.atan2(robot['green'][0][0] - robot['blue'][0][0],
-                                            robot['green'][0][1] - robot['blue'][0][1])) + self.single_angle
-            self.save_robot((robot['blue'][0][0], robot['blue'][0][1]), angle, 0)
-        elif len(robot['pink']) == 3:
+        if len(robot[self.world.our_color]) == 1 and len(robot[self.world.team_color]) == 1:
+            angle = math.degrees(math.atan2(robot[self.world.our_color][0][0] - robot[self.world.team_color][0][0],
+                                            robot[self.world.our_color][0][1] - robot[self.world.team_color][0][1])) + self.single_angle
+            self.save_robot((robot[self.world.team_color][0][0], robot[self.world.team_color][0][1]), angle, 0)
+        elif len(robot[self.world.other_color]) == 3:
             dist = []
             point_1 = []
             point_2 = []
             dist.append(sqrt(
-                (robot['pink'][0][0] - robot['pink'][1][0]) ** 2 + (robot['pink'][0][1] - robot['pink'][1][1]) ** 2))
+                (robot[self.world.other_color][0][0] - robot[self.world.other_color][1][0]) ** 2 + (robot[self.world.other_color][0][1] - robot[self.world.other_color][1][1]) ** 2))
 
             dist.append(sqrt(
-                (robot['pink'][1][0] - robot['pink'][2][0]) ** 2 + (robot['pink'][1][1] - robot['pink'][2][1]) ** 2))
+                (robot[self.world.other_color][1][0] - robot[self.world.other_color][2][0]) ** 2 + (robot[self.world.other_color][1][1] - robot[self.world.other_color][2][1]) ** 2))
 
             dist.append(sqrt(
-                (robot['pink'][2][0] - robot['pink'][0][0]) ** 2 + (robot['pink'][2][1] - robot['pink'][0][1]) ** 2))
+                (robot[self.world.other_color][2][0] - robot[self.world.other_color][0][0]) ** 2 + (robot[self.world.other_color][2][1] - robot[self.world.other_color][0][1]) ** 2))
 
-            point_1.append((robot['pink'][(dist.index(max(dist))) % 3][0] +
-                            robot['pink'][(dist.index(max(dist)) + 1) % 3][0]) / 2.0)
-            point_1.append((robot['pink'][(dist.index(max(dist))) % 3][1] +
-                            robot['pink'][(dist.index(max(dist)) + 1) % 3][1]) / 2.0)
-            point_2.append(robot['pink'][(dist.index(max(dist)) + 2) % 3][0])
-            point_2.append(robot['pink'][(dist.index(max(dist)) + 2) % 3][1])
+            point_1.append((robot[self.world.other_color][(dist.index(max(dist))) % 3][0] +
+                            robot[self.world.other_color][(dist.index(max(dist)) + 1) % 3][0]) / 2.0)
+            point_1.append((robot[self.world.other_color][(dist.index(max(dist))) % 3][1] +
+                            robot[self.world.other_color][(dist.index(max(dist)) + 1) % 3][1]) / 2.0)
+            point_2.append(robot[self.world.other_color][(dist.index(max(dist)) + 2) % 3][0])
+            point_2.append(robot[self.world.other_color][(dist.index(max(dist)) + 2) % 3][1])
             angle = math.degrees(math.atan2(point_2[0] - point_1[0], point_2[1] - point_1[1])) + self.triple_angle
-            center_x = (robot['pink'][(dist.index(max(dist))) % 3][0] + robot['pink'][(dist.index(max(dist)) + 1) % 3][
+            center_x = (robot[self.world.other_color][(dist.index(max(dist))) % 3][0] + robot[self.world.other_color][(dist.index(max(dist)) + 1) % 3][
                 0]) / 2.0  # add something here
-            center_y = (robot['pink'][(dist.index(max(dist))) % 3][1] + robot['pink'][(dist.index(max(dist)) + 1) % 3][
+            center_y = (robot[self.world.other_color][(dist.index(max(dist))) % 3][1] + robot[self.world.other_color][(dist.index(max(dist)) + 1) % 3][
                 1]) / 2.0  # add something here
             self.save_robot((center_x, center_y), angle, 0)
-        elif len(robot['blue']) == 1:
+        elif len(robot[self.world.team_color]) == 1:
             angle = math.degrees(math.atan2(self.world.venus.orientation[0], self.world.venus.orientation[1]))
-            self.save_robot((robot['blue'][0][0], robot['blue'][0][1]), angle, 0)
+            self.save_robot((robot[self.world.team_color][0][0], robot[self.world.team_color][0][1]), angle, 0)
         else:
             angle = math.degrees(math.atan2(self.world.venus.orientation[0], self.world.venus.orientation[1]))
             self.save_robot((self.world.venus.position[0], self.world.venus.position[1]), angle, 0)
@@ -330,42 +339,42 @@ class Vision:
             ####################################################################################################################
 
     def findFriend(self, robot):
-        if len(robot['green']) == 1 and len(robot['blue']) == 1:
-            angle = math.degrees(math.atan2(robot['green'][0][0] - robot['blue'][0][0],
-                                            robot['green'][0][1] - robot['blue'][0][1])) + self.single_angle
-            self.save_robot((robot['blue'][0][0], robot['blue'][0][1]), angle, 1)
-        elif len(robot['green']) == 3:
+        if len(robot[self.world.our_color]) == 1 and len(robot[self.world.team_color]) == 1:
+            angle = math.degrees(math.atan2(robot[self.world.our_color][0][0] - robot[self.world.team_color][0][0],
+                                            robot[self.world.our_color][0][1] - robot[self.world.team_color][0][1])) + self.single_angle
+            self.save_robot((robot[self.world.team_color][0][0], robot[self.world.team_color][0][1]), angle, 1)
+        elif len(robot[self.world.our_color]) == 3:
             dist = []
             point_1 = []
             point_2 = []
-            dist.append(sqrt((robot['green'][0][0] - robot['green'][1][0]) ** 2 + (
-                robot['green'][0][1] - robot['green'][1][1]) ** 2))
+            dist.append(sqrt((robot[self.world.our_color][0][0] - robot[self.world.our_color][1][0]) ** 2 + (
+                robot[self.world.our_color][0][1] - robot[self.world.our_color][1][1]) ** 2))
 
-            dist.append(sqrt((robot['green'][1][0] - robot['green'][2][0]) ** 2 + (
-                robot['green'][1][1] - robot['green'][2][1]) ** 2))
+            dist.append(sqrt((robot[self.world.our_color][1][0] - robot[self.world.our_color][2][0]) ** 2 + (
+                robot[self.world.our_color][1][1] - robot[self.world.our_color][2][1]) ** 2))
 
-            dist.append(sqrt((robot['green'][2][0] - robot['green'][0][0]) ** 2 + (
-                robot['green'][2][1] - robot['green'][0][1]) ** 2))
+            dist.append(sqrt((robot[self.world.our_color][2][0] - robot[self.world.our_color][0][0]) ** 2 + (
+                robot[self.world.our_color][2][1] - robot[self.world.our_color][0][1]) ** 2))
 
-            point_1.append((robot['green'][(dist.index(max(dist))) % 3][0] +
-                            robot['green'][(dist.index(max(dist)) + 1) % 3][0]) / 2.0)
-            point_1.append((robot['green'][(dist.index(max(dist))) % 3][1] +
-                            robot['green'][(dist.index(max(dist)) + 1) % 3][1]) / 2.0)
-            point_2.append(robot['green'][(dist.index(max(dist)) + 2) % 3][0])
-            point_2.append(robot['green'][(dist.index(max(dist)) + 2) % 3][1])
+            point_1.append((robot[self.world.our_color][(dist.index(max(dist))) % 3][0] +
+                            robot[self.world.our_color][(dist.index(max(dist)) + 1) % 3][0]) / 2.0)
+            point_1.append((robot[self.world.our_color][(dist.index(max(dist))) % 3][1] +
+                            robot[self.world.our_color][(dist.index(max(dist)) + 1) % 3][1]) / 2.0)
+            point_2.append(robot[self.world.our_color][(dist.index(max(dist)) + 2) % 3][0])
+            point_2.append(robot[self.world.our_color][(dist.index(max(dist)) + 2) % 3][1])
             angle = math.degrees(math.atan2(point_2[0] - point_1[0], point_2[1] - point_1[1])) + self.triple_angle
             center_x = (
-                           robot['green'][(dist.index(max(dist))) % 3][0] +
-                           robot['green'][(dist.index(max(dist)) + 1) % 3][
+                           robot[self.world.our_color][(dist.index(max(dist))) % 3][0] +
+                           robot[self.world.our_color][(dist.index(max(dist)) + 1) % 3][
                                0]) / 2.0  # add something here
             center_y = (
-                           robot['green'][(dist.index(max(dist))) % 3][1] +
-                           robot['green'][(dist.index(max(dist)) + 1) % 3][
+                           robot[self.world.our_color][(dist.index(max(dist))) % 3][1] +
+                           robot[self.world.our_color][(dist.index(max(dist)) + 1) % 3][
                                1]) / 2.0  # add something here
             self.save_robot((center_x, center_y), angle, 1)
-        elif len(robot['blue']) == 1:
+        elif len(robot[self.world.team_color]) == 1:
             angle = math.degrees(math.atan2(self.world.friend.orientation[0], self.world.friend.orientation[1]))
-            self.save_robot((robot['blue'][0][0], robot['blue'][0][1]), angle, 1)
+            self.save_robot((robot[self.world.team_color][0][0], robot[self.world.team_color][0][1]), angle, 1)
         else:
             angle = math.degrees(math.atan2(self.world.friend.orientation[0], self.world.friend.orientation[1]))
             self.save_robot((self.world.friend.position[0], self.world.friend.position[1]), angle, 1)
@@ -374,38 +383,38 @@ class Vision:
             ######################################################################################################################
 
     def findEnemy1(self, robot):
-        if len(robot['green']) == 1 and len(robot['yellow']) == 1:
-            angle = math.degrees(math.atan2(robot['green'][0][0] - robot['yellow'][0][0],
-                                            robot['green'][0][1] - robot['yellow'][0][1])) + self.single_angle
-            self.save_robot((robot['yellow'][0][0], robot['yellow'][0][1]), angle, 2)
-        elif len(robot['pink']) == 3:
+        if len(robot[self.world.our_color]) == 1 and len(robot[self.world.enemy_color]) == 1:
+            angle = math.degrees(math.atan2(robot[self.world.our_color][0][0] - robot[self.world.enemy_color][0][0],
+                                            robot[self.world.our_color][0][1] - robot[self.world.enemy_color][0][1])) + self.single_angle
+            self.save_robot((robot[self.world.enemy_color][0][0], robot[self.world.enemy_color][0][1]), angle, 2)
+        elif len(robot[self.world.other_color]) == 3:
             dist = []
             point_1 = []
             point_2 = []
             dist.append(sqrt(
-                (robot['pink'][0][0] - robot['pink'][1][0]) ** 2 + (robot['pink'][0][1] - robot['pink'][1][1]) ** 2))
+                (robot[self.world.other_color][0][0] - robot[self.world.other_color][1][0]) ** 2 + (robot[self.world.other_color][0][1] - robot[self.world.other_color][1][1]) ** 2))
 
             dist.append(sqrt(
-                (robot['pink'][1][0] - robot['pink'][2][0]) ** 2 + (robot['pink'][1][1] - robot['pink'][2][1]) ** 2))
+                (robot[self.world.other_color][1][0] - robot[self.world.other_color][2][0]) ** 2 + (robot[self.world.other_color][1][1] - robot[self.world.other_color][2][1]) ** 2))
 
             dist.append(sqrt(
-                (robot['pink'][2][0] - robot['pink'][0][0]) ** 2 + (robot['pink'][2][1] - robot['pink'][0][1]) ** 2))
+                (robot[self.world.other_color][2][0] - robot[self.world.other_color][0][0]) ** 2 + (robot[self.world.other_color][2][1] - robot[self.world.other_color][0][1]) ** 2))
 
-            point_1.append((robot['pink'][(dist.index(max(dist))) % 3][0] +
-                            robot['pink'][(dist.index(max(dist)) + 1) % 3][0]) / 2.0)
-            point_1.append((robot['pink'][(dist.index(max(dist))) % 3][1] +
-                            robot['pink'][(dist.index(max(dist)) + 1) % 3][1]) / 2.0)
-            point_2.append(robot['pink'][(dist.index(max(dist)) + 2) % 3][0])
-            point_2.append(robot['pink'][(dist.index(max(dist)) + 2) % 3][1])
+            point_1.append((robot[self.world.other_color][(dist.index(max(dist))) % 3][0] +
+                            robot[self.world.other_color][(dist.index(max(dist)) + 1) % 3][0]) / 2.0)
+            point_1.append((robot[self.world.other_color][(dist.index(max(dist))) % 3][1] +
+                            robot[self.world.other_color][(dist.index(max(dist)) + 1) % 3][1]) / 2.0)
+            point_2.append(robot[self.world.other_color][(dist.index(max(dist)) + 2) % 3][0])
+            point_2.append(robot[self.world.other_color][(dist.index(max(dist)) + 2) % 3][1])
             angle = math.degrees(math.atan2(point_2[0] - point_1[0], point_2[1] - point_1[1])) + self.triple_angle
-            center_x = (robot['pink'][(dist.index(max(dist))) % 3][0] + robot['pink'][(dist.index(max(dist)) + 1) % 3][
+            center_x = (robot[self.world.other_color][(dist.index(max(dist))) % 3][0] + robot[self.world.other_color][(dist.index(max(dist)) + 1) % 3][
                 0]) / 2.0  # add something here
-            center_y = (robot['pink'][(dist.index(max(dist))) % 3][1] + robot['pink'][(dist.index(max(dist)) + 1) % 3][
+            center_y = (robot[self.world.other_color][(dist.index(max(dist))) % 3][1] + robot[self.world.other_color][(dist.index(max(dist)) + 1) % 3][
                 1]) / 2.0  # add something here
             self.save_robot((center_x, center_y), angle, 2)
-        elif len(robot['yellow']) == 1:
+        elif len(robot[self.world.enemy_color]) == 1:
             angle = math.degrees(math.atan2(self.world.enemy1.orientation[0], self.world.enemy1.orientation[1]))
-            self.save_robot((robot['yellow'][0][0], robot['yellow'][0][1]), angle, 2)
+            self.save_robot((robot[self.world.enemy_color][0][0], robot[self.world.enemy_color][0][1]), angle, 2)
         else:
             angle = math.degrees(math.atan2(self.world.enemy1.orientation[0], self.world.enemy1.orientation[1]))
             self.save_robot((self.world.enemy1.position[0], self.world.enemy1.position[1]), angle, 2)
@@ -414,42 +423,42 @@ class Vision:
             #######################################################################################################################
 
     def findEnemy2(self, robot):
-        if len(robot['green']) == 1 and len(robot['yellow']) == 1:
-            angle = math.degrees(math.atan2(robot['green'][0][0] - robot['yellow'][0][0],
-                                            robot['green'][0][1] - robot['yellow'][0][1])) + self.single_angle
-            self.save_robot((robot['yellow'][0][0], robot['yellow'][0][1]), angle, 3)
-        elif len(robot['green']) == 3:
+        if len(robot[self.world.our_color]) == 1 and len(robot[self.world.enemy_color]) == 1:
+            angle = math.degrees(math.atan2(robot[self.world.our_color][0][0] - robot[self.world.enemy_color][0][0],
+                                            robot[self.world.our_color][0][1] - robot[self.world.enemy_color][0][1])) + self.single_angle
+            self.save_robot((robot[self.world.enemy_color][0][0], robot[self.world.enemy_color][0][1]), angle, 3)
+        elif len(robot[self.world.our_color]) == 3:
             dist = []
             point_1 = []
             point_2 = []
-            dist.append(sqrt((robot['green'][0][0] - robot['green'][1][0]) ** 2 + (
-                robot['green'][0][1] - robot['green'][1][1]) ** 2))
+            dist.append(sqrt((robot[self.world.our_color][0][0] - robot[self.world.our_color][1][0]) ** 2 + (
+                robot[self.world.our_color][0][1] - robot[self.world.our_color][1][1]) ** 2))
 
-            dist.append(sqrt((robot['green'][1][0] - robot['green'][2][0]) ** 2 + (
-                robot['green'][1][1] - robot['green'][2][1]) ** 2))
+            dist.append(sqrt((robot[self.world.our_color][1][0] - robot[self.world.our_color][2][0]) ** 2 + (
+                robot[self.world.our_color][1][1] - robot[self.world.our_color][2][1]) ** 2))
 
-            dist.append(sqrt((robot['green'][2][0] - robot['green'][0][0]) ** 2 + (
-                robot['green'][2][1] - robot['green'][0][1]) ** 2))
+            dist.append(sqrt((robot[self.world.our_color][2][0] - robot[self.world.our_color][0][0]) ** 2 + (
+                robot[self.world.our_color][2][1] - robot[self.world.our_color][0][1]) ** 2))
 
-            point_1.append((robot['green'][(dist.index(max(dist))) % 3][0] +
-                            robot['green'][(dist.index(max(dist)) + 1) % 3][0]) / 2.0)
-            point_1.append((robot['green'][(dist.index(max(dist))) % 3][1] +
-                            robot['green'][(dist.index(max(dist)) + 1) % 3][1]) / 2.0)
-            point_2.append(robot['green'][(dist.index(max(dist)) + 2) % 3][0])
-            point_2.append(robot['green'][(dist.index(max(dist)) + 2) % 3][1])
+            point_1.append((robot[self.world.our_color][(dist.index(max(dist))) % 3][0] +
+                            robot[self.world.our_color][(dist.index(max(dist)) + 1) % 3][0]) / 2.0)
+            point_1.append((robot[self.world.our_color][(dist.index(max(dist))) % 3][1] +
+                            robot[self.world.our_color][(dist.index(max(dist)) + 1) % 3][1]) / 2.0)
+            point_2.append(robot[self.world.our_color][(dist.index(max(dist)) + 2) % 3][0])
+            point_2.append(robot[self.world.our_color][(dist.index(max(dist)) + 2) % 3][1])
             angle = math.degrees(math.atan2(point_2[0] - point_1[0], point_2[1] - point_1[1])) + self.triple_angle
             center_x = (
-                           robot['green'][(dist.index(max(dist))) % 3][0] +
-                           robot['green'][(dist.index(max(dist)) + 1) % 3][
+                           robot[self.world.our_color][(dist.index(max(dist))) % 3][0] +
+                           robot[self.world.our_color][(dist.index(max(dist)) + 1) % 3][
                                0]) / 2.0  # add something here
             center_y = (
-                           robot['green'][(dist.index(max(dist))) % 3][1] +
-                           robot['green'][(dist.index(max(dist)) + 1) % 3][
+                           robot[self.world.our_color][(dist.index(max(dist))) % 3][1] +
+                           robot[self.world.our_color][(dist.index(max(dist)) + 1) % 3][
                                1]) / 2.0  # add something here
             self.save_robot((center_x, center_y), angle, 3)
-        elif len(robot['yellow']) == 1:
+        elif len(robot[self.world.enemy_color]) == 1:
             angle = math.degrees(math.atan2(self.world.enemy2.orientation[0], self.world.enemy2.orientation[1]))
-            self.save_robot((robot['yellow'][0][0], robot['yellow'][0][1]), angle, 3)
+            self.save_robot((robot[self.world.enemy_color][0][0], robot[self.world.enemy_color][0][1]), angle, 3)
         else:
             angle = math.degrees(math.atan2(self.world.enemy2.orientation[0], self.world.enemy2.orientation[1]))
             self.save_robot((self.world.enemy2.position[0], self.world.enemy2.position[1]), angle, 3)

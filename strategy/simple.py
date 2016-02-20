@@ -48,9 +48,9 @@ class SimpleStrategy:
     def approach(self, angle, motion_length):
         print("Turning " + str(angle) + " deg then going " + str(motion_length) + " cm")
         self.commands.c(angle)
-        time.sleep(.4)
+        #time.sleep(.4)
         self.commands.f(motion_length)
-        time.sleep(.4)
+        #time.sleep(.4)
 
     def grab_ball(self):
 
@@ -141,8 +141,6 @@ class SimpleStrategy:
             pass
 
         print("The ball is moving")
-
-        time.sleep(.1)
 
         future_pos = np.array([self.world.future_ball[0], self.world.future_ball[1]])
         angle, length = self.calculate_angle_length(future_pos)
