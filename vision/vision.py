@@ -34,11 +34,11 @@ COLORS = {
 }
 
 MIN_COLOR_AREA = {
-    'red': 2000.0,
+    'red': 1000.0,
     'blue': 0.0,
-    'yellow': 2000.0,
+    'yellow': 1000.0,
     'pink': 1000.0,
-    'green': 2000.0,
+    'green': 1000.0,
 }
 
 VENUS = 0
@@ -128,12 +128,12 @@ class Vision:
         for color_name, positions in circles.iteritems():
             if self.debug:
                 print 'Detected ' + color_name + ' : ' + str(len(positions))
-            for x, y in positions:
+            for x, y, area, color in positions:
                 cv2.circle(imgOriginal, (int(x), int(y)), 8, COLORS[color_name], 1)
 
             # save balls trajectory
             if color_name == 'red':
-                for x, y in positions:
+                for x, y, area, color in positions:
                     self.trajectory_list.append((x, y))
                     self.trajectory_list.pop(0)
 
@@ -203,158 +203,262 @@ class Vision:
             self.world.ball[1] = int(circles['red'][0][1])
 
     def getRobots(self, circles):
-        greenPoints = circles["green"]
-        pinkPoints = circles["pink"]
-        bluePoints = circles["blue"]
-        yellowPoints = circles["yellow"]
-        if greenPoints and pinkPoints:
-            greenandpink = np.concatenate((greenPoints, pinkPoints))
-        elif not greenPoints and pinkPoints:
-            greenandpink = np.array(pinkPoints)
-        elif not pinkPoints and pinkPoints:
-            greenandpink = np.array(greenPoints)
+        self.single_angle = - 150
+        self.triple_angle = 54
+        pointList = circles["green"] + circles["pink"] + circles["blue"] + circles["yellow"]
+        pointsSorted = sorted(pointList, key=lambda x: x[2], reverse=True)
+        pointsUsed = []
+        robots = []
+        robots.append({'pink': [], 'blue': [], 'green': [], 'yellow': []})
+        robots.append({'pink': [], 'blue': [], 'green': [], 'yellow': []})
+        robots.append({'pink': [], 'blue': [], 'green': [], 'yellow': []})
+        robots.append({'pink': [], 'blue': [], 'green': [], 'yellow': []})
+        robotCounter = 0
+        for point in pointsSorted:
+            if point[1] > 10 and pointsSorted is not None and point not in pointsUsed:  # dodgy blue stuff in top left
+                pointsUsed.append(point)
+                localPoints = []
+                counter = 0
+                if pointsSorted is not None:
+                    for localPoint in pointsSorted:
+                        if sqrt((point[0] - localPoint[0])**2 + (point[1] - localPoint[1])**2) < 25:
+                            counter += 1
+                            localPoints.append(localPoint)
+                            pointsUsed.append(localPoint)
+                    if robotCounter < 4:
+                        for robotPoint in localPoints:
+                            if robotPoint[3] == 'pink':
+                                robots[robotCounter]['pink'].append(robotPoint)
+                            if robotPoint[3] == 'blue':
+                                robots[robotCounter]['blue'].append(robotPoint)
+                            if robotPoint[3] == 'green':
+                                robots[robotCounter]['green'].append(robotPoint)
+                            if robotPoint[3] == 'yellow':
+                                robots[robotCounter]['yellow'].append(robotPoint)
+                    robotCounter += 1
+        ################################################################
+        venus = False
+        friend = False
+        enemy1 = False
+        enemy2 = False
+        for robot in robots:
+            if len(robot['blue']) == 1 and len(robot['yellow']) == 0 and len(robot['pink']) == 3 or len(
+                    robot['blue']) == 1 and len(robot['yellow']) == 0 and len(robot['green']) == 1:
+                self.findVenus(robot)
+                venus = True
+            elif len(robot['blue']) == 1 and len(robot['yellow']) == 0 and len(robot['green']) == 3 or len(
+                    robot['blue']) == 1 and len(robot['yellow']) == 0 and len(robot['pink']) == 1:
+                self.findFriend(robot)
+                friend = True
+            elif len(robot['yellow']) == 1 and len(robot['blue']) == 0 and len(robot['pink']) == 3 or len(
+                    robot['yellow']) == 1 and len(robot['blue']) == 0 and len(robot['green']) == 1:
+                self.findEnemy1(robot)
+                enemy1 = True
+            elif len(robot['yellow']) == 1 and len(robot['blue']) == 0 and len(robot['green']) == 3 or len(
+                    robot['yellow']) == 1 and len(robot['blue']) == 0 and len(robot['pink']) == 1:
+                self.findEnemy2(robot)
+                enemy2 = True
+            elif len(robot['blue']) < 2 and len(robot['yellow']) == 0 and len(robot['pink']) > 1 or len(
+                    robot['blue']) < 2 and len(robot['yellow']) == 0 and len(robot['green']) < 2:
+                self.findVenus(robot)
+                venus = True
+            elif len(robot['blue']) < 2 and len(robot['yellow']) == 0 and len(robot['green']) > 1 or len(
+                    robot['blue']) < 2 and len(robot['yellow']) == 0 and len(robot['pink']) < 2:
+                self.findFriend(robot)
+                friend = True
+            elif len(robot['yellow']) < 2 and len(robot['blue']) == 0 and len(robot['pink']) > 1 or len(
+                    robot['yellow']) < 2 and len(robot['blue']) == 0 and len(robot['green']) < 2:
+                self.findEnemy1(robot)
+                enemy1 = True
+            elif len(robot['yellow']) < 2 and len(robot['blue']) == 0 and len(robot['green']) > 1 or len(
+                    robot['yellow']) < 2 and len(robot['blue']) == 0 and len(robot['pink']) < 2:
+                self.findEnemy2(robot)
+                enemy2 = True
+            else:
+                print "missing robot"
+        if venus is False :
+            angle = math.degrees(math.atan2(self.world.venus.orientation[0], self.world.venus.orientation[1]))
+            self.save_robot((self.world.venus.position[0], self.world.venus.position[1]), angle, 0)
+        if friend is False :
+            angle = math.degrees(math.atan2(self.world.friend.orientation[0], self.world.friend.orientation[1]))
+            self.save_robot((self.world.friend.position[0], self.world.friend.position[1]), angle, 1)
+        if enemy1 is False :
+            angle = math.degrees(math.atan2(self.world.enemy1.orientation[0], self.world.enemy1.orientation[1]))
+            self.save_robot((self.world.enemy1.position[0], self.world.enemy1.position[1]), angle, 2)
+        if enemy2 is False :
+            angle = math.degrees(math.atan2(self.world.enemy2.orientation[0], self.world.enemy2.orientation[1]))
+            self.save_robot((self.world.enemy2.position[0], self.world.enemy2.position[1]), angle, 3)
+                # venus
+                ###################################################################################################################
+
+    def findVenus(self, robot):
+        if len(robot['green']) == 1 and len(robot['blue']) == 1:
+            angle = math.degrees(math.atan2(robot['green'][0][0] - robot['blue'][0][0],
+                                            robot['green'][0][1] - robot['blue'][0][1])) + self.single_angle
+            self.save_robot((robot['blue'][0][0], robot['blue'][0][1]), angle, 0)
+        elif len(robot['pink']) == 3:
+            dist = []
+            point_1 = []
+            point_2 = []
+            dist.append(sqrt(
+                (robot['pink'][0][0] - robot['pink'][1][0]) ** 2 + (robot['pink'][0][1] - robot['pink'][1][1]) ** 2))
+
+            dist.append(sqrt(
+                (robot['pink'][1][0] - robot['pink'][2][0]) ** 2 + (robot['pink'][1][1] - robot['pink'][2][1]) ** 2))
+
+            dist.append(sqrt(
+                (robot['pink'][2][0] - robot['pink'][0][0]) ** 2 + (robot['pink'][2][1] - robot['pink'][0][1]) ** 2))
+
+            point_1.append((robot['pink'][(dist.index(max(dist))) % 3][0] +
+                            robot['pink'][(dist.index(max(dist)) + 1) % 3][0]) / 2.0)
+            point_1.append((robot['pink'][(dist.index(max(dist))) % 3][1] +
+                            robot['pink'][(dist.index(max(dist)) + 1) % 3][1]) / 2.0)
+            point_2.append(robot['pink'][(dist.index(max(dist)) + 2) % 3][0])
+            point_2.append(robot['pink'][(dist.index(max(dist)) + 2) % 3][1])
+            angle = math.degrees(math.atan2(point_2[0] - point_1[0], point_2[1] - point_1[1])) + self.triple_angle
+            center_x = (robot['pink'][(dist.index(max(dist))) % 3][0] + robot['pink'][(dist.index(max(dist)) + 1) % 3][
+                0]) / 2.0  # add something here
+            center_y = (robot['pink'][(dist.index(max(dist))) % 3][1] + robot['pink'][(dist.index(max(dist)) + 1) % 3][
+                1]) / 2.0  # add something here
+            self.save_robot((center_x, center_y), angle, 0)
+        elif len(robot['blue']) == 1:
+            angle = math.degrees(math.atan2(self.world.venus.orientation[0], self.world.venus.orientation[1]))
+            self.save_robot((robot['blue'][0][0], robot['blue'][0][1]), angle, 0)
         else:
-            print("There are no robots!")
-            return
-        self.detected_robots = [False] * 4
-        for ypoint in yellowPoints:
-            distances = distance.cdist(greenandpink, [ypoint]).flatten()
-            greenandpink_indices = np.argsort(distances)
-            if distances[greenandpink_indices[:1]] < 20:
-                greenandpink_tuples = [(greenandpink[i], 'green' if i < len(greenPoints) else 'pink') for i in
-                                       greenandpink_indices[:4]]
-                orientation = self.getorientation(ypoint, greenandpink_tuples)
-                rid = self.getid(greenandpink_tuples, 'yellow')
-                self.save_robot(ypoint, orientation, rid)
-        for bpoint in bluePoints:
-            distances = distance.cdist(greenandpink, [bpoint]).flatten()
-            greenandpink_indices = np.argsort(distances)
-            if distances[greenandpink_indices[:1]] < 20:
-                greenandpink_tuples = [(greenandpink[i], 'green' if i < len(greenPoints) else 'pink') for i in
-                                       greenandpink_indices[:4]]
-                orientation = self.getorientation(bpoint, greenandpink_tuples)
-                rid = self.getid(greenandpink_tuples, 'blue')
-                self.save_robot(bpoint, orientation, rid)
-        for robot_id, is_detected in enumerate(self.detected_robots):
-            if not is_detected:
-                robot = [self.world.venus, self.world.friend, self.world.enemy1, self.world.enemy2][robot_id]
-                robot.position[0] = NO_VALUE
-                robot.position[1] = NO_VALUE
-                robot.orientation.value = NO_VALUE
+            angle = math.degrees(math.atan2(self.world.venus.orientation[0], self.world.venus.orientation[1]))
+            self.save_robot((self.world.venus.position[0], self.world.venus.position[1]), angle, 0)
+
+            # Team mate
+            ####################################################################################################################
+
+    def findFriend(self, robot):
+        if len(robot['green']) == 1 and len(robot['blue']) == 1:
+            angle = math.degrees(math.atan2(robot['green'][0][0] - robot['blue'][0][0],
+                                            robot['green'][0][1] - robot['blue'][0][1])) + self.single_angle
+            self.save_robot((robot['blue'][0][0], robot['blue'][0][1]), angle, 1)
+        elif len(robot['green']) == 3:
+            dist = []
+            point_1 = []
+            point_2 = []
+            dist.append(sqrt((robot['green'][0][0] - robot['green'][1][0]) ** 2 + (
+            robot['green'][0][1] - robot['green'][1][1]) ** 2))
+
+            dist.append(sqrt((robot['green'][1][0] - robot['green'][2][0]) ** 2 + (
+            robot['green'][1][1] - robot['green'][2][1]) ** 2))
+
+            dist.append(sqrt((robot['green'][2][0] - robot['green'][0][0]) ** 2 + (
+            robot['green'][2][1] - robot['green'][0][1]) ** 2))
+
+            point_1.append((robot['green'][(dist.index(max(dist))) % 3][0] +
+                            robot['green'][(dist.index(max(dist)) + 1) % 3][0]) / 2.0)
+            point_1.append((robot['green'][(dist.index(max(dist))) % 3][1] +
+                            robot['green'][(dist.index(max(dist)) + 1) % 3][1]) / 2.0)
+            point_2.append(robot['green'][(dist.index(max(dist)) + 2) % 3][0])
+            point_2.append(robot['green'][(dist.index(max(dist)) + 2) % 3][1])
+            angle = math.degrees(math.atan2(point_2[0] - point_1[0], point_2[1] - point_1[1])) + self.triple_angle
+            center_x = (
+                       robot['green'][(dist.index(max(dist))) % 3][0] + robot['green'][(dist.index(max(dist)) + 1) % 3][
+                           0]) / 2.0  # add something here
+            center_y = (
+                       robot['green'][(dist.index(max(dist))) % 3][1] + robot['green'][(dist.index(max(dist)) + 1) % 3][
+                           1]) / 2.0  # add something here
+            self.save_robot((center_x, center_y), angle, 1)
+        elif len(robot['blue']) == 1:
+            angle = math.degrees(math.atan2(self.world.friend.orientation[0], self.world.friend.orientation[1]))
+            self.save_robot((robot['blue'][0][0], robot['blue'][0][1]), angle, 1)
+        else:
+            angle = math.degrees(math.atan2(self.world.friend.orientation[0], self.world.friend.orientation[1]))
+            self.save_robot((self.world.friend.position[0], self.world.friend.position[1]), angle, 1)
+
+            # Enemy 1
+            ######################################################################################################################
+
+    def findEnemy1(self, robot):
+        if len(robot['green']) == 1 and len(robot['yellow']) == 1:
+            angle = math.degrees(math.atan2(robot['green'][0][0] - robot['yellow'][0][0],
+                                            robot['green'][0][1] - robot['yellow'][0][1])) + self.single_angle
+            self.save_robot((robot['yellow'][0][0], robot['yellow'][0][1]), angle, 2)
+        elif len(robot['pink']) == 3:
+            dist = []
+            point_1 = []
+            point_2 = []
+            dist.append(sqrt(
+                (robot['pink'][0][0] - robot['pink'][1][0]) ** 2 + (robot['pink'][0][1] - robot['pink'][1][1]) ** 2))
+
+            dist.append(sqrt(
+                (robot['pink'][1][0] - robot['pink'][2][0]) ** 2 + (robot['pink'][1][1] - robot['pink'][2][1]) ** 2))
+
+            dist.append(sqrt(
+                (robot['pink'][2][0] - robot['pink'][0][0]) ** 2 + (robot['pink'][2][1] - robot['pink'][0][1]) ** 2))
+
+            point_1.append((robot['pink'][(dist.index(max(dist))) % 3][0] +
+                            robot['pink'][(dist.index(max(dist)) + 1) % 3][0]) / 2.0)
+            point_1.append((robot['pink'][(dist.index(max(dist))) % 3][1] +
+                            robot['pink'][(dist.index(max(dist)) + 1) % 3][1]) / 2.0)
+            point_2.append(robot['pink'][(dist.index(max(dist)) + 2) % 3][0])
+            point_2.append(robot['pink'][(dist.index(max(dist)) + 2) % 3][1])
+            angle = math.degrees(math.atan2(point_2[0] - point_1[0], point_2[1] - point_1[1])) + self.triple_angle
+            center_x = (robot['pink'][(dist.index(max(dist))) % 3][0] + robot['pink'][(dist.index(max(dist)) + 1) % 3][
+                0]) / 2.0  # add something here
+            center_y = (robot['pink'][(dist.index(max(dist))) % 3][1] + robot['pink'][(dist.index(max(dist)) + 1) % 3][
+                1]) / 2.0  # add something here
+            self.save_robot((center_x, center_y), angle, 2)
+        elif len(robot['yellow']) == 1:
+            angle = math.degrees(math.atan2(self.world.enemy1.orientation[0], self.world.enemy1.orientation[1]))
+            self.save_robot((robot['yellow'][0][0], robot['yellow'][0][1]), angle, 2)
+        else:
+            angle = math.degrees(math.atan2(self.world.enemy1.orientation[0], self.world.enemy1.orientation[1]))
+            self.save_robot((self.world.enemy1.position[0], self.world.enemy1.position[1]), angle, 2)
+
+            # enemy 2
+            #######################################################################################################################
+
+    def findEnemy2(self, robot):
+        if len(robot['green']) == 1 and len(robot['yellow']) == 1:
+            angle = math.degrees(math.atan2(robot['green'][0][0] - robot['yellow'][0][0],
+                                            robot['green'][0][1] - robot['yellow'][0][1])) + self.single_angle
+            self.save_robot((robot['yellow'][0][0], robot['yellow'][0][1]), angle, 3)
+        elif len(robot['green']) == 3:
+            dist = []
+            point_1 = []
+            point_2 = []
+            dist.append(sqrt((robot['green'][0][0] - robot['green'][1][0]) ** 2 + (
+            robot['green'][0][1] - robot['green'][1][1]) ** 2))
+
+            dist.append(sqrt((robot['green'][1][0] - robot['green'][2][0]) ** 2 + (
+            robot['green'][1][1] - robot['green'][2][1]) ** 2))
+
+            dist.append(sqrt((robot['green'][2][0] - robot['green'][0][0]) ** 2 + (
+            robot['green'][2][1] - robot['green'][0][1]) ** 2))
+
+            point_1.append((robot['green'][(dist.index(max(dist))) % 3][0] +
+                            robot['green'][(dist.index(max(dist)) + 1) % 3][0]) / 2.0)
+            point_1.append((robot['green'][(dist.index(max(dist))) % 3][1] +
+                            robot['green'][(dist.index(max(dist)) + 1) % 3][1]) / 2.0)
+            point_2.append(robot['green'][(dist.index(max(dist)) + 2) % 3][0])
+            point_2.append(robot['green'][(dist.index(max(dist)) + 2) % 3][1])
+            angle = math.degrees(math.atan2(point_2[0] - point_1[0], point_2[1] - point_1[1])) + self.triple_angle
+            center_x = (
+                       robot['green'][(dist.index(max(dist))) % 3][0] + robot['green'][(dist.index(max(dist)) + 1) % 3][
+                           0]) / 2.0  # add something here
+            center_y = (
+                       robot['green'][(dist.index(max(dist))) % 3][1] + robot['green'][(dist.index(max(dist)) + 1) % 3][
+                           1]) / 2.0  # add something here
+            self.save_robot((center_x, center_y), angle, 3)
+        elif len(robot['yellow']) == 1:
+            angle = math.degrees(math.atan2(self.world.enemy2.orientation[0], self.world.enemy2.orientation[1]))
+            self.save_robot((robot['yellow'][0][0], robot['yellow'][0][1]), angle, 3)
+        else:
+            angle = math.degrees(math.atan2(self.world.enemy2.orientation[0], self.world.enemy2.orientation[1]))
+            self.save_robot((self.world.enemy2.position[0], self.world.enemy2.position[1]), angle, 3)
 
     def save_robot(self, position, orientation, robot_id):
-        self.detected_robots[robot_id] = True
         robot = [self.world.venus, self.world.friend, self.world.enemy1, self.world.enemy2][robot_id]
         robot.position[0] = int(position[0])
         robot.position[1] = int(position[1])
         rad = math.radians(orientation)
         robot.orientation[0] = sin(rad)
         robot.orientation[1] = cos(rad)
-
-    def getid(self, greenandpink, tcolor):
-        if tcolor == self.world.team_color:
-            greencount = 0
-            pinkcount = 0
-            for gnppoint in greenandpink:
-                if gnppoint[1] == 'green':
-                    greencount = greencount + 1
-                else:
-                    pinkcount = pinkcount + 1
-            if greencount == 3:
-                return 1
-            else:
-                return 0
-        else:
-            greencount = 0
-            pinkcount = 0
-            for gnppoint in greenandpink:
-                if gnppoint[1] == 'green':
-                    greencount = greencount + 1
-                else:
-                    pinkcount = pinkcount + 1
-            if greencount == 3:
-                return 3
-            else:
-                return 2
-                # TODO:
-
-    def getorientation(self, cpoint, greenandpink):
-        greenList = []
-        pinkList = []
-        savedi = 0
-        savedj = 0
-        midpointxcoord = 0
-        midpointycoord = 0
-        mid2x = 0
-        mid2y = 0
-        centerPointOfInterest2 = cpoint
-        for (coordinate, color) in greenandpink:
-            if (color == "green"):
-                greenList.append(coordinate)
-            if (color == "pink"):
-                pinkList.append(coordinate)
-        if (len(greenList)) == 3:
-            isolatedPoint = []
-            for (coordinate, color) in greenandpink:
-                if (color == "pink"):
-                    isolatedPoint.append(coordinate)
-            if isolatedPoint:
-                distances = distance.cdist(isolatedPoint, greenList)
-                smallestdist = distances[0][0]
-                for i in range(len(distances)):
-                    for j in range(len(distances[i])):
-                        if (distances[i][j] != 0 and distances[i][j] < smallestdist):
-                            smallestdist = distances[i][j]
-                            savedi = i
-                            savedj = j
-                # del greenList[savedj]
-                mid2x = (pinkList[0][0] + greenList[savedj][0]) / 2.0
-                mid2y = (pinkList[0][1] + greenList[savedj][1]) / 2.0
-                del greenList[savedj]
-                midpointxcoord = (greenList[0][0] + greenList[1][0]) / 2.0
-                midpointycoord = (greenList[0][1] + greenList[1][1]) / 2.0
-                centerPointOfInterest2 = (mid2x, mid2y)
-
-        elif (len(pinkList)) == 3:
-            isolatedPoint = []
-            for (coordinate, color) in greenandpink:
-                if (color == "green"):
-                    isolatedPoint.append(coordinate)
-            if isolatedPoint:
-                distances = distance.cdist(isolatedPoint, pinkList)
-                smallestdist = distances[0][0]
-                for i in range(len(distances)):
-                    for j in range(len(distances[i])):
-                        if (distances[i][j] != 0 and distances[i][j] < smallestdist):
-                            smallestdist = distances[i][j]
-                            savedi = i
-                            savedj = j
-                mid2x = (greenList[0][0] + pinkList[savedj][0]) / 2.0
-                mid2y = (greenList[0][1] + pinkList[savedj][1]) / 2.0
-                del pinkList[savedj]
-                midpointxcoord = (pinkList[0][0] + pinkList[1][0]) / 2.0
-                midpointycoord = (pinkList[0][1] + pinkList[1][1]) / 2.0
-                # centerPointOfInterest2 = cpoint
-                # print "center point interest ", (midpointxcoord, midpointycoord)
-                # print "center pioint ", cpoint
-
-        centerPointOfInterest = (midpointxcoord, midpointycoord)
-        # slopeHorizontalLine = 0.0
-        centerPointOfInterest2 = (mid2x, mid2y)
-        if (centerPointOfInterest[0] == cpoint[0]):
-            return 270
-        else:
-            slopeDirection = self.findslope(centerPointOfInterest, centerPointOfInterest2)
-        # print "slopeDirection " , slopeDirection
-        (numerator, denominator) = slopeDirection
-        # print numerator
-        angle = math.atan2(denominator, numerator)
-        angle = math.degrees(angle)
-        # if (angle &lt; 0):
-        #    return -angle
-        # elif (angle &gt; 0):
-        #    return 180 + (180-angle)
-        return angle
 
     def findslope(self, point1, point2):
         numerator = point1[1] - point2[1]
@@ -414,10 +518,7 @@ class Vision:
         for index in relevant_indices:
             if area[index] > MIN_COLOR_AREA[color_name]:
                 y, x = measurements.center_of_mass(z, lw, index=index + 1)
-                positions.append((x, y))
-
-        # print "center of mass", time.time() - self.trackstart
-        # self.trackstart = time.time()
+                positions.append((x, y, area[index], color_name))
 
         '''
         cluster = 1
