@@ -118,10 +118,11 @@ class SimpleStrategy:
         print("Turning " + str(angle) + " deg, releasing grabber")
         self.commands.c(angle)
         self.commands.g(-250)
-
         angle, length = self.calculate_angle_length_ball()
-        while length > 55:
+        speed = math.sqrt((self.world.future_ball[0]-self.world.ball[0])**2 + (self.world.future_ball[1]-self.world.ball[1])**2)
+        while length > 0.1*speed:
             angle, length = self.calculate_angle_length_ball()
+            speed = math.sqrt((self.world.future_ball[0]-self.world.ball[0])**2 + (self.world.future_ball[1]-self.world.ball[1])**2)
 
         print("The ball is " + str(length) + " m away, " + str(angle) + " deg")
 
