@@ -120,7 +120,7 @@ class SimpleStrategy:
         self.commands.g(-250)
         angle, length = self.calculate_angle_length_ball()
         speed = math.sqrt((self.world.future_ball[0]-self.world.ball[0])**2 + (self.world.future_ball[1]-self.world.ball[1])**2)
-        while length > 0.1*speed:
+        while length > 0.1*speed + 20:
             angle, length = self.calculate_angle_length_ball()
             speed = math.sqrt((self.world.future_ball[0]-self.world.ball[0])**2 + (self.world.future_ball[1]-self.world.ball[1])**2)
 
@@ -132,8 +132,8 @@ class SimpleStrategy:
 
         angle, length = self.calculate_angle_length_ball()
         print("The ball is " + str(length) + " m away")
-        if length > 18:
-            self.grab_ball()
+        # if length > 18:
+          #   self.grab_ball()
 
     def intercept(self):
         print("Waiting for the ball to move")
