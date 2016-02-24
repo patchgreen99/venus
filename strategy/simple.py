@@ -118,12 +118,13 @@ class SimpleStrategy:
         print("Turning " + str(angle) + " deg, releasing grabber")
         self.commands.c(angle)
         self.commands.g(-250)
-        angle, length = self.calculate_angle_length_ball()
-        speed = math.sqrt((self.world.future_ball[0]-self.world.ball[0])**2 + (self.world.future_ball[1]-self.world.ball[1])**2)
-        while length > 1.2*speed - 300:
-            angle, length = self.calculate_angle_length_ball()
-            speed = math.sqrt((self.world.future_ball[0]-self.world.ball[0])**2 + (self.world.future_ball[1]-self.world.ball[1])**2)
+        # speed in cm per frame
 
+        angle, length = self.calculate_angle_length_ball()
+        speed = math.sqrt((self.world.future_ball[0]-self.world.ball[0])**2 + (self.world.future_ball[1]-self.world.ball[1])**2)*0.2
+        while length > 55*speed/15:
+            angle, length = self.calculate_angle_length_ball()
+            speed = math.sqrt((self.world.future_ball[0]-self.world.ball[0])**2 + (self.world.future_ball[1]-self.world.ball[1])**2)*0.2
         print("The ball is " + str(length) + " m away, " + str(angle) + " deg")
 
         self.commands.g()
@@ -132,8 +133,8 @@ class SimpleStrategy:
 
         angle, length = self.calculate_angle_length_ball()
         print("The ball is " + str(length) + " m away")
-        # if length > 18:
-          #   self.grab_ball()
+        if length > 18:
+             self.grab_ball()
 
     def intercept(self):
         print("Waiting for the ball to move")
@@ -146,3 +147,35 @@ class SimpleStrategy:
         future_pos = np.array([self.world.future_ball[0], self.world.future_ball[1]])
         angle, length = self.calculate_angle_length(future_pos)
         self.approach(angle, length)
+
+    def pass_back(self):
+        print("Waiting for the ball to move")
+
+        while not self.world.ball_moving.value:
+            pass
+
+        print("The ball is moving")
+
+        angle, length = self.calculate_angle_length_ball()
+        temp_length = length
+        print("Turning " + str(angle) + " deg, releasing grabber")
+        self.commands.c(angle)
+        self.commands.g(-250)
+
+        # speed in cm per frame
+        angle, length = self.calculate_angle_length_ball()
+        speed = math.sqrt((self.world.future_ball[0]-self.world.ball[0])**2 + (self.world.future_ball[1]-self.world.ball[1])**2)*0.2
+        while length > 55*speed/15:
+            angle, length = self.calculate_angle_length_ball()
+            speed = math.sqrt((self.world.future_ball[0]-self.world.ball[0])**2 + (self.world.future_ball[1]-self.world.ball[1])**2)*0.2
+        print("The ball is " + str(length) + " m away, " + str(angle) + " deg")
+
+        self.commands.g()
+
+        time.sleep(1)
+
+        self.commands.kick(temp_length + 50)
+        self.commands.open_narrow()
+        time.sleep(1)
+        self.commands.g()
+

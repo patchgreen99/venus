@@ -52,7 +52,7 @@ class Vision:
             self.color_averages = np.array(self.color_ranges.values()).mean(1)
             self.min_color_area = {
                     'red': 6000.0,
-                    'blue': 2000.0,
+                    'blue': 1000.0,
                     'yellow': 2000.0,
                     'pink': 1000.0,
                     'green': 1000.0,
@@ -175,16 +175,14 @@ class Vision:
 
         # draw balls trajectory
         delta_x = self.trajectory_list[len(self.trajectory_list) - 1][0] - self.trajectory_list[0][0]
-        if abs(delta_x) > 2:
+        if abs(delta_x) > 3:
             self.world.ball_moving.value = True
-            future_x = self.trajectory_list[len(self.trajectory_list) - 1][0] + 10.0 * delta_x
+            future_x = self.trajectory_list[len(self.trajectory_list) - 1][0] + delta_x
             m = (self.trajectory_list[len(self.trajectory_list) - 1][1] - self.trajectory_list[0][1]) / float(delta_x)
             future_y = (future_x - self.trajectory_list[0][0]) * m + self.trajectory_list[0][1]
             self.world.future_ball[0] = int(future_x)
             self.world.future_ball[1] = int(future_y)
-            cv2.line(imgOriginal, (int(self.trajectory_list[len(self.trajectory_list) - 1][0])
-                                   , int(self.trajectory_list[len(self.trajectory_list) - 1][1]))
-                     , (int(future_x), int(future_y)), COLORS['red'], 1)
+            cv2.line(imgOriginal, (int(self.trajectory_list[len(self.trajectory_list) - 1][0]), int(self.trajectory_list[len(self.trajectory_list) - 1][1])), (int(future_x), int(future_y)), COLORS['red'], 1)
         else:
             self.world.ball_moving.value = False
 
