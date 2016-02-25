@@ -42,7 +42,7 @@ class Vision:
 
         if self.world.room_num == 1:
             self.color_ranges = {
-                'red': ((0, 170, 130), (10, 255, 255)),
+                # 'red': ((0, 170, 130), (10, 255, 255)),
                 'red': ((170, 170, 130), (180, 255, 255)),
                 'blue': ((85, 100, 110), (102, 230, 230)),
                 'yellow': ((30, 150, 150), (45, 255, 255)),
@@ -66,7 +66,7 @@ class Vision:
 
         elif self.world.room_num == 0:
             self.color_ranges = {
-                'red': ((0, 170, 130), (8, 255, 255)),
+                'red': ((0, 50, 50), (8, 255, 255)),
                 'blue': ((85, 100, 110), (102, 230, 230)),
                 'yellow': ((30, 150, 150), (37, 255, 255)),
                 'pink': ((149, 130, 60), (175, 255, 255)),
@@ -74,9 +74,9 @@ class Vision:
                 }
             self.color_averages = np.array(self.color_ranges.values()).mean(1)
             self.min_color_area = {
-                    'red': 6000.0,
-                    'blue': 2000.0,
-                    'yellow': 2000.0,
+                    'red': 1000.0,
+                    'blue': 1000.0,
+                    'yellow': 1000.0,
                     'pink': 1000.0,
                     'green': 1000.0,
                 }
@@ -356,14 +356,14 @@ class Vision:
             center_x = (robot[self.world.other_color][(dist.index(max(dist))) % 3][0] + robot[self.world.other_color][(dist.index(max(dist)) + 1) % 3][0]) / 2.0  # add something here
             center_y = (robot[self.world.other_color][(dist.index(max(dist))) % 3][1] + robot[self.world.other_color][(dist.index(max(dist)) + 1) % 3][1]) / 2.0  # add something here
 
-            if math.sqrt((center_x-self.world.venus.position[0])**2 + (center_y-self.world.venus.position[1])**2) < 25 or len(robot[self.world.team_color]) == 1:
-                self.save_robot((center_x, center_y), angle, 0)
-                self.venus = True
+            # if math.sqrt((center_x-self.world.venus.position[0])**2 + (center_y-self.world.venus.position[1])**2) < 80 or len(robot[self.world.team_color]) == 1:
+            self.save_robot((center_x, center_y), angle, 0)
+            self.venus = True
                 # self.venus_trip = True
-            else:
-                angle = math.degrees(math.atan2(self.world.venus.orientation[0], self.world.venus.orientation[1]))
-                self.save_robot((self.world.venus.position[0], self.world.venus.position[1]), angle, 0)
-                self.venus = True
+            #else:
+            #    angle = math.degrees(math.atan2(self.world.venus.orientation[0], self.world.venus.orientation[1]))
+            #    self.save_robot((self.world.venus.position[0], self.world.venus.position[1]), angle, 0)
+            #    self.venus = True
         elif len(robot[self.world.our_color]) == 1 and len(robot[self.world.other_color]) == 1 and math.sqrt((robot[self.world.our_color][0][0]-robot[self.world.other_color][0][0])**2 + (robot[self.world.our_color][0][1]-robot[self.world.other_color][0][1])**2) < 8:
             angle = math.degrees(math.atan2(robot[self.world.our_color][0][0]-robot[self.world.other_color][0][0], robot[self.world.our_color][0][1]-robot[self.world.other_color][0][1])) + self.double_angle
             self.save_robot(((robot[self.world.our_color][0][0]+robot[self.world.other_color][0][0])/2.0, (robot[self.world.our_color][0][1]+robot[self.world.other_color][0][1])/2.0), angle, 0)
@@ -413,7 +413,7 @@ class Vision:
                            robot[self.world.our_color][(dist.index(max(dist)) + 1) % 3][0]) / 2.0  # add something here
             center_y = (robot[self.world.our_color][(dist.index(max(dist))) % 3][1] +
                            robot[self.world.our_color][(dist.index(max(dist)) + 1) % 3][1]) / 2.0  # add something here
-            if math.sqrt((center_x-self.world.friend.position[0])**2 + (center_y-self.world.friend.position[1])**2) < 25 or len(robot[self.world.team_color]) == 1:
+            if math.sqrt((center_x-self.world.friend.position[0])**2 + (center_y-self.world.friend.position[1])**2) < 80 or len(robot[self.world.team_color]) == 1:
                 self.save_robot((center_x, center_y), angle, 1)
                 self.friend = True
                 # self.friend_trip = True
@@ -471,7 +471,7 @@ class Vision:
                 0]) / 2.0  # add something here
             center_y = (robot[self.world.other_color][(dist.index(max(dist))) % 3][1] + robot[self.world.other_color][(dist.index(max(dist)) + 1) % 3][
                 1]) / 2.0  # add something here
-            if math.sqrt((center_x-self.world.enemy1.position[0])**2 + (center_y-self.world.enemy1.position[1])**2) < 25 or len(robot[self.world.enemy_color]) == 1:
+            if math.sqrt((center_x-self.world.enemy1.position[0])**2 + (center_y-self.world.enemy1.position[1])**2) < 80 or len(robot[self.world.enemy_color]) == 1:
                 self.save_robot((center_x, center_y), angle, 2)
                 self.enemy1 = True
                 # self.enemy1_trip = True
@@ -533,7 +533,7 @@ class Vision:
                            robot[self.world.our_color][(dist.index(max(dist))) % 3][1] +
                            robot[self.world.our_color][(dist.index(max(dist)) + 1) % 3][
                                1]) / 2.0  # add something here
-            if math.sqrt((center_x-self.world.enemy2.position[0])**2 + (center_y-self.world.enemy2.position[1])**2) < 25 or len(robot[self.world.enemy_color]) == 1:
+            if math.sqrt((center_x-self.world.enemy2.position[0])**2 + (center_y-self.world.enemy2.position[1])**2) < 80 or len(robot[self.world.enemy_color]) == 1:
                 self.save_robot((center_x, center_y), angle, 3)
                 self.enemy2 = True
                 # self.enemy2_trip = True
