@@ -33,7 +33,7 @@ class Commands:
         print("Connecting to RF stick")
         self.protocol = RobotProtocol('/dev/ttyACM' + device_no)
 
-    def vision(self, room_num=0, team_color='blue', our_color='green'):
+    def vision(self, room_num=1, team_color='blue', our_color='green'):
         print("Starting vision")
         print("Room: %s, team color: %s, our single spot color: %s" % (str(room_num), team_color, our_color))
         if not self.vision_process:
