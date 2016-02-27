@@ -42,14 +42,12 @@ class Vision:
 
         if self.world.room_num == 1:
             self.color_ranges = {
-                # 'red': ((0, 170, 130), (10, 255, 255)),
-                'red': ((175, 170, 130), (180, 255, 255)),
-                'blue': ((85, 100, 110), (102, 230, 230)),
-                'yellow': ((30, 150, 150), (45, 255, 255)),
-                'pink': ((149, 130, 60), (170, 255, 255)),
-                'green': ((47, 130, 200), (65, 255, 255)),
+                'red': [((0, 170, 130), (10, 255, 255)), ((180, 170, 130), (180, 255, 255))],
+                'blue': [((85, 100, 110), (102, 230, 230))],
+                'yellow': [((30, 150, 150), (45, 255, 255))],
+                'pink': [((149, 130, 60), (170, 255, 255))],
+                'green': [((47, 130, 200), (65, 255, 255))],
                 }
-            self.color_averages = np.array(self.color_ranges.values()).mean(1)
             self.min_color_area = {
                     'red': 6000.0,
                     'blue': 1000.0,
@@ -66,14 +64,12 @@ class Vision:
 
         elif self.world.room_num == 0:
             self.color_ranges = {
-                'red': ((0, 100, 100), (6, 255, 255)),
-                # 'red': ((170, 170, 130), (180, 255, 255)),
-                'blue': ((83, 150, 160), (100, 255, 230)),
-                'yellow': ((30, 150, 150), (37, 255, 255)),
-                'pink': ((149, 130, 100), (175, 255, 255)),
-                'green': ((47, 130, 200), (59, 255, 255)),
+                'red': [((0, 100, 100), (8, 255, 255)), ((165, 170, 130), (180, 255, 255))],
+                'blue': [((83, 150, 160), (100, 255, 230))],
+                'yellow': [((30, 150, 150), (37, 255, 255))],
+                'pink': [((149, 130, 100), (175, 255, 255))],
+                'green': [((47, 130, 200), (59, 255, 255))],
                 }
-            self.color_averages = np.array(self.color_ranges.values()).mean(1)
             self.min_color_area = {
                     'red': 6000.0,
                     'blue': 2000.0,
@@ -136,12 +132,13 @@ class Vision:
         self.image = cv2.cvtColor(imgOriginal, cv2.COLOR_BGR2HSV)
 
         mask = None
-        for begin, end in self.color_ranges.itervalues():
-            color_mask = cv2.inRange(self.image, begin, end)
-            if mask is None:
-                mask = color_mask
-            else:
-                mask += color_mask
+        for ranges in self.color_ranges.itervalues():
+            for begin, end in ranges:
+                color_mask = cv2.inRange(self.image, begin, end)
+                if mask is None:
+                    mask = color_mask
+                else:
+                    mask += color_mask
 
         # mask = cv2.GaussianBlur(mask, (3, 3), 2)
 
@@ -160,9 +157,10 @@ class Vision:
         for center_index in center_indices:
             center = centers[center_index]
             color = None
-            for color_name, (begin, end) in self.color_ranges.iteritems():
-                if cv2.inRange(np.array([[self.image[center]]]), begin, end):
-                    color = color_name
+            for color_name, ranges in self.color_ranges.iteritems():
+                for begin, end in ranges:
+                    if cv2.inRange(np.array([[self.image[center]]]), begin, end):
+                        color = color_name
             # if color is None:
             #    color = COLOR_RANGES.keys()[np.linalg.norm(COLOR_AVERAGES - self.image[center], axis=1).argmin()]
             if color is not None and len(circles[color]) < MAX_COLOR_COUNTS[color] and areas[center_index] > \
