@@ -48,7 +48,7 @@ class Vision:
         self.colorList = ["red", "blue", "yellow", "pink", "green"]
         self.colorMedians = []
         self.counter = 0
-        self.trajectory_list = [(0, 0)] * 6
+        self.trajectory_list = [(0, 0)] * 10
 
 
 # #################################################################################################
@@ -102,14 +102,14 @@ class Vision:
             target.close()
 
             self.min_color_area = {
-                    'red': 2000.0,
+                    'red': 100.0,
                     'blue': 1000.0,
                     'yellow': 1000.0,
                     'pink': 2000.0,
                     'green': 2000.0,
                 }
-            self.mtx = np.loadtxt(VISION_ROOT + "mtx2.txt")
-            self.dist = np.loadtxt(VISION_ROOT + "dist2.txt")
+            self.mtx = np.loadtxt(VISION_ROOT + "mtx0.txt")
+            self.dist = np.loadtxt(VISION_ROOT + "dist0.txt")
             self.pts1 = np.float32([[33, 12], [609, 16], [607, 475], [22, 462]])
             # self.pts1 = np.float32([[7, 5], [607, 4], [593, 451], [17, 450]])
 
@@ -252,6 +252,19 @@ class Vision:
             for x, y, area, color in positions:
                 cv2.circle(imgOriginal, (int(x), int(y)), 8, COLORS[color_name], 1)
 
+        # draw balls trajectory
+        delta_x = self.trajectory_list[len(self.trajectory_list) - 1][0] - self.trajectory_list[0][0]
+        if abs(delta_x) > 5:
+            self.world.ball_moving.value = True
+            future_x = self.trajectory_list[len(self.trajectory_list) - 1][0] + delta_x
+            m = (self.trajectory_list[len(self.trajectory_list) - 1][1] - self.trajectory_list[0][1]) / float(delta_x)
+            future_y = (future_x - self.trajectory_list[0][0]) * m + self.trajectory_list[0][1]
+            self.world.future_ball[0] = int(future_x)
+            self.world.future_ball[1] = int(future_y)
+            cv2.line(imgOriginal, (int(self.trajectory_list[len(self.trajectory_list) - 1][0]), int(self.trajectory_list[len(self.trajectory_list) - 1][1])), (int(future_x), int(future_y)), COLORS['red'], 1)
+        else:
+            self.world.ball_moving.value = False
+
         self.getRobots(circles)
         self.getBall(circles, imgOriginal)
 
@@ -290,29 +303,17 @@ class Vision:
         else:
             for i in range(0, len(circles['red'])-1):
                 for position in robot_pos:
-                    if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 20:
+                    if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 25:
                         its_robot = True
                 if its_robot is False:
-                    self.world.ball[0] = int(circles['red'][0][0])
-                    self.world.ball[1] = int(circles['red'][0][1])
-                    self.trajectory_list.append((int(circles['red'][0][0]), int(circles['red'][0][1])))
+                    self.world.ball[0] = int(circles['red'][i][0])
+                    self.world.ball[1] = int(circles['red'][i][1])
+                    self.trajectory_list.append((int(circles['red'][i][0]), int(circles['red'][i][1])))
                     self.trajectory_list.pop(0)
                     break
                 else:
                     self.world.ball[0] = self.world.ball[0]
                     self.world.ball[1] = self.world.ball[1]
-        # draw balls trajectory
-        delta_x = self.trajectory_list[len(self.trajectory_list) - 1][0] - self.trajectory_list[0][0]
-        if abs(delta_x) > 5:
-            self.world.ball_moving.value = True
-            future_x = self.trajectory_list[len(self.trajectory_list) - 1][0] + delta_x
-            m = (self.trajectory_list[len(self.trajectory_list) - 1][1] - self.trajectory_list[0][1]) / float(delta_x)
-            future_y = (future_x - self.trajectory_list[0][0]) * m + self.trajectory_list[0][1]
-            self.world.future_ball[0] = int(future_x)
-            self.world.future_ball[1] = int(future_y)
-            cv2.line(imgOriginal, (int(self.trajectory_list[len(self.trajectory_list) - 1][0]), int(self.trajectory_list[len(self.trajectory_list) - 1][1])), (int(future_x), int(future_y)), COLORS['red'], 1)
-        else:
-            self.world.ball_moving.value = False
 
     def getRobots(self, circles):
         self.single_angle = - 150
@@ -423,8 +424,8 @@ class Vision:
     def findVenus(self, robot):
         if len(robot[self.world.our_color]) == 1 and len(robot[self.world.team_color]) == 1 and abs(robot[self.world.team_color][0][0]-self.world.friend.position[0]) > 10 and abs(robot[self.world.team_color][0][1]-self.world.friend.position[1]) > 10:
             if math.sqrt((robot[self.world.team_color][0][0]-self.world.friend.position[0])**2 + (robot[self.world.team_color][0][1]-self.world.friend.position[1])**2) > 50:
-                angle = math.degrees(math.atan2(robot[self.world.our_color][0][0] - robot[self.world.team_color][0][0],
-                                            robot[self.world.our_color][0][1] - robot[self.world.team_color][0][1])) + self.single_angle
+                angle = self.normalize_angle(math.degrees(math.atan2(robot[self.world.our_color][0][0] - robot[self.world.team_color][0][0],
+                                            robot[self.world.our_color][0][1] - robot[self.world.team_color][0][1])) + self.single_angle)
                 self.save_robot((robot[self.world.team_color][0][0], robot[self.world.team_color][0][1]), angle, 0)
                 self.venus = True
             else:
@@ -448,7 +449,7 @@ class Vision:
                             robot[self.world.other_color][(dist.index(max(dist)) + 1) % 3][1]) / 2.0)
             point_2.append(robot[self.world.other_color][(dist.index(max(dist)) + 2) % 3][0])
             point_2.append(robot[self.world.other_color][(dist.index(max(dist)) + 2) % 3][1])
-            angle = math.degrees(math.atan2(point_2[0] - point_1[0], point_2[1] - point_1[1])) + self.triple_angle
+            angle = self.normalize_angle(math.degrees(math.atan2(point_2[0] - point_1[0], point_2[1] - point_1[1])) + self.triple_angle)
             center_x = (robot[self.world.other_color][(dist.index(max(dist))) % 3][0] + robot[self.world.other_color][(dist.index(max(dist)) + 1) % 3][0]) / 2.0  # add something here
             center_y = (robot[self.world.other_color][(dist.index(max(dist))) % 3][1] + robot[self.world.other_color][(dist.index(max(dist)) + 1) % 3][1]) / 2.0  # add something here
 
@@ -475,8 +476,8 @@ class Vision:
     def findFriend(self, robot):
         if len(robot[self.world.our_color]) == 1 and len(robot[self.world.team_color]) == 1 and abs(robot[self.world.team_color][0][0]-self.world.venus.position[0]) > 10 and abs(robot[self.world.team_color][0][1]-self.world.venus.position[1]) > 10:
             if math.sqrt((robot[self.world.team_color][0][0]-self.world.venus.position[0])**2 + (robot[self.world.team_color][0][1]-self.world.venus.position[1])**2) > 50:
-                angle = math.degrees(math.atan2(robot[self.world.our_color][0][0] - robot[self.world.team_color][0][0],
-                                            robot[self.world.our_color][0][1] - robot[self.world.team_color][0][1])) + self.single_angle
+                angle = self.normalize_angle(math.degrees(math.atan2(robot[self.world.our_color][0][0] - robot[self.world.team_color][0][0],
+                                            robot[self.world.our_color][0][1] - robot[self.world.team_color][0][1])) + self.single_angle)
                 self.save_robot((robot[self.world.team_color][0][0], robot[self.world.team_color][0][1]), angle, 1)
                 self.friend = True
             else:
@@ -501,7 +502,7 @@ class Vision:
                             robot[self.world.our_color][(dist.index(max(dist)) + 1) % 3][1]) / 2.0)
             point_2.append(robot[self.world.our_color][(dist.index(max(dist)) + 2) % 3][0])
             point_2.append(robot[self.world.our_color][(dist.index(max(dist)) + 2) % 3][1])
-            angle = math.degrees(math.atan2(point_2[0] - point_1[0], point_2[1] - point_1[1])) + self.triple_angle
+            angle = self.normalize_angle(math.degrees(math.atan2(point_2[0] - point_1[0], point_2[1] - point_1[1])) + self.triple_angle)
             center_x = (robot[self.world.our_color][(dist.index(max(dist))) % 3][0] +
                            robot[self.world.our_color][(dist.index(max(dist)) + 1) % 3][0]) / 2.0  # add something here
             center_y = (robot[self.world.our_color][(dist.index(max(dist))) % 3][1] +
@@ -529,8 +530,8 @@ class Vision:
     def findEnemy1(self, robot):
         if len(robot[self.world.our_color]) == 1 and len(robot[self.world.enemy_color]) == 1 and abs(robot[self.world.enemy_color][0][0]-self.world.enemy2.position[0]) > 10 and abs(robot[self.world.enemy_color][0][1]-self.world.enemy2.position[1]) > 10:
             if math.sqrt((robot[self.world.enemy_color][0][0]-self.world.enemy2.position[0])**2 + (robot[self.world.enemy_color][0][1]-self.world.enemy2.position[1])**2) > 50:
-                angle = math.degrees(math.atan2(robot[self.world.our_color][0][0] - robot[self.world.enemy_color][0][0],
-                                            robot[self.world.our_color][0][1] - robot[self.world.enemy_color][0][1])) + self.single_angle
+                angle = self.normalize_angle(math.degrees(math.atan2(robot[self.world.our_color][0][0] - robot[self.world.enemy_color][0][0],
+                                            robot[self.world.our_color][0][1] - robot[self.world.enemy_color][0][1])) + self.single_angle)
                 self.save_robot((robot[self.world.enemy_color][0][0], robot[self.world.enemy_color][0][1]), angle, 2)
                 self.enemy1 = True
             else:
@@ -556,7 +557,7 @@ class Vision:
                             robot[self.world.other_color][(dist.index(max(dist)) + 1) % 3][1]) / 2.0)
             point_2.append(robot[self.world.other_color][(dist.index(max(dist)) + 2) % 3][0])
             point_2.append(robot[self.world.other_color][(dist.index(max(dist)) + 2) % 3][1])
-            angle = math.degrees(math.atan2(point_2[0] - point_1[0], point_2[1] - point_1[1])) + self.triple_angle
+            angle = self.normalize_angle(math.degrees(math.atan2(point_2[0] - point_1[0], point_2[1] - point_1[1])) + self.triple_angle)
             center_x = (robot[self.world.other_color][(dist.index(max(dist))) % 3][0] + robot[self.world.other_color][(dist.index(max(dist)) + 1) % 3][
                 0]) / 2.0  # add something here
             center_y = (robot[self.world.other_color][(dist.index(max(dist))) % 3][1] + robot[self.world.other_color][(dist.index(max(dist)) + 1) % 3][
@@ -584,8 +585,8 @@ class Vision:
     def findEnemy2(self, robot):
         if len(robot[self.world.our_color]) == 1 and len(robot[self.world.enemy_color]) == 1:
             if math.sqrt((robot[self.world.enemy_color][0][0]-self.world.enemy1.position[0])**2 + (robot[self.world.enemy_color][0][1]-self.world.enemy1.position[1])**2) > 50:
-                angle = math.degrees(math.atan2(robot[self.world.our_color][0][0] - robot[self.world.enemy_color][0][0],
-                                            robot[self.world.our_color][0][1] - robot[self.world.enemy_color][0][1])) + self.single_angle
+                angle = self.normalize_angle(math.degrees(math.atan2(robot[self.world.our_color][0][0] - robot[self.world.enemy_color][0][0],
+                                            robot[self.world.our_color][0][1] - robot[self.world.enemy_color][0][1])) + self.single_angle)
                 self.save_robot((robot[self.world.enemy_color][0][0], robot[self.world.enemy_color][0][1]), angle, 3)
                 self.enemy2 = True
             else:
@@ -611,7 +612,7 @@ class Vision:
                             robot[self.world.our_color][(dist.index(max(dist)) + 1) % 3][1]) / 2.0)
             point_2.append(robot[self.world.our_color][(dist.index(max(dist)) + 2) % 3][0])
             point_2.append(robot[self.world.our_color][(dist.index(max(dist)) + 2) % 3][1])
-            angle = math.degrees(math.atan2(point_2[0] - point_1[0], point_2[1] - point_1[1])) + self.triple_angle
+            angle = self.normalize_angle(math.degrees(math.atan2(point_2[0] - point_1[0], point_2[1] - point_1[1])) + self.triple_angle)
             center_x = (
                            robot[self.world.our_color][(dist.index(max(dist))) % 3][0] +
                            robot[self.world.our_color][(dist.index(max(dist)) + 1) % 3][
@@ -761,5 +762,13 @@ class Vision:
                     targetFile = open("vision/color0.txt", "w")
                 targetFile.write(str(self.color_ranges))
                 targetFile.close()
+
+    def normalize_angle(self, angle):
+        if angle > 180:
+            return float(angle-360)
+        elif angle < -180:
+            return float(angle+360)
+        else:
+            return angle
 
 

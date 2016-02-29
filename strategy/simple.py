@@ -61,7 +61,7 @@ class SimpleStrategy:
             angle, motion_length = self.calculate_angle_length_ball()
 
         angle, motion_length = self.calculate_angle_length_ball()
-        if motion_length > 20:
+        if motion_length > 25:
             motion_length -= 40
         else:
             motion_length = 0
@@ -77,7 +77,7 @@ class SimpleStrategy:
 
         print("LAST: Going " + str(motion_length) + " cm")
 
-        motion_length -= 8 #12 #13
+        motion_length -= 6 #12 #13
         if motion_length < 5:
             motion_length = 5
 
@@ -117,14 +117,14 @@ class SimpleStrategy:
         angle, length = self.calculate_angle_length_ball()
         print("Turning " + str(angle) + " deg, releasing grabber")
         self.commands.c(angle)
-        self.commands.g(-250)
+        self.commands.open_wide()
         # speed in cm per frame
 
         angle, length = self.calculate_angle_length_ball()
-        speed = math.sqrt((self.world.future_ball[0]-self.world.ball[0])**2 + (self.world.future_ball[1]-self.world.ball[1])**2)*0.2
-        while length > 55*speed/15:
+        speed = math.sqrt((self.world.future_ball[0]-self.world.ball[0])**2 + (self.world.future_ball[1]-self.world.ball[1])**2)
+        while length > 75 and not self.world.ball_moving.value:
             angle, length = self.calculate_angle_length_ball()
-            speed = math.sqrt((self.world.future_ball[0]-self.world.ball[0])**2 + (self.world.future_ball[1]-self.world.ball[1])**2)*0.2
+            speed = math.sqrt((self.world.future_ball[0]-self.world.ball[0])**2 + (self.world.future_ball[1]-self.world.ball[1])**2)
         print("The ball is " + str(length) + " m away, " + str(angle) + " deg")
 
         self.commands.g()

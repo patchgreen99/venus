@@ -84,6 +84,10 @@ void rotaryTimerCallback() {
       targetPositions[i] = 0;
       motorWasStopped = true;
     } else if (targetPositions[i]) {
+      //Serial.print("E ");
+      //Serial.print(i);
+      //Serial.print(" ");
+      //Serial.println(positions[i]);
       allMotorsAreStopped = false;
     }
   }
