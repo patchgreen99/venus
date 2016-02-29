@@ -303,7 +303,7 @@ class Vision:
         else:
             for i in range(0, len(circles['red'])-1):
                 for position in robot_pos:
-                    if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 25:
+                    if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 20:
                         its_robot = True
                 if its_robot is False:
                     self.world.ball[0] = int(circles['red'][i][0])
