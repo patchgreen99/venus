@@ -77,7 +77,7 @@ class SimpleStrategy:
 
         print("LAST: Going " + str(motion_length) + " cm")
 
-        motion_length -= 12 #13
+        motion_length -= 8 #12 #13
         if motion_length < 5:
             motion_length = 5
 
@@ -109,8 +109,8 @@ class SimpleStrategy:
     def catch_ball(self):
         print("Waiting for the ball to move")
 
-        while not self.world.ball_moving.value:
-            pass
+        #while not self.world.ball_moving.value:
+        #    pass
 
         print("The ball is moving")
 
@@ -155,3 +155,14 @@ class SimpleStrategy:
         self.commands.f(motion_length)
 
         print("Moving to "+str(block_position))
+
+    def block_goal(self):
+        t = (self.world.enemy1.position[0]*self.world.enemy1.orientation[1] - self.world.enemy1.position[1]*self.world.enemy1.orientation[0]+
+            self.world.venus.position[1]*self.world.enemy1.orientation[0] - self.world.venus.position[0]*self.world.enemy1.orientation[1])/(self.world.venus.orientation[0]*self.world.enemy1.orientation[1] - self.world.venus.orientation[1]*self.world.enemy1.orientation[0])
+        new_x = t*self.world.venus.orientation[0] + self.world.venus.position[0]
+        new_y = t*self.world.venus.orientation[1] + self.world.venus.position[1]
+        block_position = (new_x, new_y)
+        angle, motion_length = self.calculate_angle_length(block_position)
+
+        self.commands.c(angle)
+        self.commands.f(motion_length)

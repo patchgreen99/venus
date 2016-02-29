@@ -33,7 +33,7 @@ class Commands:
         print("Connecting to RF stick")
         self.protocol = RobotProtocol('/dev/ttyACM' + device_no)
 
-    def vision(self, room_num=0, team_color='blue', our_color='green'):
+    def vision(self, room_num=1, team_color='blue', our_color='green'):
         print("Starting vision")
         print("Room: %s, team color: %s, our single spot color: %s" % (str(room_num), team_color, our_color))
         if not self.vision_process:
@@ -101,10 +101,10 @@ class Commands:
         """Grab, negative x means release"""
         x = int(x)
         # This motor does not have rotary encoders
-        self.protocol.move(abs(x), [(MOTOR_GRAB, 100 * sign(x))], time=True)
+        self.protocol.move(abs(x), [(MOTOR_GRAB, 50 * sign(x))], time=True)
 
     def open_wide(self):
-        self.g(-250)
+        self.g(-300)
 
     def open_narrow(self):
         self.g(-200)
@@ -180,3 +180,6 @@ class Commands:
 
     def reset_input(self):
         self.protocol.reset_input()
+
+    def block_goal(self):
+        self.strategy.block_goal()
