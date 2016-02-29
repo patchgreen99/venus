@@ -254,7 +254,7 @@ class Vision:
 
         # draw balls trajectory
         delta_x = self.trajectory_list[len(self.trajectory_list) - 1][0] - self.trajectory_list[0][0]
-        if abs(delta_x) > 5:
+        if abs(delta_x) > 10:
             self.world.ball_moving.value = True
             future_x = self.trajectory_list[len(self.trajectory_list) - 1][0] + delta_x
             m = (self.trajectory_list[len(self.trajectory_list) - 1][1] - self.trajectory_list[0][1]) / float(delta_x)
@@ -303,7 +303,7 @@ class Vision:
         else:
             for i in range(0, len(circles['red'])-1):
                 for position in robot_pos:
-                    if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 20:
+                    if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 24:
                         its_robot = True
                 if its_robot is False:
                     self.world.ball[0] = int(circles['red'][i][0])
