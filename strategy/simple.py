@@ -91,6 +91,7 @@ class SimpleStrategy:
         angle, motion_length = self.calculate_angle_length_goal()
         self.commands.c(angle)
         self.commands.x(500)
+        time.sleep(.5)
         self.commands.g()
 
     def grab_goal(self):
@@ -134,8 +135,10 @@ class SimpleStrategy:
         print("The ball is " + str(length) + " m away, " + str(angle) + " deg")
 
         self.commands.g()
-
         time.sleep(1)
+        self.commands.g(150)
+
+        time.sleep(2)
 
         angle, length = self.calculate_angle_length_ball()
         print("The ball is " + str(length) + " m away")
@@ -146,7 +149,7 @@ class SimpleStrategy:
             print("Ball is " + str(length))
 
     def intercept(self):
-        print("Waiting for the ball to move")
+        #print("Waiting for the ball to move")
 
         m = float(self.world.enemy1.position[1]-self.world.enemy2.position[1]) / float(self.world.enemy1.position[0]-self.world.enemy2.position[0])
         c = self.world.enemy1.position[1] - self.world.enemy1.position[0] * m
@@ -155,26 +158,40 @@ class SimpleStrategy:
         block_position = (go_x, go_y)
         angle, motion_length = self.calculate_angle_length(block_position)
 
-        while not self.world.ball_moving.value:
-             pass
+        #while not self.world.ball_moving.value:
+        #     pass
 
-        print("The ball is moving")
+        #print("The ball is moving")
 
-        self.commands.c(angle)
-        self.commands.f(motion_length)
+        while motion_length > 100:
+            self.approach(angle, 100)
+            angle, motion_length = self.calculate_angle_length(block_position)
+
+        angle, motion_length = self.calculate_angle_length(block_position)
+        self.approach(angle, motion_length)
 
         print("Moving to "+str(block_position))
 
     def block_goal(self):
-        t = (self.world.enemy1.position[0]*self.world.enemy1.orientation[1] - self.world.enemy1.position[1]*self.world.enemy1.orientation[0]+
-            self.world.venus.position[1]*self.world.enemy1.orientation[0] - self.world.venus.position[0]*self.world.enemy1.orientation[1])/(self.world.venus.orientation[0]*self.world.enemy1.orientation[1] - self.world.venus.orientation[1]*self.world.enemy1.orientation[0])
-        new_x = t*self.world.venus.orientation[0] + self.world.venus.position[0]
-        new_y = t*self.world.venus.orientation[1] + self.world.venus.position[1]
-        block_position = (new_x, new_y)
+        # t = (self.world.enemy1.position[0]*self.world.enemy1.orientation[1] - self.world.enemy1.position[1]*self.world.enemy1.orientation[0]+
+        #     self.world.venus.position[1]*self.world.enemy1.orientation[0] - self.world.venus.position[0]*self.world.enemy1.orientation[1])/(self.world.venus.orientation[0]*self.world.enemy1.orientation[1] - self.world.venus.orientation[1]*self.world.enemy1.orientation[0])
+        # new_x = t*self.world.venus.orientation[0] + self.world.venus.position[0]
+        # new_y = t*self.world.venus.orientation[1] + self.world.venus.position[1]
+
+        m = (self.world.enemy2.position[1] - (self.world.enemy2.position[1] + self.world.enemy2.orientation[1])) / (self.world.enemy2.position[0] - (self.world.enemy2.position[0] + self.world.enemy2.orientation[0]))
+        c = self.world.enemy2.position[1] - m * self.world.enemy2.position[0]
+
+        print(m,c)
+        # go_x = -0.5*(-2*self.world.venus.position[0] + 2*m*(c-self.world.venus.position[1]))/(1+m**2)
+        # go_y = go_x*m + c
+        go_x = float(self.world.venus.position[0])
+        go_y = m*go_x + c
+
+        block_position = (go_x, go_y)
+        print block_position
         angle, motion_length = self.calculate_angle_length(block_position)
 
-        self.commands.c(angle)
-        self.commands.f(motion_length)
+        self.approach(angle, motion_length)
 
     def catch_pass(self):
         self.catch_ball()

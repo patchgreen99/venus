@@ -113,7 +113,7 @@ class Commands:
         self.g(-400)
 
     def open_narrow(self):
-        self.g(-150)
+        self.g(-200)
 
     def x(self, x):
         """Kick and release"""
