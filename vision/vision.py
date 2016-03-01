@@ -316,7 +316,7 @@ class Vision:
                     self.world.ball[1] = self.world.ball[1]
 
     def getRobots(self, circles):
-        self.single_angle = - 150
+        self.single_angle = -150
         self.triple_angle = 45
         pointList = circles["green"] + circles["pink"] + circles["blue"] + circles["yellow"]
         pointsSorted = sorted(pointList, key=lambda x: x[2], reverse=True)
@@ -699,10 +699,10 @@ class Vision:
         self.imageHSV = cv2.cvtColor(self.image, cv2.COLOR_BGR2HSV)
         cv2.imshow('calibrate', self.image)
         k = 1
-        while k != 27:
+        while k != 27:  # Esc
             k = cv2.waitKey(100) & 0xFF
             cv2.imshow('calibrate', self.image)
-            if k == 113:
+            if k == 113:  # q
                 hues = []
                 sats = []
                 values = []
