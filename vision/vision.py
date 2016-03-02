@@ -353,13 +353,13 @@ class Vision:
         robots.append({'pink': [], 'blue': [], 'green': [], 'yellow': []})
         robotCounter = 0
         for point in pointsSorted:
-            if 10 < point[1] < 430 and 10 < point[0] < 590 and pointsSorted is not None and point not in pointsUsed:  # dodgy blue stuff in top left
+            if 5 < point[1] < 474 and 5 < point[0] < 634 and pointsSorted is not None and point not in pointsUsed:  # dodgy blue stuff in top left
                 pointsUsed.append(point)
                 localPoints = []
                 counter = 0
                 if pointsSorted is not None:
                     for localPoint in pointsSorted:
-                        if sqrt((point[0] - localPoint[0]) ** 2 + (point[1] - localPoint[1]) ** 2) < 25:
+                        if math.sqrt((point[0] - localPoint[0]) ** 2 + (point[1] - localPoint[1]) ** 2) < 25:
                             counter += 1
                             localPoints.append(localPoint)
                             pointsUsed.append(localPoint)
