@@ -187,5 +187,5 @@ class Commands:
     def reset_input(self):
         self.protocol.reset_input()
 
-    def block_goal(self):
-        self.strategy.block_goal()
+    def block_goal(self, enemy_num=1):
+        self.strategy.block_goal(int(enemy_num))

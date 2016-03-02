@@ -172,14 +172,17 @@ class SimpleStrategy:
 
         print("Moving to "+str(block_position))
 
-    def block_goal(self):
-        t = (self.world.enemy2.position[0]*self.world.enemy2.orientation[1] - self.world.enemy2.position[1]*self.world.enemy2.orientation[0]+
-             self.world.venus.position[1]*self.world.enemy2.orientation[0] - self.world.venus.position[0]*self.world.enemy2.orientation[1])/(self.world.venus.orientation[0]*self.world.enemy2.orientation[1] - self.world.venus.orientation[1]*self.world.enemy2.orientation[0])
+    def block_goal(self, enemy_num):
+        print("Blocking enemy " + str(enemy_num))
+        enemy = self.world.enemy1 if enemy_num == 1 else self.world.enemy2
+
+        t = (enemy.position[0]*enemy.orientation[1] - enemy.position[1]*enemy.orientation[0]+
+             self.world.venus.position[1]*enemy.orientation[0] - self.world.venus.position[0]*enemy.orientation[1])/(self.world.venus.orientation[0]*enemy.orientation[1] - self.world.venus.orientation[1]*enemy.orientation[0])
         go_x = t*self.world.venus.orientation[0] + self.world.venus.position[0]
         go_y = t*self.world.venus.orientation[1] + self.world.venus.position[1]
 
-        #m = (self.world.enemy2.position[1] - (self.world.enemy2.position[1] + self.world.enemy2.orientation[1])) / (self.world.enemy2.position[0] - (self.world.enemy2.position[0] + self.world.enemy2.orientation[0]))
-        #c = self.world.enemy2.position[1] - m * self.world.enemy2.position[0]
+        #m = (enemy.position[1] - (enemy.position[1] + enemy.orientation[1])) / (enemy.position[0] - (enemy.position[0] + enemy.orientation[0]))
+        #c = enemy.position[1] - m * enemy.position[0]
 
         #print(m,c)
         #go_x = -0.5*(-2*self.world.venus.position[0] + 2*m*(c-self.world.venus.position[1]))/(1+m**2)
