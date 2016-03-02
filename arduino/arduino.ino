@@ -95,10 +95,18 @@ void rotaryTimerCallback() {
   // Acknowledgement that the motion is finished
   if (motorWasStopped && allMotorsAreStopped) {
     Serial.print('F');
+    Serial.print('F');
+    Serial.print('F');
+    Serial.print('F');
+    Serial.print('F');
   }
 }
 
 void moveTimeUnits() {
+  Serial.print('D');
+  Serial.print('D');
+  Serial.print('D');
+  Serial.print('D');
   Serial.print('D');
 
   int time = atoi(sc.next()); 
@@ -127,12 +135,20 @@ void moveTimeUnits() {
   motorAllStop();
 
   Serial.print('F');
+  Serial.print('F');
+  Serial.print('F');
+  Serial.print('F');
+  Serial.print('F');
 
   // Acknowledgement that the motion is finished
   //timer.setTimeout(time, notifyFinished);
 }
 
 void moveRotaryUnits() {
+  Serial.print('D');
+  Serial.print('D');
+  Serial.print('D');
+  Serial.print('D');
   Serial.print('D');
 
   int target = atoi(sc.next());
@@ -159,6 +175,10 @@ void moveRotaryUnits() {
 }
 
 void stop() {
+  Serial.print('D');
+  Serial.print('D');
+  Serial.print('D');
+  Serial.print('D');
   Serial.print('D');
 
   motorAllStop();

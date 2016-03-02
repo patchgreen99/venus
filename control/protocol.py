@@ -4,6 +4,7 @@ import serial
 class RobotProtocol:
     def __init__(self, device):
         self.ser = serial.Serial(device, 115200)
+        self.check = 0
 
     def stop(self):
         self.write('S\r')
@@ -16,13 +17,20 @@ class RobotProtocol:
             out.append(int(num))
             out.append(int(power))
         self.write(' '.join(str(x) for x in out))
-        s = self.ser.read()
         if wait:
+            s = self.ser.read()
+
+            while s == 'F':
+                s = self.ser.read()
+
             while s != 'D':
                 print("Got unknown response '%s'" % s)
                 s = self.ser.read()
             print("Got done")
-            s = self.ser.read()
+
+            while s == 'D':
+                s = self.ser.read()
+
             while s != 'F':
                 print("Got unknown response '%s'" % s)
                 s = self.ser.read()
