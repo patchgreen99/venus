@@ -173,19 +173,19 @@ class SimpleStrategy:
         print("Moving to "+str(block_position))
 
     def block_goal(self):
-        # t = (self.world.enemy1.position[0]*self.world.enemy1.orientation[1] - self.world.enemy1.position[1]*self.world.enemy1.orientation[0]+
-        #     self.world.venus.position[1]*self.world.enemy1.orientation[0] - self.world.venus.position[0]*self.world.enemy1.orientation[1])/(self.world.venus.orientation[0]*self.world.enemy1.orientation[1] - self.world.venus.orientation[1]*self.world.enemy1.orientation[0])
-        # new_x = t*self.world.venus.orientation[0] + self.world.venus.position[0]
-        # new_y = t*self.world.venus.orientation[1] + self.world.venus.position[1]
+        t = (self.world.enemy2.position[0]*self.world.enemy2.orientation[1] - self.world.enemy2.position[1]*self.world.enemy2.orientation[0]+
+             self.world.venus.position[1]*self.world.enemy2.orientation[0] - self.world.venus.position[0]*self.world.enemy2.orientation[1])/(self.world.venus.orientation[0]*self.world.enemy2.orientation[1] - self.world.venus.orientation[1]*self.world.enemy2.orientation[0])
+        go_x = t*self.world.venus.orientation[0] + self.world.venus.position[0]
+        go_y = t*self.world.venus.orientation[1] + self.world.venus.position[1]
 
-        m = (self.world.enemy2.position[1] - (self.world.enemy2.position[1] + self.world.enemy2.orientation[1])) / (self.world.enemy2.position[0] - (self.world.enemy2.position[0] + self.world.enemy2.orientation[0]))
-        c = self.world.enemy2.position[1] - m * self.world.enemy2.position[0]
+        #m = (self.world.enemy2.position[1] - (self.world.enemy2.position[1] + self.world.enemy2.orientation[1])) / (self.world.enemy2.position[0] - (self.world.enemy2.position[0] + self.world.enemy2.orientation[0]))
+        #c = self.world.enemy2.position[1] - m * self.world.enemy2.position[0]
 
-        print(m,c)
-        # go_x = -0.5*(-2*self.world.venus.position[0] + 2*m*(c-self.world.venus.position[1]))/(1+m**2)
-        # go_y = go_x*m + c
-        go_x = float(self.world.venus.position[0])
-        go_y = m*go_x + c
+        #print(m,c)
+        #go_x = -0.5*(-2*self.world.venus.position[0] + 2*m*(c-self.world.venus.position[1]))/(1+m**2)
+        #go_y = go_x*m + c
+        #go_x = float(self.world.venus.position[0])
+        #go_y = m*go_x + c
 
         block_position = (go_x, go_y)
         print block_position

@@ -77,7 +77,8 @@ class Vision:
                     'pink': 2000.0,
                     'green': 2000.0,
                 }
-            self.mtx = np.loadtxt(VISION_ROOT + "mtx1.txt")
+
+            #self.mtx = np.loadtxt(VISION_ROOT + "mtx1.txt")
             self.dist = np.loadtxt(VISION_ROOT + "dist1.txt")
             self.pts1 = np.float32([[33, 12], [609, 16], [607, 475], [22, 462]])
             # self.pts1 = np.float32([[10, 2], [634, 37], [596, 478], [6, 456]])
@@ -108,7 +109,8 @@ class Vision:
                     'pink': 2000.0,
                     'green': 2000.0,
                 }
-            self.mtx = np.loadtxt(VISION_ROOT + "mtx0.txt")
+            #self.mtx = np.loadtxt(VISION_ROOT + "mtx0.txt")
+
             self.dist = np.loadtxt(VISION_ROOT + "dist0.txt")
             self.pts1 = np.float32([[33, 12], [609, 16], [607, 475], [22, 462]])
             # self.pts1 = np.float32([[7, 5], [607, 4], [593, 451], [17, 450]])
@@ -123,8 +125,26 @@ class Vision:
         cv2.namedWindow("Mask")
         cv2.namedWindow("Room")
 
+        ####################################################
+        cv2.createTrackbar('Flatten top/bot', 'Room', 0, 100, self.nothing)
+        cv2.createTrackbar('Rotation y axis', 'Room', 0, 100, self.nothing)
+        cv2.createTrackbar('Flatten sides', 'Room', 0, 100, self.nothing)
+        cv2.createTrackbar('Rotation x axis', 'Room', 0, 100, self.nothing)
+
+        if self.world.room_num == 0:
+            cv2.setTrackbarPos('Flatten top/bot', 'Room', 32)
+            cv2.setTrackbarPos('Rotation y axis', 'Room', 32)
+            cv2.setTrackbarPos('Flatten sides', 'Room', 36)
+            cv2.setTrackbarPos('Rotation x axis', 'Room', 23)
+        else:
+            cv2.setTrackbarPos('Flatten top/bot', 'Room', 32)
+            cv2.setTrackbarPos('Rotation y axis', 'Room', 32)
+            cv2.setTrackbarPos('Flatten sides', 'Room', 36)
+            cv2.setTrackbarPos('Rotation x axis', 'Room', 23)
+
+
         self.capture.set(cv2.CAP_PROP_FRAME_WIDTH, 600)
-        self.capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 440)
+        self.capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
         cv2.createTrackbar('BRIGHTNESS', 'Room', 0, 100, self.nothing)
         cv2.createTrackbar('CONTRAST', 'Room', 0, 100, self.nothing)
         cv2.createTrackbar('CALIBRATE', 'Room', 0, 1, self.nothing)
@@ -189,6 +209,9 @@ class Vision:
     def frame(self):
         status, frame = self.capture.read()
         h, w = frame.shape[:2]
+        #########################################################################################
+        self.mtx = np.array([[cv2.getTrackbarPos('Flatten top/bot', 'Room')*10, 0., cv2.getTrackbarPos('Rotation y axis', 'Room')*10],[0.,cv2.getTrackbarPos('Flatten sides', 'Room')*10, cv2.getTrackbarPos('Rotation x axis', 'Room')*10],[0.,0.,1.]])
+
         newcameramtx, roi = cv2.getOptimalNewCameraMatrix(self.mtx, self.dist, (w, h), 0, (w, h))
 
         # These are the actual values needed to undistort:
@@ -242,7 +265,7 @@ class Vision:
             if color is not None and len(circles[color]) < MAX_COLOR_COUNTS[color] and areas[center_index] > \
                     self.min_color_area[color]:
                 if color == 'red':
-                    if 5 < center[0] < 435:
+                    if 5 < center[0] < 475:
                         circles[color].append((center[1], center[0], areas[center_index], color))
                 else:
                     circles[color].append((center[1], center[0], areas[center_index], color))
