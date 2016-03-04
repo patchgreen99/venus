@@ -21,8 +21,8 @@ class World:
         self.enemy_color = 'yellow' if team_color == 'blue' else 'blue'
         self.other_color = 'green' if our_color == 'pink' else 'pink'
 
-        self.ball = Array('i', [NO_VALUE, NO_VALUE])
-        self.future_ball = Array('i', [NO_VALUE, NO_VALUE])
+        self.ball = Array('i', [NO_VALUE, NO_VALUE]) # in pixels
+        self.ball_velocity = Array('i', [NO_VALUE, NO_VALUE]) # pixels per frame
         self.ball_moving = Value('b')
         self.venus = Robot()
         self.friend = Robot()
@@ -31,5 +31,5 @@ class World:
 
     def __str__(self):
         return "World state: ball {} {} {}, future ball {} {}, venus {}, friend {}, enemy1 {}, enemy2 {}".format(
-            self.ball[0], self.ball[1], self.ball_moving.value, self.future_ball[0], self.future_ball[1],
+            self.ball[0], self.ball[1], self.ball_moving.value, self.speed[0], self.speed[1],
             self.venus, self.friend, self.enemy1, self.enemy2)
