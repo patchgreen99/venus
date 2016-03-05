@@ -14,8 +14,15 @@
 #define MOTOR_KICK 3
 #define MOTOR_GRAB 4
 
+#define RESP_DONE 'D'
+#define RESP_UNKNOWN 'U'
+
 SerialCommand sc;
 SimpleTimer timer;
+
+/* Values for repeated message checking */
+int lastSeqNo = -1;
+bool lastDone;
 
 /* Callbacks to stop nth motor so that we would be able to
  * simply create timeouts for each single motor.
@@ -32,16 +39,22 @@ timer_callback stopMotorCallbacks[] = {
 /* Current positions and target positions when moving motors
  * by an amount of rotary units.
  */
-int positions[ROTARY_COUNT] = {0};
-int targetPositions[ROTARY_COUNT] = {0};
+int positions[ROTARY_COUNT];
+int targetPositions[ROTARY_COUNT];
 
+/* Whether motors are moving by an amount of time units */
+bool moving[ROTARY_COUNT];
 
 void setup() {
   SDPsetup();
   
   sc.addCommand("M", moveTimeUnits);
   sc.addCommand("R", moveRotaryUnits);
-  sc.addCommand("S", stop);
+  sc.addCommand("V", moveForever);
+  sc.addCommand("Z", stopSome);
+  sc.addCommand("S", stopAll);
+  sc.addCommand("I", areAllStopped);
+  sc.addCommand("Y", isOneStopped);
   sc.addCommand("T", transferByte);
   sc.addDefaultHandler(unknown);
   
@@ -53,15 +66,13 @@ void loop() {
   sc.readSerial();
 }
 
-
 /* Used to set timeouts after moving for some time units */
-void stopMotor0() { motorStop(0); }
-void stopMotor1() { motorStop(1); }
-void stopMotor2() { motorStop(2); }
-void stopMotor3() { motorStop(3); }
-void stopMotor4() { motorStop(4); }
-void stopMotor5() { motorStop(5); }
-void notifyFinished() { Serial.print('F'); }
+void stopMotor0() { motorStop(0); moving[0] = false; }
+void stopMotor1() { motorStop(1); moving[1] = false; }
+void stopMotor2() { motorStop(2); moving[2] = false; }
+void stopMotor3() { motorStop(3); moving[3] = false; }
+void stopMotor4() { motorStop(4); moving[4] = false; }
+void stopMotor5() { motorStop(5); moving[5] = false; }
 
 /* Callback that stops motors after they moved for some rotary units */
 void rotaryTimerCallback() {
@@ -73,126 +84,164 @@ void rotaryTimerCallback() {
     positions[i] += (int8_t) Wire.read();  // Must cast to signed 8-bit type
   }
   
-  bool motorWasStopped = false;
-  bool allMotorsAreStopped = true;
-  
   for (int i = 0; i < ROTARY_COUNT; ++i) {
     if (targetPositions[i] > 0 && positions[i] >= targetPositions[i] ||
         targetPositions[i] < 0 && positions[i] <= targetPositions[i]) {
       motorStop(i);
       positions[i] = 0;
       targetPositions[i] = 0;
-      motorWasStopped = true;
-    } else if (targetPositions[i]) {
-      //Serial.print("E ");
-      //Serial.print(i);
-      //Serial.print(" ");
-      //Serial.println(positions[i]);
-      allMotorsAreStopped = false;
+    }
+  }
+}
+
+/* Returns true if the command should be ignored (duplicate command) */
+bool ignore() {
+  int seqNo = atoi(sc.next());
+  
+  if (seqNo == lastSeqNo) {
+    if (lastDone) {
+      Serial.print(RESP_DONE);
+    }
+    return true;
+  } else {
+    lastSeqNo = seqNo;
+    lastDone = false;
+    return false;
+  }
+}
+
+/* Inform that command is done */
+void done() {
+  lastDone = true;
+  Serial.print(RESP_DONE);
+}
+
+void moveForever() {
+  if (ignore()) {
+    return;
+  }
+  
+  while (char *ch = sc.next()) {
+    int motor = atoi(ch);
+    int power = atoi(sc.next());
+    
+    if (power > 0) {
+      motorForward(motor, power);
+    } else {
+      motorBackward(motor, -power);
     }
   }
   
-  // Acknowledgement that the motion is finished
-  if (motorWasStopped && allMotorsAreStopped) {
-    Serial.print('F');
-    Serial.print('F');
-    Serial.print('F');
-    Serial.print('F');
-    Serial.print('F');
-  }
+  done();
 }
 
 void moveTimeUnits() {
-  Serial.print('D');
-  Serial.print('D');
-  Serial.print('D');
-  Serial.print('D');
-  Serial.print('D');
-
-  int time = atoi(sc.next()); 
-  int count = atoi(sc.next());
-  int power[ROTARY_COUNT] = {0};
-  
-  if (time <= 0) {
+  if (ignore()) {
     return;
   }
 
-  for (int i = 0; i < count; ++i) {
-    int motor = atoi(sc.next());
-    power[motor] = atoi(sc.next());
+  int time = atoi(sc.next());
+
+  while (char *ch = sc.next()) {
+    int motor = atoi(ch);
+    int power = atoi(sc.next());
     
-    if (power[motor] > 0) {
-      motorForward(motor, power[motor]);
+    if (power > 0) {
+      motorForward(motor, power);
     } else {
-      motorBackward(motor, -power[motor]);
+      motorBackward(motor, -power);
     }
     
-    //timer.setTimeout(time, stopMotorCallbacks[motor]);
+    moving[motor] = true;
+    
+    // Use timeout to make moveTimeUnits non-blocking
+    timer.setTimeout(time, stopMotorCallbacks[motor]);
   }
-
-  delay(time);
-
-  motorAllStop();
-
-  Serial.print('F');
-  Serial.print('F');
-  Serial.print('F');
-  Serial.print('F');
-  Serial.print('F');
-
-  // Acknowledgement that the motion is finished
-  //timer.setTimeout(time, notifyFinished);
+  
+  done();
 }
 
 void moveRotaryUnits() {
-  Serial.print('D');
-  Serial.print('D');
-  Serial.print('D');
-  Serial.print('D');
-  Serial.print('D');
-
-  int target = atoi(sc.next());
-  int count = atoi(sc.next());
-  int power[ROTARY_COUNT] = {0};
-  
-  if (target <= 0) {
+  if (ignore()) {
     return;
   }
 
-  for (int i = 0; i < count; ++i) {
-    int motor = atoi(sc.next());
-    power[motor] = atoi(sc.next());
+  int target = atoi(sc.next());
+
+  while (char *ch = sc.next()) {
+    int motor = atoi(ch);
+    int power = atoi(sc.next());
     positions[motor] = 0;
     
-    if (power[motor] > 0) {
+    if (power > 0) {
       targetPositions[motor] = target;
-      motorForward(motor, power[motor]);
+      motorForward(motor, power);
     } else {
       targetPositions[motor] = -target;
-      motorBackward(motor, -power[motor]);
+      motorBackward(motor, -power);
     }
   }
+  
+  done();
 }
 
-void stop() {
-  Serial.print('D');
-  Serial.print('D');
-  Serial.print('D');
-  Serial.print('D');
-  Serial.print('D');
+void stopSome() {
+  if (ignore()) {
+    return;
+  }
+  
+  while (char *ch = sc.next()) {
+    int motor = atoi(ch);
+    
+    motorStop(motor);
+  }
+  
+  done();
+}
 
+void stopAll() {
+  if (ignore()) {
+    return;
+  }
+  
   motorAllStop();
+  
+  done();
+}
+
+void areAllStopped() {
+  for (int i = 0; i < ROTARY_COUNT; ++i) {
+    if (targetPositions[i] || moving[i]) {
+      return;
+    }
+  }
+  
+  Serial.print(RESP_DONE);
+}
+
+void isOneStopped() {
+  int motor = atoi(sc.next());
+  
+  if (targetPositions[motor] || moving[motor]) {
+    return;
+  }
+  
+  Serial.print(RESP_DONE);
 }
 
 void transferByte() {
+  if (ignore()) {
+    return;
+  }
+  
   byte value = atoi(sc.next());
   Wire.beginTransmission(69);
   Wire.write(value);
   Wire.endTransmission();
   
-  Serial.print('D');
+  done();
 }
 
 void unknown() {
-  Serial.print('U');
+  Serial.print(RESP_UNKNOWN);
 }

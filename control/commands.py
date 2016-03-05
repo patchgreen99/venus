@@ -26,7 +26,7 @@ class Commands:
         print("! Remember to call:")
         print("! vision <room: 0/1> <team_color: blue/yellow> <our_single_spot_color: green/pink>")
         print("! connect")
-        self.vision()
+        #self.vision()
         self.connect()
 
     def connect(self, device_no='0'):
@@ -79,8 +79,40 @@ class Commands:
             self.protocol.move(x, [(MOTOR_LEFT, -100 * s),
                                    (MOTOR_RIGHT, -100 * s)], wait=wait)
 
-    def tt(self):
-        self.protocol.move(200, [MOTOR_TURN, 100])
+    def forward_forever(self):
+        """Move forward forever"""
+        self.protocol.move_forever([(MOTOR_LEFT, -100),
+                                    (MOTOR_RIGHT, -100)])
+
+    def swerve_right(self, x):
+        """Swerve right whilst moving forwards
+
+        x values:
+        45 degrees: 200
+        90 degrees: 500
+        """
+        self.protocol.move(x, [(MOTOR_TURN, 100)])
+        self.protocol.block_until_stop(MOTOR_TURN)
+
+    def swerve_left(self, x):
+        """Swerve left whilst moving forwards
+
+        x values:
+        45 degrees: 200
+        90 degrees: 500
+        """
+        self.protocol.move(x, [(MOTOR_TURN, -100)])
+        self.protocol.block_until_stop(MOTOR_TURN)
+
+    def test(self):
+        """Test of swerving"""
+        self.forward_forever()
+        time.sleep(1)
+        self.swerve_left(200)
+        self.swerve_right(200)
+        self.swerve_left(200)
+        self.swerve_right(200)
+        self.s()
 
     def c(self, x):
         """Rotate clockwise, negative x means counter-clockwise"""
