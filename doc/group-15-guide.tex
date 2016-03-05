@@ -53,11 +53,15 @@ To clone the repository, execute in terminal:
 $ git clone https://github.com/julijonas/venus.git
 \end{lstlisting}
 
-Then create a Python virtual environment and install the libraries:
+Then go to the root directory of the project and create a Python virtual environment:
 \begin{lstlisting}
 $ cd venus
-$ virtualenv env
+$ virtualenv --system-site-packages env
 $ source env/bin/activate
+\end{lstlisting}
+
+Install the libraries (currently there is only pyserial 3.0.1 that needs to be installed):
+\begin{lstlisting}
 $ pip install -r requirements.txt
 \end{lstlisting}
 
@@ -73,65 +77,47 @@ Sketch -> Import Library... -> Add Library... and choose the library folder you 
 
 \section{Overview of the robot}
 
-At the current stage, our robot, Venus, can move and kick. It moves because it
-has its wheels connected to the NXT motors and we can send commands that power
-some of those motors on and off depending which action we want the robot to
-perform. The kicker is also connected to another NXT motor, which allows us to
-control the power of the kick.
+At this stage of the course, we can say that the hardware part of our robot is done. Venus is a three wheels robot. There are two main driving wheels and one holonomic wheel placed sideways at the back which allows the robot to turn as well as does not cause problems moving backwards and forwards due to its holonomic property. All wheels are powered by NXT motors. 
+\\There is also a kicker that is powered by a NXT motor with gears. The kicker operates by going backwards inside the robot from the starting low position and then kicks the ball forwards.
+
+
+\bigskip
+PHOTOOOOOOOOS
+
+The grabber consists of two parts resembling arms and is placed on the sides of the front part of the robot. It is powered by Electric Technic Mini-Motor 9v with gears. 
+
+\bigskip
+PHOTTOOO especially of gears... and mention in techspec more about how gears are connected
 
 \subsection{Use}
 
-In order to turn the robot on, connect the battery pack to the power board.
+First thing you would need to do to be able to communicate to Venus, is to connect the RF stick to the machine you are running the commands from. Then after performing steps described in "Running instructions" section, you will be able to operate the robot.
+\\If you make any changes to the Arduino code, you need to upload it before running the commands. Uploading can be done either via RF stick or cable connected to the Arduino board. 
+\\In order to turn the robot on, connect the battery pack to the power board.
 In order to swap the batteries, take them out, put them to charge and insert
 the new batteries into the battery pack. Easy!
 
 \section{Running instructions}
 
-(To be changed after the first milestone)
-\bigskip
-
-Run the command in the terminal from the project root directory:
+Run the command in the terminal from the project root directory if you haven't done so already:
 \begin{lstlisting}
 source env/bin/activate
 \end{lstlisting}
-Then, in order to send commands the robot:
+Then, in order to be able to send commands the robot:
 \begin{lstlisting}
-python control/control.py
+python main.py
 \end{lstlisting}
-After that you should be able to send commands to the robot (make sure the RF stick is plugged in).
+Executing \textit{main.py} makes a connection to the RF stick and to the vision feed automatically. After that you should be able to send commands to the robot (make sure the RF stick is plugged in).
+\bigskip
+INCLUDE INFO HOW TO CHANGE COLORS, CAMERA etc.
 \bigskip
 
 \textbf{NB} In case you make changes to Arduino code, you should upload your changes to the board!
 \bigskip
 
-The list of possible commands is below:
+The list of possible commands is below (this is for milestone 3 and some basic commands, will be changed later):
 \bigskip
 \begin{itemize}
-\item For moving to the target in the milestone 1, there is a command 'move'.
-\bigskip
-
-At the beggining the robot turns 90 degrees to the right (if "distance1" parameter is positive the robot will move to the forwards, if negative backwards). After covering the first distance it turns 90 degrees so that it faces the same way as at the start. The "degrees" parameter is amount of degrees the robot turns (positive - clockwise, negative - anticlockwise)
-\bigskip
-
-\begin{figure}
-    \centering
-    \includegraphics{Diagram1}
-\end{figure}
-
-\begin{lstlisting}
-move <distance1> <distance2> <degrees>
-\end{lstlisting}
-\newpage
-
-\item To transfer a file through RF link to I2C port as specified in the milestone:
-\begin{lstlisting}
-transfer <filename> <frequencyInHz>
-\end{lstlisting}
-
-\item To kick the ball a distance specified in the milestone:
-\begin{lstlisting}
-kick [50|100|150]
-\end{lstlisting}
 
 \item To move forward and turn (negative values will change the direction):
 \begin{lstlisting}
@@ -144,15 +130,53 @@ c <degrees>
 g
 \end{lstlisting}
 
-\item To release the grabber and kick simultaneously:
+\item To kick the ball a distance specified in the milestone:
 \begin{lstlisting}
-x <kickStrength>
+kick [50|100|150]
+\end{lstlisting}
+
+\item To release the grabber (two modes):
+\begin{lstlisting}
+
 \end{lstlisting}
 
 \item To stop all the motors:
 \begin{lstlisting}
 s
 \end{lstlisting}
+
+\item For catching the ball:
+\\The robot detects where the ball is, turns in that direction and opens the grabber. When the ball is kicked towards the robot, it grabs it. In case the ball bounces off, the robot starts moving in order to grab the ball.
+\bigskip
+MAKE DIAGRAM
+\begin{figure}
+    \centering
+    \includegraphics{Diagram1}
+\end{figure}
+
+\begin{lstlisting}
+catch_ball
+\end{lstlisting}
+\newpage
+
+\item To catch the ball and then pass it to the teammate:
+\\Venus turns towards the ball and opens the grabber, then when it grabs the ball, it turns to the teammate robot and kicks the ball (the distance by which the ball should be kicked is calculated such that the ball can reach the teammate robot).
+\begin{lstlisting}
+catch_pass
+\end{lstlisting}
+
+\item To intercept the ball that is passed between two opposite team robots:
+\\The robot goes to the closest point from itself on the line between two enemy robots.
+\begin{lstlisting}
+intercept
+\end{lstlisting}
+
+\item To block the goal:
+\begin{lstlisting}
+block_goal
+\end{lstlisting}
+
+Later, this part should look more like what should be done in order to fully prepare robot for the game, and things like commands/strategy will be described in the technical specifications.
 
 \end{itemize}
 

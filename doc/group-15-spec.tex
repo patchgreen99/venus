@@ -24,19 +24,11 @@
 
 \section{System Architecture}
 
-The earliest prototype simply had four regular wheels as seen in Figure
-\ref{fig:robot0}. This made us realise that we have to keep in mind the space
+Venus has gone through several stages of changes. The earliest prototype had four regular wheels as seen in Figure \ref{fig:robot0}. This made us realise that we have to keep in mind the space
 constraints when building the base as we need to accommodate not only the motors
-for the wheels but also the kicking and grabbing mechanism.
-The next more sophisticated design was a robot with four powerful kickers
-that used elastics as seen in Figure \ref{fig:robot3}. This design had a
-disadvantage because it was not be able to kick the ball for varying distances,
-which was an essential requirement for the first milestone. Moreover, the
-dimensions of the robot were exceeding the maximum size limits. Thus, a similar
-design was agreed upon as seen in Figures \ref{fig:robot1} and \ref{fig:robot2}.
-Advantage of this design is that it is simple and at the same time the robot can
-still move fast enough to play football and the power of the kicks can be
-precisely controlled.
+for the wheels but also the kicking and grabbing mechanism. 
+\\The next more sophisticated design was a robot with four powerful kickers that used elastics as seen in Figure \ref{fig:robot3}. The idea was to stretch elastics for all four kickers using the star shape element on top of the robot as seen in the picture and then release, this gave a lot of energy to the kickers. However, this design had a disadvantage because it was not be able to kick the ball for varying distances, which was an essential requirement for the first milestone. Moreover, the dimensions of the robot were exceeding the maximum size limits and the speed of the ball was exceeding the one allowed in the game rules. 
+\\Thus, taking all the disadvantages of previous designs into account we came up with a new design as seen in Figures \ref{fig:robot1} and \ref{fig:robot2}. Advantage of this design is that it is simple and at the same time the robot can still move fast enough to play football and the power of the kicks can be precisely controlled. 
 
 \begin{figure}[h]
 	\centering
@@ -55,16 +47,13 @@ precisely controlled.
 	\end{minipage}
 \end{figure}
 
-The grabbing mechanism of the latest design went through two iterations of
-development.
-The first grabber in Figure \ref{fig:robot1} was deemed not suitable because of
-the obstruction of the ball which is not allowed by the football game rules.
-This is related to the fact that this design had difficulties at placing the
-ball in front of the kicker at initial kicking position, instead it pushed it
-too far inside the kicker. It was replaced by the newest grabber design
-depicted in Figure \ref{fig:robot2} which has two symmetrical grabbers that
-interlock when the robot is moving to conserve space and are able to reach a
-more distant ball.
+The grabbing mechanism of the latest design went through two iterations of development.
+The first grabber in Figure \ref{fig:robot1} was deemed not suitable because it obstructed the ball more than it was allowed by the football game rules. This is related to the fact that this design had difficulties at placing the ball in front of the kicker at initial kicking position, instead it pushed it
+too far inside the kicker. It was replaced by the newest grabber design depicted in Figure \ref{fig:robot2} which has two symmetrical grabbers that interlock when the robot is moving to conserve space and are able to reach a more distant ball.
+\\When we were satisfied with the look of Venus, we also made all cables look neat using elastics as seen in Figure SOMETHING. We also ensured that we can still access the battery pack and Arduino board if needed.
+
+NEED TO DO SOMETHING ABOUT PICTURES WHERE IT'S NOT SEEN 
+ALSO INCLUDE FINAL PICTURE WITH ALL CABLES NEAT
 
 \begin{figure}
 	\centering
@@ -86,18 +75,17 @@ more distant ball.
 
 \section{Hardware}
 
-The initial robot had four holonomic wheels. The current design has two main
-driving wheels and one holonomic wheel placed sideways at the back which allows
-the robot to turn as well as does not cause problems moving backwards and
-forwards due to its holonomic property.
-
+\subsection{Wheels}
+The current design has two main driving wheels and one holonomic wheel placed sideways at the back which allows the robot to turn as well as does not cause problems moving backwards and
+forwards due to its holonomic property. All three wheels are powered by NXT motors.
+\subsection{Kicker}
 Even though the idea of the kicker that uses elastics was appealing as this made
 the kick more powerful, it was almost impossible to predict the distance the
-ball will travel.
-Because of that the new design that was used for the first milestone has a
+ball will travel. Because of that the new design has a
 kicker that is powered by an NXT motor with gears. The kicker operates by going backwards inside the robot from the starting low position and then kicks
 forwards and touches the ball.
-
+\subsection{Grabber}
+The grabber consists of two symmetric parts placed one a bit above the other and is placed on the sides of the front part of the robot. The grabber is powered by Electric Technic Mini-Motor 9v with gears as seen on Figure SOMETHING. They interlock when the robot needs to catch the ball and we also keep them in a closed position during movements without the ball. We open the grabber only before catching. This ensures that the grabber don't get broken against other robots or walls.  
 
 \section{Documentation of the code}
 
@@ -109,6 +97,7 @@ values or time durations for which they are going to be powered. Then the robot
 turns the motors on, sets the timeouts to stop them, and notifies the PC about
 finishing starting the motors as seen in Figure \ref{fig:code1}.
 
+CHANGE THE DIAGRAM!!!!!
 \begin{figure}
     \includegraphics[scale=.7]{Diagram2}
     \caption{High level diagram of the system structure}
@@ -150,9 +139,7 @@ to engage the kicker while the robot is in motion.
 
 \subsection{PC}
 
-The PC currently provides a simple command line interface mapping higher level
-commands such as \texttt{f 100} meaning 'go forwards 100 meters' to
-communication messages. They are described in detail in the user guide.
+The PC currently provides a simple command line interface. We currently use commands specified in the user guide that call python methods, which use commands such as \texttt{f 100} meaning 'go forwards 100 meters' that are mapped to communication messages. 
 
 \subsection{Vision}
 
@@ -175,4 +162,7 @@ is available for the Arduino code. Every 30 ms we query the board and
 check whether we have reached the target value. After the rotary value becomes
 greater or equal to the target value, the appropriate motor is stopped.
 
+\subsection{IR sensor}
+
+TBD
 \end{document}
