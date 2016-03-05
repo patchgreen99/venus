@@ -108,8 +108,10 @@ Then, in order to be able to send commands the robot:
 python main.py
 \end{lstlisting}
 Executing \textit{main.py} makes a connection to the RF stick and to the vision feed automatically. After that you should be able to send commands to the robot (make sure the RF stick is plugged in).
-\bigskip
-INCLUDE INFO HOW TO CHANGE COLORS, CAMERA etc.
+In order to change the room of the pitch (0 - 3.D03, 1 - 3.D04) and colors of your robot, change hard-coded values in \textit{vision} method in \textit{/control/commands.py}. For example if you are in room 3.D04 and your robot has yellow team-color and one green dot, change as follows:
+\begin{lstlisting}
+def vision(self, room_num=1, team_color='yellow', our_color='green')
+\end{lstlisting}
 \bigskip
 
 \textbf{NB} In case you make changes to Arduino code, you should upload your changes to the board!
@@ -130,14 +132,15 @@ c <degrees>
 g
 \end{lstlisting}
 
-\item To kick the ball a distance specified in the milestone:
+\item To kick the ball:
 \begin{lstlisting}
-kick [50|100|150]
+kick <distance>
 \end{lstlisting}
 
 \item To release the grabber (two modes):
 \begin{lstlisting}
-
+open_narrow
+open_wide
 \end{lstlisting}
 
 \item To stop all the motors:
@@ -148,11 +151,6 @@ s
 \item For catching the ball:
 \\The robot detects where the ball is, turns in that direction and opens the grabber. When the ball is kicked towards the robot, it grabs it. In case the ball bounces off, the robot starts moving in order to grab the ball.
 \bigskip
-MAKE DIAGRAM
-\begin{figure}
-    \centering
-    \includegraphics{Diagram1}
-\end{figure}
 
 \begin{lstlisting}
 catch_ball
@@ -192,9 +190,19 @@ processing.app.SerialNotFoundException: Serial port '<port>' not found. Did you 
 \bigskip
 
 \textbf{Problem 2} When sending commands the robot doesn't do anything and you're sure it should move.
+\\\textbf{Solution} Power the Arduino board off and on again.
 \bigskip
 
-\textbf{Solution} Power the Arduino board off and on again.
+\textbf{Problem 3} We cannot distinguish robots on the video frames, because they are flipping.
 
+\textbf{Solution} We have implemented a probabilistic way of detecting robots, so that we can see them even when not all colors are detected (more details on that in technical specifications).
+\bigskip
+
+\textbf{Problem 4} The distortion varies on different machines/pitches.
+\\\textbf{Solution} It is still ongoing problem, we are working on to make it more accurate.
+\bigskip
+
+\textbf{Problem 5} The kicker is not reliable. Sometimes the kick is not straight.
+\\\textbf{Solution} It is still ongoing problem, we are working to make it more accurate.
 
 \end{document}
