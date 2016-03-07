@@ -3,49 +3,61 @@ import serial
 
 class RobotProtocol:
     def __init__(self, device):
-        self.ser = serial.Serial(device, 115200)
-        self.check = 0
+        self.ser = serial.Serial(device, 115200, timeout=0.1)
+        self.seq_no = 2
+        self.response = None
 
-    def stop(self):
-        self.write('S\r')
-
-    def move(self, units, motor_powers, time=False, wait=True):
+    def move(self, units, motor_powers, time=False, wait=False):
         # motor_powers consists of tuples (num, power)
         command = 'M' if time else 'R'
-        out = [command, int(abs(units)), len(motor_powers)]
-        for num, power in motor_powers:
-            out.append(int(num))
-            out.append(int(power))
-        self.write(' '.join(str(x) for x in out))
+        params = [abs(units)] + list(sum(motor_powers, ()))
+        self.write(command, params)
         if wait:
-            s = self.ser.read()
+            self.block_until_stop()
 
-            while s == 'F':
-                s = self.ser.read()
+    def schedule(self, target, master, motor_powers):
+        params = [target, master] + list(sum(motor_powers, ()))
+        self.write('J', params)
 
-            while s != 'D':
-                print("Got unknown response '%s'" % s)
-                s = self.ser.read()
-            print("Got done")
+    def block_until_stop(self, motor=None):
+        if motor:
+            self.write('Y', [motor], error_check=False)
+        else:
+            self.write('I', error_check=False)
 
-            while s == 'D':
-                s = self.ser.read()
+    def move_forever(self, motor_powers):
+        self.write('V', list(sum(motor_powers, ())))
 
-            while s != 'F':
-                print("Got unknown response '%s'" % s)
-                s = self.ser.read()
-            print("Got finished")
+    def stop(self, motors=None):
+        if motors:
+            self.write('Z', motors)
+        else:
+            self.write('S')
 
     def transfer(self, byte):
-        self.write_unsafe('T %d' % ord(byte))
+        self.write('T', [ord(byte)])
 
-    def write(self, message):
+    def write(self, command, params=None, error_check=True):
+        self.ser.reset_input_buffer()
+
+        tokens = [command]
+        if error_check:
+            tokens += [self.seq_no, sum(abs(x) for x in params)]
+            self.seq_no = (self.seq_no + 1) % 2
+        if params:
+            tokens += params
+        message = ' '.join(str(t) for t in tokens)
         self.ser.write(message + '\r')
         print("Message sent: %s" % message)
 
-    def write_unsafe(self, message):
-        self.ser.write(message + '\r')
-        print("Message sent: %s" % message)
+        self.response = self.ser.read()
+        while self.response != 'D':
+            if self.response:
+                print("Got unknown response '%s'" % self.response)
+            self.ser.write(message + '\r')
+            self.response = self.ser.read()
+
+        print("Got done")
 
     def reset_input(self):
         self.ser.reset_input_buffer()
