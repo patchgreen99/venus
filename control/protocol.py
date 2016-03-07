@@ -21,9 +21,9 @@ class RobotProtocol:
 
     def block_until_stop(self, motor=None):
         if motor:
-            self.write('Y', [motor], seq=False)
+            self.write('Y', [motor], error_check=False)
         else:
-            self.write('I', seq=False)
+            self.write('I', error_check=False)
 
     def move_forever(self, motor_powers):
         self.write('V', list(sum(motor_powers, ())))
@@ -37,12 +37,12 @@ class RobotProtocol:
     def transfer(self, byte):
         self.write('T', [ord(byte)])
 
-    def write(self, command, params=None, seq=True):
+    def write(self, command, params=None, error_check=True):
         self.ser.reset_input_buffer()
 
         tokens = [command]
-        if seq:
-            tokens.append(self.seq_no)
+        if error_check:
+            tokens += [self.seq_no, sum(abs(x) for x in params)]
             self.seq_no = (self.seq_no + 1) % 2
         if params:
             tokens += params

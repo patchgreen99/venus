@@ -16,9 +16,12 @@
 
 #define RESP_DONE 'D'
 #define RESP_UNKNOWN 'U'
-#define RESP_ERROR 'E'
+#define RESP_ERROR_CHECKSUM 'C'
+#define RESP_ERROR_JOBS_EXCEEDED 'X'
 
 #define MAX_JOB_COUNT 10
+
+#define MAX_PARAMS 30
 
 SerialCommand sc;
 SimpleTimer timer;
@@ -58,6 +61,9 @@ bool running;
 int head;
 int tail;
 int count;
+
+int params[MAX_PARAMS];
+int paramCount;
 
 void setup() {
   SDPsetup();
@@ -138,17 +144,31 @@ bool finished(int position, int targetPosition) {
          targetPosition < 0 && position <= targetPosition;
 }
 
-/* Returns true if the command should be ignored (duplicate command) */
+/* Returns true if the command should be ignored in case
+ * it is a duplicate command or bad checksum */
 bool ignore() {  
-  Serial.print(RESP_DONE);
-  
   int seqNo = atoi(sc.next());
   if (seqNo == lastSeqNo) {
     return true;
-  } else {
-    lastSeqNo = seqNo;
-    return false;
   }
+  
+  int checksum = atoi(sc.next());
+  
+  int sum = 0;
+  paramCount = 0;
+  while (char *token = sc.next()) {
+    params[paramCount] = atoi(token);
+    sum += abs(params[paramCount]);
+    ++paramCount;
+  }
+  if (checksum != sum) {
+    Serial.print(RESP_ERROR_CHECKSUM);
+    return true;
+  }
+  
+  Serial.print(RESP_DONE);
+  lastSeqNo = seqNo;
+  return false;
 }
 
 void moveForever() {
@@ -156,9 +176,10 @@ void moveForever() {
     return;
   }
   
-  while (char *ch = sc.next()) {
-    int motor = atoi(ch);
-    int power = atoi(sc.next());
+  int i = 0;
+  while (i < paramCount) {
+    int motor = params[i++];
+    int power = params[i++];
     
     if (power > 0) {
       motorForward(motor, power);
@@ -172,12 +193,13 @@ void moveTimeUnits() {
   if (ignore()) {
     return;
   }
+  
+  int p = 0;
+  int time = params[p++];
 
-  int time = atoi(sc.next());
-
-  while (char *ch = sc.next()) {
-    int motor = atoi(ch);
-    int power = atoi(sc.next());
+  while (p < paramCount) {
+    int motor = params[p++];
+    int power = params[p++];
     
     if (power > 0) {
       motorForward(motor, power);
@@ -196,12 +218,13 @@ void moveRotaryUnits() {
   if (ignore()) {
     return;
   }
+  
+  int p = 0;
+  int target = params[p++];
 
-  int target = atoi(sc.next());
-
-  while (char *ch = sc.next()) {
-    int motor = atoi(ch);
-    int power = atoi(sc.next());
+  while (p < paramCount) {
+    int motor = params[p++];
+    int power = params[p++];
     positions[motor] = 0;
     
     if (power > 0) {
@@ -217,7 +240,7 @@ void moveRotaryUnits() {
 void scheduleJob() {
   if (count == MAX_JOB_COUNT) {
     // No more space in the job queue
-    Serial.print(RESP_ERROR);
+    Serial.print(RESP_ERROR_JOBS_EXCEEDED);
     return;
   }
   
@@ -225,16 +248,17 @@ void scheduleJob() {
     return;
   }
   
-  jobs[tail].target = atoi(sc.next());
-  jobs[tail].master = atoi(sc.next());
+  int p = 0;
+  jobs[tail].target = params[p++];
+  jobs[tail].master = params[p++];
   
   for (int i = 0; i < ROTARY_COUNT; ++i) {
     jobs[tail].powers[i] = 0;
   }
   
-  while (char *ch = sc.next()) {
-    int motor = atoi(ch);
-    jobs[tail].powers[motor] = atoi(sc.next());
+  while (p < paramCount) {
+    int motor = params[p++];
+    jobs[tail].powers[motor] = params[p++];
   }
   
   if (jobs[tail].powers[jobs[tail].master] < 0) {
@@ -250,8 +274,9 @@ void stopSome() {
     return;
   }
   
-  while (char *ch = sc.next()) {
-    int motor = atoi(ch);
+  int p = 0;
+  while (p < paramCount) {
+    int motor = params[p++];
     
     motorStop(motor);
   }
@@ -290,7 +315,7 @@ void transferByte() {
     return;
   }
   
-  byte value = atoi(sc.next());
+  byte value = params[0];
   Wire.beginTransmission(69);
   Wire.write(value);
   Wire.endTransmission();
