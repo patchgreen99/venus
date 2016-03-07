@@ -4,7 +4,7 @@ import serial
 class RobotProtocol:
     def __init__(self, device):
         self.ser = serial.Serial(device, 115200, timeout=0.1)
-        self.seq_no = 0
+        self.seq_no = 2
         self.response = None
 
     def move(self, units, motor_powers, time=False, wait=False):
@@ -14,6 +14,10 @@ class RobotProtocol:
         self.write(command, params)
         if wait:
             self.block_until_stop()
+
+    def schedule(self, target, master, motor_powers):
+        params = [target, master] + list(sum(motor_powers, ()))
+        self.write('J', params)
 
     def block_until_stop(self, motor=None):
         if motor:
@@ -38,15 +42,13 @@ class RobotProtocol:
 
         tokens = [command]
         if seq:
-            self.seq_no = (self.seq_no + 1) % 2
             tokens.append(self.seq_no)
+            self.seq_no = (self.seq_no + 1) % 2
         if params:
             tokens += params
         message = ' '.join(str(t) for t in tokens)
         self.ser.write(message + '\r')
         print("Message sent: %s" % message)
-
-        print("Waiting for done")
 
         self.response = self.ser.read()
         while self.response != 'D':

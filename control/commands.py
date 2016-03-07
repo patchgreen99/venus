@@ -84,6 +84,19 @@ class Commands:
         self.protocol.move_forever([(MOTOR_LEFT, -100),
                                     (MOTOR_RIGHT, -100)])
 
+    def backward_forever(self):
+        """Move backward forever"""
+        self.protocol.move_forever([(MOTOR_LEFT, 100),
+                                    (MOTOR_RIGHT, 100)])
+
+    def forward(self, x):
+        self.protocol.schedule(x, MOTOR_LEFT, [(MOTOR_LEFT, -100),
+                                               (MOTOR_RIGHT, -100)])
+
+    def backward(self, x):
+        self.protocol.schedule(x, MOTOR_LEFT, [(MOTOR_LEFT, 100),
+                                               (MOTOR_RIGHT, 100)])
+
     def swerve_right(self, x):
         """Swerve right whilst moving forwards
 
@@ -91,8 +104,9 @@ class Commands:
         45 degrees: 200
         90 degrees: 500
         """
-        self.protocol.move(x, [(MOTOR_TURN, 100)])
-        self.protocol.block_until_stop(MOTOR_TURN)
+        self.protocol.schedule(x, MOTOR_TURN, [(MOTOR_TURN, 100),
+                                               (MOTOR_LEFT, -100),
+                                               (MOTOR_RIGHT, -100)])
 
     def swerve_left(self, x):
         """Swerve left whilst moving forwards
@@ -101,18 +115,18 @@ class Commands:
         45 degrees: 200
         90 degrees: 500
         """
-        self.protocol.move(x, [(MOTOR_TURN, -100)])
-        self.protocol.block_until_stop(MOTOR_TURN)
+        self.protocol.schedule(x, MOTOR_TURN, [(MOTOR_TURN, -100),
+                                               (MOTOR_LEFT, -100),
+                                               (MOTOR_RIGHT, -100)])
 
     def test(self):
         """Test of swerving"""
-        self.forward_forever()
-        time.sleep(1)
+        self.forward(200)
         self.swerve_left(200)
         self.swerve_right(200)
         self.swerve_left(200)
         self.swerve_right(200)
-        self.s()
+        self.forward(200)
 
     def c(self, x):
         """Rotate clockwise, negative x means counter-clockwise"""

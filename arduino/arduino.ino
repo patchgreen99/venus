@@ -16,6 +16,9 @@
 
 #define RESP_DONE 'D'
 #define RESP_UNKNOWN 'U'
+#define RESP_ERROR 'E'
+
+#define MAX_JOB_COUNT 10
 
 SerialCommand sc;
 SimpleTimer timer;
@@ -44,12 +47,25 @@ int targetPositions[ROTARY_COUNT];
 /* Whether motors are moving by an amount of time units */
 bool moving[ROTARY_COUNT];
 
+struct Job {
+  int master;
+  int target;
+  int powers[ROTARY_COUNT];
+};
+
+Job jobs[MAX_JOB_COUNT];
+bool running;
+int head;
+int tail;
+int count;
+
 void setup() {
   SDPsetup();
   
   sc.addCommand("M", moveTimeUnits);
   sc.addCommand("R", moveRotaryUnits);
   sc.addCommand("V", moveForever);
+  sc.addCommand("J", scheduleJob);
   sc.addCommand("Z", stopSome);
   sc.addCommand("S", stopAll);
   sc.addCommand("I", areAllStopped);
@@ -84,13 +100,42 @@ void rotaryTimerCallback() {
   }
   
   for (int i = 0; i < ROTARY_COUNT; ++i) {
-    if (targetPositions[i] > 0 && positions[i] >= targetPositions[i] ||
-        targetPositions[i] < 0 && positions[i] <= targetPositions[i]) {
+    if (finished(positions[i], targetPositions[i])) {
       motorStop(i);
       positions[i] = 0;
       targetPositions[i] = 0;
     }
   }
+  
+  bool stopping = running && finished(positions[jobs[head].master], jobs[head].target);
+  bool starting = !running && count > 0 || stopping && count > 1;
+  int next = stopping ? (head + 1) % MAX_JOB_COUNT : head;
+  
+  for (int i = 0; i < ROTARY_COUNT; ++i) {
+    if (starting && jobs[next].powers[i]) {
+      positions[i] = 0;
+      if (jobs[next].powers[i] > 0) {
+        motorForward(i, jobs[next].powers[i]);
+      } else {
+        motorBackward(i, -jobs[next].powers[i]);
+      }
+    } else if (stopping && jobs[head].powers[i]) {
+      positions[i] = 0;
+      motorStop(i);
+    }
+  }
+  
+  if (stopping) {
+    --count;
+    head = next;
+  }
+  
+  running = running && !stopping || starting;
+}
+
+bool finished(int position, int targetPosition) {
+  return targetPosition > 0 && position >= targetPosition ||
+         targetPosition < 0 && position <= targetPosition;
 }
 
 /* Returns true if the command should be ignored (duplicate command) */
@@ -167,6 +212,37 @@ void moveRotaryUnits() {
       motorBackward(motor, -power);
     }
   }
+}
+
+void scheduleJob() {
+  if (count == MAX_JOB_COUNT) {
+    // No more space in the job queue
+    Serial.print(RESP_ERROR);
+    return;
+  }
+  
+  if (ignore()) {
+    return;
+  }
+  
+  jobs[tail].target = atoi(sc.next());
+  jobs[tail].master = atoi(sc.next());
+  
+  for (int i = 0; i < ROTARY_COUNT; ++i) {
+    jobs[tail].powers[i] = 0;
+  }
+  
+  while (char *ch = sc.next()) {
+    int motor = atoi(ch);
+    jobs[tail].powers[motor] = atoi(sc.next());
+  }
+  
+  if (jobs[tail].powers[jobs[tail].master] < 0) {
+    jobs[tail].target *= -1;
+  }
+  
+  ++count;
+  tail = (tail + 1) % MAX_JOB_COUNT;
 }
 
 void stopSome() {
