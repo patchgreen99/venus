@@ -182,7 +182,7 @@ In our opinion, the vision is our unique feature of this project. We have built 
 
 \begin{enumerate}
 \item For the relevant room (0 or 1) read files containing the following data: brightness, contrast,     saturation, hue values (room0.txt), minimum and maximum HSV values for each color that we want to detect (color0.txt), distortion (dist0.txt). 
-\item The image from the video feed is blurred (using \textit{cv2.GaussianBlur}) and the mask is created (there is a possibility of calibration if some colors are not well detected).
+\item The image from the video feed is blurred (using \textit{cv2.GaussianBlur}) and the mask is created (there is a possibility of calibration if some colors are not detected well enough).
 \item We draw circles of relevant colors that are in the mask except red (the ball).
 \item Find the ball.
 \item Find robots.
