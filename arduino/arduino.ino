@@ -22,7 +22,6 @@ SimpleTimer timer;
 
 /* Values for repeated message checking */
 int lastSeqNo = -1;
-bool lastDone;
 
 /* Callbacks to stop nth motor so that we would be able to
  * simply create timeouts for each single motor.
@@ -95,25 +94,16 @@ void rotaryTimerCallback() {
 }
 
 /* Returns true if the command should be ignored (duplicate command) */
-bool ignore() {
-  int seqNo = atoi(sc.next());
+bool ignore() {  
+  Serial.print(RESP_DONE);
   
+  int seqNo = atoi(sc.next());
   if (seqNo == lastSeqNo) {
-    if (lastDone) {
-      Serial.print(RESP_DONE);
-    }
     return true;
   } else {
     lastSeqNo = seqNo;
-    lastDone = false;
     return false;
   }
-}
-
-/* Inform that command is done */
-void done() {
-  lastDone = true;
-  Serial.print(RESP_DONE);
 }
 
 void moveForever() {
@@ -131,8 +121,6 @@ void moveForever() {
       motorBackward(motor, -power);
     }
   }
-  
-  done();
 }
 
 void moveTimeUnits() {
@@ -157,8 +145,6 @@ void moveTimeUnits() {
     // Use timeout to make moveTimeUnits non-blocking
     timer.setTimeout(time, stopMotorCallbacks[motor]);
   }
-  
-  done();
 }
 
 void moveRotaryUnits() {
@@ -181,8 +167,6 @@ void moveRotaryUnits() {
       motorBackward(motor, -power);
     }
   }
-  
-  done();
 }
 
 void stopSome() {
@@ -195,8 +179,6 @@ void stopSome() {
     
     motorStop(motor);
   }
-  
-  done();
 }
 
 void stopAll() {
@@ -205,8 +187,6 @@ void stopAll() {
   }
   
   motorAllStop();
-  
-  done();
 }
 
 void areAllStopped() {
@@ -238,8 +218,6 @@ void transferByte() {
   Wire.beginTransmission(69);
   Wire.write(value);
   Wire.endTransmission();
-  
-  done();
 }
 
 void unknown() {
