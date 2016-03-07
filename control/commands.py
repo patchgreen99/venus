@@ -66,7 +66,7 @@ class Commands:
     def pw(self):
         print(self.world)
 
-    def f(self, x, wait=True):
+    def f(self, x):
         """Move forward, negative x means backward"""
         x = int(x)
         s = sign(x)
@@ -77,7 +77,7 @@ class Commands:
         x = int(x)
         if x > 0:
             self.protocol.move(x, [(MOTOR_LEFT, -100 * s),
-                                   (MOTOR_RIGHT, -100 * s)], wait=wait)
+                                   (MOTOR_RIGHT, -100 * s)])
 
     def forward_forever(self):
         """Move forward forever"""
