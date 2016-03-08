@@ -69,8 +69,8 @@ class Game:
             # 1 1 1 1 1 1 1
             # 3 3 3 3 3 3 3
 
-            advance = step_field(self.world.friend.position, (0, 1), 0, 0)
-            catch_up = step_field(self.world.venus.position, (0, 1), 0, 0)
+            advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 0, 0)
+            catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 0, 0)
 
             # step - an infinite line drawn through the point in the first argument in the direction of the vector in
             # the second argument. The clockwise segment to the vector is cut off where as the anticlockwise segment
@@ -330,3 +330,9 @@ def normalize((x, y)):
 
 def dot_product((ax, ay),(bx, by)):
     return ax*bx + ay*by
+
+def get_play_direction(world):
+    if world.we_have_computer_goal and world.room_num == 1 or not world.we_have_computer_goal and world.room_num == 0:
+        return 1, 0
+    elif world.we_have_computer_goal and world.room_num == 0 or not world.we_have_computer_goal and world.room_num == 1:
+        return -1, 0
