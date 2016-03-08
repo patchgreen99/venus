@@ -5,6 +5,7 @@ import numpy as np
 
 from control.protocol import RobotProtocol
 from strategy.simple import SimpleStrategy
+from strategy.highstrategy import StrategyTools
 from strategy.game import Game
 from strategy.world import World
 from strategy.movement import get_movement_direction
@@ -27,6 +28,7 @@ class Commands:
         self.vision_process = None
         self.world = None
         self.strategy = None
+        self.highstrategy = None
         print("! Remember to call:")
         print("! vision <room: 0/1> <team_color: blue/yellow> <our_single_spot_color: green/pink>")
         print("! connect")
@@ -52,8 +54,15 @@ class Commands:
         if not self.vision_process:
             self.world = World(int(room_num), team_color, our_color)
             self.strategy = SimpleStrategy(self.world, self)
+            self.highstrategy = StrategyTools(self.world, self)
             self.vision_process = multiprocessing.Process(target=Vision, args=(self.world,))
             self.vision_process.start()
+
+    def attackwithball(self):
+        self.highstrategy.attackwithball()
+
+    def ballwithenemy(self):
+        self.highstrategy.ballwithenemy()
 
     def grab_ball(self):
         self.strategy.grab_ball()
