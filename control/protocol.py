@@ -4,8 +4,9 @@ import serial
 class RobotProtocol:
     def __init__(self, device):
         self.ser = serial.Serial(device, 115200, timeout=0.1)
-        self.seq_no = 2
+        self.seq_no = 0
         self.response = None
+        self.write('H', error_check=False)
 
     def move(self, units, motor_powers, time=False, wait=False):
         # motor_powers consists of tuples (num, power)
