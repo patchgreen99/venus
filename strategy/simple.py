@@ -201,6 +201,7 @@ class SimpleStrategy:
 
     def enemy_has_ball(self):
         # todo: what happens if one of enemy robots is not in the game?
+        # todo: what if orientation vector endpoint is outside the pitch?
         # returns either (False, -1) or (True, self.world.enemyX)
 
         # find which enemy robot is closer to the ball
