@@ -16,21 +16,51 @@ class Robot:
 
 
 class World:
-    def __init__(self, room_num, team_color, our_color):
+    def __init__(self, room_num, team_color, our_color, we_have_computer_goal):
         self.room_num = room_num
         self.team_color = team_color  # yellow or blue
         self.our_color = our_color  # green or pink
         self.enemy_color = 'yellow' if team_color == 'blue' else 'blue'
         self.other_color = 'green' if our_color == 'pink' else 'pink'
 
-        self.our_goalX = 0 #TODO
-        self.our_goallowY = 0 #TODO
-        self.our_goalhighY = 0 #TODO
-        self.our_goalmeanY = (self.our_goalhighX + self.our_goallowX)/2
-        self.their_goalX = 0 #TODO
-        self.their_goallowY = 0 #TODO
-        self.their_goalhighY = 0 #TODO
-        self.their_goalmeanY = (self.their_goalhighX + self.their_goallowX)/2
+        if room_num == 1:
+            if we_have_computer_goal:
+                self.our_goalX = 38 # left
+                self.our_goallowY = 181
+                self.our_goalhighY = 304
+                self.our_goalmeanY = (self.our_goalhighY + self.our_goallowY)/2
+                self.their_goalX = 618 # right
+                self.their_goallowY = 176
+                self.their_goalhighY = 297
+                self.their_goalmeanY = (self.their_goalhighY + self.their_goallowY)/2
+            else:
+                self.our_goalX = 618 # right
+                self.our_goallowY = 176
+                self.our_goalhighY = 297
+                self.our_goalmeanY = (self.our_goalhighY + self.our_goallowY)/2
+                self.their_goalX = 38 # right
+                self.their_goallowY = 181
+                self.their_goalhighY = 304
+                self.their_goalmeanY = (self.their_goalhighY + self.their_goallowY)/2
+        else:
+            if we_have_computer_goal:
+                self.our_goalX = 618 # right
+                self.our_goallowY = 176
+                self.our_goalhighY = 297
+                self.our_goalmeanY = (self.our_goalhighY + self.our_goallowY)/2
+                self.their_goalX = 38 # right
+                self.their_goallowY = 181
+                self.their_goalhighY = 304
+                self.their_goalmeanY = (self.their_goalhighY + self.their_goallowY)/2
+            else:
+                self.our_goalX = 38 # left
+                self.our_goallowY = 181
+                self.our_goalhighY = 304
+                self.our_goalmeanY = (self.our_goalhighY + self.our_goallowY)/2
+                self.their_goalX = 618 # right
+                self.their_goallowY = 176
+                self.their_goalhighY = 297
+                self.their_goalmeanY = (self.their_goalhighY + self.their_goallowY)/2
 
         self.ball = Array('i', [NO_VALUE, NO_VALUE]) # in pixels
         self.ball_velocity = Array('i', [NO_VALUE, NO_VALUE]) # pixels per frame
@@ -45,16 +75,3 @@ class World:
             self.ball[0], self.ball[1], self.ball_moving.value, self.speed[0], self.speed[1],
             self.venus, self.friend, self.enemy1, self.enemy2)
 
-class Potential_field:
-    def __init__(self):
-        '''
-        The potential field
-        '''
-        self.potential_1 = Array('i', [NO_VALUE, NO_VALUE, NO_VALUE, NO_VALUE, NO_VALUE])
-        self.potential_2 = Array('i', [NO_VALUE, NO_VALUE, NO_VALUE, NO_VALUE, NO_VALUE])
-        self.potential_3 = Array('i', [NO_VALUE, NO_VALUE, NO_VALUE, NO_VALUE, NO_VALUE])
-        self.potential_4 = Array('i', [NO_VALUE, NO_VALUE, NO_VALUE, NO_VALUE, NO_VALUE])
-        self.potential_5 = Array('i', [NO_VALUE, NO_VALUE, NO_VALUE, NO_VALUE, NO_VALUE])
-        '''
-        The potentials
-        '''

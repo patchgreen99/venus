@@ -5,16 +5,19 @@ PITCH_COLS = 640
 
 
 class Potential:
-        def __init__(self, current_point, world, ball_field, friend_field, enemy1_field, enemy2_field, free_up_pass_enemy1,
-                     free_up_pass_enemy2, free_up_goal_enemy1, free_up_goal_enemy2, block_pass, block_goal_enemy1,
-                     block_goal_enemy2, advance, catch_up, bad_minima):
+        def __init__(self, current_point, world, ball_field, friend_field, enemy1_field, enemy2_field,
+                     free_up_pass_enemy1, free_up_pass_enemy2, free_up_goal_enemy1, free_up_goal_enemy2, block_pass,
+                     block_goal_enemy1, block_goal_enemy2, advance, catch_up, bad_minima):
 
             self.world = world
             if self.world.room_num == 1:
                 self.top_wall = step_field((39, 14), (617-39, 10-14), 0, 0)
-                self.bot_wall = step_field((), (), 0, 0)
-                self.right_wall = step_field((), (), 0, 0)
-                self.left_wall = step_field((), (), 0, 0)
+                self.bot_wall = step_field((34, 466), (617-34, 464-466), 0, 0)
+                self.right_wall = step_field((617, 10), (617-617, 464-10), 0, 0)
+                self.left_wall = step_field((34, 466), (34-39, 466-14), 0, 0)
+                self.penalty_box_front = infinite_axial((),(), 0, 0)
+                self.penalty_box_left = infinite_axial((),(), 0, 0)
+                self.penalty_box_right = infinite_axial((),(), 0, 0)
 
                 self.current_point = current_point
                 self.ball_field = ball_field
@@ -32,45 +35,6 @@ class Potential:
                 self.catch_up = catch_up
                 self.bad_minima = bad_minima
 
-
-        '''
-        "defending_left": {
-            "top": [
-                190,
-                114
-            ],
-            "bottom": [
-                188,
-                367
-            ]
-        },
-        "defending_right": {
-            "top": [
-                462,
-                114
-            ],
-            "bottom": [
-                464,
-                368
-            ]
-        },
-        "pitch": {
-            "top_right": [
-                617,
-                10
-            ],
-            "bottom_left": [
-                34,
-                466
-            ],
-            "bottom_right": [
-                617,
-                464
-            ],
-            "top_left": [
-                39,
-                14
-                '''
 
 
 

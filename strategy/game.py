@@ -82,7 +82,7 @@ class Game:
             # 0 0 0 0 0 0 0
 
             # Constructor must always be this
-            self.local_potential = Potential(self.current_point, ball_field, friend_field, enemy1_field, enemy2_field,
+            self.local_potential = Potential(self.current_point, self.world, ball_field, friend_field, enemy1_field, enemy2_field,
                                              free_up_pass_enemy1, free_up_pass_enemy2, free_up_goal_enemy1,
                                              free_up_goal_enemy2, block_pass,
                                              block_goal_enemy1, block_goal_enemy2,  advance, catch_up, bad_minima)

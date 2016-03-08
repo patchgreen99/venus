@@ -46,11 +46,11 @@ class Commands:
         print("Connecting to RF stick")
         self.protocol = RobotProtocol('/dev/ttyACM' + device_no)
 
-    def vision(self, room_num=1, team_color='yellow', our_color='pink'):
+    def vision(self, room_num=1, team_color='yellow', our_color='pink', we_have_computer_goal=True):
         print("Starting vision")
         print("Room: %s, team color: %s, our single spot color: %s" % (str(room_num), team_color, our_color))
         if not self.vision_process:
-            self.world = World(int(room_num), team_color, our_color)
+            self.world = World(int(room_num), team_color, our_color, we_have_computer_goal)
             self.strategy = SimpleStrategy(self.world, self)
             self.vision_process = multiprocessing.Process(target=Vision, args=(self.world,))
             self.vision_process.start()
