@@ -66,14 +66,18 @@ class StrategyTools:
             enemyposition = self.world.enemy1
             if self.iclosertogoal(enemyposition):
                 '''# TODO: make the block_goal_enemy 1 on'''
+                print('block goal enemy1')
             else:
                 '''# TODO: make the block_pass on'''
+                print('block pass')
         elif enemyno == 2:
             enemyposition = self.world.enemy2
             if self.iclosertogoal(enemyposition):
                 '''# TODO: make the block_goal_enemy 1 on'''
+                print('block goal enemy2')
             else:
                 '''# TODO: make the block_pass on'''
+                print('block pass')
         return
 
     def iclosertogoal(self,enemyposition):
