@@ -1,10 +1,13 @@
 import time
 import multiprocessing
 
+import numpy as np
+
 from control.protocol import RobotProtocol
 from strategy.simple import SimpleStrategy
 from strategy.game import Game
 from strategy.world import World
+from strategy.movement import get_movement_direction
 from vision.vision import Vision
 
 MOTOR_LEFT = 0
@@ -27,8 +30,17 @@ class Commands:
         print("! Remember to call:")
         print("! vision <room: 0/1> <team_color: blue/yellow> <our_single_spot_color: green/pink>")
         print("! connect")
-        self.vision()
+        #self.vision()
         self.connect()
+
+    def test_movement(self):
+        a = np.array([[666, 100, 666, 100, 666],
+                      [666, 100, 100, 100, 666],
+                      [666, 100, 100, 100, 666],
+                      [666, 100, 666, 100, 666],
+                      [666, 100, 666, 0, 666]], dtype=np.float64)
+
+        print get_movement_direction(a, self)
 
     def connect(self, device_no='0'):
         print("Connecting to RF stick")
