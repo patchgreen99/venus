@@ -35,11 +35,12 @@ class Game:
             dont_copy_friend_enemy2 = infinite_axial(self.world.friend.position, self.world.enemy2.position, 0, 0)
             advance = step_field(self.world.friend.position, 0, 0)
             catch_up = step_field(self.world.venus.position, 0, 0)
+            bad_minima = infinite_axial(self.world.venus.position, self.world.friend.position, 0, 0)
 
             self.local_potential = Potential(self.current_point, ball_field, friend_field, enemy1_field, enemy2_field, free_up_pass_enemy1,
                                              free_up_pass_enemy2, free_up_goal_enemy1, free_up_goal_enemy2, block_pass,
                                              block_goal_enemy1, block_goal_enemy2, dont_copy_friend_enemy1,
-                                             dont_copy_friend_enemy2, advance, catch_up)
+                                             dont_copy_friend_enemy2, advance, catch_up,bad_minima)
 
             '''
             jules's movement method will be called here once you have you local matrix
