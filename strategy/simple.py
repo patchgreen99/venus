@@ -1,6 +1,5 @@
 import math
 import time
-
 import numpy as np
 
 CENTIMETERS_TO_PIXELS = (300.0 / 639.0)

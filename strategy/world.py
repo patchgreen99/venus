@@ -1,4 +1,5 @@
 from multiprocessing import Array, Value
+import math
 
 NO_VALUE = -1
 
@@ -7,6 +8,7 @@ class Robot:
     def __init__(self):
         self.position = Array('i', [NO_VALUE, NO_VALUE])
         self.orientation = Array('d', [NO_VALUE, NO_VALUE])
+        self.out = Value('b')
 
     def __str__(self):
         return "(pos: {} {}, ori: {})".format(self.position[0], self.position[1],
@@ -20,6 +22,8 @@ class World:
         self.our_color = our_color  # green or pink
         self.enemy_color = 'yellow' if team_color == 'blue' else 'blue'
         self.other_color = 'green' if our_color == 'pink' else 'pink'
+        self.there_goal = (0,0) #todo get goal
+        self.our_goal = (0,0) #todo get goal
 
         self.ball = Array('i', [NO_VALUE, NO_VALUE]) # in pixels
         self.ball_velocity = Array('i', [NO_VALUE, NO_VALUE]) # pixels per frame
@@ -33,3 +37,17 @@ class World:
         return "World state: ball {} {} {}, future ball {} {}, venus {}, friend {}, enemy1 {}, enemy2 {}".format(
             self.ball[0], self.ball[1], self.ball_moving.value, self.speed[0], self.speed[1],
             self.venus, self.friend, self.enemy1, self.enemy2)
+
+class Potential_field:
+    def __init__(self):
+        '''
+        The potential field
+        '''
+        self.potential_1 = Array('i', [NO_VALUE, NO_VALUE, NO_VALUE, NO_VALUE, NO_VALUE])
+        self.potential_2 = Array('i', [NO_VALUE, NO_VALUE, NO_VALUE, NO_VALUE, NO_VALUE])
+        self.potential_3 = Array('i', [NO_VALUE, NO_VALUE, NO_VALUE, NO_VALUE, NO_VALUE])
+        self.potential_4 = Array('i', [NO_VALUE, NO_VALUE, NO_VALUE, NO_VALUE, NO_VALUE])
+        self.potential_5 = Array('i', [NO_VALUE, NO_VALUE, NO_VALUE, NO_VALUE, NO_VALUE])
+        '''
+        The potentials
+        '''

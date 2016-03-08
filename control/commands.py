@@ -3,6 +3,7 @@ import multiprocessing
 
 from control.protocol import RobotProtocol
 from strategy.simple import SimpleStrategy
+from strategy.game import Game
 from strategy.world import World
 from vision.vision import Vision
 
@@ -26,7 +27,7 @@ class Commands:
         print("! Remember to call:")
         print("! vision <room: 0/1> <team_color: blue/yellow> <our_single_spot_color: green/pink>")
         print("! connect")
-        #self.vision()
+        self.vision()
         self.connect()
 
     def connect(self, device_no='0'):

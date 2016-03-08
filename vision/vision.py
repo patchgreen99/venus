@@ -1,14 +1,12 @@
 from pylab import *
 from scipy.ndimage import measurements
-import cv2
-import numpy as np
-
+from color_calibration import *
 from strategy.world import NO_VALUE
 
 VISION_ROOT = 'vision/'
 
 MAX_COLOR_COUNTS = {
-    'red': 9,
+    'red': 100,
     'blue': 2,
     'yellow': 2,
     'pink': 8,
@@ -39,6 +37,9 @@ ENEMY_2 = 3
 
 class Vision:
     def __init__(self, world, debug=False):
+        self.last_angle = [0, 0, 0, 0]
+        self.out_counter = [0, 0, 0, 0]
+        self.start = 0
         self.debug = debug
         self.world = world
         self.pressed_key = None
@@ -75,7 +76,7 @@ class Vision:
             target.close()
 
             self.min_color_area = {
-                    'red': 100.0,
+                    'red': 0.0,
                     'blue': 1000.0,
                     'yellow': 1000.0,
                     'pink': 2000.0,
@@ -108,7 +109,7 @@ class Vision:
             target.close()
 
             self.min_color_area = {
-                    'red': 100.0,
+                    'red': 0.0,
                     'blue': 1000.0,
                     'yellow': 1000.0,
                     'pink': 2000.0,
@@ -157,7 +158,6 @@ class Vision:
         else:
             targetFile = open("vision/room1.txt", "w")
 
-
         targetFile.write(str(cv2.getTrackbarPos('BRIGHTNESS', 'Room')))
         targetFile.write('\n')
         targetFile.write(str(cv2.getTrackbarPos('CONTRAST', 'Room')))
@@ -174,52 +174,57 @@ class Vision:
     def frame(self):
         status, frame = self.capture.read()
         imgOriginal = self.step(frame)
-        '''
-        h, w = frame.shape[:2]
-
-        newcameramtx, roi = cv2.getOptimalNewCameraMatrix(self.mtx, self.dist, (w, h), 0, (w, h))
-
-        # These are the actual values needed to undistort:
-        dst = cv2.undistort(frame, self.mtx, self.dist, None, newcameramtx)
-
-        # crop the image
-        x, y, w, h = roi
-        dst = dst[y:y + h, x:x + w]
-
-        # Apply perspective transformation
-        pts2 = np.float32([[0, 0], [639, 0], [639, 479], [0, 479]])
-        M = cv2.getPerspectiveTransform(self.pts1, pts2)
-        imgOriginal = cv2.warpPerspective(dst, M, (639, 479))
-        '''
-        imgOriginal = cv2.GaussianBlur(imgOriginal, (3, 3), 2)
-
+        #blur = imgOriginal
+        blur = cv2.GaussianBlur(imgOriginal, (3, 3), 2) #todo: what values are best
+#########################################################################################################################################
         if cv2.getTrackbarPos('CALIBRATE', 'Room') == 1:
 
             cv2.setTrackbarPos('CALIBRATE', 'Room', 0)
-            self.pressed_key = None
-            self.exit_key = None
-            self.image = None
-            self.imageHSV = None
-            self.pressed_key = None
-            self.counter = 0
-            self.colorMedians = []
-            cv2.imwrite('vision/calibrate.png', imgOriginal)
-            cv2.namedWindow('calibrate')
-            cv2.setMouseCallback('calibrate', self.on_mouse, 0)
-            self.calibrate("vision/calibrate.png")
-            cv2.destroyWindow('calibrate')
+            colors = ['red', 'blue', 'yellow', 'pink', 'green']
+            data = getColors(self.world.room_num, imgOriginal)
+            '''
+            for color in colors:
+                if color in data.keys():
+                    if color == 'red':
+                        hmax = data['maroon']['min']
+                        hmin = data['maroon']['max']
+                        lmin = data['red']['min']
+                        lmax = data['red']['max']
+                        self.color_ranges[color] = [((lmin[0], lmin[1], lmin[2]), (lmax[0], lmax[1], lmax[2])),
+                                                    ((hmin[0], hmin[1], hmin[2]), (hmax[0], hmax[1], hmax[2]))]
+                    elif color == 'blue' and 'bright_blue' in data.keys():
+                        hmax = data['blue']['min']
+                        hmin = data['blue']['max']
+                        lmin = data['bright_blue']['min']
+                        lmax = data['bright_blue']['max']
+                        self.color_ranges[color] = [((lmin[0], lmin[1], lmin[2]), (lmax[0], lmax[1], lmax[2])),
+                                                    ((hmin[0], hmin[1], hmin[2]), (hmax[0], hmax[1], hmax[2]))]
+                    elif color == 'blue' and 'bright_blue' not in data.keys():
+                        min = data[color]['min']
+                        max = data[color]['max']
+                        self.color_ranges[color] = [((min[0], min[1], min[2]), (max[0], max[1], max[2]))]
+                    else:
+                        min = data[color]['min']
+                        max = data[color]['max']
+                        self.color_ranges[color] = [((min[0], min[1], min[2]), (max[0], max[1], max[2]))]
+                elif 'bright_blue' in data.keys() and 'blue' not in data.keys():
+                    min = data['bright_blue']['min']
+                    max = data['bright_blue']['max']
+                    self.color_ranges[color] = [((min[0], min[1], min[2]), (max[0], max[1], max[2]))]
 
             if self.world.room_num == 1:
-                target = open('vision/color1.txt', 'r')
-                self.color_ranges = eval(target.read())
-                target.close()
-            elif self.world.room_num == 0:
-                target = open('vision/color0.txt', 'r')
-                self.color_ranges = eval(target.read())
-                target.close()
+                targetFile = open("vision/color1.txt", "w")
+            else:
+                targetFile = open("vision/color0.txt", "w")
+
+            targetFile.write(str(self.color_ranges))
+            targetFile.close()
+            '''
+
+        ##########################################################################################################################################
 
         else:
-            hsv_image = cv2.cvtColor(imgOriginal, cv2.COLOR_BGR2HSV)
+            hsv_image = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
             mask = None
             for ranges in self.color_ranges.itervalues():
                 for begin, end in ranges:
@@ -253,7 +258,10 @@ class Vision:
                 if color is not None and len(circles[color]) < MAX_COLOR_COUNTS[color] and areas[center_index] > \
                         self.min_color_area[color]:
                     if color == 'red':
-                        if 5 < center[0] < self.ROWS-5:  # todo: cropping dependent
+                        if 25 < center[1] < self.COLS - 10: #todo Danger hard coded
+                            circles[color].append((center[1], center[0], areas[center_index], color))
+                    elif color == 'blue':
+                        if 20 < center[0] < self.COLS - 10: #todo Danger hard coded
                             circles[color].append((center[1], center[0], areas[center_index], color))
                     else:
                         circles[color].append((center[1], center[0], areas[center_index], color))
@@ -265,7 +273,7 @@ class Vision:
                         cv2.circle(imgOriginal, (int(x), int(y)), 8, COLORS[color_name], 1)
 
             self.getRobots(circles)
-            #self.getBall(circles)
+            self.getBall(circles)
 
             # Draw ball
             cv2.circle(imgOriginal, (self.world.ball[0], self.world.ball[1]), 8, COLORS['red'], 1)
@@ -287,27 +295,31 @@ class Vision:
             for robot_id, robot in enumerate([self.world.venus, self.world.friend, self.world.enemy1, self.world.enemy2]):
                 if robot.position[0] != NO_VALUE:
                     cv2.rectangle(imgOriginal, (robot.position[0] - 20, robot.position[1] - 20),
-                                  (robot.position[0] + 20, robot.position[1] + 20), self.robot_color(robot_id), 2)
+                                  (robot.position[0] + 20, robot.position[1] + 20), self.robot_color(robot_id, robot.out), 2)
                     cv2.arrowedLine(imgOriginal, (robot.position[0], robot.position[1]),
                                     (int(robot.position[0] + robot.orientation[0] * 50.0),
                                      int(robot.position[1] + robot.orientation[1] * 50.0)),
-                                    self.robot_color(robot_id), 2)
+                                    self.robot_color(robot_id, robot.out), 2)
                     cv2.putText(imgOriginal, str(robot_id), (robot.position[0] + 20, robot.position[1] + 40),
                                 cv2.FONT_HERSHEY_SIMPLEX,
-                                2, self.robot_color(robot_id))
-
+                                2, self.robot_color(robot_id, robot.out))
+            if self.start < 10:
+                self.start +=1
             cv2.imshow('Room', imgOriginal)
             self.pressed_key = cv2.waitKey(2) & 0xFF
 
-    def robot_color(self, r_id):
-        if r_id == 0:
-            return COLORS['green']
-        elif r_id == 1:
-            return COLORS['yellow']
-        elif r_id == 2:
-            return COLORS['red']
-        elif r_id == 3:
-            return COLORS['red']
+    def robot_color(self, r_id, out):
+        if out is True:
+            return COLORS['blue']
+        else:
+            if r_id == 0:
+                return COLORS['green']
+            elif r_id == 1:
+                return COLORS['green']
+            elif r_id == 2:
+                return COLORS['red']
+            elif r_id == 3:
+                return COLORS['red']
 
     # returns one ball
     def getBall(self, circles):
@@ -317,10 +329,11 @@ class Vision:
             self.world.ball[0] = self.world.ball[0]
             self.world.ball[1] = self.world.ball[1]
         else:
+            sorted(circles, key=lambda x: x[2], reverse=True)
             for i in range(0, len(circles['red'])-1):
                 its_robot = False
                 for position in robot_pos:
-                    if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 15:
+                    if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 22: #todo Danger hard coded
                         its_robot = True
                 if not its_robot:
                     found = True
@@ -354,7 +367,7 @@ class Vision:
                 counter = 0
                 if pointsSorted is not None:
                     for localPoint in pointsSorted:
-                        if sqrt((point[0] - localPoint[0]) ** 2 + (point[1] - localPoint[1]) ** 2) < 20:
+                        if sqrt((point[0] - localPoint[0]) ** 2 + (point[1] - localPoint[1]) ** 2) < 30 and counter < 5:
                             counter += 1
                             localPoints.append(localPoint)
                             pointsUsed.append(localPoint)
@@ -375,7 +388,23 @@ class Vision:
 
         for robot in robots:
             # Best cases know all information
-            if len(robot[self.world.team_color]) > 0 and len(robot[self.world.enemy_color]) == 0 and len(robot[self.world.other_color]) > 1 or len(
+            if len(robot[self.world.team_color]) == 1 and len(robot[self.world.enemy_color]) == 0 and len(robot[self.world.other_color]) > 1 or len(
+                    robot[self.world.team_color]) == 1 and len(robot[self.world.enemy_color]) == 0 and len(robot[self.world.our_color]) == 1:
+                self.findVenus(robot)
+
+            elif len(robot[self.world.team_color]) == 1 and len(robot[self.world.enemy_color]) == 0 and len(robot[self.world.our_color]) > 1 or len(
+                    robot[self.world.team_color]) == 1 and len(robot[self.world.enemy_color]) == 0 and len(robot[self.world.other_color]) == 1:
+                self.findFriend(robot)
+
+            elif len(robot[self.world.enemy_color]) == 1 and len(robot[self.world.team_color]) == 0 and len(robot[self.world.other_color]) > 1 or len(
+                    robot[self.world.enemy_color]) == 1 and len(robot[self.world.team_color]) == 0 and len(robot[self.world.our_color]) == 1:
+                self.findEnemy1(robot)
+
+            elif len(robot[self.world.enemy_color]) == 1 and len(robot[self.world.team_color]) == 0 and len(robot[self.world.our_color]) > 1 or len(
+                    robot[self.world.enemy_color]) == 1 and len(robot[self.world.team_color]) == 0 and len(robot[self.world.other_color]) == 1:
+                self.findEnemy2(robot)
+
+            elif len(robot[self.world.team_color]) > 0 and len(robot[self.world.enemy_color]) == 0 and len(robot[self.world.other_color]) > 1 or len(
                     robot[self.world.team_color]) > 0 and len(robot[self.world.enemy_color]) == 0 and len(robot[self.world.our_color]) == 1:
                 self.findVenus(robot)
 
@@ -404,7 +433,7 @@ class Vision:
             elif len(robot[self.world.team_color]) == 0 and len(robot[self.world.our_color]) > 1 and not self.flag[3] or len(robot[self.world.team_color]) == 0 and len(robot[self.world.other_color]) == 1 and not self.flag[3]:
                 self.findEnemy2(robot)
 
-            # looses two colors out of 4
+            # looses 1 color
             elif len(robot[self.world.other_color]) > 1 and not self.flag[0] and len(robot[self.world.our_color]) < 2 :
                 self.findVenus(robot)
 
@@ -422,111 +451,124 @@ class Vision:
             angle = math.degrees(math.atan2(self.world.venus.orientation[0], self.world.venus.orientation[1]))
             self.save_robot((self.world.venus.position[0], self.world.venus.position[1]), angle, 0)
             self.flag[0] = True
+            self.out_counter[0] += 1
+            if self.out_counter[0] > 200:
+                self.out_counter[0] = 0
+                self.world.venus.out = True
+
         if self.flag[1] is False:
             angle = math.degrees(math.atan2(self.world.friend.orientation[0], self.world.friend.orientation[1]))
             self.save_robot((self.world.friend.position[0], self.world.friend.position[1]), angle, 1)
             self.flag[1] = True
+            self.out_counter[1] += 1
+            if self.out_counter[1] > 200:
+                self.out_counter[1] = 0
+                self.world.friend.out = True
+
         if self.flag[2] is False:
             angle = math.degrees(math.atan2(self.world.enemy1.orientation[0], self.world.enemy1.orientation[1]))
             self.save_robot((self.world.enemy1.position[0], self.world.enemy1.position[1]), angle, 2)
             self.flag[2] = True
+            self.out_counter[2] += 1
+            if self.out_counter[2] > 200:
+                self.out_counter[2] = 0
+                self.world.enemy1.out = True
+
         if self.flag[3] is False:
             angle = math.degrees(math.atan2(self.world.enemy2.orientation[0], self.world.enemy2.orientation[1]))
             self.save_robot((self.world.enemy2.position[0], self.world.enemy2.position[1]), angle, 3)
             self.flag[3] = True
+            self.out_counter[3] += 1
+            if self.out_counter[3] > 200:
+                self.out_counter[3] = 0
+                self.world.enemy2.out = True
 
             # venus
             ###################################################################################################################
 
     def findVenus(self, robot):
         if self.last_save[0] == 0:
-            if len(robot[self.world.our_color]) == 1 and len(robot[self.world.team_color]) == 1 and abs(robot[self.world.team_color][0][0]-self.world.friend.position[0]) > 10 and abs(robot[self.world.team_color][0][1]-self.world.friend.position[1]) > 10:
+            if len(robot[self.world.our_color]) == 1 and len(robot[self.world.team_color]) == 1:
                 if math.sqrt((robot[self.world.team_color][0][0]-self.world.friend.position[0])**2 + (robot[self.world.team_color][0][1]-self.world.friend.position[1])**2) > 50:
                     self.single_spot(robot, self.world.team_color, self.world.our_color, 0)
 
             if len(robot[self.world.other_color]) == 3 and not self.flag[0]:
                 self.three_spot(robot, self.world.other_color, self.world.team_color, self.world.enemy1, 0)
         else:
-            if len(robot[self.world.other_color]) == 3 and not self.flag[0]:
+            if len(robot[self.world.other_color]) == 3:
                 self.three_spot(robot, self.world.other_color, self.world.team_color, self.world.enemy1, 0)
 
-            if len(robot[self.world.our_color]) == 1 and len(robot[self.world.team_color]) == 1 and abs(robot[self.world.team_color][0][0]-self.world.friend.position[0]) > 10 and abs(robot[self.world.team_color][0][1]-self.world.friend.position[1]) > 10:
+            if len(robot[self.world.our_color]) == 1 and len(robot[self.world.team_color]) == 1 and not self.flag[0]:
                 if math.sqrt((robot[self.world.team_color][0][0]-self.world.friend.position[0])**2 + (robot[self.world.team_color][0][1]-self.world.friend.position[1])**2) > 50:
                     self.single_spot(robot, self.world.team_color, self.world.our_color, 0)
-
-        if len(robot[self.world.team_color]) == 1 and not self.flag[0] and abs(robot[self.world.team_color][0][0]-self.world.venus.position[0]) < 10 and abs(robot[self.world.team_color][0][1]-self.world.venus.position[1]) < 10:
-            self.center_spot(robot, self.world.venus, self.world.team_color, 0)
 
             # Team mate
             ####################################################################################################################
 
     def findFriend(self, robot):
         if self.last_save[1] == 0:
-            if len(robot[self.world.other_color]) == 1 and len(robot[self.world.team_color]) == 1 and abs(robot[self.world.team_color][0][0]-self.world.venus.position[0]) > 10 and abs(robot[self.world.team_color][0][1]-self.world.venus.position[1]) > 10:
+            if len(robot[self.world.other_color]) == 1 and len(robot[self.world.team_color]) == 1:
                 if math.sqrt((robot[self.world.team_color][0][0]-self.world.venus.position[0])**2 + (robot[self.world.team_color][0][1]-self.world.venus.position[1])**2) > 50:
                     self.single_spot(robot, self.world.team_color, self.world.other_color, 1)
 
             if len(robot[self.world.our_color]) == 3 and not self.flag[1]:
                 self.three_spot(robot, self.world.our_color, self.world.team_color, self.world.enemy2, 1)
         else:
-            if len(robot[self.world.our_color]) == 3 and not self.flag[1]:
+            if len(robot[self.world.our_color]) == 3:
                 self.three_spot(robot, self.world.our_color, self.world.team_color, self.world.enemy2, 1)
 
-            if len(robot[self.world.other_color]) == 1 and len(robot[self.world.team_color]) == 1 and abs(robot[self.world.team_color][0][0]-self.world.venus.position[0]) > 10 and abs(robot[self.world.team_color][0][1]-self.world.venus.position[1]) > 10:
+            if len(robot[self.world.other_color]) == 1 and len(robot[self.world.team_color]) == 1 and not self.flag[1]:
                 if math.sqrt((robot[self.world.team_color][0][0]-self.world.venus.position[0])**2 + (robot[self.world.team_color][0][1]-self.world.venus.position[1])**2) > 50:
                     self.single_spot(robot, self.world.team_color, self.world.other_color, 1)
 
-        if len(robot[self.world.team_color]) == 1 and not self.flag[1] and abs(robot[self.world.team_color][0][0]-self.world.friend.position[0]) < 10 and abs(robot[self.world.team_color][0][1]-self.world.friend.position[1]) < 10:
-            self.center_spot(robot, self.world.friend, self.world.team_color, 1)
 
             # Enemy 1
             ######################################################################################################################
 
     def findEnemy1(self, robot):
         if self.last_save[2] == 0:
-            if len(robot[self.world.our_color]) == 1 and len(robot[self.world.enemy_color]) == 1 and abs(robot[self.world.enemy_color][0][0]-self.world.enemy2.position[0]) > 10 and abs(robot[self.world.enemy_color][0][1]-self.world.enemy2.position[1]) > 10:
+            if len(robot[self.world.our_color]) == 1 and len(robot[self.world.enemy_color]) == 1:
                 if math.sqrt((robot[self.world.enemy_color][0][0]-self.world.enemy2.position[0])**2 + (robot[self.world.enemy_color][0][1]-self.world.enemy2.position[1])**2) > 50:
                     self.single_spot(robot, self.world.enemy_color, self.world.our_color, 2)
 
             if len(robot[self.world.other_color]) == 3 and not self.flag[2]:
                 self.three_spot(robot, self.world.other_color, self.world.enemy_color, self.world.venus, 2)
         else:
-            if len(robot[self.world.other_color]) == 3 and not self.flag[2]:
+            if len(robot[self.world.other_color]) == 3:
                 self.three_spot(robot, self.world.other_color, self.world.enemy_color, self.world.venus, 2)
 
-            if len(robot[self.world.our_color]) == 1 and len(robot[self.world.enemy_color]) == 1 and abs(robot[self.world.enemy_color][0][0]-self.world.enemy2.position[0]) > 10 and abs(robot[self.world.enemy_color][0][1]-self.world.enemy2.position[1]) > 10:
+            if len(robot[self.world.our_color]) == 1 and len(robot[self.world.enemy_color]) == 1 and not self.flag[2]:
                 if math.sqrt((robot[self.world.enemy_color][0][0]-self.world.enemy2.position[0])**2 + (robot[self.world.enemy_color][0][1]-self.world.enemy2.position[1])**2) > 50:
                     self.single_spot(robot, self.world.enemy_color, self.world.our_color, 2)
 
-        if len(robot[self.world.enemy_color]) == 1 and not self.flag[2] and abs(robot[self.world.enemy_color][0][0]-self.world.enemy1.position[0]) < 10 and abs(robot[self.world.enemy_color][0][1]-self.world.enemy1.position[1]) < 10:
-            self.center_spot(robot, self.world.enemy1, self.world.enemy_color, 2)
 
             # enemy 2
             #######################################################################################################################
 
     def findEnemy2(self, robot):
         if self.last_save[3] == 0:
-            if len(robot[self.world.other_color]) == 1 and len(robot[self.world.enemy_color]) == 1 and abs(robot[self.world.enemy_color][0][0]-self.world.enemy1.position[0]) > 10 and abs(robot[self.world.enemy_color][0][1]-self.world.enemy1.position[1]) > 10:
+            if len(robot[self.world.other_color]) == 1 and len(robot[self.world.enemy_color]) == 1:
                 if math.sqrt((robot[self.world.enemy_color][0][0]-self.world.enemy1.position[0])**2 + (robot[self.world.enemy_color][0][1]-self.world.enemy1.position[1])**2) > 50:
                     self.single_spot(robot, self.world.enemy_color, self.world.other_color, 3)
 
             if len(robot[self.world.our_color]) == 3 and not self.flag[3]:
                 self.three_spot(robot, self.world.our_color, self.world.enemy_color, self.world.friend, 3)
         else:
-            if len(robot[self.world.our_color]) == 3 and not self.flag[3]:
+            if len(robot[self.world.our_color]) == 3:
                 self.three_spot(robot, self.world.our_color, self.world.enemy_color, self.world.friend, 3)
 
-            if len(robot[self.world.other_color]) == 1 and len(robot[self.world.enemy_color]) == 1 and abs(robot[self.world.enemy_color][0][0]-self.world.enemy1.position[0]) > 10 and abs(robot[self.world.enemy_color][0][1]-self.world.enemy1.position[1]) > 10:
+            if len(robot[self.world.other_color]) == 1 and len(robot[self.world.enemy_color]) == 1 and not self.flag[3]:
                 if math.sqrt((robot[self.world.enemy_color][0][0]-self.world.enemy1.position[0])**2 + (robot[self.world.enemy_color][0][1]-self.world.enemy1.position[1])**2) > 50:
                     self.single_spot(robot, self.world.enemy_color, self.world.other_color, 3)
 
-        if len(robot[self.world.enemy_color]) == 1 and not self.flag[3] and abs(robot[self.world.enemy_color][0][0]-self.world.enemy2.position[0]) < 10 and abs(robot[self.world.enemy_color][0][1]-self.world.enemy2.position[1]) < 10:
-            self.center_spot(robot, self.world.enemy2, self.world.enemy_color, 3)
 
             ########################################################################################################################
 
     def save_robot(self, position, orientation, robot_id):
         robot = [self.world.venus, self.world.friend, self.world.enemy1, self.world.enemy2][robot_id]
+        if abs(orientation - self.last_angle[robot_id]) > 10 and self.start > 10:
+            orientation = math.degrees(math.atan2(robot[robot_id].orientation[0], robot[robot_id].orientation[1]))
+        self.last_angle[robot_id] = orientation
         robot.position[0] = int(position[0])
         robot.position[1] = int(position[1])
         rad = math.radians(orientation)
@@ -534,50 +576,50 @@ class Vision:
         robot.orientation[1] = cos(rad)
 
     def three_spot(self, robot, three_spot_color, center_color, similar_bot, bot_id):
-            dist = []
-            point_1 = []
-            point_2 = []
-            dist.append(sqrt((robot[three_spot_color][0][0] - robot[three_spot_color][1][0]) ** 2 + (
-                robot[three_spot_color][0][1] - robot[three_spot_color][1][1]) ** 2))
+        bot = [self.world.venus, self.world.friend, self.world.enemy1, self.world.enemy2][bot_id]
+        dist = []
+        point_1 = []
+        point_2 = []
+        dist.append(sqrt((robot[three_spot_color][0][0] - robot[three_spot_color][1][0]) ** 2 + (
+            robot[three_spot_color][0][1] - robot[three_spot_color][1][1]) ** 2))
 
-            dist.append(sqrt((robot[three_spot_color][1][0] - robot[three_spot_color][2][0]) ** 2 + (
-                robot[three_spot_color][1][1] - robot[three_spot_color][2][1]) ** 2))
+        dist.append(sqrt((robot[three_spot_color][1][0] - robot[three_spot_color][2][0]) ** 2 + (
+            robot[three_spot_color][1][1] - robot[three_spot_color][2][1]) ** 2))
 
-            dist.append(sqrt((robot[three_spot_color][2][0] - robot[three_spot_color][0][0]) ** 2 + (
-                robot[three_spot_color][2][1] - robot[three_spot_color][0][1]) ** 2))
+        dist.append(sqrt((robot[three_spot_color][2][0] - robot[three_spot_color][0][0]) ** 2 + (
+            robot[three_spot_color][2][1] - robot[three_spot_color][0][1]) ** 2))
 
-            point_1.append((robot[three_spot_color][(dist.index(max(dist))) % 3][0] +
-                            robot[three_spot_color][(dist.index(max(dist)) + 1) % 3][0]) / 2.0)
-            point_1.append((robot[three_spot_color][(dist.index(max(dist))) % 3][1] +
-                            robot[three_spot_color][(dist.index(max(dist)) + 1) % 3][1]) / 2.0)
-            point_2.append(robot[three_spot_color][(dist.index(max(dist)) + 2) % 3][0])
-            point_2.append(robot[three_spot_color][(dist.index(max(dist)) + 2) % 3][1])
-            angle = self.normalize_angle(math.degrees(math.atan2(point_2[0] - point_1[0], point_2[1] - point_1[1])) + 45)
-            center_x = (
-                           robot[three_spot_color][(dist.index(max(dist))) % 3][0] +
-                           robot[three_spot_color][(dist.index(max(dist)) + 1) % 3][
-                               0]) / 2.0  # add something here
-            center_y = (
-                           robot[three_spot_color][(dist.index(max(dist))) % 3][1] +
-                           robot[three_spot_color][(dist.index(max(dist)) + 1) % 3][
-                               1]) / 2.0  # add something here
-            if math.sqrt((center_x-similar_bot.position[0])**2 + (center_y-similar_bot.position[1])**2) > 50 or len(robot[center_color]) == 1:
-                self.save_robot((center_x, center_y), angle, bot_id)
-                self.flag[bot_id] = True
-                self.last_save[bot_id] = 1
+        point_1.append((robot[three_spot_color][(dist.index(max(dist))) % 3][0] +
+                        robot[three_spot_color][(dist.index(max(dist)) + 1) % 3][0]) / 2.0)
+        point_1.append((robot[three_spot_color][(dist.index(max(dist))) % 3][1] +
+                        robot[three_spot_color][(dist.index(max(dist)) + 1) % 3][1]) / 2.0)
+        point_2.append(robot[three_spot_color][(dist.index(max(dist)) + 2) % 3][0])
+        point_2.append(robot[three_spot_color][(dist.index(max(dist)) + 2) % 3][1])
+        angle = self.normalize_angle(math.degrees(math.atan2(point_2[0] - point_1[0], point_2[1] - point_1[1])) + 45)
+        center_x = (
+                       robot[three_spot_color][(dist.index(max(dist))) % 3][0] +
+                       robot[three_spot_color][(dist.index(max(dist)) + 1) % 3][
+                           0]) / 2.0  # add something here
+        center_y = (
+                       robot[three_spot_color][(dist.index(max(dist))) % 3][1] +
+                       robot[three_spot_color][(dist.index(max(dist)) + 1) % 3][
+                           1]) / 2.0  # add something here
 
-    def center_spot(self, robot, current_bot, center_color, bot_id):
-        angle = math.degrees(math.atan2(current_bot.orientation[0], current_bot.orientation[1]))
-        self.save_robot((robot[center_color][0][0], robot[center_color][0][1]), angle, bot_id)
-        self.flag[bot_id] = True
+        if math.sqrt((center_x-similar_bot.position[0])**2 + (center_y-similar_bot.position[1])**2) > 50:
+            self.save_robot((center_x, center_y), angle, bot_id)
+            bot.out = False
+            self.flag[bot_id] = True
+            self.last_save[bot_id] = 1
 
     def single_spot(self, robot, center_color, single_color, bot_id):
+        bot = [self.world.venus, self.world.friend, self.world.enemy1, self.world.enemy2][bot_id]
         angle = self.normalize_angle(math.degrees(math.atan2(robot[single_color][0][0] - robot[center_color][0][0],
                                             robot[single_color][0][1] - robot[center_color][0][1])) - 150)
         self.save_robot((robot[center_color][0][0], robot[center_color][0][1]), angle, bot_id)
+        bot.out = False
         self.flag[bot_id] = True
         self.last_save[bot_id] = 0
-
+    '''
     def on_mouse(self, event, x, y, flag, param):
         if event == cv2.EVENT_LBUTTONDBLCLK:
             pixelClicked = self.imageHSV[y][x]
@@ -594,21 +636,20 @@ class Vision:
             medianHSV = [np.median(hueList), np.median(satList), np.median(valueList)]
             print medianHSV
             if self.colorList[self.counter] == 'red':
-                if 0 < medianHSV[0] < 5 or 175 < medianHSV[0] < 180:
+                if 0 < medianHSV[0] < 5 or 175 < medianHSV[0] < 180: #todo cropping dependent
                     self.colorMedians.append(medianHSV)
             else:
                 if HUES[self.colorList[self.counter]][0] < medianHSV[0] < HUES[self.colorList[self.counter]][1]:
                     self.colorMedians.append(medianHSV)
 
-    def calibrate(self, filename):
-        self.image = cv2.imread(filename)
-        self.imageHSV = cv2.cvtColor(self.image, cv2.COLOR_BGR2HSV)
+    def calibrate(self, imgOriginal):
+        self.imageHSV = cv2.cvtColor(imgOriginal, cv2.COLOR_BGR2HSV)
         hsvThres = []
-        cv2.imshow('calibrate', self.image)
+        cv2.imshow('calibrate', imgOriginal)
         k = 1
         while k != 27:  # Esc
             k = cv2.waitKey(100) & 0xFF
-            cv2.imshow('calibrate', self.image)
+            cv2.imshow('calibrate', imgOriginal)
             if k == 113:  # q
                 hues = []
                 sats = []
@@ -661,7 +702,7 @@ class Vision:
                     targetFile.close()
                     break
 
-            cv2.circle(self.image, (20, 20), 5, COLORS[self.colorList[self.counter]], 10)
+            cv2.circle(imgOriginal, (20, 20), 5, COLORS[self.colorList[self.counter]], 10)
             if self.counter > 4:
                 if self.world.room_num == 1:
                     targetFile = open("vision/color1.txt", "w")
@@ -669,6 +710,7 @@ class Vision:
                     targetFile = open("vision/color0.txt", "w")
                 targetFile.write(str(self.color_ranges))
                 targetFile.close()
+    '''
 
     def normalize_angle(self, angle):
         if angle > 180:
@@ -712,7 +754,7 @@ class Vision:
             pts1 = np.float32([[5,5],[5,475],[640,480],[640,0]])
             pts2 = np.float32([[0,0],[0,480],[640,480],[640,0]])
             M = cv2.getPerspectiveTransform(pts1,pts2)
-            dst = cv2.warpPerspective(frame,M,(640,480))
+            dst = cv2.warpPerspective(frame, M, (640, 480))
             return dst
 
 
