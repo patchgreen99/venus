@@ -198,3 +198,36 @@ class SimpleStrategy:
     def catch_pass(self):
         self.catch_ball()
         self.pass_ball()
+
+    def enemy_has_ball(self):
+        # todo: what happens if one of enemy robots is not in the game?
+        # returns either (False, -1) or (True, self.world.enemyX)
+
+        # find which enemy robot is closer to the ball
+        enemy1 = self.world.enemy1
+        enemy2 = self.world.enemy2
+        ball = self.world.ball
+
+        distance1 = math.sqrt((ball[0] - enemy1.position[0])**2 + (ball[1] - enemy1.position[1])**2)
+        distance2 = math.sqrt((ball[0] - enemy2.position[0])**2 + (ball[1] - enemy2.position[1])**2)
+        closest = enemy1
+        if distance1 > distance2:
+            closest = enemy2
+
+        # 'closest' is the robot who might have the ball, let's check that
+        distance_between_points = math.sqrt((closest.position[0] - closest.orientation[0])**2 + (closest.position[1] - closest.orientation[1])**2)
+        # we want point that is ten pixels away from the centre towards the orientation vector endpoint
+        ratio = 10.0/distance_between_points
+
+        # then point's coordinates will be
+        new_x = closest.position[0] * (1-ratio) + ratio*closest.orientation[0]
+        new_y = closest.position[1] * (1-ratio) + ratio*closest.orientation[1]
+
+        # check how far this point is from the ball
+        dist_to_ball = math.sqrt((ball[0] - new_x)**2 + (ball[1] - new_y)**2)
+
+        # return status
+        if dist_to_ball < 10:
+            return True, closest
+        else:
+            return False, -1
