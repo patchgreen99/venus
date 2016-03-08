@@ -183,14 +183,14 @@ class SimpleStrategy:
         m = (enemy.position[1] - (enemy.position[1] + enemy.orientation[1])) / (enemy.position[0] - (enemy.position[0] + enemy.orientation[0]))
         c = enemy.position[1] - m * enemy.position[0]
 
-        print(m,c)
+        #print(m,c)
         #go_x = -0.5*(-2*self.world.venus.position[0] + 2*m*(c-self.world.venus.position[1]))/(1+m**2)
         #go_y = go_x*m + c
         go_x = float(self.world.venus.position[0])
         go_y = m*go_x + c
 
         block_position = (go_x, go_y)
-        print block_position
+        #print block_position
         angle, motion_length = self.calculate_angle_length(block_position)
 
         self.approach(angle, motion_length)

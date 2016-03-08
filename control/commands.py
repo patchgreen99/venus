@@ -33,7 +33,7 @@ class Commands:
         print("! vision <room: 0/1> <team_color: blue/yellow> <our_single_spot_color: green/pink>")
         print("! connect")
         #self.vision()
-        self.connect()
+        #self.connect()
 
     def test_movement(self):
         a = np.array([[666, 100, 666, 100, 666],
