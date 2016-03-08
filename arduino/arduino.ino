@@ -77,6 +77,7 @@ void setup() {
   sc.addCommand("I", areAllStopped);
   sc.addCommand("Y", isOneStopped);
   sc.addCommand("T", transferByte);
+  sc.addCommand("H", handshake);
   sc.addDefaultHandler(unknown);
   
   timer.setInterval(ROTARY_REQUEST_INTERVAL, rotaryTimerCallback);
@@ -319,6 +320,11 @@ void transferByte() {
   Wire.beginTransmission(69);
   Wire.write(value);
   Wire.endTransmission();
+}
+
+void handshake() {
+  lastSeqNo = -1;
+  Serial.print(RESP_DONE);
 }
 
 void unknown() {

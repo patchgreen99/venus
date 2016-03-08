@@ -66,7 +66,7 @@ class Commands:
     def pw(self):
         print(self.world)
 
-    def f(self, x, wait=True):
+    def f(self, x):
         """Move forward, negative x means backward"""
         x = int(x)
         s = sign(x)
@@ -77,7 +77,7 @@ class Commands:
         x = int(x)
         if x > 0:
             self.protocol.move(x, [(MOTOR_LEFT, -100 * s),
-                                   (MOTOR_RIGHT, -100 * s)], wait=wait)
+                                   (MOTOR_RIGHT, -100 * s)])
 
     def forward_forever(self):
         """Move forward forever"""
@@ -88,14 +88,6 @@ class Commands:
         """Move backward forever"""
         self.protocol.move_forever([(MOTOR_LEFT, 100),
                                     (MOTOR_RIGHT, 100)])
-
-    def forward(self, x):
-        self.protocol.schedule(x, MOTOR_LEFT, [(MOTOR_LEFT, -100),
-                                               (MOTOR_RIGHT, -100)])
-
-    def backward(self, x):
-        self.protocol.schedule(x, MOTOR_LEFT, [(MOTOR_LEFT, 100),
-                                               (MOTOR_RIGHT, 100)])
 
     def swerve_right(self, x):
         """Swerve right whilst moving forwards
@@ -121,12 +113,56 @@ class Commands:
 
     def test(self):
         """Test of swerving"""
-        self.forward(200)
+        self.forward()
         self.swerve_left(200)
         self.swerve_right(200)
         self.swerve_left(200)
         self.swerve_right(200)
-        self.forward(200)
+        self.forward()
+
+    def forward(self):
+        self.protocol.schedule(200, MOTOR_LEFT, [(MOTOR_LEFT, -100),
+                                                 (MOTOR_RIGHT, -100)])
+
+    def backward(self):
+        self.protocol.schedule(200, MOTOR_LEFT, [(MOTOR_LEFT, 100),
+                                                 (MOTOR_RIGHT, 100)])
+
+    def forward_left(self):
+        self.protocol.schedule(300, MOTOR_TURN, [(MOTOR_TURN, -100),
+                                                 (MOTOR_LEFT, -70),
+                                                 (MOTOR_RIGHT, -100)])
+        self.protocol.schedule(120, MOTOR_LEFT, [(MOTOR_LEFT, -100),
+                                                 (MOTOR_RIGHT, -100)])
+
+    def forward_right(self):
+        self.protocol.schedule(340, MOTOR_TURN, [(MOTOR_TURN, 100),
+                                                 (MOTOR_LEFT, -100),
+                                                 (MOTOR_RIGHT, -70)])
+        self.protocol.schedule(120, MOTOR_LEFT, [(MOTOR_LEFT, -100),
+                                                 (MOTOR_RIGHT, -100)])
+
+    def backward_left(self):
+        self.protocol.schedule(340, MOTOR_TURN, [(MOTOR_TURN, 100),
+                                                 (MOTOR_LEFT, 90),
+                                                 (MOTOR_RIGHT, 100)])
+
+    def backward_right(self):
+        self.protocol.schedule(340, MOTOR_TURN, [(MOTOR_TURN, -100),
+                                                 (MOTOR_LEFT, 100),
+                                                 (MOTOR_RIGHT, 90)])
+
+    def sharp_left(self):
+        self.protocol.schedule(120, MOTOR_TURN, [(MOTOR_TURN, -100),
+                                                 (MOTOR_LEFT, 100),
+                                                 (MOTOR_RIGHT, -100)])
+        self.forward()
+
+    def sharp_right(self):
+        self.protocol.schedule(120, MOTOR_TURN, [(MOTOR_TURN, 100),
+                                                 (MOTOR_LEFT, -100),
+                                                 (MOTOR_RIGHT, 100)])
+        self.forward()
 
     def c(self, x):
         """Rotate clockwise, negative x means counter-clockwise"""
