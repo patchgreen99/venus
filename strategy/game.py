@@ -94,11 +94,6 @@ class Game:
 
 
 
-'''Add here a very cool state machine'''
-class GameState:
-
-
-
 
 
 
