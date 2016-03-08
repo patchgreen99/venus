@@ -26,9 +26,11 @@ class World:
         self.our_goalY = (0,0) #TODO
         self.our_goallowX = (0,0)#TODO
         self.our_goalhighX = (0,0) #TODO
+        self.our_goalmeanX = (self.our_goalhighX + self.our_goallowX)/2
         self.their_goalY = (0,0) #TODO
         self.their_goallowX = (0,0)#TODO
         self.their_goalhighX = (0,0) #TODO
+        self.their_goalmeanX = (self.their_goalhighX+ self.their_goallowX)/2
 
         self.ball = Array('i', [NO_VALUE, NO_VALUE]) # in pixels
         self.ball_velocity = Array('i', [NO_VALUE, NO_VALUE]) # pixels per frame
