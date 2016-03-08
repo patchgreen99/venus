@@ -1,6 +1,7 @@
 import math
 import numpy as np
 from potential_field import Potential
+from simple import SimpleStrategy
 
 ROBOT_SIZE = 20
 
@@ -31,16 +32,13 @@ class Game:
             block_pass = infinite_axial(self.world.enemy1.position, self.world.enemy2.position, 0, 0)
             block_goal_enemy1 = infinite_axial(self.world.enemy1.position, self.world.there_our, 0, 0)
             block_goal_enemy2 = infinite_axial(self.world.enemy2.position, self.world.there_our, 0, 0)
-            dont_copy_friend_enemy1 = infinite_axial(self.world.friend.position, self.world.enemy1.position, 0, 0)
-            dont_copy_friend_enemy2 = infinite_axial(self.world.friend.position, self.world.enemy2.position, 0, 0)
             advance = step_field(self.world.friend.position, 0, 0)
             catch_up = step_field(self.world.venus.position, 0, 0)
             bad_minima = infinite_axial(self.world.venus.position, self.world.friend.position, 0, 0)
 
             self.local_potential = Potential(self.current_point, ball_field, friend_field, enemy1_field, enemy2_field, free_up_pass_enemy1,
                                              free_up_pass_enemy2, free_up_goal_enemy1, free_up_goal_enemy2, block_pass,
-                                             block_goal_enemy1, block_goal_enemy2, dont_copy_friend_enemy1,
-                                             dont_copy_friend_enemy2, advance, catch_up,bad_minima)
+                                             block_goal_enemy1, block_goal_enemy2,  advance, catch_up,bad_minima)
 
             '''
             jules's movement method will be called here once you have you local matrix
@@ -49,8 +47,9 @@ class Game:
 
 
 
-
 '''Add here a very cool state machine'''
+class GameState:
+
 
 
 

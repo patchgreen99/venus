@@ -22,8 +22,13 @@ class World:
         self.our_color = our_color  # green or pink
         self.enemy_color = 'yellow' if team_color == 'blue' else 'blue'
         self.other_color = 'green' if our_color == 'pink' else 'pink'
-        self.there_goal = (0,0) #todo get goal
-        self.our_goal = (0,0) #todo get goal
+
+        self.our_goalY = (0,0) #TODO
+        self.our_goallowX = (0,0)#TODO
+        self.our_goalhighX = (0,0) #TODO
+        self.their_goalY = (0,0) #TODO
+        self.their_goallowX = (0,0)#TODO
+        self.their_goalhighX = (0,0) #TODO
 
         self.ball = Array('i', [NO_VALUE, NO_VALUE]) # in pixels
         self.ball_velocity = Array('i', [NO_VALUE, NO_VALUE]) # pixels per frame

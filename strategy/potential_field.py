@@ -2,7 +2,7 @@ import math
 
 
 class Potential:
-        def __init__(self, current_point, ball_field, friend_field, enemy1_field, enemy2_field, free_up_pass_enemy1, free_up_pass_enemy2, free_up_goal_enemy1, free_up_goal_enemy2, block_pass, block_goal_enemy1, block_goal_enemy2, dont_copy_friend_enemy1, dont_copy_friend_enemy2, advance, catch_up):
+        def __init__(self, current_point, ball_field, friend_field, enemy1_field, enemy2_field, free_up_pass_enemy1, free_up_pass_enemy2, free_up_goal_enemy1, free_up_goal_enemy2, block_pass, block_goal_enemy1, block_goal_enemy2, dont_copy_friend_enemy1, dont_copy_friend_enemy2, advance, catch_up,bad_minima):
             self.current_point = current_point
 
             self.ball_field = ball_field
@@ -16,11 +16,9 @@ class Potential:
             self.block_pass = block_pass
             self.block_goal_enemy1 = block_goal_enemy1
             self.block_goal_enemy2 = block_goal_enemy2
-            self.dont_copy_friend_enemy1 = dont_copy_friend_enemy1
-            self.dont_copy_friend_enemy2 = dont_copy_friend_enemy2
             self.advance = advance
             self.catch_up = catch_up
-
+            self.bad_minima = bad_minima
 
         '''
         The magic will happen here soon
