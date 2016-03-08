@@ -7,9 +7,9 @@ class StrategyTools:
         self.world = world
         self.commands = commands
 
-    def attackwithball(self) :
+    def attackwithball(self):
 
-        (x1,y1) =self.world.venus
+        (x1,y1) = self.world.venus
         (x2,y2) = self.world.friend
         robotposlist = [self.world.enemy1,self.world.enemy2]
         goalx = self.world.their_goalX
