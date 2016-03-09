@@ -22,6 +22,7 @@ class World:
         self.our_color = our_color  # green or pink
         self.enemy_color = 'yellow' if team_color == 'blue' else 'blue'
         self.other_color = 'green' if our_color == 'pink' else 'pink'
+        self.we_have_computer_goal = we_have_computer_goal
 
         if room_num == 1:
             if we_have_computer_goal:
@@ -43,7 +44,7 @@ class World:
                 self.their_goalhighY = 304
                 self.their_goalmeanY = (self.their_goalhighY + self.their_goallowY)/2
         else:
-            if we_have_computer_goal:
+            if we_have_computer_goal: #todo these values need checking
                 self.our_goalX = 618 # right
                 self.our_goallowY = 176
                 self.our_goalhighY = 297
@@ -63,7 +64,7 @@ class World:
                 self.their_goalmeanY = (self.their_goalhighY + self.their_goallowY)/2
 
         self.ball = Array('i', [NO_VALUE, NO_VALUE]) # in pixels
-        self.ball_velocity = Array('i', [NO_VALUE, NO_VALUE]) # pixels per frame
+        self.ball_velocity = Array('d', [NO_VALUE, NO_VALUE]) # pixels per frame
         self.ball_moving = Value('b')
         self.venus = Robot()
         self.friend = Robot()

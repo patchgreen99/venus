@@ -3,6 +3,19 @@ import math
 PITCH_ROWS = 480
 PITCH_COLS = 640
 
+DEFENDING_LEFT_TOP = [(117, 114), (190, 144)]
+DEFENDING_LEFT_BOT = [(169, 365), (188, 367)]
+DEFENDING_RIGHT_TOP = [(457, 107), (462, 114)]
+DEFENDING_RIGHT_BOT = [(460, 358), (464, 368)]
+GOAL_LEFT_TOP = [(25, 114), (38, 181)]
+GOAL_LEFT_BOT = [(25, 365), (37, 304)]
+GOAL_RIGHT_TOP = [(594, 107), (618, 176)]
+GOAL_RIGHT_BOT = [(600, 358), (620, 297)]
+PITCH_TOP_RIGHT = [(594, 15), (617, 10)]
+PITCH_TOP_LEFT = [(25, 13), (39, 14)]
+PITCH_BOT_RIGHT = [(600, 450), (617, 464)]
+PITCH_BOT_LEFT = [(25, 457), (34, 466)]
+
 
 class Potential:
         def __init__(self, current_point, world, ball_field, friend_field, enemy1_field, enemy2_field,
@@ -10,31 +23,40 @@ class Potential:
                      block_goal_enemy1, block_goal_enemy2, advance, catch_up, bad_minima):
 
             self.world = world
-            if self.world.room_num == 1:
-                self.top_wall = step_field((39, 14), (617-39, 10-14), 0, 0)
-                self.bot_wall = step_field((34, 466), (617-34, 464-466), 0, 0)
-                self.right_wall = step_field((617, 10), (617-617, 464-10), 0, 0)
-                self.left_wall = step_field((34, 466), (34-39, 466-14), 0, 0)
-                self.penalty_box_front = infinite_axial((),(), 0, 0)
-                self.penalty_box_left = infinite_axial((),(), 0, 0)
-                self.penalty_box_right = infinite_axial((),(), 0, 0)
+            self.current_point = current_point
 
-                self.current_point = current_point
-                self.ball_field = ball_field
-                self.friend_field = friend_field
-                self.enemy1_field = enemy1_field
-                self.enemy2_field = enemy2_field
-                self.free_up_pass_enemy1 = free_up_pass_enemy1
-                self.free_up_pass_enemy2 = free_up_pass_enemy2
-                self.free_up_goal_enemy1 = free_up_goal_enemy1
-                self.free_up_goal_enemy2 = free_up_goal_enemy2
-                self.block_pass = block_pass
-                self.block_goal_enemy1 = block_goal_enemy1
-                self.block_goal_enemy2 = block_goal_enemy2
-                self.advance = advance
-                self.catch_up = catch_up
-                self.bad_minima = bad_minima
+            self.top_wall = step_field(PITCH_TOP_LEFT[self.world.room_num], (PITCH_TOP_LEFT[self.world.room_num][0]-PITCH_TOP_RIGHT[self.world.room_num][0], PITCH_TOP_LEFT[self.world.room_num][1]-PITCH_TOP_RIGHT[self.world.room_num][1]), 0, 0)
+            self.bot_wall = step_field(PITCH_BOT_LEFT[self.world.room_num], (PITCH_BOT_RIGHT[self.world.room_num][0]-PITCH_BOT_LEFT[self.world.room_num][0], PITCH_BOT_RIGHT[self.world.room_num][1]-PITCH_BOT_LEFT[self.world.room_num][1]), 0, 0)
+            self.right_wall = step_field(PITCH_TOP_RIGHT[self.world.room_num], (PITCH_TOP_RIGHT[self.world.room_num][0] - PITCH_BOT_RIGHT[self.world.room_num][0], PITCH_TOP_RIGHT[self.world.room_num][1] - PITCH_BOT_RIGHT[self.world.room_num][1]), 0, 0)
+            self.left_wall = step_field(PITCH_TOP_LEFT[self.world.room_num], (PITCH_BOT_LEFT[self.world.room_num][0] - PITCH_TOP_LEFT[self.world.room_num][0], PITCH_BOT_LEFT[self.world.room_num][1] - PITCH_TOP_LEFT[self.world.room_num][1]), 0, 0)
 
+            if world.we_have_computer_goal and world.room_num == 1 or not world.we_have_computer_goal and world.room_num == 0: # there goal is on the right
+                self.penalty_box_front = infinite_axial(DEFENDING_RIGHT_TOP[self.world.room_num], DEFENDING_RIGHT_BOT[self.world.room_num], 0, 0)
+                self.penalty_box_top = infinite_axial(GOAL_RIGHT_TOP[self.world.room_num], DEFENDING_RIGHT_TOP[self.world.room_num], 0, 0)
+                self.penalty_box_bot = infinite_axial(GOAL_RIGHT_BOT[self.world.room_num], DEFENDING_RIGHT_BOT[self.world.room_num], 0, 0)
+            elif world.we_have_computer_goal and world.room_num == 0 or not world.we_have_computer_goal and world.room_num == 1: # obviously the left goal
+                self.penalty_box_front = infinite_axial(DEFENDING_LEFT_TOP[self.world.room_num], DEFENDING_LEFT_BOT[self.world.room_num], 0, 0)
+                self.penalty_box_top = infinite_axial(GOAL_LEFT_TOP[self.world.room_num], DEFENDING_LEFT_TOP[self.world.room_num], 0, 0)
+                self.penalty_box_bot = infinite_axial(GOAL_LEFT_BOT[self.world.room_num], DEFENDING_LEFT_BOT[self.world.room_num], 0, 0)
+
+            self.current_point = current_point
+            self.ball_field = ball_field
+            self.friend_field = friend_field
+            self.enemy1_field = enemy1_field
+            self.enemy2_field = enemy2_field
+            self.free_up_pass_enemy1 = free_up_pass_enemy1
+            self.free_up_pass_enemy2 = free_up_pass_enemy2
+            self.free_up_goal_enemy1 = free_up_goal_enemy1
+            self.free_up_goal_enemy2 = free_up_goal_enemy2
+            self.block_pass = block_pass
+            self.block_goal_enemy1 = block_goal_enemy1
+            self.block_goal_enemy2 = block_goal_enemy2
+            self.advance = advance
+            self.catch_up = catch_up
+            self.bad_minima = bad_minima
+
+        def get_local_potential(self):
+            return
 
 
 
