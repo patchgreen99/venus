@@ -70,6 +70,7 @@ int paramCount;
 void setup() {
   SDPsetup();
   
+  sc.addCommand("A", sensor);
   sc.addCommand("M", moveTimeUnits);
   sc.addCommand("R", moveRotaryUnits);
   sc.addCommand("V", moveForever);
@@ -376,4 +377,20 @@ void handshake() {
 
 void unknown() {
   Serial.print(RESP_UNKNOWN);
+}
+
+void sensor() {
+  if (ignore()) {
+    return;
+  }
+  
+  bool has_ball = false;
+  
+  Wire.requestFrom(57, 1);
+  int8_t test = (int8_t)Wire.read();
+
+  if(-test<70)
+    has_ball = true;
+  
+  Serial.print(has_ball);
 }

@@ -85,6 +85,9 @@ class Commands:
     def pw(self):
         print(self.world)
 
+    def potential(self):
+        self.s
+
     def test1(self):
         self.game.local_potential = np.array([[666, 100, 666, 100, 666],
                                               [666, 100, 0, 0, 666],
