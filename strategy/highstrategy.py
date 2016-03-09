@@ -74,8 +74,8 @@ class StrategyTools:
         c1 = newlist[1][1] - m1*newlist[1][0]
         return (m1,c1)
 
-    def ballwithenemy(self, enemystr):
-        enemy_no = int(enemystr)
+    def ballwithenemy(self, enemy_no):
+        # enemy_no = int(enemystr)
         if enemy_no == 1:
             enemyposition = self.world.enemy1.position
             if self.iclosertogoal(enemyposition): #TODO: or enemy out of pitch
@@ -213,5 +213,26 @@ class StrategyTools:
             #move to pass position
             print('move to pass position')
 
-
+    def main(self):
+        venus = self.world.venus
+        friend = self.world.friend
+        enemy1 = self.world.enemy1
+        enemy2 = self.world.enemy2
+        if venus.hasBallInRange:
+            # venus has the ball
+            self.attackwithball()
+        elif friend.hasBallInRange:
+            # friend has the ball
+            self.ballwithfriend()
+        elif enemy1.hasBallInRange:
+            # enemy1 has the ball
+            self.ballwithenemy(1)
+        elif enemy2.hasBallInRange:
+            # enemy2 has the ball
+            self.ballwithenemy(2)
+        else:
+            # open ball!
+            self.openball()
+    if __name__ == "__main__":
+        main()
 
