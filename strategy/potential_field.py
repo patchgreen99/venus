@@ -1,7 +1,10 @@
 import math
+import numpy as np
 
-PITCH_ROWS = 480
-PITCH_COLS = 640
+PITCH_ROWS = 480 #pixels
+PITCH_COLS = 640 #pixels
+
+POTENTIAL_GRANULARITY = 20 #pixels
 
 DEFENDING_LEFT_TOP = [(117, 114), (190, 144)]
 DEFENDING_LEFT_BOT = [(169, 365), (188, 367)]
@@ -55,10 +58,16 @@ class Potential:
             self.catch_up = catch_up
             self.bad_minima = bad_minima
 
+            self.local_potential = np.zeros(5, 5)
+
         def get_local_potential(self):
             return
 
+        def get_current_square(self):
+            return
 
+        def calculate_squares_minima(self, row, col): # minima in the closest center to the square
+            return
 
 
 

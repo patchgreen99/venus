@@ -131,8 +131,6 @@ class Vision:
 
         ####################################################
 
-        #self.capture.set(cv2.CAP_PROP_FRAME_WIDTH, self.COLS)
-        #self.capture.set(cv2.CAP_PROP_FRAME_HEIGHT, self.ROWS)
         cv2.createTrackbar('BRIGHTNESS', 'Room', 0, 100, self.nothing)
         cv2.createTrackbar('CONTRAST', 'Room', 0, 100, self.nothing)
         cv2.createTrackbar('SATURATION', 'Room', 0, 100, self.nothing)
@@ -173,15 +171,15 @@ class Vision:
 
     def frame(self):
         status, frame = self.capture.read()
+        self.pressed_key = cv2.waitKey(2) & 0xFF
         imgOriginal = self.step(frame)
         #blur = imgOriginal
         blur = cv2.GaussianBlur(imgOriginal, (3, 3), 2) #todo: what values are best
 #########################################################################################################################################
         if cv2.getTrackbarPos('CALIBRATE', 'Room') == 1:
 
-            cv2.setTrackbarPos('CALIBRATE', 'Room', 0)
             colors = ['red', 'blue', 'yellow', 'pink', 'green']
-            data = getColors(self.world.room_num, imgOriginal)
+            data = getColors(self.world.room_num, imgOriginal) #todo uncomment if you want to save new calibrations
             '''
             for color in colors:
                 if color in data.keys():
@@ -258,10 +256,10 @@ class Vision:
                 if color is not None and len(circles[color]) < MAX_COLOR_COUNTS[color] and areas[center_index] > \
                         self.min_color_area[color]:
                     if color == 'red':
-                        if 25 < center[1] < self.COLS - 10: #todo Danger hard coded
+                        if 10 < center[1] < self.COLS - 10: #todo Danger hard coded
                             circles[color].append((center[1], center[0], areas[center_index], color))
                     elif color == 'blue':
-                        if 20 < center[0] < self.COLS - 10: #todo Danger hard coded
+                        if 10 < center[0] < self.COLS - 10: #todo Danger hard coded
                             circles[color].append((center[1], center[0], areas[center_index], color))
                     else:
                         circles[color].append((center[1], center[0], areas[center_index], color))
@@ -306,7 +304,6 @@ class Vision:
             if self.start < 10:
                 self.start +=1
             cv2.imshow('Room', imgOriginal)
-            self.pressed_key = cv2.waitKey(2) & 0xFF
 
     def robot_color(self, r_id, out):
         if out is True:
@@ -322,9 +319,9 @@ class Vision:
                 return COLORS['red']
 
     # returns one ball
-    def getBall(self, circles):
+    def getBall(self, circles): #todo look over and test everything in here
         found = False
-        robot_pos = [self.world.venus.position, self.world.friend.position, self.world.enemy1.position, self.world.enemy2.position]
+        robots_pos = [self.world.venus.position, self.world.friend.position, self.world.enemy1.position, self.world.enemy2.position]
         if len(circles['red']) == 0:
             self.world.ball[0] = self.world.ball[0]
             self.world.ball[1] = self.world.ball[1]
@@ -332,19 +329,102 @@ class Vision:
             sorted(circles, key=lambda x: x[2], reverse=True)
             for i in range(0, len(circles['red'])-1):
                 its_robot = False
-                for position in robot_pos:
+                for position in robots_pos:
                     if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 22: #todo Danger hard coded
                         its_robot = True
                 if not its_robot:
                     found = True
                     self.world.ball[0] = int(circles['red'][i][0])
                     self.world.ball[1] = int(circles['red'][i][1])
+                    for positionIndex in range(0, len(robots_pos)):
+                        position = robots_pos[positionIndex]
+                        # todo Danger hard coded
+                        if(positionIndex == 0):
+                            if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 40:
+                                self.world.venus.hasBallInRange = True
+                            else:
+                                self.world.venus.hasBallInRange = False
+                        if(positionIndex == 1):
+                            if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 40:
+                                self.world.friend.hasBallInRange = True
+                            else:
+                                self.world.friend.hasBallInRange = False
+                        if(positionIndex == 2):
+                            if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 40:
+                                self.world.enemy1.hasBallInRange = True
+                            else:
+                                self.world.enemy1.hasBallInRange = False
+                        if(positionIndex == 3):
+                            if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 40:
+                                self.world.enemy2.hasBallInRange = True
+                            else:
+                                self.world.enemy2.hasBallInRange = False
+
                     self.trajectory_list.append((int(circles['red'][i][0]), int(circles['red'][i][1])))
                     self.trajectory_list.pop(0)
                     break
             if not found:
-                self.world.ball[0] = self.world.ball[0]
-                self.world.ball[1] = self.world.ball[1]
+                flag = False
+                for positionIndex in range(0,len(robots_pos)):
+                    position = robots_pos[positionIndex]
+                    if(positionIndex == 0 and self.world.venus.hasBallInRange == True):
+                        flag = True
+                        # 'closest' is the robot who might have the ball, let's check that
+                        distance_between_points = math.sqrt((position[0] - self.world.venus.orientation[0])**2 + (position[1] -
+                                                             self.world.venus.orientation[1])**2)
+                        # we want point that is ten pixels away from the centre towards the orientation vector endpoint
+                        ratio = 2.0/distance_between_points
+                        # then point's coordinates will be
+                        new_x = int(position[0] + 30 * (1-ratio) * self.world.venus.orientation[0])
+                        new_y = int(position[1] + 30 * (1-ratio) * self.world.venus.orientation[1])
+                        self.world.ball[0] = new_x
+                        self.world.ball[1] = new_y
+
+                    if(positionIndex == 1 and self.world.friend.hasBallInRange == True):
+                        flag = True
+                        # 'closest' is the robot who might have the ball, let's check that
+                        distance_between_points = math.sqrt((position[0] - self.world.friend.orientation[0])**2 + (position[1] -
+                                                             self.world.friend.orientation[1])**2)
+                        # we want point that is ten pixels away from the centre towards the orientation vector endpoint
+                        ratio = 2.0/distance_between_points
+
+                        # then point's coordinates will be
+                        new_x = int(position[0] + 30 * (1-ratio) * self.world.friend.orientation[0])
+                        new_y = int(position[1] + 30 * (1-ratio) * self.world.friend.orientation[1])
+                        self.world.ball[0] = new_x
+                        self.world.ball[1] = new_y
+
+                    if(positionIndex == 2 and self.world.enemy1.hasBallInRange == True):
+                        flag = True
+                        # 'closest' is the robot who might have the ball, let's check that
+                        distance_between_points = math.sqrt((position[0] - self.world.enemy1.orientation[0])**2 + (position[1] -
+                                                             self.world.enemy1.orientation[1])**2)
+                        # we want point that is ten pixels away from the centre towards the orientation vector endpoint
+                        ratio = 2.0/distance_between_points
+
+                        # then point's coordinates will be
+                        new_x = int(position[0] + 30 * (1-ratio) * self.world.enemy1.orientation[0])
+                        new_y = int(position[1] + 30 * (1-ratio) * self.world.enemy1.orientation[1])
+                        self.world.ball[0] = new_x
+                        self.world.ball[1] = new_y
+
+                    if(positionIndex == 3 and self.world.enemy2.hasBallInRange == True):
+                        flag = True
+                        # 'closest' is the robot who might have the ball, let's check that
+                        distance_between_points = math.sqrt((position[0] - self.world.enemy2.orientation[0])**2 + (position[1] -
+                                                             self.world.enemy2.orientation[1])**2)
+                        # we want point that is ten pixels away from the centre towards the orientation vector endpoint
+                        ratio = 2.0/distance_between_points
+
+                        # then point's coordinates will be
+                        new_x = int(position[0] + 30 * (1-ratio) * self.world.enemy2.orientation[0])
+                        new_y = int(position[1] + 30 * (1-ratio) * self.world.enemy2.orientation[1])
+                        self.world.ball[0] = new_x
+                        self.world.ball[1] = new_y
+
+                if not flag:
+                    self.world.ball[0] = self.world.ball[0]
+                    self.world.ball[1] = self.world.ball[1]
 
     def getRobots(self, circles):
         pointList = circles["green"] + circles["pink"] + circles["blue"] + circles["yellow"]
@@ -619,98 +699,6 @@ class Vision:
         bot.out = False
         self.flag[bot_id] = True
         self.last_save[bot_id] = 0
-    '''
-    def on_mouse(self, event, x, y, flag, param):
-        if event == cv2.EVENT_LBUTTONDBLCLK:
-            pixelClicked = self.imageHSV[y][x]
-            surroundingPixels = [self.imageHSV[y-1][x-1], self.imageHSV[y-1][x], self.imageHSV[y-1][x+1], self.imageHSV[y]
-            [x+1], self.imageHSV[y+1][x+1], self.imageHSV[y+1][x], self.imageHSV[y+1][x-1], self.imageHSV[y][x-1], self.imageHSV[y][x]]
-            hueList = []
-            satList = []
-            valueList = []
-            for i in range(0, 9):
-                hueList.append(surroundingPixels[i][0])
-                satList.append(surroundingPixels[i][1])
-                valueList.append(surroundingPixels[i][2])
-
-            medianHSV = [np.median(hueList), np.median(satList), np.median(valueList)]
-            print medianHSV
-            if self.colorList[self.counter] == 'red':
-                if 0 < medianHSV[0] < 5 or 175 < medianHSV[0] < 180: #todo cropping dependent
-                    self.colorMedians.append(medianHSV)
-            else:
-                if HUES[self.colorList[self.counter]][0] < medianHSV[0] < HUES[self.colorList[self.counter]][1]:
-                    self.colorMedians.append(medianHSV)
-
-    def calibrate(self, imgOriginal):
-        self.imageHSV = cv2.cvtColor(imgOriginal, cv2.COLOR_BGR2HSV)
-        hsvThres = []
-        cv2.imshow('calibrate', imgOriginal)
-        k = 1
-        while k != 27:  # Esc
-            k = cv2.waitKey(100) & 0xFF
-            cv2.imshow('calibrate', imgOriginal)
-            if k == 113:  # q
-                hues = []
-                sats = []
-                values = []
-                if len(self.colorMedians) > 0:   # We have clicked
-                    for i in range(0, len(self.colorMedians)):
-                        hues.append(self.colorMedians[i][0])
-                        sats.append(self.colorMedians[i][1])
-                        values.append(self.colorMedians[i][2])
-                    if self.colorList[self.counter] == 'red':
-                        if max(hues) <= 15:
-                            hsvThres = [((min(hues), min(sats), min(values)), (max(hues), 255, 255)), self.color_ranges['red'][1]]
-                        elif min(hues) >= 165:
-                            hsvThres = [self.color_ranges['red'][0], ((min(hues), min(sats), min(values)), (max(hues), 255, 255))]
-                        else:
-                            huesLower = []
-                            huesUpper = []
-                            satsLower = []
-                            satsUpper = []
-                            valuesLower = []
-                            valuesUpper = []
-                            try:
-                                for i in range(0, len(hues)):
-                                    if hues[i] <= 100:
-                                        huesLower.append(hues[i])
-                                        satsLower.append(sats[i])
-                                        valuesLower.append(values[i])
-                                    else:
-                                        huesUpper.append(hues[i])
-                                        satsUpper.append(sats[i])
-                                        valuesUpper.append(values[i])
-                                lowerRange = ((min(huesLower), min(satsLower), min(valuesLower)), (max(huesLower), 255, 255))
-                                upperRange = ((min(huesUpper), min(satsUpper), min(valuesUpper)), (max(huesUpper), 255, 255))
-                                hsvThres = [lowerRange, upperRange]
-                            except ValueError:
-                                pass
-                    else:
-                        hsvThres = [((min(hues), min(sats), min(values)), (max(hues), 255, 255))]
-
-                    self.color_ranges[self.colorList[self.counter]] = hsvThres
-
-                self.counter += 1
-                del self.colorMedians[:]
-                if self.counter == 5:
-                    if self.world.room_num == 1:
-                        targetFile = open("vision/color1.txt", "w")
-                    else:
-                        targetFile = open("vision/color0.txt", "w")
-                    targetFile.write(str(self.color_ranges))
-                    targetFile.close()
-                    break
-
-            cv2.circle(imgOriginal, (20, 20), 5, COLORS[self.colorList[self.counter]], 10)
-            if self.counter > 4:
-                if self.world.room_num == 1:
-                    targetFile = open("vision/color1.txt", "w")
-                else:
-                    targetFile = open("vision/color0.txt", "w")
-                targetFile.write(str(self.color_ranges))
-                targetFile.close()
-    '''
 
     def normalize_angle(self, angle):
         if angle > 180:

@@ -8,9 +8,7 @@ ROBOT_INFLUENCE_SIZE = 50
 class Game:
     def __init__(self, world):
         self.world = world
-        self.current_point = Potential.get_current_sqaure() #todo
         self.local_potential = np.zeros(5, 5)
-        return
 
     def run(self):
 
@@ -82,6 +80,7 @@ class Game:
             # 0 0 0 0 0 0 0
 
             # Constructor must always be this
+            self.current_point = (0, 0)
             self.local_potential = Potential(self.current_point, self.world, ball_field, friend_field, enemy1_field, enemy2_field,
                                              free_up_pass_enemy1, free_up_pass_enemy2, free_up_goal_enemy1,
                                              free_up_goal_enemy2, block_pass,

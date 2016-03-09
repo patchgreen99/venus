@@ -9,6 +9,7 @@ class Robot:
         self.position = Array('i', [NO_VALUE, NO_VALUE])
         self.orientation = Array('d', [NO_VALUE, NO_VALUE])
         self.out = Value('b')
+        self.hasBallInRange = False
 
     def __str__(self):
         return "(pos: {} {}, ori: {})".format(self.position[0], self.position[1],
@@ -44,23 +45,23 @@ class World:
                 self.their_goalhighY = 304
                 self.their_goalmeanY = (self.their_goalhighY + self.their_goallowY)/2
         else:
-            if we_have_computer_goal: #todo these values need checking
-                self.our_goalX = 618 # right
-                self.our_goallowY = 176
-                self.our_goalhighY = 297
+            if we_have_computer_goal:
+                self.our_goalX = 594 # right
+                self.our_goallowY = 107
+                self.our_goalhighY = 358
                 self.our_goalmeanY = (self.our_goalhighY + self.our_goallowY)/2
-                self.their_goalX = 38 # right
-                self.their_goallowY = 181
-                self.their_goalhighY = 304
+                self.their_goalX = 25 # right
+                self.their_goallowY = 114
+                self.their_goalhighY = 365
                 self.their_goalmeanY = (self.their_goalhighY + self.their_goallowY)/2
             else:
-                self.our_goalX = 38 # left
-                self.our_goallowY = 181
-                self.our_goalhighY = 304
+                self.our_goalX = 25 # left
+                self.our_goallowY = 114
+                self.our_goalhighY = 365
                 self.our_goalmeanY = (self.our_goalhighY + self.our_goallowY)/2
-                self.their_goalX = 618 # right
-                self.their_goallowY = 176
-                self.their_goalhighY = 297
+                self.their_goalX = 594 # right
+                self.their_goallowY = 107
+                self.their_goalhighY = 358
                 self.their_goalmeanY = (self.their_goalhighY + self.their_goallowY)/2
 
         self.ball = Array('i', [NO_VALUE, NO_VALUE]) # in pixels
