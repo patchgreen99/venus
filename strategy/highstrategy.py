@@ -14,11 +14,16 @@ class StrategyTools:
         x3,y3 = self.world.enemy1.position
         x4,y4 = self.world.enemy2.position
 
-        robotposlist = [(x3,y3), (x4,y4)]
-        print(robotposlist)
+        robotposlist = [(x3,y3),
+                        (x4,y4)]
+        # TODO: if self.world.enemy1.out.value == False:
+
         goalx = self.world.their_goalX
         highy = self.world.their_goalhighY
         lowy = self.world.their_goallowY
+
+        print(goalx,highy,lowy)
+        print(self.world.enemy1.position[0],self.world.enemy1.position[1])
         i = (highy + lowy)/2
         while i < highy:
             if self.isSafeKick((x1,y1),(goalx,i),robotposlist ):
@@ -37,12 +42,12 @@ class StrategyTools:
             #self.commands.pass_ball()
             print('pass')
             return
-        #do something instead
+        # do something instead
         print('something else')
         return
 
     def isSafeKick(self, (x1, y1), (x2, y2), robotposlist):
-        rotation = 0.26
+        rotation = 0.20
         m1, c1 = self.rotateline(x1, y1, x2, y2, rotation)
         m2, c2 = self.rotateline(x1, y1, x2, y2, -rotation)
         if (y2 - m1 * x2 - c1) > 0:
@@ -54,7 +59,7 @@ class StrategyTools:
             if robotposlist[i][1] > min(y1, y2) & robotposlist[i][1] < max(y1, y2):
                 if (robotposlist[i][1] - m1 * robotposlist[i][0] - c1) * s > 0:
                     return False
-                if (robotposlist[i][1] - m2 * robotposlist[i][0] - c2) * s < 0:
+                if (robotposlist[i][1] - m2 * robotposlist[i][0] - c2) * s > 0:
                     return False
             i = i + 1
         return True
@@ -73,7 +78,7 @@ class StrategyTools:
         enemy_no = int(enemystr)
         if enemy_no == 1:
             enemyposition = self.world.enemy1.position
-            if self.iclosertogoal(enemyposition):
+            if self.iclosertogoal(enemyposition): #TODO: or enemy out of pitch
                 '''# TODO: make the block_goal_enemy 1 on'''
                 print('block goal enemy1')
             else:
@@ -81,7 +86,7 @@ class StrategyTools:
                 print('block pass')
         elif enemy_no == 2:
             enemyposition = self.world.enemy2.position
-            if self.iclosertogoal(enemyposition):
+            if self.iclosertogoal(enemyposition):  #TODO: or enemy out of pitch
                 '''# TODO: make the block_goal_enemy 1 on'''
                 print('block goal enemy2')
             else:
@@ -95,7 +100,7 @@ class StrategyTools:
         linex1,liney1 = (self.world.our_goalX,self.world.our_goalmeanY)
         linex2,liney2 = enemyposition
         m = (liney2-liney1) / (linex2 -linex1)
-        c= -( liney2 - m* linex2)
+        c = -(liney2 - m * linex2)
         a = -m
 
         vx,vy = self.world.venus.position
@@ -122,27 +127,10 @@ class StrategyTools:
             minfdist = flinedist
         else:
             minfdist = minfenddist
-
-        if minvdist<minfdist:
+        if minvdist < minfdist:
             return True
         else:
             return False
-
-        # linemidx = (linex1 + linex2) /2
-        # linemidy = (liney1 + liney2) /2
-
-        # minvmidist = self.euclideandist((linemidx,linemidy),(vx,vy))
-        # minfmidist = self.euclideandist((linemidx,linemidy),(fx,fy))
-
-        # if(minvenddist < minvmidist):
-        #     minvdist = minvenddist
-        # else:
-        #     minvdist = vlinedist
-        #
-        # if(minfenddist < minfmidist):
-        #     minfdist = minfenddist
-        # else:
-        #     minfdist = flinedist
 
     def isinbetween(self,(x1,y1),(x2,y2),(x,y)):
         if x>min(x1,x2) & x <max(x1,x2) & y>min(y1,y2) & y<max(y1,y2) :
@@ -186,4 +174,44 @@ class StrategyTools:
             return True, closest
         else:
             return False, -1
+
+    def openball(self):
+        if self.icloserball():
+            #grab_ball
+            print('grab ball')
+        else:
+            print('reach pass position')
+            #reachpassposition
+        return
+
+    def icloserball(self):
+        x1,y1 = self.world.venus.position
+        x2,y2 = self.world.friend.position
+        x,y = self.world.ball
+
+        d1 = self.euclideandist((x1,y1),(x,y))
+        d2 = self.euclideandist((x2,y2),(x,y))
+
+        if d1< d2 :         #TODO: or teamate out of pitch
+            return True
+        else:
+            return False
+
+    def ballwithfriend(self):
+        x2,y2 = self.world.friend.position
+        x1,y1 = self.world.venus.position
+        x3,y3 = self.world.enemy1.position
+        x4,y4 = self.world.enemy2.position
+
+        robotposlist = [(x3,y3),
+                        (x4,y4)]
+
+        if self.isSafeKick((x2,y2),(x1,y1,robotposlist)):
+            #recievepass
+            print('receive pass')
+        else:
+            #move to pass position
+            print('move to pass position')
+
+
 
