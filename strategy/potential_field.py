@@ -62,7 +62,7 @@ class Potential:
             self.enemy1_field = enemy1_field
             self.enemy2_field = enemy2_field
             self.free_up_pass_enemy1 = free_up_pass_enemy1
-            self.free_up_pass_enemy2 = free_up_pass_enemy2s
+            self.free_up_pass_enemy2 = free_up_pass_enemy2
             self.free_up_goal_enemy1 = free_up_goal_enemy1
             self.free_up_goal_enemy2 = free_up_goal_enemy2
             self.block_pass = block_pass
@@ -75,8 +75,8 @@ class Potential:
             self.local_potential = np.zeros((5, 5, 3), dtype=np.float64)# wrong
 
         def build_grid(self):
-            robot_pos = self.world.venus.position
-            robot_dir = self.world.venus.orientation
+            robot_pos = self.last_square
+            robot_dir = self.last_direction
 
             #row then column
 

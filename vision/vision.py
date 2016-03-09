@@ -345,7 +345,6 @@ class Vision:
                         # todo Danger hard coded
                         if positionIndex == 0:
                             if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 45:
-                                print time.time()
                                 self.world.venus.hasBallInRange.value = True
                             else:
                                 self.world.venus.hasBallInRange.value = False

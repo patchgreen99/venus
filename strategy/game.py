@@ -1,6 +1,7 @@
 import math
 import numpy as np
 from potential_field import Potential
+import cv2
 
 ROBOT_SIZE = 20
 ROBOT_INFLUENCE_SIZE = 50
@@ -8,14 +9,14 @@ ROBOT_INFLUENCE_SIZE = 50
 class Game:
     def __init__(self, world):
         self.world = world
-        self.local_potential = np.zeros(5, 5, 3)
+        self.local_potential = np.zeros((5, 5, 3), dtype=np.float64)
         self.current_point = None
         self.current_direction = None
 
     def run(self):
 
         # example state
-        if True:
+        while True:
             # as an example the potentials you wil need for any single state
             # if you don't understand ask Aseem, then ask me :)
             # All the zeros are up to you
@@ -89,10 +90,12 @@ class Game:
                                              block_goal_enemy1, block_goal_enemy2,  advance, catch_up, bad_minima)
 
             self.local_potential = potential.get_local_potential() # each square is a list [potential, centerx, centery]
+            # potential is double and everything else is an integer
 
-            self.current_point = None
-            self.current_direction = None
+            '''movement must happen here'''
 
+            self.current_point = None #todo need setting
+            self.current_direction = None #todo need setting
 
 
 
@@ -166,7 +169,121 @@ class Game:
 
 
 
-    '''POTENTIALS'''
+    def test_fields(self):
+
+        # example state
+        while True:
+            cv2.namedWindow('STATIC')
+
+            cv2.createTrackbar('DEFENSE_BOX', 'Room', 0, 100, self.nothing)
+            cv2.createTrackbar('WALLS', 'Room', 0, 100, self.nothing)
+
+            cv2.namedWindow("ATTACK")
+
+            cv2.createTrackbar('BALL', 'Room', 0, 100, self.nothing)
+            cv2.createTrackbar('FRIEND', 'Room', 0, 100, self.nothing)
+            cv2.createTrackbar('ENEMY1', 'Room', 0, 100, self.nothing)
+            cv2.createTrackbar('ENEMY2', 'Room', 0, 100, self.nothing)
+            cv2.createTrackbar('FREE_UP_PASS_ENEMY1', 'Room', 0, 100, self.nothing)
+            cv2.createTrackbar('FREE_UP_PASS_ENEMY2', 'Room', 0, 100, self.nothing)
+            cv2.createTrackbar('FREE_UP_GOAL_ENEMY1', 'Room', 0, 100, self.nothing)
+            cv2.createTrackbar('FREE_UP_GOAL_ENEMY2', 'Room', 0, 100, self.nothing)
+
+            cv2.namedWindow("DEFENSE")
+
+            cv2.createTrackbar('BALL', 'Room', 0, 100, self.nothing)
+            cv2.createTrackbar('FRIEND', 'Room', 0, 100, self.nothing)
+            cv2.createTrackbar('ENEMY1', 'Room', 0, 100, self.nothing)
+            cv2.createTrackbar('ENEMY2', 'Room', 0, 100, self.nothing)
+            cv2.createTrackbar('FREE_UP_PASS_ENEMY1', 'Room', 0, 100, self.nothing)
+            cv2.createTrackbar('FREE_UP_PASS_ENEMY2', 'Room', 0, 100, self.nothing)
+            cv2.createTrackbar('FREE_UP_GOAL_ENEMY1', 'Room', 0, 100, self.nothing)
+            cv2.createTrackbar('FREE_UP_GOAL_ENEMY2', 'Room', 0, 100, self.nothing)
+
+            # as an example the potentials you wil need for any single state
+            # if you don't understand ask Aseem, then ask me :)
+            # All the zeros are up to you
+            # first value is the gradient eg. the response of the field
+            # the second value is the constant eg. the magnitude of the field
+
+            ball_field = radial(self.world.ball, 0, 0)
+
+            # radial - constant gradient everywhere  coming out from one single spot
+            # 3 3 3 3 3 3 3
+            # 3 3 2 1 2 3 3
+            # 3 3 1 0 1 3 3
+            # 3 3 2 1 2 3 3
+            # 3 3 3 3 3 3 3
+
+            friend_field = solid_field(self.world.friend.position, 0, 0, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy1_field = solid_field(self.world.enemy1.position, 0, 0, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy2_field = solid_field(self.world.enemy2.position, 0, 0, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+
+            # solid - modeled as a circle, from center 'forbidden' is unreachable and outside the influence area
+            # is unreachable
+            # 0 2 3 3 3 2 0
+            # 1 3 9 9 9 3 1
+            # 2 3 9 9 9 3 2
+            # 1 3 9 9 9 3 1
+            # 0 2 3 3 3 2 0
+
+            free_up_pass_enemy1 = finite_axial(self.world.enemy1.position, self.world.friend.position, 0, 0)
+            free_up_pass_enemy2 = finite_axial(self.world.enemy2.position, self.world.friend.position, 0, 0)
+            free_up_goal_enemy1 = finite_axial(self.world.enemy1.position, self.world.there_goal, 0, 0)
+            free_up_goal_enemy2 = finite_axial(self.world.enemy2.position, self.world.there_goal, 0, 0)
+
+            # finite axial - field will start at start point and exist on the opposite side to the ref point and
+            # continue of the pitch
+            # 3 3 3 2 3 3 3
+            # 3 2 1 1 1 2 3
+            # 0 0 0 0 0 0 0
+            # 3 2 1 1 1 2 3
+            # 3 3 3 2 3 3 3
+
+            block_pass = infinite_axial(self.world.enemy1.position, self.world.enemy2.position, 0, 0)
+            block_goal_enemy1 = infinite_axial(self.world.enemy1.position, self.world.our_goal, 0, 0)
+            block_goal_enemy2 = infinite_axial(self.world.enemy2.position, self.world.our_goal, 0, 0)
+            bad_minima = infinite_axial(self.world.venus.position, self.world.friend.position, 0, 0)
+
+            # infinite axial - field is only implemented between start and end points everywhere else
+            # contribution is zero
+            # 3 3 3 3 3 3 3
+            # 1 1 1 1 1 1 1
+            # 0 0 0 0 0 0 0
+            # 1 1 1 1 1 1 1
+            # 3 3 3 3 3 3 3
+
+            advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 0, 0)
+            catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 0, 0)
+
+            # step - an infinite line drawn through the point in the first argument in the direction of the vector in
+            # the second argument. The clockwise segment to the vector is cut off where as the anticlockwise segment
+            # acts like a infinite axial field over the entire pitch
+            # 9 9 9 9 9 9 9
+            # 9 9 9 9 9 9 9
+            # 3 3 3 3 3 3 3
+            # 1 1 1 1 1 1 1
+            # 0 0 0 0 0 0 0
+
+            # Constructor must always be this
+
+            potential = Potential(self.current_point, self.current_direction, self.world, ball_field, friend_field, enemy1_field, enemy2_field,
+                                             free_up_pass_enemy1, free_up_pass_enemy2, free_up_goal_enemy1,
+                                             free_up_goal_enemy2, block_pass,
+                                             block_goal_enemy1, block_goal_enemy2,  advance, catch_up, bad_minima)
+
+            self.local_potential = potential.get_local_potential() # each square is a list [potential, centerx, centery]
+            # potential is double and everything else is an integer
+
+            '''movement must happen here'''
+
+            self.current_point = None # todo need setting
+            self.current_direction = None # todo need setting
+
+    def nothing(self, x):
+        pass
+
+'''POTENTIALS'''
 
 # radial - constant gradient everywhere  coming out from one single spot
 # 3 3 3 3 3 3 3
