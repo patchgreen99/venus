@@ -190,7 +190,6 @@ def calibrateThresholds(pitch, frame):
                 if k == 27:
                     break
 
-            cv2.setTrackbarPos('CALIBRATE', 'Room', 0)
             cv2.destroyWindow('actual feed')
             cv2.destroyWindow(colors)
 

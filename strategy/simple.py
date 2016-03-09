@@ -21,6 +21,10 @@ class SimpleStrategy:
         else:
             return self.calculate_angle_length(np.array([8, 227]))
 
+    def check_lag(self):
+        if self.world.venus.hasBallInRange:
+            self.commands.grab_ball()
+
     def calculate_angle_length(self, pos):
 
         robot_pos = np.array([self.world.venus.position[0], self.world.venus.position[1]])

@@ -9,7 +9,7 @@ class Robot:
         self.position = Array('i', [NO_VALUE, NO_VALUE])
         self.orientation = Array('d', [NO_VALUE, NO_VALUE])
         self.out = Value('b')
-        self.hasBallInRange = False
+        self.hasBallInRange = Value('b')
 
     def __str__(self):
         return "(pos: {} {}, ori: {})".format(self.position[0], self.position[1],

@@ -2,11 +2,12 @@ from pylab import *
 from scipy.ndimage import measurements
 from color_calibration import *
 from strategy.world import NO_VALUE
+import time
 
 VISION_ROOT = 'vision/'
 
 MAX_COLOR_COUNTS = {
-    'red': 1,
+    'red': 10,
     'blue': 2,
     'yellow': 2,
     'pink': 8,
@@ -151,6 +152,8 @@ class Vision:
             self.capture.set(cv2.CAP_PROP_HUE, cv2.getTrackbarPos('HUE', 'Room')/100.0)
             self.frame()
 
+        print time.time()
+
         if self.world.room_num == 0:
             targetFile = open("vision/room0.txt", "w")
         else:
@@ -171,16 +174,16 @@ class Vision:
 
     def frame(self):
         status, frame = self.capture.read()
-        self.pressed_key = cv2.waitKey(2) & 0xFF
         imgOriginal = self.step(frame)
         #blur = imgOriginal
         blur = cv2.GaussianBlur(imgOriginal, (3, 3), 2) #todo: what values are best
 #########################################################################################################################################
         if cv2.getTrackbarPos('CALIBRATE', 'Room') == 1:
 
+            cv2.setTrackbarPos('CALIBRATE', 'Room', 0)
             colors = ['red', 'blue', 'yellow', 'pink', 'green']
             data = getColors(self.world.room_num, imgOriginal) #todo uncomment if you want to save new calibrations
-            '''
+
             for color in colors:
                 if color in data.keys():
                     if color == 'red':
@@ -217,7 +220,7 @@ class Vision:
 
             targetFile.write(str(self.color_ranges))
             targetFile.close()
-            '''
+            
 
         ##########################################################################################################################################
 
@@ -303,6 +306,7 @@ class Vision:
                                 2, self.robot_color(robot_id, robot.out))
             if self.start < 10:
                 self.start +=1
+            self.pressed_key = cv2.waitKey(2) & 0xFF
             cv2.imshow('Room', imgOriginal)
 
     def robot_color(self, r_id, out):
@@ -339,26 +343,27 @@ class Vision:
                     for positionIndex in range(0, len(robots_pos)):
                         position = robots_pos[positionIndex]
                         # todo Danger hard coded
-                        if(positionIndex == 0):
-                            if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 40:
-                                self.world.venus.hasBallInRange = True
+                        if positionIndex == 0:
+                            if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 45:
+                                print time.time()
+                                self.world.venus.hasBallInRange.value = True
                             else:
-                                self.world.venus.hasBallInRange = False
-                        if(positionIndex == 1):
-                            if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 40:
-                                self.world.friend.hasBallInRange = True
+                                self.world.venus.hasBallInRange.value = False
+                        if positionIndex == 1:
+                            if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 45:
+                                self.world.friend.hasBallInRange.value = True
                             else:
-                                self.world.friend.hasBallInRange = False
-                        if(positionIndex == 2):
-                            if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 40:
-                                self.world.enemy1.hasBallInRange = True
+                                self.world.friend.hasBallInRange.value = False
+                        if positionIndex == 2:
+                            if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 45:
+                                self.world.enemy1.hasBallInRange.value = True
                             else:
-                                self.world.enemy1.hasBallInRange = False
-                        if(positionIndex == 3):
-                            if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 40:
-                                self.world.enemy2.hasBallInRange = True
+                                self.world.enemy1.hasBallInRange.value = False
+                        if positionIndex == 3:
+                            if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 45:
+                                self.world.enemy2.hasBallInRange.value = True
                             else:
-                                self.world.enemy2.hasBallInRange = False
+                                self.world.enemy2.hasBallInRange.value = False
 
                     self.trajectory_list.append((int(circles['red'][i][0]), int(circles['red'][i][1])))
                     self.trajectory_list.pop(0)
@@ -367,7 +372,7 @@ class Vision:
                 flag = False
                 for positionIndex in range(0,len(robots_pos)):
                     position = robots_pos[positionIndex]
-                    if(positionIndex == 0 and self.world.venus.hasBallInRange == True):
+                    if positionIndex == 0 and self.world.venus.hasBallInRange.value:
                         flag = True
                         # 'closest' is the robot who might have the ball, let's check that
                         distance_between_points = math.sqrt((position[0] - self.world.venus.orientation[0])**2 + (position[1] -
@@ -380,7 +385,7 @@ class Vision:
                         self.world.ball[0] = new_x
                         self.world.ball[1] = new_y
 
-                    if(positionIndex == 1 and self.world.friend.hasBallInRange == True):
+                    if positionIndex == 1 and self.world.friend.hasBallInRange.value :
                         flag = True
                         # 'closest' is the robot who might have the ball, let's check that
                         distance_between_points = math.sqrt((position[0] - self.world.friend.orientation[0])**2 + (position[1] -
@@ -394,7 +399,7 @@ class Vision:
                         self.world.ball[0] = new_x
                         self.world.ball[1] = new_y
 
-                    if(positionIndex == 2 and self.world.enemy1.hasBallInRange == True):
+                    if positionIndex == 2 and self.world.enemy1.hasBallInRange.value :
                         flag = True
                         # 'closest' is the robot who might have the ball, let's check that
                         distance_between_points = math.sqrt((position[0] - self.world.enemy1.orientation[0])**2 + (position[1] -
@@ -408,7 +413,7 @@ class Vision:
                         self.world.ball[0] = new_x
                         self.world.ball[1] = new_y
 
-                    if(positionIndex == 3 and self.world.enemy2.hasBallInRange == True):
+                    if positionIndex == 3 and self.world.enemy2.hasBallInRange.value :
                         flag = True
                         # 'closest' is the robot who might have the ball, let's check that
                         distance_between_points = math.sqrt((position[0] - self.world.enemy2.orientation[0])**2 + (position[1] -
@@ -534,7 +539,7 @@ class Vision:
             self.out_counter[0] += 1
             if self.out_counter[0] > 200:
                 self.out_counter[0] = 0
-                self.world.venus.out = True
+                self.world.venus.out.value = True
 
         if self.flag[1] is False:
             angle = math.degrees(math.atan2(self.world.friend.orientation[0], self.world.friend.orientation[1]))
@@ -543,7 +548,7 @@ class Vision:
             self.out_counter[1] += 1
             if self.out_counter[1] > 200:
                 self.out_counter[1] = 0
-                self.world.friend.out = True
+                self.world.friend.out.value = True
 
         if self.flag[2] is False:
             angle = math.degrees(math.atan2(self.world.enemy1.orientation[0], self.world.enemy1.orientation[1]))
@@ -552,7 +557,7 @@ class Vision:
             self.out_counter[2] += 1
             if self.out_counter[2] > 200:
                 self.out_counter[2] = 0
-                self.world.enemy1.out = True
+                self.world.enemy1.out.value = True
 
         if self.flag[3] is False:
             angle = math.degrees(math.atan2(self.world.enemy2.orientation[0], self.world.enemy2.orientation[1]))
@@ -561,7 +566,7 @@ class Vision:
             self.out_counter[3] += 1
             if self.out_counter[3] > 200:
                 self.out_counter[3] = 0
-                self.world.enemy2.out = True
+                self.world.enemy2.out.value = True
 
             # venus
             ###################################################################################################################
@@ -687,7 +692,7 @@ class Vision:
 
         if math.sqrt((center_x-similar_bot.position[0])**2 + (center_y-similar_bot.position[1])**2) > 50:
             self.save_robot((center_x, center_y), angle, bot_id)
-            bot.out = False
+            bot.out.value = False
             self.flag[bot_id] = True
             self.last_save[bot_id] = 1
 
@@ -696,7 +701,7 @@ class Vision:
         angle = self.normalize_angle(math.degrees(math.atan2(robot[single_color][0][0] - robot[center_color][0][0],
                                             robot[single_color][0][1] - robot[center_color][0][1])) - 150)
         self.save_robot((robot[center_color][0][0], robot[center_color][0][1]), angle, bot_id)
-        bot.out = False
+        bot.out.value = False
         self.flag[bot_id] = True
         self.last_save[bot_id] = 0
 
