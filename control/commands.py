@@ -32,7 +32,7 @@ class Commands:
         print("! Remember to call:")
         print("! vision <room: 0/1> <team_color: blue/yellow> <our_single_spot_color: green/pink>")
         print("! connect")
-        #self.vision()
+        self.vision()
         #self.connect()
 
     def test_movement(self):
@@ -48,7 +48,7 @@ class Commands:
         print("Connecting to RF stick")
         self.protocol = RobotProtocol('/dev/ttyACM' + device_no)
 
-    def vision(self, room_num=1, team_color='yellow', our_color='pink', we_have_computer_goal=True):
+    def vision(self, room_num=0, team_color='yellow', our_color='pink', we_have_computer_goal=True):
         print("Starting vision")
         print("Room: %s, team color: %s, our single spot color: %s" % (str(room_num), team_color, our_color))
         if not self.vision_process:
@@ -61,8 +61,8 @@ class Commands:
     def attackwithball(self):
         self.highstrategy.attackwithball()
 
-    def ballwithenemy(self):
-        self.highstrategy.ballwithenemy()
+    def ballwithenemy(self, no):
+        self.highstrategy.ballwithenemy(no)
 
     def grab_ball(self):
         self.strategy.grab_ball()
@@ -291,5 +291,5 @@ class Commands:
     def reset_input(self):
         self.protocol.reset_input()
 
-    def block_goal(self, enemy_num=1):
+    def block_goal(self, enemy_num):
         self.strategy.block_goal(int(enemy_num))
