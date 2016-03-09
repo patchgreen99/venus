@@ -51,13 +51,15 @@ int targetPositions[ROTARY_COUNT];
 bool moving[ROTARY_COUNT];
 
 struct Job {
-  int master;
+  bool pause;
   int target;
+  int master;
   int powers[ROTARY_COUNT];
 };
 
 Job jobs[MAX_JOB_COUNT];
 bool running;
+bool pauseFinished;
 int head;
 int tail;
 int count;
@@ -72,6 +74,7 @@ void setup() {
   sc.addCommand("R", moveRotaryUnits);
   sc.addCommand("V", moveForever);
   sc.addCommand("J", scheduleJob);
+  sc.addCommand("P", schedulePause);
   sc.addCommand("Z", stopSome);
   sc.addCommand("S", stopAll);
   sc.addCommand("I", areAllStopped);
@@ -98,25 +101,16 @@ void stopMotor5() { motorStop(5); moving[5] = false; }
 
 /* Callback that stops motors after they moved for some rotary units */
 void rotaryTimerCallback() {
-  // Request motor position deltas from rotary slave board
-  Wire.requestFrom(ROTARY_SLAVE_ADDRESS, ROTARY_COUNT);
+  updateRotaryPositions();
   
-  // Update the recorded motor positions
-  for (int i = 0; i < ROTARY_COUNT; i++) {
-    positions[i] += (int8_t) Wire.read();  // Must cast to signed 8-bit type
-  }
-  
-  for (int i = 0; i < ROTARY_COUNT; ++i) {
-    if (finished(positions[i], targetPositions[i])) {
-      motorStop(i);
-      positions[i] = 0;
-      targetPositions[i] = 0;
-    }
-  }
-  
-  bool stopping = running && finished(positions[jobs[head].master], jobs[head].target);
+  bool stopping = running && (jobs[head].pause && pauseFinished || !jobs[head].pause && finished(positions[jobs[head].master], jobs[head].target));
   bool starting = !running && count > 0 || stopping && count > 1;
+  
   int next = stopping ? (head + 1) % MAX_JOB_COUNT : head;
+  
+  if (starting && jobs[next].pause) {
+    timer.setTimeout(jobs[next].target, setPauseFinished);
+  }
   
   for (int i = 0; i < ROTARY_COUNT; ++i) {
     if (starting && jobs[next].powers[i]) {
@@ -129,6 +123,14 @@ void rotaryTimerCallback() {
     } else if (stopping && jobs[head].powers[i]) {
       positions[i] = 0;
       motorStop(i);
+      
+      // Moving motors in other direction hoping to stop them quickly
+      /*if (jobs[head].powers[i] > 0) {
+        motorBackward(i, 100);
+      } else {
+        motorForward(i, 100);
+      }
+      timer.setTimeout(400, stopMotorCallbacks[i]);*/
     }
   }
   
@@ -138,6 +140,28 @@ void rotaryTimerCallback() {
   }
   
   running = running && !stopping || starting;
+  
+  for (int i = 0; i < ROTARY_COUNT; ++i) {
+    if (finished(positions[i], targetPositions[i])) {
+      motorStop(i);
+      positions[i] = 0;
+      targetPositions[i] = 0;
+    }
+  }
+}
+
+void setPauseFinished() {
+  pauseFinished = true;
+}
+
+void updateRotaryPositions() {
+  // Request motor position deltas from rotary slave board
+  Wire.requestFrom(ROTARY_SLAVE_ADDRESS, ROTARY_COUNT);
+  
+  // Update the recorded motor positions
+  for (int i = 0; i < ROTARY_COUNT; i++) {
+    positions[i] += (int8_t) Wire.read();  // Must cast to signed 8-bit type
+  }
 }
 
 bool finished(int position, int targetPosition) {
@@ -250,6 +274,7 @@ void scheduleJob() {
   }
   
   int p = 0;
+  jobs[tail].pause = false;
   jobs[tail].target = params[p++];
   jobs[tail].master = params[p++];
   
@@ -264,6 +289,28 @@ void scheduleJob() {
   
   if (jobs[tail].powers[jobs[tail].master] < 0) {
     jobs[tail].target *= -1;
+  }
+  
+  ++count;
+  tail = (tail + 1) % MAX_JOB_COUNT;
+}
+
+void schedulePause() {
+  if (count == MAX_JOB_COUNT) {
+    // No more space in the job queue
+    Serial.print(RESP_ERROR_JOBS_EXCEEDED);
+    return;
+  }
+  
+  if (ignore()) {
+    return;
+  }
+  
+  jobs[tail].pause = true;
+  jobs[tail].target = params[0];
+  
+  for (int i = 0; i < ROTARY_COUNT; ++i) {
+    jobs[tail].powers[i] = 0;
   }
   
   ++count;

@@ -6,9 +6,8 @@ import numpy as np
 from control.protocol import RobotProtocol
 from strategy.simple import SimpleStrategy
 from strategy.highstrategy import StrategyTools
-from strategy.game import Game
 from strategy.world import World
-from strategy.movement import get_movement_direction
+from strategy.movement import Movement
 from vision.vision import Vision
 
 MOTOR_LEFT = 0
@@ -33,22 +32,36 @@ class Commands:
         print("! vision <room: 0/1> <team_color: blue/yellow> <our_single_spot_color: green/pink>")
         print("! connect")
         #self.vision()
-        #self.connect()
+        self.connect()
 
     def test_movement(self):
+        movement = Movement(self)
         a = np.array([[666, 100, 666, 100, 666],
-                      [666, 100, 100, 100, 666],
+                      [666, 100, 100, 0, 666],
                       [666, 100, 100, 100, 666],
                       [666, 100, 666, 100, 666],
-                      [666, 100, 666, 0, 666]], dtype=np.float64)
+                      [666, 100, 666, 100, 666]], dtype=np.float64)
+        movement.move(a)
 
-        print get_movement_direction(a, self)
+    def a(self):
+        self.forward()
+        self.forward_left()
+        self.forward_right()
+        self.forward_left()
+        self.backward()
+        self.backward()
+        self.backward_left()
+
+    def w(self):
+        self.forward()
+        self.pause()
+        self.sharp_left()
 
     def connect(self, device_no='0'):
         print("Connecting to RF stick")
         self.protocol = RobotProtocol('/dev/ttyACM' + device_no)
 
-    def vision(self, room_num=1, team_color='yellow', our_color='pink', we_have_computer_goal=True):
+    def vision(self, room_num=0, team_color='yellow', our_color='pink', we_have_computer_goal=True):
         print("Starting vision")
         print("Room: %s, team color: %s, our single spot color: %s" % (str(room_num), team_color, our_color))
         if not self.vision_process:
@@ -61,8 +74,8 @@ class Commands:
     def attackwithball(self):
         self.highstrategy.attackwithball()
 
-    def ballwithenemy(self):
-        self.highstrategy.ballwithenemy()
+    def ballwithenemy(self, no):
+        self.highstrategy.ballwithenemy(no)
 
     def grab_ball(self):
         self.strategy.grab_ball()
@@ -142,8 +155,11 @@ class Commands:
         self.swerve_right(200)
         self.forward()
 
+    def pause(self):
+        self.protocol.schedule_pause(200)
+
     def forward(self):
-        self.protocol.schedule(200, MOTOR_LEFT, [(MOTOR_LEFT, -100),
+        self.protocol.schedule(200, MOTOR_RIGHT, [(MOTOR_LEFT, -100),
                                                  (MOTOR_RIGHT, -100)])
 
     def backward(self):
@@ -158,7 +174,7 @@ class Commands:
                                                  (MOTOR_RIGHT, -100)])
 
     def forward_right(self):
-        self.protocol.schedule(340, MOTOR_TURN, [(MOTOR_TURN, 100),
+        self.protocol.schedule(350, MOTOR_TURN, [(MOTOR_TURN, 100),
                                                  (MOTOR_LEFT, -100),
                                                  (MOTOR_RIGHT, -70)])
         self.protocol.schedule(120, MOTOR_LEFT, [(MOTOR_LEFT, -100),
@@ -175,16 +191,25 @@ class Commands:
                                                  (MOTOR_RIGHT, 90)])
 
     def sharp_left(self):
-        self.protocol.schedule(120, MOTOR_TURN, [(MOTOR_TURN, -100),
-                                                 (MOTOR_LEFT, 100),
+        self.protocol.schedule(60, MOTOR_TURN, [(MOTOR_TURN, -100),
+                                                (MOTOR_LEFT, 100),
+                                                (MOTOR_RIGHT, -100)])
+        self.protocol.schedule(200, MOTOR_LEFT, [(MOTOR_LEFT, -100),
                                                  (MOTOR_RIGHT, -100)])
-        self.forward()
 
     def sharp_right(self):
-        self.protocol.schedule(120, MOTOR_TURN, [(MOTOR_TURN, 100),
-                                                 (MOTOR_LEFT, -100),
-                                                 (MOTOR_RIGHT, 100)])
-        self.forward()
+        self.protocol.schedule(80, MOTOR_TURN, [(MOTOR_TURN, 100),
+                                                (MOTOR_LEFT, -100),
+                                                (MOTOR_RIGHT, 100)])
+        self.protocol.schedule(200, MOTOR_RIGHT, [(MOTOR_LEFT, -100),
+                                                  (MOTOR_RIGHT, -100)])
+
+    def ttt(self):
+        self.forward_forever()
+        time.sleep(1)
+        self.protocol.move(100, [(MOTOR_TURN, -100)])
+        time.sleep(2)
+        self.s()
 
     def c(self, x):
         """Rotate clockwise, negative x means counter-clockwise"""
@@ -291,5 +316,5 @@ class Commands:
     def reset_input(self):
         self.protocol.reset_input()
 
-    def block_goal(self, enemy_num=1):
+    def block_goal(self, enemy_num):
         self.strategy.block_goal(int(enemy_num))

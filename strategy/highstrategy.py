@@ -9,32 +9,40 @@ class StrategyTools:
 
     def attackwithball(self):
 
-        (x1,y1) = self.world.venus
-        (x2,y2) = self.world.friend
-        robotposlist = [self.world.enemy1,self.world.enemy2]
+        x2,y2 = self.world.friend.position
+        x1,y1 = self.world.venus.position
+        x3,y3 = self.world.enemy1.position
+        x4,y4 = self.world.enemy2.position
+
+        robotposlist = [(x3,y3), (x4,y4)]
+        print(robotposlist)
         goalx = self.world.their_goalX
         highy = self.world.their_goalhighY
         lowy = self.world.their_goallowY
         i = (highy + lowy)/2
         while i < highy:
             if self.isSafeKick((x1,y1),(goalx,i),robotposlist ):
-                self.commands.goal()
+                #self.commands.goal()
+                print('goal')
                 return
             i = i + 1
         i = (highy + lowy)/2
         while i > lowy:
             if self.isSafeKick((x1,y1),(goalx,i),robotposlist):
-                self.commands.goal()
+                #self.commands.goal()
+                print('goal')
                 return
             i = i - 1
-        if self.isSafeKick(self, (x1, y1), (x2, y2), robotposlist):
-            self.commands.pass_ball()
+        if self.isSafeKick((x1, y1), (x2, y2), robotposlist):
+            #self.commands.pass_ball()
+            print('pass')
             return
         #do something instead
+        print('something else')
         return
 
     def isSafeKick(self, (x1, y1), (x2, y2), robotposlist):
-        rotation = 15
+        rotation = 0.26
         m1, c1 = self.rotateline(x1, y1, x2, y2, rotation)
         m2, c2 = self.rotateline(x1, y1, x2, y2, -rotation)
         if (y2 - m1 * x2 - c1) > 0:
@@ -42,7 +50,7 @@ class StrategyTools:
         else:
             s = -1
         i = 0
-        while i < robotposlist.length():
+        while i < len(robotposlist):
             if robotposlist[i][1] > min(y1, y2) & robotposlist[i][1] < max(y1, y2):
                 if (robotposlist[i][1] - m1 * robotposlist[i][0] - c1) * s > 0:
                     return False
@@ -53,31 +61,34 @@ class StrategyTools:
 
     def rotateline(self, x1, y1, x2, y2, rotation):
         diff = np.array([x2 - x1, y2 - y1])
-        r = np.array([math.cos(rotation), -math.sin(rotation)], [math.sin(rotation), math.cos(rotation)])
+        r = np.array([[math.cos(rotation), -math.sin(rotation)], [math.sin(rotation), math.cos(rotation)]])
         mul = np.multiply(r, diff)
         newarr = np.subtract(mul, np.array([x1, y1]))
         newlist = newarr.tolist()
-        m1 = (newlist[1] - y1) / (newlist[0] - x1)
-        c1 = newlist[1] - m1*newlist[0]
+        m1 = (newlist[1][1] - y1) / (newlist[1][0] - x1)
+        c1 = newlist[1][1] - m1*newlist[1][0]
         return (m1,c1)
 
-    def ballwithenemy(self, enemyno):
-        if enemyno == 1:
-            enemyposition = self.world.enemy1
+    def ballwithenemy(self, enemystr):
+        enemy_no = int(enemystr)
+        if enemy_no == 1:
+            enemyposition = self.world.enemy1.position
             if self.iclosertogoal(enemyposition):
                 '''# TODO: make the block_goal_enemy 1 on'''
                 print('block goal enemy1')
             else:
                 '''# TODO: make the block_pass on'''
                 print('block pass')
-        elif enemyno == 2:
-            enemyposition = self.world.enemy2
+        elif enemy_no == 2:
+            enemyposition = self.world.enemy2.position
             if self.iclosertogoal(enemyposition):
                 '''# TODO: make the block_goal_enemy 1 on'''
                 print('block goal enemy2')
             else:
                 '''# TODO: make the block_pass on'''
                 print('block pass')
+        else:
+            print('no')
         return
 
     def iclosertogoal(self,enemyposition):
@@ -87,14 +98,14 @@ class StrategyTools:
         c= -( liney2 - m* linex2)
         a = -m
 
-        vx,vy = self.world.venus
-        fx,fy = self.world.friend
+        vx,vy = self.world.venus.position
+        fx,fy = self.world.friend.position
 
-        pvx = ((vx - a*vy) - a*c)/ a**2 + 1
-        pfx = ((fx - a*fy) - a*c)/ a**2 + 1
+        pvx = ((vx - a*vy) - a*c)/ (a**2 + 1)
+        pfx = ((fx - a*fy) - a*c)/ (a**2 + 1)
 
-        pvy = (a(-vx + a*vy) - c) / a**2 + 1
-        pfy = (a(-fx + a*fy) - c) / a**2 + 1
+        pvy = (a*(-vx + a*vy) - c) / (a**2 + 1)
+        pfy = (a*(-fx + a*fy) - c) / (a**2 + 1)
 
         vlinedist= abs((liney2-liney1)*vx - (linex2-linex1)*vy + (linex1*liney2) + (linex2*liney1))/self.euclideandist((linex1,liney1),(linex2,liney2))
         flinedist= abs((liney2-liney1)*fx - (linex2-linex1)*fy + (linex1*liney2) + (linex2*liney1))/self.euclideandist((linex1,liney1),(linex2,liney2))
@@ -148,8 +159,8 @@ class StrategyTools:
         # returns either (False, -1) or (True, self.world.enemyX)
 
         # find which enemy robot is closer to the ball
-        enemy1 = self.world.enemy1
-        enemy2 = self.world.enemy2
+        enemy1 = self.world.enemy1.position
+        enemy2 = self.world.enemy2.position
         ball = self.world.ball
 
         distance1 = math.sqrt((ball[0] - enemy1.position[0])**2 + (ball[1] - enemy1.position[1])**2)
