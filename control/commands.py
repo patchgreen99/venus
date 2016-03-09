@@ -57,12 +57,6 @@ class Commands:
     def grab_ball(self):
         self.strategy.grab_ball()
 
-    def check_lag(self):
-        a = self.world.venus.hasBallInRange.value
-        while not a:
-            a = self.world.venus.hasBallInRange.value
-        self.g(300)
-
     def goal(self):
         self.strategy.goal()
 

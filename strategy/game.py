@@ -8,7 +8,9 @@ ROBOT_INFLUENCE_SIZE = 50
 class Game:
     def __init__(self, world):
         self.world = world
-        self.local_potential = np.zeros(5, 5)
+        self.local_potential = np.zeros(5, 5, 3)
+        self.current_point = None
+        self.current_direction = None
 
     def run(self):
 
@@ -80,15 +82,16 @@ class Game:
             # 0 0 0 0 0 0 0
 
             # Constructor must always be this
-            self.current_point = (0, 0)
-            self.local_potential = Potential(self.current_point, self.world, ball_field, friend_field, enemy1_field, enemy2_field,
+
+            potential = Potential(self.current_point, self.current_direction, self.world, ball_field, friend_field, enemy1_field, enemy2_field,
                                              free_up_pass_enemy1, free_up_pass_enemy2, free_up_goal_enemy1,
                                              free_up_goal_enemy2, block_pass,
                                              block_goal_enemy1, block_goal_enemy2,  advance, catch_up, bad_minima)
 
-            '''
-            jules's movement method will be called here once you have you local matrix
-            '''
+            self.local_potential = potential.get_local_potential() # each square is a list [potential, centerx, centery]
+
+            self.current_point = None
+            self.current_direction = None
 
 
 

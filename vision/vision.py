@@ -537,7 +537,7 @@ class Vision:
             self.save_robot((self.world.venus.position[0], self.world.venus.position[1]), angle, 0)
             self.flag[0] = True
             self.out_counter[0] += 1
-            if self.out_counter[0] > 200:
+            if self.out_counter[0] > 100:
                 self.out_counter[0] = 0
                 self.world.venus.out.value = True
 
@@ -546,7 +546,7 @@ class Vision:
             self.save_robot((self.world.friend.position[0], self.world.friend.position[1]), angle, 1)
             self.flag[1] = True
             self.out_counter[1] += 1
-            if self.out_counter[1] > 200:
+            if self.out_counter[1] > 100:
                 self.out_counter[1] = 0
                 self.world.friend.out.value = True
 
@@ -555,7 +555,7 @@ class Vision:
             self.save_robot((self.world.enemy1.position[0], self.world.enemy1.position[1]), angle, 2)
             self.flag[2] = True
             self.out_counter[2] += 1
-            if self.out_counter[2] > 200:
+            if self.out_counter[2] > 100:
                 self.out_counter[2] = 0
                 self.world.enemy1.out.value = True
 
@@ -564,7 +564,7 @@ class Vision:
             self.save_robot((self.world.enemy2.position[0], self.world.enemy2.position[1]), angle, 3)
             self.flag[3] = True
             self.out_counter[3] += 1
-            if self.out_counter[3] > 200:
+            if self.out_counter[3] > 100:
                 self.out_counter[3] = 0
                 self.world.enemy2.out.value = True
 

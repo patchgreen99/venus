@@ -21,12 +21,21 @@ PITCH_BOT_LEFT = [(25, 457), (34, 466)]
 
 
 class Potential:
-        def __init__(self, current_point, world, ball_field, friend_field, enemy1_field, enemy2_field,
+        def __init__(self, last_square, last_direction, world, ball_field, friend_field, enemy1_field, enemy2_field,
                      free_up_pass_enemy1, free_up_pass_enemy2, free_up_goal_enemy1, free_up_goal_enemy2, block_pass,
                      block_goal_enemy1, block_goal_enemy2, advance, catch_up, bad_minima):
 
             self.world = world
-            self.current_point = current_point
+
+            if last_square is None:
+                self.last_square = (0, self.world.venus.position[0], self.world.venus.position[1])
+            else:
+                self.last_square = last_square
+
+            if last_direction is None:
+                self.last_direction = (self.world.venus.orientation[0], self.world.venus.orientation[1])
+            else:
+                self.last_direction = last_square
 
             self.top_wall = step_field(PITCH_TOP_LEFT[self.world.room_num], (PITCH_TOP_LEFT[self.world.room_num][0]-PITCH_TOP_RIGHT[self.world.room_num][0], PITCH_TOP_LEFT[self.world.room_num][1]-PITCH_TOP_RIGHT[self.world.room_num][1]), 0, 0)
             self.bot_wall = step_field(PITCH_BOT_LEFT[self.world.room_num], (PITCH_BOT_RIGHT[self.world.room_num][0]-PITCH_BOT_LEFT[self.world.room_num][0], PITCH_BOT_RIGHT[self.world.room_num][1]-PITCH_BOT_LEFT[self.world.room_num][1]), 0, 0)
@@ -42,13 +51,18 @@ class Potential:
                 self.penalty_box_top = infinite_axial(GOAL_LEFT_TOP[self.world.room_num], DEFENDING_LEFT_TOP[self.world.room_num], 0, 0)
                 self.penalty_box_bot = infinite_axial(GOAL_LEFT_BOT[self.world.room_num], DEFENDING_LEFT_BOT[self.world.room_num], 0, 0)
 
-            self.current_point = current_point
+            self.potential_list = [self.ball_field, self.friend_field, self.enemy1_field, self.enemy2_field,
+                     self.free_up_pass_enemy1, self.free_up_pass_enemy2, self.free_up_goal_enemy1,
+                    self.free_up_goal_enemy2, self.block_pass, self.block_goal_enemy1, self.block_goal_enemy2,
+                        self.advance, self.catch_up, self.bad_minima, self.top_wall, self.bot_wall, self.right_wall,
+                                self.left_wall, self.penalty_box_front, self.penalty_box_top, self.penalty_box_bot]
+
             self.ball_field = ball_field
             self.friend_field = friend_field
             self.enemy1_field = enemy1_field
             self.enemy2_field = enemy2_field
             self.free_up_pass_enemy1 = free_up_pass_enemy1
-            self.free_up_pass_enemy2 = free_up_pass_enemy2
+            self.free_up_pass_enemy2 = free_up_pass_enemy2s
             self.free_up_goal_enemy1 = free_up_goal_enemy1
             self.free_up_goal_enemy2 = free_up_goal_enemy2
             self.block_pass = block_pass
@@ -58,16 +72,83 @@ class Potential:
             self.catch_up = catch_up
             self.bad_minima = bad_minima
 
-            self.local_potential = np.zeros(5, 5)
+            self.local_potential = np.zeros((5, 5, 3), dtype=np.float64)# wrong
+
+        def build_grid(self):
+            robot_pos = self.world.venus.position
+            robot_dir = self.world.venus.orientation
+
+            #row then column
+
+            self.local_potential[2][2] = (self.get_potential_at_square((robot_pos[0], robot_pos[1])), (robot_pos[0], robot_pos[1]))
+
+            point = (robot_pos[0]+POTENTIAL_GRANULARITY*robot_dir[0],robot_pos[1]+POTENTIAL_GRANULARITY*robot_dir[1])
+            self.local_potential[1][2] = [self.get_potential_at_square(point), point[0], point[1]]
+
+            back = rotate_vector(180, robot_dir[0], robot_dir[1])
+            point = (robot_pos[0]+POTENTIAL_GRANULARITY*back[0],robot_pos[1]+POTENTIAL_GRANULARITY*back[1])
+            self.local_potential[3][2] = [self.get_potential_at_square(point), point[0], point[1]]
+
+            right = rotate_vector(-90, robot_dir[0], robot_dir[1])
+            point = (robot_pos[0]+POTENTIAL_GRANULARITY*right[0],robot_pos[1]+POTENTIAL_GRANULARITY*right[1])
+            self.local_potential[2][3] = [self.get_potential_at_square(point), point[0], point[1]]
+
+            left = rotate_vector(90, robot_dir[0], robot_dir[1])
+            point = (robot_pos[0]+POTENTIAL_GRANULARITY*left[0],robot_pos[1]+POTENTIAL_GRANULARITY*left[1])
+            self.local_potential[2][1] = [self.get_potential_at_square(point), point[0], point[1]]
+
+            # corner inner 3x3
+
+            point = (robot_pos[0]+POTENTIAL_GRANULARITY*robot_dir[0]+POTENTIAL_GRANULARITY*right[0],robot_pos[1]+POTENTIAL_GRANULARITY*robot_dir[1]+POTENTIAL_GRANULARITY*right[1])
+            self.local_potential[1][3] = [self.get_potential_at_square(point), point[0], point[1]]
+
+            point = (robot_pos[0]+POTENTIAL_GRANULARITY*robot_dir[0]+POTENTIAL_GRANULARITY*left[0],robot_pos[1]+POTENTIAL_GRANULARITY*robot_dir[1]+POTENTIAL_GRANULARITY*left[1])
+            self.local_potential[1][1] = [self.get_potential_at_square(point), point[0], point[1]]
+
+            point = (robot_pos[0]+POTENTIAL_GRANULARITY*back[0]+POTENTIAL_GRANULARITY*right[0],robot_pos[1]+POTENTIAL_GRANULARITY*back[1]+POTENTIAL_GRANULARITY*right[1])
+            self.local_potential[3][3] = [self.get_potential_at_square(point), point[0], point[1]]
+
+            point = (robot_pos[0]+POTENTIAL_GRANULARITY*back[0]+POTENTIAL_GRANULARITY*left[0],robot_pos[1]+POTENTIAL_GRANULARITY*back[1]+POTENTIAL_GRANULARITY*left[1])
+            self.local_potential[3][1] = [self.get_potential_at_square(point), point[0], point[1]]
+
+            # top and bottom
+
+            point = (robot_pos[0]+2*POTENTIAL_GRANULARITY*robot_dir[0]+POTENTIAL_GRANULARITY*right[0],robot_pos[1]+2*POTENTIAL_GRANULARITY*robot_dir[1]+POTENTIAL_GRANULARITY*right[1])
+            self.local_potential[0][3] = [self.get_potential_at_square(point), point[0], point[1]]
+
+            point = (robot_pos[0]+2*POTENTIAL_GRANULARITY*robot_dir[0]+POTENTIAL_GRANULARITY*left[0],robot_pos[1]+2*POTENTIAL_GRANULARITY*robot_dir[1]+POTENTIAL_GRANULARITY*left[1])
+            self.local_potential[0][1] = [self.get_potential_at_square(point), point[0], point[1]]
+
+            point = (robot_pos[0]+2*POTENTIAL_GRANULARITY*back[0]+POTENTIAL_GRANULARITY*right[0],robot_pos[1]+2*POTENTIAL_GRANULARITY*back[1]+POTENTIAL_GRANULARITY*right[1])
+            self.local_potential[4][3] = [self.get_potential_at_square(point), point[0], point[1]]
+
+            point = (robot_pos[0]+2*POTENTIAL_GRANULARITY*back[0]+POTENTIAL_GRANULARITY*left[0],robot_pos[1]+2*POTENTIAL_GRANULARITY*back[1]+POTENTIAL_GRANULARITY*left[1])
+            self.local_potential[4][1] = [self.get_potential_at_square(point), point[0], point[1]]
+
+            # side side
+
+            point = (robot_pos[0]+POTENTIAL_GRANULARITY*robot_dir[0]+2*POTENTIAL_GRANULARITY*right[0],robot_pos[1]+POTENTIAL_GRANULARITY*robot_dir[1]+2*POTENTIAL_GRANULARITY*right[1])
+            self.local_potential[1][4] = [self.get_potential_at_square(point), point[0], point[1]]
+
+            point = (robot_pos[0]+POTENTIAL_GRANULARITY*robot_dir[0]+2*POTENTIAL_GRANULARITY*left[0],robot_pos[1]+POTENTIAL_GRANULARITY*robot_dir[1]+2*POTENTIAL_GRANULARITY*left[1])
+            self.local_potential[1][0] = [self.get_potential_at_square(point), point[0], point[1]]
+
+            point = (robot_pos[0]+POTENTIAL_GRANULARITY*back[0]+2*POTENTIAL_GRANULARITY*right[0],robot_pos[1]+POTENTIAL_GRANULARITY*back[1]+2*POTENTIAL_GRANULARITY*right[1])
+            self.local_potential[3][4] = [self.get_potential_at_square(point), point[0], point[1]]
+
+            point = (robot_pos[0]+POTENTIAL_GRANULARITY*back[0]+2*POTENTIAL_GRANULARITY*left[0],robot_pos[1]+POTENTIAL_GRANULARITY*back[1]+2*POTENTIAL_GRANULARITY*left[1])
+            self.local_potential[3][0] = [self.get_potential_at_square(point), point[0], point[1]]
 
         def get_local_potential(self):
-            return
+            self.build_grid()
+            return self.local_potential
 
-        def get_current_square(self):
-            return
+        def get_potential_at_square(self, (x, y)):
+            potential_sum = 0
+            for potential in self.potential_list:
+                potential_sum = potential_sum + potential.field_at(x, y)
+            return potential_sum
 
-        def calculate_squares_minima(self, row, col): # minima in the closest center to the square
-            return
 
 
 
@@ -233,6 +314,7 @@ class step_field:
                 return float("inf")
 
 def rotate_vector(angle, x, y):
+    angle = math.degrees(angle)
     return x*math.cos(angle)-y*math.sin(angle), x*math.sin(angle)+y*math.cos(angle)
 
 def normalize((x, y)):
