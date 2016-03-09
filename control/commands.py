@@ -55,6 +55,9 @@ class Commands:
             self.vision_process = multiprocessing.Process(target=Vision, args=(self.world,))
             self.vision_process.start()
 
+    def query_ball(self):
+        print("We have the ball: %s" % self.protocol.query_ball())
+
     def attackwithball(self):
         self.highstrategy.attackwithball()
 

@@ -8,6 +8,9 @@
 #define ROTARY_COUNT 5
 #define ROTARY_REQUEST_INTERVAL 30
 
+#define RECEIVER_SLAVE_ADDRESS 69
+#define BALL_SENSOR_SLAVE_ADDRESS 57
+
 #define MOTOR_LEFT 0
 #define MOTOR_RIGHT 1
 #define MOTOR_TURN 2
@@ -15,7 +18,8 @@
 #define MOTOR_GRAB 4
 
 #define RESP_DONE 'D'
-#define RESP_UNKNOWN 'U'
+#define RESP_NEGATIVE 'N'
+#define RESP_ERROR_COMMAND_UNKNOWN 'U'
 #define RESP_ERROR_CHECKSUM 'C'
 #define RESP_ERROR_JOBS_EXCEEDED 'X'
 
@@ -70,7 +74,6 @@ int paramCount;
 void setup() {
   SDPsetup();
   
-  sc.addCommand("A", sensor);
   sc.addCommand("M", moveTimeUnits);
   sc.addCommand("R", moveRotaryUnits);
   sc.addCommand("V", moveForever);
@@ -82,6 +85,7 @@ void setup() {
   sc.addCommand("Y", isOneStopped);
   sc.addCommand("T", transferByte);
   sc.addCommand("H", handshake);
+  sc.addCommand("A", queryBallSensor);
   sc.addDefaultHandler(unknown);
   
   timer.setInterval(ROTARY_REQUEST_INTERVAL, rotaryTimerCallback);
@@ -365,7 +369,7 @@ void transferByte() {
   }
   
   byte value = params[0];
-  Wire.beginTransmission(69);
+  Wire.beginTransmission(RECEIVER_SLAVE_ADDRESS);
   Wire.write(value);
   Wire.endTransmission();
 }
@@ -375,15 +379,9 @@ void handshake() {
   Serial.print(RESP_DONE);
 }
 
-void unknown() {
-  Serial.print(RESP_UNKNOWN);
-}
-
-void sensor() {
-  if (ignore()) {
-    return;
-  }
-  
+void queryBallSensor() {
+  ////////////////////////////////////////
+  // Sensor code
   bool has_ball = false;
   
   Wire.requestFrom(57, 1);
@@ -391,6 +389,11 @@ void sensor() {
 
   if(-test<70)
     has_ball = true;
+  ////////////////////////////////////////
   
-  Serial.print(has_ball);
+  Serial.print(has_ball ? RESP_DONE : RESP_NEGATIVE);
+}
+
+void unknown() {
+  Serial.print(RESP_ERROR_COMMAND_UNKNOWN);
 }

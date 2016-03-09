@@ -41,6 +41,9 @@ class RobotProtocol:
     def transfer(self, byte):
         self.write('T', [ord(byte)])
 
+    def query_ball(self):
+        return self.write('A', error_check=False)
+
     def write(self, command, params=None, error_check=True):
         self.ser.reset_input_buffer()
 
@@ -57,13 +60,14 @@ class RobotProtocol:
         print("Message sent: %s" % message)
 
         self.response = self.ser.read()
-        while self.response != 'D':
+        while self.response not in ['D', 'N']:
             if self.response:
                 print("Got unknown response '%s'" % self.response)
             self.ser.write(message + '\r')
             self.response = self.ser.read()
 
-        print("Got done")
+        print("Received: %s" % self.response)
+        return self.response == 'D'
 
     def reset_input(self):
         self.ser.reset_input_buffer()
