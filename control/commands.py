@@ -7,7 +7,7 @@ from control.protocol import RobotProtocol
 from strategy.simple import SimpleStrategy
 from strategy.highstrategy import StrategyTools
 from strategy.world import World
-from strategy.movement import Movement
+from strategy.game import Game
 from vision.vision import Vision
 
 MOTOR_LEFT = 0
@@ -28,23 +28,30 @@ class Commands:
         self.world = None
         self.strategy = None
         self.highstrategy = None
+        self.game = None
         print("! Remember to call:")
-        print("! vision <room: 0/1> <team_color: blue/yellow> <our_single_spot_color: green/pink>")
-        print("! connect")
-        self.vision()
+        print("! init <room: 0/1> <team_color: blue/yellow> <our_single_spot_color: green/pink>")
+        print("! vision")
+        print("! connect <device_no>")
+        self.init()
+        #self.vision()
         self.connect()
 
+    def init(self, room_num=0, team_color='yellow', our_color='pink', computer_goal=False):
+        print("init: Room: %s, team color: %s, our single spot color: %s, computer goal: %s" %
+              (room_num, team_color, our_color, computer_goal))
+        self.world = World(int(room_num), team_color, our_color, computer_goal)
+        self.strategy = SimpleStrategy(self.world, self)
+        self.highstrategy = StrategyTools(self.world, self)
+        self.game = Game(self.world, self)
+
     def connect(self, device_no='0'):
-        print("Connecting to RF stick")
+        print("connect: Connecting to RF stick")
         self.protocol = RobotProtocol('/dev/ttyACM' + device_no)
 
-    def vision(self, room_num=0, team_color='yellow', our_color='pink', we_have_computer_goal=False):
-        print("Starting vision")
-        print("Room: %s, team color: %s, our single spot color: %s" % (str(room_num), team_color, our_color))
+    def vision(self):
         if not self.vision_process:
-            self.world = World(int(room_num), team_color, our_color, we_have_computer_goal)
-            self.strategy = SimpleStrategy(self.world, self)
-            self.highstrategy = StrategyTools(self.world, self)
+            print("vision: Starting vision")
             self.vision_process = multiprocessing.Process(target=Vision, args=(self.world,))
             self.vision_process.start()
 
@@ -79,13 +86,13 @@ class Commands:
         print(self.world)
 
     def test1(self):
-        movement = Movement(self)
-        a = np.array([[666, 100, 666, 100, 666],
-                      [666, 100, 100, 0, 666],
-                      [666, 100, 100, 100, 666],
-                      [666, 100, 666, 100, 666],
-                      [666, 100, 666, 100, 666]], dtype=np.float64)
-        movement.move(a)
+        self.game.local_potential = np.array([[666, 100, 666, 100, 666],
+                                              [666, 100, 0, 0, 666],
+                                              [666, 100, 1, 100, 666],
+                                              [666, 100, 666, 100, 666],
+                                              [666, 100, 666, 100, 666]], dtype=np.float64)
+        self.game.points = np.arange(50).reshape((5, 5, 2))
+        print self.game.move()
 
     def test2(self):
         self.forward()

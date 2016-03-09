@@ -1,17 +1,31 @@
 import math
-import numpy as np
-from potential_field import Potential
+
 import cv2
+import numpy as np
+
+from potential_field import Potential
+
 
 ROBOT_SIZE = 20
 ROBOT_INFLUENCE_SIZE = 50
 
+
+# Directions robot is facing after the movement
+TOP = 0
+RIGHT = -90
+BOTTOM = 180
+LEFT = 90
+
+
 class Game:
-    def __init__(self, world):
+    def __init__(self, world, commands):
         self.world = world
-        self.local_potential = np.zeros((5, 5, 3), dtype=np.float64)
+        self.local_potential = None
+        self.points = None
         self.current_point = None
         self.current_direction = None
+        self.commands = commands
+        self.moving = True
 
     def run(self):
 
@@ -89,14 +103,43 @@ class Game:
                                              free_up_goal_enemy2, block_pass,
                                              block_goal_enemy1, block_goal_enemy2,  advance, catch_up, bad_minima)
 
-            self.local_potential = potential.get_local_potential() # each square is a list [potential, centerx, centery]
-            # potential is double and everything else is an integer
+            self.local_potential, self.points = potential.get_local_potential()
+            self.current_direction, self.current_point = self.move()
 
-            '''movement must happen here'''
-
-            self.current_point = None #todo need setting
-            self.current_direction = None #todo need setting
-
+    def move(self):
+        """Executes command to go to minimum potential and returns robot direction after the movement"""
+        x, y = np.where(self.local_potential == self.local_potential.min())
+        indices = np.array([x, y]).T.tolist()
+        if [2, 2] in indices:
+            return TOP, self.points[2, 2]
+        elif [1, 2] in indices or [0, 1] in indices or [0, 3] in indices:
+            self.commands.forward()
+            return TOP, self.points[1, 2]
+        elif [1, 1] in indices or [1, 0] in indices:
+            self.commands.forward_left()
+            return LEFT, self.points[1, 1]
+        elif [1, 3] in indices or [1, 4] in indices:
+            self.commands.forward_right()
+            return RIGHT, self.points[1, 3]
+        elif [2, 1] in indices:
+            if self.moving:
+                self.commands.pause()
+            self.commands.sharp_left()
+            return LEFT, self.points[2, 1]
+        elif [2, 3] in indices:
+            if self.moving:
+                self.commands.pause()
+            self.commands.sharp_right()
+            return RIGHT, self.points[2, 3]
+        elif [3, 2] in indices or [4, 1] in indices or [4, 3] in indices:
+            self.commands.backward()
+            return TOP, self.points[3, 2]
+        elif [3, 1] in indices or [3, 0] in indices:
+            self.commands.backward_left()
+            return RIGHT, self.points[3, 1]
+        elif [3, 3] in indices or [3, 4] in indices:
+            self.commands.backward_right()
+            return LEFT, self.points[3, 3]
 
 
 

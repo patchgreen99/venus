@@ -72,7 +72,8 @@ class Potential:
             self.catch_up = catch_up
             self.bad_minima = bad_minima
 
-            self.local_potential = np.zeros((5, 5, 3), dtype=np.float64)# wrong
+            self.local_potential = np.full((5, 5), fill_value=np.inf, dtype=np.float64)
+            self.points = np.zeros((5, 5, 2))
 
         def build_grid(self):
             robot_pos = self.last_square
@@ -80,68 +81,85 @@ class Potential:
 
             #row then column
 
-            self.local_potential[2][2] = (self.get_potential_at_square((robot_pos[0], robot_pos[1])), (robot_pos[0], robot_pos[1]))
+            self.local_potential[2, 2] = self.get_potential_at_square((robot_pos[0], robot_pos[1]))
+            self.points[2, 2] = (robot_pos[0], robot_pos[1])
 
             point = (robot_pos[0]+POTENTIAL_GRANULARITY*robot_dir[0],robot_pos[1]+POTENTIAL_GRANULARITY*robot_dir[1])
-            self.local_potential[1][2] = [self.get_potential_at_square(point), point[0], point[1]]
+            self.local_potential[1, 2] = self.get_potential_at_square(point)
+            self.points[1, 2] = point
 
             back = rotate_vector(180, robot_dir[0], robot_dir[1])
             point = (robot_pos[0]+POTENTIAL_GRANULARITY*back[0],robot_pos[1]+POTENTIAL_GRANULARITY*back[1])
-            self.local_potential[3][2] = [self.get_potential_at_square(point), point[0], point[1]]
+            self.local_potential[3, 2] = self.get_potential_at_square(point)
+            self.points[3, 2] = point
 
             right = rotate_vector(-90, robot_dir[0], robot_dir[1])
             point = (robot_pos[0]+POTENTIAL_GRANULARITY*right[0],robot_pos[1]+POTENTIAL_GRANULARITY*right[1])
-            self.local_potential[2][3] = [self.get_potential_at_square(point), point[0], point[1]]
+            self.local_potential[2, 3] = self.get_potential_at_square(point)
+            self.points[2, 3] = point
 
             left = rotate_vector(90, robot_dir[0], robot_dir[1])
             point = (robot_pos[0]+POTENTIAL_GRANULARITY*left[0],robot_pos[1]+POTENTIAL_GRANULARITY*left[1])
-            self.local_potential[2][1] = [self.get_potential_at_square(point), point[0], point[1]]
+            self.local_potential[2, 1] = self.get_potential_at_square(point)
+            self.points[2, 1] = point
 
             # corner inner 3x3
 
             point = (robot_pos[0]+POTENTIAL_GRANULARITY*robot_dir[0]+POTENTIAL_GRANULARITY*right[0],robot_pos[1]+POTENTIAL_GRANULARITY*robot_dir[1]+POTENTIAL_GRANULARITY*right[1])
-            self.local_potential[1][3] = [self.get_potential_at_square(point), point[0], point[1]]
+            self.local_potential[1, 3] = self.get_potential_at_square(point)
+            self.points[1, 3] = point
 
             point = (robot_pos[0]+POTENTIAL_GRANULARITY*robot_dir[0]+POTENTIAL_GRANULARITY*left[0],robot_pos[1]+POTENTIAL_GRANULARITY*robot_dir[1]+POTENTIAL_GRANULARITY*left[1])
-            self.local_potential[1][1] = [self.get_potential_at_square(point), point[0], point[1]]
+            self.local_potential[1, 1] = self.get_potential_at_square(point)
+            self.points[1, 1] = point
 
             point = (robot_pos[0]+POTENTIAL_GRANULARITY*back[0]+POTENTIAL_GRANULARITY*right[0],robot_pos[1]+POTENTIAL_GRANULARITY*back[1]+POTENTIAL_GRANULARITY*right[1])
-            self.local_potential[3][3] = [self.get_potential_at_square(point), point[0], point[1]]
+            self.local_potential[3, 3] = self.get_potential_at_square(point)
+            self.points[3, 3] = point
 
             point = (robot_pos[0]+POTENTIAL_GRANULARITY*back[0]+POTENTIAL_GRANULARITY*left[0],robot_pos[1]+POTENTIAL_GRANULARITY*back[1]+POTENTIAL_GRANULARITY*left[1])
-            self.local_potential[3][1] = [self.get_potential_at_square(point), point[0], point[1]]
+            self.local_potential[3, 1] = self.get_potential_at_square(point)
+            self.points[3, 1] = point
 
             # top and bottom
 
             point = (robot_pos[0]+2*POTENTIAL_GRANULARITY*robot_dir[0]+POTENTIAL_GRANULARITY*right[0],robot_pos[1]+2*POTENTIAL_GRANULARITY*robot_dir[1]+POTENTIAL_GRANULARITY*right[1])
-            self.local_potential[0][3] = [self.get_potential_at_square(point), point[0], point[1]]
+            self.local_potential[0, 3] = self.get_potential_at_square(point)
+            self.points[0, 3] = point
 
             point = (robot_pos[0]+2*POTENTIAL_GRANULARITY*robot_dir[0]+POTENTIAL_GRANULARITY*left[0],robot_pos[1]+2*POTENTIAL_GRANULARITY*robot_dir[1]+POTENTIAL_GRANULARITY*left[1])
-            self.local_potential[0][1] = [self.get_potential_at_square(point), point[0], point[1]]
+            self.local_potential[0, 1] = self.get_potential_at_square(point)
+            self.points[0, 1] = point
 
             point = (robot_pos[0]+2*POTENTIAL_GRANULARITY*back[0]+POTENTIAL_GRANULARITY*right[0],robot_pos[1]+2*POTENTIAL_GRANULARITY*back[1]+POTENTIAL_GRANULARITY*right[1])
-            self.local_potential[4][3] = [self.get_potential_at_square(point), point[0], point[1]]
+            self.local_potential[4, 3] = self.get_potential_at_square(point)
+            self.points[4, 3] = point
 
             point = (robot_pos[0]+2*POTENTIAL_GRANULARITY*back[0]+POTENTIAL_GRANULARITY*left[0],robot_pos[1]+2*POTENTIAL_GRANULARITY*back[1]+POTENTIAL_GRANULARITY*left[1])
-            self.local_potential[4][1] = [self.get_potential_at_square(point), point[0], point[1]]
+            self.local_potential[4, 1] = self.get_potential_at_square(point)
+            self.points[4, 1] = point
 
             # side side
 
             point = (robot_pos[0]+POTENTIAL_GRANULARITY*robot_dir[0]+2*POTENTIAL_GRANULARITY*right[0],robot_pos[1]+POTENTIAL_GRANULARITY*robot_dir[1]+2*POTENTIAL_GRANULARITY*right[1])
-            self.local_potential[1][4] = [self.get_potential_at_square(point), point[0], point[1]]
+            self.local_potential[1, 4] = self.get_potential_at_square(point)
+            self.points[1, 4] = point
 
             point = (robot_pos[0]+POTENTIAL_GRANULARITY*robot_dir[0]+2*POTENTIAL_GRANULARITY*left[0],robot_pos[1]+POTENTIAL_GRANULARITY*robot_dir[1]+2*POTENTIAL_GRANULARITY*left[1])
-            self.local_potential[1][0] = [self.get_potential_at_square(point), point[0], point[1]]
+            self.local_potential[1, 0] = self.get_potential_at_square(point)
+            self.points[1, 0] = point
 
             point = (robot_pos[0]+POTENTIAL_GRANULARITY*back[0]+2*POTENTIAL_GRANULARITY*right[0],robot_pos[1]+POTENTIAL_GRANULARITY*back[1]+2*POTENTIAL_GRANULARITY*right[1])
-            self.local_potential[3][4] = [self.get_potential_at_square(point), point[0], point[1]]
+            self.local_potential[3, 4] = self.get_potential_at_square(point)
+            self.points[3, 4] = point
 
             point = (robot_pos[0]+POTENTIAL_GRANULARITY*back[0]+2*POTENTIAL_GRANULARITY*left[0],robot_pos[1]+POTENTIAL_GRANULARITY*back[1]+2*POTENTIAL_GRANULARITY*left[1])
-            self.local_potential[3][0] = [self.get_potential_at_square(point), point[0], point[1]]
+            self.local_potential[3, 0] = self.get_potential_at_square(point)
+            self.points[3, 0] = point
 
         def get_local_potential(self):
             self.build_grid()
-            return self.local_potential
+            return self.local_potential, self.points
 
         def get_potential_at_square(self, (x, y)):
             potential_sum = 0
