@@ -104,7 +104,8 @@ class Game:
                                              block_goal_enemy1, block_goal_enemy2,  advance, catch_up, bad_minima)
 
             self.local_potential, self.points = potential.get_local_potential()
-            self.current_direction, self.current_point = self.move()
+            turn, self.current_point = self.move()
+            self.current_direction = rotate_vector(turn, self.current_direction[0], self.current_direction[1])
 
     def move(self):
         """Executes command to go to minimum potential and returns robot direction after the movement"""
@@ -141,136 +142,78 @@ class Game:
             self.commands.backward_right()
             return LEFT, self.points[3, 3]
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     def test_fields(self):
 
         # example state
         while True:
-            cv2.namedWindow('STATIC')
 
-            cv2.createTrackbar('DEFENSE_BOX CONSTANT', 'Room', -100, 100, self.nothing)
-            cv2.createTrackbar('DEFENSE_BOX GRADIENT', 'Room', -10, 10, self.nothing)
-            cv2.createTrackbar('WALLS CONSTANT', 'Room', -100, 100, self.nothing)
-            cv2.createTrackbar('WALLS GRADIENT', 'Room', -10, 10, self.nothing)
+            cv2.namedWindow('BASIC COURTESY')
 
-            cv2.namedWindow('BASIC')
+            cv2.createTrackbar('FRIEND CONSTANT', 'BASIC COURTESY', -100, 100, self.nothing)
+            cv2.createTrackbar('FRIEND GRADIENT', 'BASIC COURTESY', -10, 10, self.nothing)
+            cv2.createTrackbar('ENEMY CONSTANT', 'BASIC COURTESY', -100, 100, self.nothing)
+            cv2.createTrackbar('ENEMY GRADIENT', 'BASIC COURTESY', -10, 10, self.nothing)
 
-            cv2.createTrackbar('BALL CONSTANT', 'Room', -100, 100, self.nothing)
-            cv2.createTrackbar('BALL GRADIENT', 'Room', -100, 100, self.nothing)
-            cv2.createTrackbar('FRIEND CONSTANT', 'Room', 0, 100, self.nothing)
-            cv2.createTrackbar('FRIEND GRADIENT', 'Room', 0, 100, self.nothing)
-            cv2.createTrackbar('ENEMY1 CONSTANT', 'Room', 0, 100, self.nothing)
-            cv2.createTrackbar('ENEMY1 GRADIENT', 'Room', 0, 100, self.nothing)
-            cv2.createTrackbar('ENEMY2 CONSTANT', 'Room', 0, 100, self.nothing)
-            cv2.createTrackbar('ENEMY2 GRADIENT', 'Room', 0, 100, self.nothing)
+            cv2.setTrackbarPos('FRIEND CONSTANT', 'BASIC COURTESY', 0)
+            cv2.setTrackbarPos('FRIEND GRADIENT', 'BASIC COURTESY', 0)
+            cv2.setTrackbarPos('ENEMY CONSTANT', 'BASIC COURTESY', 0)
+            cv2.setTrackbarPos('ENEMY GRADIENT', 'BASIC COURTESY', 0)
+
+            cv2.namedWindow("PROGRESSIVE STRATEGY")
+
+            cv2.createTrackbar('BALL CONSTANT', 'PROGRESSIVE STRATEGY', -100, 100, self.nothing)
+            cv2.createTrackbar('BALL GRADIENT', 'PROGRESSIVE STRATEGY', -10, 10, self.nothing)
+            cv2.createTrackbar('ADVANCE CONSTANT', 'PROGRESSIVE STRATEGY', -100, 100, self.nothing)
+            cv2.createTrackbar('ADVANCE GRADIENT', 'PROGRESSIVE STRATEGY', -10, 10, self.nothing)
+            cv2.createTrackbar('CATCH_UP CONSTANT', 'PROGRESSIVE STRATEGY', -100, 100, self.nothing)
+            cv2.createTrackbar('CATCH_UP GRADIENT', 'PROGRESSIVE STRATEGY', -10, 10, self.nothing)
+
+            cv2.setTrackbarPos('BALL CONSTANT', 'PROGRESSIVE STRATEGY', 0)
+            cv2.setTrackbarPos('BALL GRADIENT', 'PROGRESSIVE STRATEGY', 0)
+            cv2.setTrackbarPos('ADVANCE CONSTANT', 'PROGRESSIVE STRATEGY', 0)
+            cv2.setTrackbarPos('ADVANCE GRADIENT', 'PROGRESSIVE STRATEGY', 0)
+            cv2.setTrackbarPos('CATCH_UP CONSTANT', 'PROGRESSIVE STRATEGY', 0)
+            cv2.setTrackbarPos('CATCH_UP GRADIENT', 'PROGRESSIVE STRATEGY', 0)
 
             cv2.namedWindow("ATTACK")
 
-            cv2.createTrackbar('FREE_UP_PASS_ENEMY1 CONSTANT', 'Room', 0, 100, self.nothing)
-            cv2.createTrackbar('FREE_UP_PASS_ENEMY1 GRADIENT', 'Room', 0, 100, self.nothing)
-            cv2.createTrackbar('FREE_UP_PASS_ENEMY2 CONSTANT', 'Room', 0, 100, self.nothing)
-            cv2.createTrackbar('FREE_UP_PASS_ENEMY2 GRADIENT', 'Room', 0, 100, self.nothing)
-            cv2.createTrackbar('FREE_UP_GOAL_ENEMY1 CONSTANT', 'Room', 0, 100, self.nothing)
-            cv2.createTrackbar('FREE_UP_GOAL_ENEMY1 GRADIENT', 'Room', 0, 100, self.nothing)
-            cv2.createTrackbar('FREE_UP_GOAL_ENEMY2 CONSTANT', 'Room', 0, 100, self.nothing)
-            cv2.createTrackbar('FREE_UP_GOAL_ENEMY2 GRADIENT', 'Room', 0, 100, self.nothing)
-            cv2.createTrackbar('ADVANCE CONSTANT', 'Room', 0, 100, self.nothing)
-            cv2.createTrackbar('ADVANCE GRADIENT', 'Room', 0, 100, self.nothing)
-            cv2.createTrackbar('CATCH_UP CONSTANT', 'Room', 0, 100, self.nothing)
-            cv2.createTrackbar('CATCH_UP GRADIENT', 'Room', 0, 100, self.nothing)
-            cv2.createTrackbar('BAD_MINIMA CONSTANT', 'Room', 0, 100, self.nothing)
-            cv2.createTrackbar('BAD_MINIMA GRADIENT', 'Room', 0, 100, self.nothing)
+            cv2.createTrackbar('FREE_UP_PASS_ENEMY1 CONSTANT', 'ATTACK', -100, 100, self.nothing)
+            cv2.createTrackbar('FREE_UP_PASS_ENEMY1 GRADIENT', 'ATTACK', -10, 10, self.nothing)
+            cv2.createTrackbar('FREE_UP_PASS_ENEMY2 CONSTANT', 'ATTACK', -100, 100, self.nothing)
+            cv2.createTrackbar('FREE_UP_PASS_ENEMY2 GRADIENT', 'ATTACK', -10, 10, self.nothing)
+            cv2.createTrackbar('FREE_UP_GOAL_ENEMY1 CONSTANT', 'ATTACK', -100, 100, self.nothing)
+            cv2.createTrackbar('FREE_UP_GOAL_ENEMY1 GRADIENT', 'ATTACK', -10, 10, self.nothing)
+            cv2.createTrackbar('FREE_UP_GOAL_ENEMY2 CONSTANT', 'ATTACK', -100, 100, self.nothing)
+            cv2.createTrackbar('FREE_UP_GOAL_ENEMY2 GRADIENT', 'ATTACK', -10, 10, self.nothing)
+            cv2.createTrackbar('BAD_MINIMA CONSTANT', 'ATTACK', -100, 100, self.nothing)
+            cv2.createTrackbar('BAD_MINIMA GRADIENT', 'ATTACK', -10, 10, self.nothing)
+
+            cv2.setTrackbarPos('FREE_UP_PASS_ENEMY1 CONSTANT', 'ATTACK', 0)
+            cv2.setTrackbarPos('FREE_UP_PASS_ENEMY1 GRADIENT', 'ATTACK', 0)
+            cv2.setTrackbarPos('FREE_UP_PASS_ENEMY2 CONSTANT', 'ATTACK', 0)
+            cv2.setTrackbarPos('FREE_UP_PASS_ENEMY2 GRADIENT', 'ATTACK', 0)
+            cv2.setTrackbarPos('FREE_UP_GOAL_ENEMY1 CONSTANT', 'ATTACK', 0)
+            cv2.setTrackbarPos('FREE_UP_GOAL_ENEMY1 GRADIENT', 'ATTACK', 0)
+            cv2.setTrackbarPos('FREE_UP_GOAL_ENEMY2 CONSTANT', 'ATTACK', 0)
+            cv2.setTrackbarPos('FREE_UP_GOAL_ENEMY2 GRADIENT', 'ATTACK', 0)
+            cv2.setTrackbarPos('BAD_MINIMA CONSTANT', 'ATTACK', 0)
+            cv2.setTrackbarPos('BAD_MINIMA GRADIENT', 'ATTACK', 0)
 
             cv2.namedWindow("DEFENSE")
 
-            cv2.createTrackbar('BALL CONSTANT', 'Room', -100, 100, self.nothing)
-            cv2.createTrackbar('BALL GRADIENT', 'Room', -100, 100, self.nothing)
-            cv2.createTrackbar('FRIEND CONSTANT', 'Room', 0, 100, self.nothing)
-            cv2.createTrackbar('FRIEND GRADIENT', 'Room', 0, 100, self.nothing)
-            cv2.createTrackbar('ENEMY1 CONSTANT', 'Room', 0, 100, self.nothing)
-            cv2.createTrackbar('ENEMY1 GRADIENT', 'Room', 0, 100, self.nothing)
-            cv2.createTrackbar('ENEMY2 CONSTANT', 'Room', 0, 100, self.nothing)
-            cv2.createTrackbar('ENEMY2 GRADIENT', 'Room', 0, 100, self.nothing)
-            cv2.createTrackbar('BLOCK_GOAL_ENEMY1 CONSTANT', 'Room', 0, 100, self.nothing)
-            cv2.createTrackbar('BLOCK_GOAL_ENEMY1 GRADIENT', 'Room', 0, 100, self.nothing)
-            cv2.createTrackbar('BLOCK_GOAL_ENEMY2 CONSTANT', 'Room', 0, 100, self.nothing)
-            cv2.createTrackbar('BLOCK_GOAL_ENEMY2 GRADIENT', 'Room', 0, 100, self.nothing)
-            cv2.createTrackbar('BLOCK_PASS CONSTANT', 'Room', 0, 100, self.nothing)
-            cv2.createTrackbar('BLOCK_PASS GRADIENT', 'Room', 0, 100, self.nothing)
-            cv2.createTrackbar('ADVANCE CONSTANT', 'Room', 0, 100, self.nothing)
-            cv2.createTrackbar('ADVANCE GRADIENT', 'Room', 0, 100, self.nothing)
-            cv2.createTrackbar('CATCH_UP CONSTANT', 'Room', 0, 100, self.nothing)
-            cv2.createTrackbar('CATCH_UP GRADIENT', 'Room', 0, 100, self.nothing)
+            cv2.createTrackbar('BLOCK_GOAL_ENEMY1 CONSTANT', 'DEFENSE', -100, 100, self.nothing)
+            cv2.createTrackbar('BLOCK_GOAL_ENEMY1 GRADIENT', 'DEFENSE', -10, 10, self.nothing)
+            cv2.createTrackbar('BLOCK_GOAL_ENEMY2 CONSTANT', 'DEFENSE', -100, 100, self.nothing)
+            cv2.createTrackbar('BLOCK_GOAL_ENEMY2 GRADIENT', 'DEFENSE', -10, 10, self.nothing)
+            cv2.createTrackbar('BLOCK_PASS CONSTANT', 'DEFENSE', -100, 100, self.nothing)
+            cv2.createTrackbar('BLOCK_PASS GRADIENT', 'DEFENSE', -10, 10, self.nothing)
+
+            cv2.setTrackbarPos('BLOCK_GOAL_ENEMY1 CONSTANT', 'DEFENSE', 0)
+            cv2.setTrackbarPos('BLOCK_GOAL_ENEMY1 GRADIENT', 'DEFENSE', 0)
+            cv2.setTrackbarPos('BLOCK_GOAL_ENEMY2 CONSTANT', 'DEFENSE', 0)
+            cv2.setTrackbarPos('BLOCK_GOAL_ENEMY2 GRADIENT', 'DEFENSE', 0)
+            cv2.setTrackbarPos('BLOCK_PASS CONSTANT', 'DEFENSE', 0)
+            cv2.setTrackbarPos('BLOCK_PASS GRADIENT', 'DEFENSE', 0)
 
             # as an example the potentials you wil need for any single state
             # if you don't understand ask Aseem, then ask me :)
@@ -278,7 +221,7 @@ class Game:
             # first value is the gradient eg. the response of the field
             # the second value is the constant eg. the magnitude of the field
 
-            ball_field = radial(self.world.ball, 0, 0)
+            ball_field = radial(self.world.ball, cv2.getTrackbarPos('BALL GRADIENT', 'PROGRESSIVE STRATEGY'), cv2.getTrackbarPos('BALL CONSTANT', 'PROGRESSIVE STRATEGY'))
 
             # radial - constant gradient everywhere  coming out from one single spot
             # 3 3 3 3 3 3 3
@@ -287,9 +230,9 @@ class Game:
             # 3 3 2 1 2 3 3
             # 3 3 3 3 3 3 3
 
-            friend_field = solid_field(self.world.friend.position, 0, 0, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy1_field = solid_field(self.world.enemy1.position, 0, 0, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy2_field = solid_field(self.world.enemy2.position, 0, 0, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            friend_field = solid_field(self.world.friend.position, cv2.getTrackbarPos('FRIEND GRADIENT', 'BASIC COURTESY'), cv2.getTrackbarPos('FRIEND CONSTANT', 'BASIC COURTESY'), ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy1_field = solid_field(self.world.enemy1.position, cv2.getTrackbarPos('ENEMY GRADIENT', 'BASIC COURTESY'), cv2.getTrackbarPos('ENEMY CONSTANT', 'BASIC COURTESY'), ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy2_field = solid_field(self.world.enemy2.position, cv2.getTrackbarPos('ENEMY GRADIENT', 'BASIC COURTESY'), cv2.getTrackbarPos('ENEMY CONSTANT', 'BASIC COURTESY'), ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
 
             # solid - modeled as a circle, from center 'forbidden' is unreachable and outside the influence area
             # is unreachable
@@ -299,10 +242,10 @@ class Game:
             # 1 3 9 9 9 3 1
             # 0 2 3 3 3 2 0
 
-            free_up_pass_enemy1 = finite_axial(self.world.enemy1.position, self.world.friend.position, 0, 0)
-            free_up_pass_enemy2 = finite_axial(self.world.enemy2.position, self.world.friend.position, 0, 0)
-            free_up_goal_enemy1 = finite_axial(self.world.enemy1.position, self.world.there_goal, 0, 0)
-            free_up_goal_enemy2 = finite_axial(self.world.enemy2.position, self.world.there_goal, 0, 0)
+            free_up_pass_enemy1 = finite_axial(self.world.enemy1.position, self.world.friend.position, cv2.getTrackbarPos('FREE_UP_PASS_ENEMY1 GRADIENT', 'ATTACK'), cv2.getTrackbarPos('FREE_UP_PASS_ENEMY1 CONSTANT', 'ATTACK'))
+            free_up_pass_enemy2 = finite_axial(self.world.enemy2.position, self.world.friend.position, cv2.getTrackbarPos('FREE_UP_PASS_ENEMY2 GRADIENT', 'ATTACK'), cv2.getTrackbarPos('FREE_UP_PASS_ENEMY2 CONSTANT', 'ATTACK'))
+            free_up_goal_enemy1 = finite_axial(self.world.enemy1.position, self.world.there_goal, cv2.getTrackbarPos('FREE_UP_GOAL_ENEMY1 GRADIENT', 'ATTACK'), cv2.getTrackbarPos('FREE_UP_GOAL_ENEMY1 CONSTANT', 'ATTACK'))
+            free_up_goal_enemy2 = finite_axial(self.world.enemy2.position, self.world.there_goal, cv2.getTrackbarPos('FREE_UP_GOAL_ENEMY2 GRADIENT', 'ATTACK'), cv2.getTrackbarPos('FREE_UP_GOAL_ENEMY2 CONSTANT', 'ATTACK'))
 
             # finite axial - field will start at start point and exist on the opposite side to the ref point and
             # continue of the pitch
@@ -312,10 +255,10 @@ class Game:
             # 3 2 1 1 1 2 3
             # 3 3 3 2 3 3 3
 
-            block_pass = infinite_axial(self.world.enemy1.position, self.world.enemy2.position, 0, 0)
-            block_goal_enemy1 = infinite_axial(self.world.enemy1.position, self.world.our_goal, 0, 0)
-            block_goal_enemy2 = infinite_axial(self.world.enemy2.position, self.world.our_goal, 0, 0)
-            bad_minima = infinite_axial(self.world.venus.position, self.world.friend.position, 0, 0)
+            block_pass = infinite_axial(self.world.enemy1.position, self.world.enemy2.position, cv2.getTrackbarPos('BLOCK_PASS GRADIENT', 'DEFENSE'), cv2.getTrackbarPos('BLOCK_PASS CONSTANT', 'DEFENSE'))
+            block_goal_enemy1 = infinite_axial(self.world.enemy1.position, self.world.our_goal, cv2.getTrackbarPos('BLOCK_GOAL_ENEMY1 GRADIENT', 'DEFENSE'), cv2.getTrackbarPos('BLOCK_GOAL_ENEMY1 CONSTANT', 'DEFENSE'))
+            block_goal_enemy2 = infinite_axial(self.world.enemy2.position, self.world.our_goal, cv2.getTrackbarPos('BLOCK_GOAL_ENEMY2 GRADIENT', 'DEFENSE'), cv2.getTrackbarPos('BLOCK_GOAL_ENEMY2 CONSTANT', 'DEFENSE'))
+            bad_minima = infinite_axial(self.world.venus.position, self.world.friend.position, cv2.getTrackbarPos('BAD_MINIMA GRADIENT', 'ATTACK'), cv2.getTrackbarPos('BAD_MINIMA CONSTANT', 'ATTACK'))
 
             # infinite axial - field is only implemented between start and end points everywhere else
             # contribution is zero
@@ -325,8 +268,8 @@ class Game:
             # 1 1 1 1 1 1 1
             # 3 3 3 3 3 3 3
 
-            advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 0, 0)
-            catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 0, 0)
+            advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), cv2.getTrackbarPos('ADVANCE GRADIENT', 'PROGRESSIVE STRATEGY'), cv2.getTrackbarPos('ADVANCE CONSTANT', 'PROGRESSIVE STRATEGY'))
+            catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), cv2.getTrackbarPos('CATCH_UP GRADIENT', 'PROGRESSIVE STRATEGY'), cv2.getTrackbarPos('CATCH_UP CONSTANT', 'PROGRESSIVE STRATEGY'))
 
             # step - an infinite line drawn through the point in the first argument in the direction of the vector in
             # the second argument. The clockwise segment to the vector is cut off where as the anticlockwise segment
@@ -344,13 +287,9 @@ class Game:
                                              free_up_goal_enemy2, block_pass,
                                              block_goal_enemy1, block_goal_enemy2,  advance, catch_up, bad_minima)
 
-            self.local_potential = potential.get_local_potential() # each square is a list [potential, centerx, centery]
-            # potential is double and everything else is an integer
-
-            '''movement must happen here'''
-
-            self.current_point = None # todo need setting
-            self.current_direction = None # todo need setting
+            self.local_potential, self.points = potential.get_local_potential()
+            turn, self.current_point = self.move()
+            self.current_direction = rotate_vector(turn, self.current_direction[0], self.current_direction[1])
 
     def nothing(self, x):
         pass

@@ -86,7 +86,7 @@ class Commands:
         print(self.world)
 
     def potential(self):
-        self.s
+        self.game.test_fields()
 
     def test1(self):
         self.game.local_potential = np.array([[666, 100, 666, 100, 666],

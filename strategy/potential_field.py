@@ -1,5 +1,6 @@
 import math
 import numpy as np
+import cv2
 
 PITCH_ROWS = 480 #pixels
 PITCH_COLS = 640 #pixels
@@ -25,6 +26,18 @@ class Potential:
                      free_up_pass_enemy1, free_up_pass_enemy2, free_up_goal_enemy1, free_up_goal_enemy2, block_pass,
                      block_goal_enemy1, block_goal_enemy2, advance, catch_up, bad_minima):
 
+            cv2.namedWindow('STATIC')
+
+            cv2.createTrackbar('DEFENSE_BOX CONSTANT', 'STATIC', -100, 100, self.nothing)
+            cv2.createTrackbar('DEFENSE_BOX GRADIENT', 'STATIC', -10, 10, self.nothing)
+            cv2.createTrackbar('WALLS CONSTANT', 'STATIC', -100, 100, self.nothing)
+            cv2.createTrackbar('WALLS GRADIENT', 'STATIC', -10, 10, self.nothing)
+
+            cv2.setTrackbarPos('DEFENSE_BOX CONSTANT', 'STATIC', 0)
+            cv2.setTrackbarPos('DEFENSE_BOX GRADIENT', 'STATIC', 0)
+            cv2.setTrackbarPos('WALLS CONSTANT', 'STATIC', 0)
+            cv2.setTrackbarPos('WALLS GRADIENT', 'STATIC', 0)
+
             self.world = world
 
             if last_square is None:
@@ -37,19 +50,19 @@ class Potential:
             else:
                 self.last_direction = last_square
 
-            self.top_wall = step_field(PITCH_TOP_LEFT[self.world.room_num], (PITCH_TOP_LEFT[self.world.room_num][0]-PITCH_TOP_RIGHT[self.world.room_num][0], PITCH_TOP_LEFT[self.world.room_num][1]-PITCH_TOP_RIGHT[self.world.room_num][1]), 0, 0)
-            self.bot_wall = step_field(PITCH_BOT_LEFT[self.world.room_num], (PITCH_BOT_RIGHT[self.world.room_num][0]-PITCH_BOT_LEFT[self.world.room_num][0], PITCH_BOT_RIGHT[self.world.room_num][1]-PITCH_BOT_LEFT[self.world.room_num][1]), 0, 0)
-            self.right_wall = step_field(PITCH_TOP_RIGHT[self.world.room_num], (PITCH_TOP_RIGHT[self.world.room_num][0] - PITCH_BOT_RIGHT[self.world.room_num][0], PITCH_TOP_RIGHT[self.world.room_num][1] - PITCH_BOT_RIGHT[self.world.room_num][1]), 0, 0)
-            self.left_wall = step_field(PITCH_TOP_LEFT[self.world.room_num], (PITCH_BOT_LEFT[self.world.room_num][0] - PITCH_TOP_LEFT[self.world.room_num][0], PITCH_BOT_LEFT[self.world.room_num][1] - PITCH_TOP_LEFT[self.world.room_num][1]), 0, 0)
+            self.top_wall = step_field(PITCH_TOP_LEFT[self.world.room_num], (PITCH_TOP_LEFT[self.world.room_num][0]-PITCH_TOP_RIGHT[self.world.room_num][0], PITCH_TOP_LEFT[self.world.room_num][1]-PITCH_TOP_RIGHT[self.world.room_num][1]), cv2.getTrackbarPos('WALLS GRADIENT', 'STATIC'), cv2.getTrackbarPos('WALLS CONSTANT', 'STATIC'))
+            self.bot_wall = step_field(PITCH_BOT_LEFT[self.world.room_num], (PITCH_BOT_RIGHT[self.world.room_num][0]-PITCH_BOT_LEFT[self.world.room_num][0], PITCH_BOT_RIGHT[self.world.room_num][1]-PITCH_BOT_LEFT[self.world.room_num][1]), cv2.getTrackbarPos('WALLS GRADIENT', 'STATIC'), cv2.getTrackbarPos('WALLS CONSTANT', 'STATIC'))
+            self.right_wall = step_field(PITCH_TOP_RIGHT[self.world.room_num], (PITCH_TOP_RIGHT[self.world.room_num][0] - PITCH_BOT_RIGHT[self.world.room_num][0], PITCH_TOP_RIGHT[self.world.room_num][1] - PITCH_BOT_RIGHT[self.world.room_num][1]), cv2.getTrackbarPos('WALLS GRADIENT', 'STATIC'), cv2.getTrackbarPos('WALLS CONSTANT', 'STATIC'))
+            self.left_wall = step_field(PITCH_TOP_LEFT[self.world.room_num], (PITCH_BOT_LEFT[self.world.room_num][0] - PITCH_TOP_LEFT[self.world.room_num][0], PITCH_BOT_LEFT[self.world.room_num][1] - PITCH_TOP_LEFT[self.world.room_num][1]), cv2.getTrackbarPos('WALLS GRADIENT', 'STATIC'), cv2.getTrackbarPos('WALLS CONSTANT', 'STATIC'))
 
             if world.we_have_computer_goal and world.room_num == 1 or not world.we_have_computer_goal and world.room_num == 0: # there goal is on the right
-                self.penalty_box_front = infinite_axial(DEFENDING_RIGHT_TOP[self.world.room_num], DEFENDING_RIGHT_BOT[self.world.room_num], 0, 0)
-                self.penalty_box_top = infinite_axial(GOAL_RIGHT_TOP[self.world.room_num], DEFENDING_RIGHT_TOP[self.world.room_num], 0, 0)
-                self.penalty_box_bot = infinite_axial(GOAL_RIGHT_BOT[self.world.room_num], DEFENDING_RIGHT_BOT[self.world.room_num], 0, 0)
+                self.penalty_box_front = infinite_axial(DEFENDING_RIGHT_TOP[self.world.room_num], DEFENDING_RIGHT_BOT[self.world.room_num], cv2.getTrackbarPos('DEFENSE_BOX GRADIENT', 'STATIC'), cv2.getTrackbarPos('DEFENSE_BOX CONSTANT', 'STATIC'))
+                self.penalty_box_top = infinite_axial(GOAL_RIGHT_TOP[self.world.room_num], DEFENDING_RIGHT_TOP[self.world.room_num], cv2.getTrackbarPos('DEFENSE_BOX GRADIENT', 'STATIC'), cv2.getTrackbarPos('DEFENSE_BOX CONSTANT', 'STATIC'))
+                self.penalty_box_bot = infinite_axial(GOAL_RIGHT_BOT[self.world.room_num], DEFENDING_RIGHT_BOT[self.world.room_num], cv2.getTrackbarPos('DEFENSE_BOX GRADIENT', 'STATIC'), cv2.getTrackbarPos('DEFENSE_BOX CONSTANT', 'STATIC'))
             elif world.we_have_computer_goal and world.room_num == 0 or not world.we_have_computer_goal and world.room_num == 1: # obviously the left goal
-                self.penalty_box_front = infinite_axial(DEFENDING_LEFT_TOP[self.world.room_num], DEFENDING_LEFT_BOT[self.world.room_num], 0, 0)
-                self.penalty_box_top = infinite_axial(GOAL_LEFT_TOP[self.world.room_num], DEFENDING_LEFT_TOP[self.world.room_num], 0, 0)
-                self.penalty_box_bot = infinite_axial(GOAL_LEFT_BOT[self.world.room_num], DEFENDING_LEFT_BOT[self.world.room_num], 0, 0)
+                self.penalty_box_front = infinite_axial(DEFENDING_LEFT_TOP[self.world.room_num], DEFENDING_LEFT_BOT[self.world.room_num], cv2.getTrackbarPos('DEFENSE_BOX GRADIENT', 'STATIC'), cv2.getTrackbarPos('DEFENSE_BOX CONSTANT', 'STATIC'))
+                self.penalty_box_top = infinite_axial(GOAL_LEFT_TOP[self.world.room_num], DEFENDING_LEFT_TOP[self.world.room_num], cv2.getTrackbarPos('DEFENSE_BOX GRADIENT', 'STATIC'), cv2.getTrackbarPos('DEFENSE_BOX CONSTANT', 'STATIC'))
+                self.penalty_box_bot = infinite_axial(GOAL_LEFT_BOT[self.world.room_num], DEFENDING_LEFT_BOT[self.world.room_num], cv2.getTrackbarPos('DEFENSE_BOX GRADIENT', 'STATIC'), cv2.getTrackbarPos('DEFENSE_BOX CONSTANT', 'STATIC'))
 
             self.potential_list = [self.ball_field, self.friend_field, self.enemy1_field, self.enemy2_field,
                      self.free_up_pass_enemy1, self.free_up_pass_enemy2, self.free_up_goal_enemy1,
@@ -74,6 +87,9 @@ class Potential:
 
             self.local_potential = np.full((5, 5), fill_value=np.inf, dtype=np.float64)
             self.points = np.zeros((5, 5, 2))
+
+        def nothing(self, x):
+            pass
 
         def build_grid(self):
             robot_pos = self.last_square
@@ -166,6 +182,8 @@ class Potential:
             for potential in self.potential_list:
                 potential_sum = potential_sum + potential.field_at(x, y)
             return potential_sum
+
+
 
 
 

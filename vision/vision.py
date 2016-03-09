@@ -152,8 +152,6 @@ class Vision:
             self.capture.set(cv2.CAP_PROP_HUE, cv2.getTrackbarPos('HUE', 'Room')/100.0)
             self.frame()
 
-        print time.time()
-
         if self.world.room_num == 0:
             targetFile = open("vision/room0.txt", "w")
         else:
