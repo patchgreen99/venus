@@ -34,29 +34,6 @@ class Commands:
         #self.vision()
         self.connect()
 
-    def test_movement(self):
-        movement = Movement(self)
-        a = np.array([[666, 100, 666, 100, 666],
-                      [666, 100, 100, 0, 666],
-                      [666, 100, 100, 100, 666],
-                      [666, 100, 666, 100, 666],
-                      [666, 100, 666, 100, 666]], dtype=np.float64)
-        movement.move(a)
-
-    def a(self):
-        self.forward()
-        self.forward_left()
-        self.forward_right()
-        self.forward_left()
-        self.backward()
-        self.backward()
-        self.backward_left()
-
-    def w(self):
-        self.forward()
-        self.pause()
-        self.sharp_left()
-
     def connect(self, device_no='0'):
         print("Connecting to RF stick")
         self.protocol = RobotProtocol('/dev/ttyACM' + device_no)
@@ -101,18 +78,37 @@ class Commands:
     def pw(self):
         print(self.world)
 
-    def f(self, x):
-        """Move forward, negative x means backward"""
-        x = int(x)
-        s = sign(x)
-        if x > 0:
-            x = 13.7627360975 * x - 53.5734818271
-        else:
-            x = 13.964509832 * -x - 75.2448595458
-        x = int(x)
-        if x > 0:
-            self.protocol.move(x, [(MOTOR_LEFT, -100 * s),
-                                   (MOTOR_RIGHT, -100 * s)])
+    def test1(self):
+        movement = Movement(self)
+        a = np.array([[666, 100, 666, 100, 666],
+                      [666, 100, 100, 0, 666],
+                      [666, 100, 100, 100, 666],
+                      [666, 100, 666, 100, 666],
+                      [666, 100, 666, 100, 666]], dtype=np.float64)
+        movement.move(a)
+
+    def test2(self):
+        self.forward()
+        self.forward_left()
+        self.forward_right()
+        self.forward_left()
+        self.backward()
+        self.backward()
+        self.backward_left()
+
+    def test3(self):
+        self.forward()
+        self.pause()
+        self.sharp_left()
+
+    def test4(self):
+        """Test of swerving"""
+        self.forward()
+        self.swerve_left(200)
+        self.swerve_right(200)
+        self.swerve_left(200)
+        self.swerve_right(200)
+        self.forward()
 
     def forward_forever(self):
         """Move forward forever"""
@@ -125,91 +121,91 @@ class Commands:
                                     (MOTOR_RIGHT, 100)])
 
     def swerve_right(self, x):
-        """Swerve right whilst moving forwards
-
-        x values:
-        45 degrees: 200
-        90 degrees: 500
-        """
+        """Swerve right whilst moving forwards"""
         self.protocol.schedule(x, MOTOR_TURN, [(MOTOR_TURN, 100),
                                                (MOTOR_LEFT, -100),
                                                (MOTOR_RIGHT, -100)])
 
     def swerve_left(self, x):
-        """Swerve left whilst moving forwards
-
-        x values:
-        45 degrees: 200
-        90 degrees: 500
-        """
+        """Swerve left whilst moving forwards"""
         self.protocol.schedule(x, MOTOR_TURN, [(MOTOR_TURN, -100),
                                                (MOTOR_LEFT, -100),
                                                (MOTOR_RIGHT, -100)])
 
-    def test(self):
-        """Test of swerving"""
-        self.forward()
-        self.swerve_left(200)
-        self.swerve_right(200)
-        self.swerve_left(200)
-        self.swerve_right(200)
-        self.forward()
-
     def pause(self):
-        self.protocol.schedule_pause(200)
+        """Pause between motions that immediately change motor direction"""
+        self.protocol.schedule_pause(400)
 
     def forward(self):
-        self.protocol.schedule(200, MOTOR_RIGHT, [(MOTOR_LEFT, -100),
+        """Move a cell forward"""
+        self.protocol.schedule(100, MOTOR_LEFT, [(MOTOR_LEFT, -100),
                                                  (MOTOR_RIGHT, -100)])
 
     def backward(self):
-        self.protocol.schedule(200, MOTOR_LEFT, [(MOTOR_LEFT, 100),
+        """Move a cell backward"""
+        self.protocol.schedule(100, MOTOR_LEFT, [(MOTOR_LEFT, 100),
                                                  (MOTOR_RIGHT, 100)])
 
     def forward_left(self):
-        self.protocol.schedule(300, MOTOR_TURN, [(MOTOR_TURN, -100),
+        """Move forward and to left"""
+        self.protocol.schedule(170, MOTOR_TURN, [(MOTOR_TURN, -100),
                                                  (MOTOR_LEFT, -70),
                                                  (MOTOR_RIGHT, -100)])
-        self.protocol.schedule(120, MOTOR_LEFT, [(MOTOR_LEFT, -100),
-                                                 (MOTOR_RIGHT, -100)])
+        self.protocol.schedule(50, MOTOR_LEFT, [(MOTOR_LEFT, -100),
+                                                (MOTOR_RIGHT, -100)])
 
     def forward_right(self):
-        self.protocol.schedule(350, MOTOR_TURN, [(MOTOR_TURN, 100),
+        """Move forward and to right"""
+        self.protocol.schedule(240, MOTOR_TURN, [(MOTOR_TURN, 100),
                                                  (MOTOR_LEFT, -100),
                                                  (MOTOR_RIGHT, -70)])
-        self.protocol.schedule(120, MOTOR_LEFT, [(MOTOR_LEFT, -100),
+        self.protocol.schedule(10, MOTOR_RIGHT, [(MOTOR_LEFT, -100),
                                                  (MOTOR_RIGHT, -100)])
 
     def backward_left(self):
-        self.protocol.schedule(340, MOTOR_TURN, [(MOTOR_TURN, 100),
-                                                 (MOTOR_LEFT, 90),
+        """Move backward and to left"""
+        self.protocol.schedule(10, MOTOR_LEFT, [(MOTOR_LEFT, 100),
+                                                (MOTOR_RIGHT, 100)])
+        self.protocol.schedule(190, MOTOR_TURN, [(MOTOR_TURN, 100),
+                                                 (MOTOR_LEFT, 80),
                                                  (MOTOR_RIGHT, 100)])
 
     def backward_right(self):
-        self.protocol.schedule(340, MOTOR_TURN, [(MOTOR_TURN, -100),
+        """Move backward and to right"""
+        self.protocol.schedule(5, MOTOR_RIGHT, [(MOTOR_LEFT, 100),
+                                                (MOTOR_RIGHT, 100)])
+        self.protocol.schedule(230, MOTOR_TURN, [(MOTOR_TURN, -100),
                                                  (MOTOR_LEFT, 100),
-                                                 (MOTOR_RIGHT, 90)])
+                                                 (MOTOR_RIGHT, 60)])
 
     def sharp_left(self):
-        self.protocol.schedule(60, MOTOR_TURN, [(MOTOR_TURN, -100),
+        """Move to a cell left"""
+        self.protocol.schedule(35, MOTOR_TURN, [(MOTOR_TURN, -100),
                                                 (MOTOR_LEFT, 100),
                                                 (MOTOR_RIGHT, -100)])
-        self.protocol.schedule(200, MOTOR_LEFT, [(MOTOR_LEFT, -100),
-                                                 (MOTOR_RIGHT, -100)])
+        self.protocol.schedule(50, MOTOR_LEFT, [(MOTOR_LEFT, -100),
+                                                (MOTOR_RIGHT, -100)])
 
     def sharp_right(self):
-        self.protocol.schedule(80, MOTOR_TURN, [(MOTOR_TURN, 100),
+        """Move to a cell right"""
+        self.protocol.schedule(50, MOTOR_TURN, [(MOTOR_TURN, 100),
                                                 (MOTOR_LEFT, -100),
                                                 (MOTOR_RIGHT, 100)])
-        self.protocol.schedule(200, MOTOR_RIGHT, [(MOTOR_LEFT, -100),
-                                                  (MOTOR_RIGHT, -100)])
+        self.protocol.schedule(50, MOTOR_RIGHT, [(MOTOR_LEFT, -100),
+                                                 (MOTOR_RIGHT, -100)])
 
-    def ttt(self):
-        self.forward_forever()
-        time.sleep(1)
-        self.protocol.move(100, [(MOTOR_TURN, -100)])
-        time.sleep(2)
-        self.s()
+    def f(self, x):
+        """Move forward, negative x means backward"""
+        x = int(x)
+        s = sign(x)
+        if x > 0:
+            x = 13.7627360975 * x - 53.5734818271
+        else:
+            x = 13.964509832 * -x - 75.2448595458
+        x = int(x)
+        if x > 0:
+            self.protocol.move(x, [(MOTOR_LEFT, -100 * s),
+                                   (MOTOR_RIGHT, -100 * s)])
 
     def c(self, x):
         """Rotate clockwise, negative x means counter-clockwise"""
