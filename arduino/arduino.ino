@@ -9,7 +9,7 @@
 #define ROTARY_REQUEST_INTERVAL 30
 
 #define RECEIVER_SLAVE_ADDRESS 69
-#define BALL_SENSOR_SLAVE_ADDRESS 57
+#define BALL_SENSOR_ANALOG_PORT 0
 
 #define MOTOR_LEFT 0
 #define MOTOR_RIGHT 1
@@ -380,18 +380,8 @@ void handshake() {
 }
 
 void queryBallSensor() {
-  ////////////////////////////////////////
-  // Sensor code
-  bool has_ball = false;
-  
-  Wire.requestFrom(57, 1);
-  int8_t test = (int8_t)Wire.read();
-
-  if(-test<70)
-    has_ball = true;
-  ////////////////////////////////////////
-  
-  Serial.print(has_ball ? RESP_DONE : RESP_NEGATIVE);
+  int value = analogRead(BALL_SENSOR_ANALOG_PORT);
+  Serial.print(value > 80 ? RESP_DONE : RESP_NEGATIVE);
 }
 
 void unknown() {
