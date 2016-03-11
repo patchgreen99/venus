@@ -177,6 +177,27 @@ class StrategyTools:
             print('receive pass')
         else:
             # change position
+            # based on positions of all robots choose the one that will ensure a safe pass
+            # switch relevant fields on
+
+            # at this point we are sure one of the enemy robots is between venus and friend
+            # so it's mainly the position of another enemy robot that might affect us
+
+            # find out which robot is on the way for us to pass todo: this is not a nice way to do it, also it (isSafeKick function) might not even work...
+            robot_not_middle = self.world.enemy1
+            if self.isSafeKick((x2,y2),(x1,y1,[(x3, y3)])):
+                robot_not_middle = self.world.enemy2
+
+            elif self.isSafeKick((x2,y2),(x1,y1,[(x4, y4)])):
+                robot_not_middle = self.world.enemy1
+
+            if robot_not_middle == self.world.enemy1:
+                # free_up_pass_enemy2
+                # free_up_goal_enemy1
+            else:
+                # free_up_pass_enemy1
+                # free_up_goal_enemy2
+
             print('move to pass position')
 
     def get_pass_goal_position(self):
