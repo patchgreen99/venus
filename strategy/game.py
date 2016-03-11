@@ -74,7 +74,8 @@ class Game:
             block_pass = infinite_axial(self.world.enemy1.position, self.world.enemy2.position, 0, 0)
             block_goal_enemy1 = infinite_axial(self.world.enemy1.position, self.world.our_goal, 0, 0)
             block_goal_enemy2 = infinite_axial(self.world.enemy2.position, self.world.our_goal, 0, 0)
-            bad_minima = infinite_axial(self.world.venus.position, self.world.friend.position, 0, 0)
+            bad_minima_goal = infinite_axial(self.world.venus.position, (self.world.their_goalX, self.world.their_goalmeanY), 0, 0)
+            bad_minima_pass = infinite_axial(self.world.venus.position, self.world.friend.position, 0, 0)
 
             # infinite axial - field is only implemented between start and end points everywhere else
             # contribution is zero
@@ -101,9 +102,11 @@ class Game:
             potential = Potential(self.current_point, self.current_direction, self.world, ball_field, friend_field, enemy1_field, enemy2_field,
                                              free_up_pass_enemy1, free_up_pass_enemy2, free_up_goal_enemy1,
                                              free_up_goal_enemy2, block_pass,
-                                             block_goal_enemy1, block_goal_enemy2,  advance, catch_up, bad_minima)
+                                             block_goal_enemy1, block_goal_enemy2,  advance, catch_up, bad_minima_pass, bad_minima_goal)
 
             self.local_potential, self.points = potential.get_local_potential()
+            if not self.world.grabber_open and self.world.venus.hasBallInRange:
+                self.commands.open_wide()
             turn, self.current_point = self.move()
             self.current_direction = rotate_vector(turn, self.current_direction[0], self.current_direction[1])
 

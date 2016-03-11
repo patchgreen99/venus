@@ -71,6 +71,7 @@ class World:
         self.friend = Robot()
         self.enemy1 = Robot()
         self.enemy2 = Robot()
+        self.grabber_open = False
 
     def __str__(self):
         return "World state: ball {} {} {}, future ball {} {}, venus {}, friend {}, enemy1 {}, enemy2 {}".format(

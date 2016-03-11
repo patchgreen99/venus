@@ -241,17 +241,18 @@ class Commands:
         # Not using rotary encoders, granularity too low
         self.protocol.move(x, [(MOTOR_KICK, 100)], time=True)
 
-    def g(self, x=300):
+    def g(self, x=-300):
         """Grab, negative x means release"""
         x = int(x)
         # This motor does not have rotary encoders
         self.protocol.move(abs(x), [(MOTOR_GRAB, 100 * sign(x))], time=True)
 
     def open_wide(self):
-        self.g(-400)
+        self.world.grabber_open = True
+        self.g(400)
 
     def open_narrow(self):
-        self.g(-200)
+        self.g(200)
 
     def x(self, x):
         """Kick and release"""

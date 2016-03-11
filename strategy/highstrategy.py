@@ -163,7 +163,7 @@ class StrategyTools:
         else:
             return False
 
-    def ballwithfriend(self):
+    def ballwithfriend(self): # trigger on isballinrange
         x2,y2 = self.world.friend.position
         x1,y1 = self.world.venus.position
         x3,y3 = self.world.enemy1.position
@@ -172,21 +172,26 @@ class StrategyTools:
         robotposlist = [(x3,y3),
                         (x4,y4)]
 
-        if self.isSafeKick((x2,y2),(x1,y1,robotposlist)):
+        if self.isSafeKick((x2,y2),(x1,y1,robotposlist)) and self.world.friend.hasBallInRange:
             #recievepass
             print('receive pass')
         else:
-            #move to pass position
+            # change position
             print('move to pass position')
+
+    def get_pass_goal_position(self):
+
 
     def main(self):
         venus = self.world.venus
         friend = self.world.friend
         enemy1 = self.world.enemy1
         enemy2 = self.world.enemy2
-        if venus.hasBallInRange:
+        if self.commands.query_ball():
             # venus has the ball
+            self.commands.g()
             self.attackwithball()
+
         elif friend.hasBallInRange:
             # friend has the ball
             self.ballwithfriend()
