@@ -39,19 +39,19 @@ class Potential:
             else:
                 self.last_direction = (self.world.venus.orientation[0], self.world.venus.orientation[1])
 
-            self.top_wall = step_field(PITCH_TOP_LEFT[self.world.room_num], (PITCH_TOP_LEFT[self.world.room_num][0]-PITCH_TOP_RIGHT[self.world.room_num][0], PITCH_TOP_LEFT[self.world.room_num][1]-PITCH_TOP_RIGHT[self.world.room_num][1]), cv2.getTrackbarPos('WALLS GRADIENT', 'STATIC'), cv2.getTrackbarPos('WALLS CONSTANT', 'STATIC'))
-            self.bot_wall = step_field(PITCH_BOT_LEFT[self.world.room_num], (PITCH_BOT_RIGHT[self.world.room_num][0]-PITCH_BOT_LEFT[self.world.room_num][0], PITCH_BOT_RIGHT[self.world.room_num][1]-PITCH_BOT_LEFT[self.world.room_num][1]), cv2.getTrackbarPos('WALLS GRADIENT', 'STATIC'), cv2.getTrackbarPos('WALLS CONSTANT', 'STATIC'))
-            self.right_wall = step_field(PITCH_TOP_RIGHT[self.world.room_num], (PITCH_TOP_RIGHT[self.world.room_num][0] - PITCH_BOT_RIGHT[self.world.room_num][0], PITCH_TOP_RIGHT[self.world.room_num][1] - PITCH_BOT_RIGHT[self.world.room_num][1]), cv2.getTrackbarPos('WALLS GRADIENT', 'STATIC'), cv2.getTrackbarPos('WALLS CONSTANT', 'STATIC'))
-            self.left_wall = step_field(PITCH_TOP_LEFT[self.world.room_num], (PITCH_BOT_LEFT[self.world.room_num][0] - PITCH_TOP_LEFT[self.world.room_num][0], PITCH_BOT_LEFT[self.world.room_num][1] - PITCH_TOP_LEFT[self.world.room_num][1]), cv2.getTrackbarPos('WALLS GRADIENT', 'STATIC'), cv2.getTrackbarPos('WALLS CONSTANT', 'STATIC'))
+            self.top_wall = step_field(PITCH_TOP_LEFT[self.world.room_num], (PITCH_TOP_RIGHT[self.world.room_num][0]-PITCH_TOP_LEFT[self.world.room_num][0], PITCH_TOP_RIGHT[self.world.room_num][1]-PITCH_TOP_LEFT[self.world.room_num][1]), 10, 0.001)
+            self.bot_wall = step_field(PITCH_BOT_LEFT[self.world.room_num], (PITCH_BOT_LEFT[self.world.room_num][0]-PITCH_BOT_RIGHT[self.world.room_num][0], PITCH_BOT_LEFT[self.world.room_num][1]-PITCH_BOT_RIGHT[self.world.room_num][1]), 10, 0.001)
+            self.right_wall = step_field(PITCH_TOP_RIGHT[self.world.room_num], (PITCH_BOT_RIGHT[self.world.room_num][0] - PITCH_TOP_RIGHT[self.world.room_num][0], PITCH_BOT_RIGHT[self.world.room_num][1] - PITCH_TOP_RIGHT[self.world.room_num][1]), 10, 0.001)
+            self.left_wall = step_field(PITCH_TOP_LEFT[self.world.room_num], (PITCH_TOP_LEFT[self.world.room_num][0] - PITCH_BOT_LEFT[self.world.room_num][0], PITCH_TOP_LEFT[self.world.room_num][1] - PITCH_BOT_LEFT[self.world.room_num][1]), 10, 0.001)
 
             if world.we_have_computer_goal and world.room_num == 1 or not world.we_have_computer_goal and world.room_num == 0: # there goal is on the right
-                self.penalty_box_front = infinite_axial(DEFENDING_RIGHT_TOP[self.world.room_num], DEFENDING_RIGHT_BOT[self.world.room_num], cv2.getTrackbarPos('DEFENSE_BOX GRADIENT', 'STATIC'), cv2.getTrackbarPos('DEFENSE_BOX CONSTANT', 'STATIC'))
-                self.penalty_box_top = infinite_axial(GOAL_RIGHT_TOP[self.world.room_num], DEFENDING_RIGHT_TOP[self.world.room_num], cv2.getTrackbarPos('DEFENSE_BOX GRADIENT', 'STATIC'), cv2.getTrackbarPos('DEFENSE_BOX CONSTANT', 'STATIC'))
-                self.penalty_box_bot = infinite_axial(GOAL_RIGHT_BOT[self.world.room_num], DEFENDING_RIGHT_BOT[self.world.room_num], cv2.getTrackbarPos('DEFENSE_BOX GRADIENT', 'STATIC'), cv2.getTrackbarPos('DEFENSE_BOX CONSTANT', 'STATIC'))
+                self.penalty_box_front = infinite_axial(DEFENDING_RIGHT_TOP[self.world.room_num], DEFENDING_RIGHT_BOT[self.world.room_num], 10, 0.001)
+                self.penalty_box_top = infinite_axial(GOAL_RIGHT_TOP[self.world.room_num], DEFENDING_RIGHT_TOP[self.world.room_num], 10, 0.001)
+                self.penalty_box_bot = infinite_axial(GOAL_RIGHT_BOT[self.world.room_num], DEFENDING_RIGHT_BOT[self.world.room_num], 10, 0.001)
             elif world.we_have_computer_goal and world.room_num == 0 or not world.we_have_computer_goal and world.room_num == 1: # obviously the left goal
-                self.penalty_box_front = infinite_axial(DEFENDING_LEFT_TOP[self.world.room_num], DEFENDING_LEFT_BOT[self.world.room_num], cv2.getTrackbarPos('DEFENSE_BOX GRADIENT', 'STATIC'), cv2.getTrackbarPos('DEFENSE_BOX CONSTANT', 'STATIC'))
-                self.penalty_box_top = infinite_axial(GOAL_LEFT_TOP[self.world.room_num], DEFENDING_LEFT_TOP[self.world.room_num], cv2.getTrackbarPos('DEFENSE_BOX GRADIENT', 'STATIC'), cv2.getTrackbarPos('DEFENSE_BOX CONSTANT', 'STATIC'))
-                self.penalty_box_bot = infinite_axial(GOAL_LEFT_BOT[self.world.room_num], DEFENDING_LEFT_BOT[self.world.room_num], cv2.getTrackbarPos('DEFENSE_BOX GRADIENT', 'STATIC'), cv2.getTrackbarPos('DEFENSE_BOX CONSTANT', 'STATIC'))
+                self.penalty_box_front = infinite_axial(DEFENDING_LEFT_TOP[self.world.room_num], DEFENDING_LEFT_BOT[self.world.room_num], 10, 0.001)
+                self.penalty_box_top = infinite_axial(GOAL_LEFT_TOP[self.world.room_num], DEFENDING_LEFT_TOP[self.world.room_num], 10, 0.001)
+                self.penalty_box_bot = infinite_axial(GOAL_LEFT_BOT[self.world.room_num], DEFENDING_LEFT_BOT[self.world.room_num], 10, 0.001)
 
             self.ball_field = ball_field
 
@@ -76,7 +76,7 @@ class Potential:
                         self.advance, self.catch_up, self.bad_minima_pass, self.bad_minima_goal, self.top_wall, self.bot_wall, self.right_wall,
                                 self.left_wall, self.penalty_box_front, self.penalty_box_top, self.penalty_box_bot]
             '''
-            self.potential_list = [self.ball_field]
+            self.potential_list = [self.block_pass]
 
             self.local_potential = np.full((5, 5), fill_value=np.inf, dtype=np.float64)
             #self.local_potential = np.zeros((5, 5), dtype=np.float64)
@@ -194,6 +194,7 @@ def normalize((x, y)):
 def dot_product((ax, ay),(bx, by)):
     return ax*bx + ay*by
 
+
 '''POTENTIALS'''
 
 # radial - constant gradient everywhere  coming out from one single spot
@@ -233,7 +234,7 @@ class infinite_axial:
         self.constant = k
 
     def field_at(self, x, y):
-        angle = math.atan2(self.dir_y, self.dir_x)
+        angle = math.degrees(math.atan2(self.dir_y, self.dir_x))
         rotated_point = rotate_vector(-angle, x, y)
         rotated_start = rotate_vector(-angle, self.start_x, self.start_y)
         rotated_end = rotate_vector(-angle, self.end_x, self.end_y)
@@ -250,7 +251,49 @@ class infinite_axial:
             else:
                 return 0
 
-# finite axial - field will start at start point and exist on the opposite side to the ref point anc continue of
+# finite axial inside - field is between reference points and exists everywhere
+# 3 3 3 2 3 3 3
+# 3 2 1 1 1 2 3
+# 0 0 0 0 0 0 0
+# 3 2 1 1 1 2 3
+# 3 3 3 2 3 3 3
+
+class finite_axial_inside:
+    def __init__(self, (start_x, start_y), (ref_x, ref_y), g, k):
+        self.start_x = start_x
+        self.start_y = start_y
+        self.ref_x = ref_x
+        self.ref_y = ref_y
+        self.dir_x = start_x - ref_x
+        self.dir_y = start_y - ref_y
+        self.gradient = g
+        self.constant = k
+
+    def field_at(self, x, y):
+        angle = math.atan2(self.dir_y, self.dir_x)
+        rotated_point = rotate_vector(-angle, x, y)
+        start_field = rotate_vector(-angle, self.start_x, self.start_y)
+        end_field = rotate_vector(-angle, self.start_x, self.start_y)
+
+        if start_field[0] > end_field[0]:
+            right_ref = start_field[0]
+            left_ref = end_field[0]
+        else:
+            left_ref = start_field[0]
+            right_ref = end_field[0]
+
+        if left_ref < rotated_point[0] < right_ref:
+            b = right_ref - rotated_point[0]
+            a = left_ref - rotated_point[0]
+            distance_to = abs(rotated_point[1] - start_field[1])
+            return self.constant*math.pow(math.log(b + math.sqrt(b**2 + distance_to**2)/a + math.sqrt(a**2 + distance_to**2), math.e), self.gradient)
+        elif right_ref <= rotated_point[0]: # outside
+            return self.constant/math.pow(math.sqrt((x-right_ref)**2 + (y-right_ref)**2), self.gradient)
+        elif left_ref >= rotated_point[0]: # outside
+            return self.constant/math.pow(math.sqrt((x-left_ref)**2 + (y-left_ref)**2), self.gradient)
+
+
+# finite axial outside - field will start at start point and exist on the opposite side to the ref point anc continue of
 # the pitch
 # 3 3 3 2 3 3 3
 # 3 2 1 1 1 2 3
@@ -258,7 +301,7 @@ class infinite_axial:
 # 3 2 1 1 1 2 3
 # 3 3 3 2 3 3 3
 
-class finite_axial:
+class finite_axial_outside:
     def __init__(self, (start_x, start_y), (ref_x, ref_y), g, k):
         self.start_x = start_x
         self.start_y = start_y
