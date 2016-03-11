@@ -192,16 +192,18 @@ class StrategyTools:
                 robot_not_middle = self.world.enemy1
 
             if robot_not_middle == self.world.enemy1:
+                pass
                 # free_up_pass_enemy2
                 # free_up_goal_enemy1
             else:
+                pass
                 # free_up_pass_enemy1
                 # free_up_goal_enemy2
 
             print('move to pass position')
 
     def get_pass_goal_position(self):
-
+        pass
 
     def main(self):
         venus = self.world.venus

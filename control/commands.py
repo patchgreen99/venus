@@ -5,7 +5,7 @@ import numpy as np
 
 from control.protocol import RobotProtocol
 from strategy.simple import SimpleStrategy
-#from strategy.highstrategy import StrategyTools
+from strategy.highstrategy import StrategyTools
 from strategy.world import World
 from strategy.game import Game
 from vision.vision import Vision
@@ -20,13 +20,14 @@ MOTOR_GRAB = 4
 def sign(x):
     return 1 if x >= 0 else -1
 
+
 class Commands:
     def __init__(self):
         self.protocol = None
         self.vision_process = None
         self.world = None
         self.strategy = None
-        #self.highstrategy = None
+        self.highstrategy = None
         self.game = None
         print("! Remember to call:")
         print("! init <room: 0/1> <team_color: blue/yellow> <our_single_spot_color: green/pink>")
@@ -34,14 +35,14 @@ class Commands:
         print("! connect <device_no>")
         self.init()
         self.vision()
-        #self.connect()
+        self.connect()
 
     def init(self, room_num=1, team_color='yellow', our_color='green', computer_goal=False):
         print("init: Room: %s, team color: %s, our single spot color: %s, computer goal: %s" %
               (room_num, team_color, our_color, computer_goal))
         self.world = World(int(room_num), team_color, our_color, computer_goal)
         self.strategy = SimpleStrategy(self.world, self)
-        #self.highstrategy = StrategyTools(self.world, self)
+        self.highstrategy = StrategyTools(self.world, self)
         self.game = Game(self.world, self)
 
     def connect(self, device_no='0'):
@@ -56,13 +57,13 @@ class Commands:
 
     def query_ball(self):
         print("We have the ball: %s" % self.protocol.query_ball())
-    '''
+
     def attackwithball(self):
         self.highstrategy.attackwithball()
 
     def ballwithenemy(self, no):
         self.highstrategy.ballwithenemy(no)
-    '''
+
     def grab_ball(self):
         self.strategy.grab_ball()
 
