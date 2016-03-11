@@ -242,13 +242,13 @@ class Commands:
         self.protocol.move(x, [(MOTOR_KICK, 100)], time=True)
 
     def g(self, x=-300):
-        """Grab, negative x means release"""
+        """Grab, positive x means release"""
         x = int(x)
         # This motor does not have rotary encoders
+        self.world.grabber_open = x > 0
         self.protocol.move(abs(x), [(MOTOR_GRAB, 100 * sign(x))], time=True)
 
     def open_wide(self):
-        self.world.grabber_open = True
         self.g(400)
 
     def open_narrow(self):

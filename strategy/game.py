@@ -120,11 +120,18 @@ class Game:
             self.current_direction = potential.last_direction
             self.local_potential, self.points = potential.get_local_potential()
             print self.local_potential[2][2]
-            #if not self.world.grabber_open and self.world.venus.hasBallInRange.value:
-                #self.commands.open_wide()
+            if not self.world.grabber_open and self.world.venus.hasBallInRange.value:
+                print "Opening grabber"
+                self.commands.open_wide()
             turn, self.current_point = self.move()
+            a = self.commands.protocol.query_ball()
+            b = self.world.grabber_open
+            print '>>>>>> ', a, b
+            if a and b:
+                # venus has the ball
+                self.commands.g()
             self.current_direction = rotate_vector(turn, self.current_direction[0], self.current_direction[1])
-            time.sleep(1)
+            time.sleep(.5)
 
     def move(self):
         """Executes command to go to minimum potential and returns robot direction after the movement"""
@@ -133,34 +140,34 @@ class Game:
         if [2, 2] in indices:
             return TOP, self.points[2, 2]
         elif [1, 2] in indices or [0, 1] in indices or [0, 3] in indices:
-            #self.commands.forward()
+            self.commands.forward()
             return TOP, self.points[1, 2]
         elif [1, 1] in indices or [1, 0] in indices:
-            #self.commands.forward_left()
+            self.commands.forward_left()
             return LEFT, self.points[1, 1]
         elif [1, 3] in indices or [1, 4] in indices:
-            #self.commands.forward_right()
+            self.commands.forward_right()
             return RIGHT, self.points[1, 3]
         elif [2, 1] in indices:
-            #if self.moving:
-                #self.commands.pause()
-            #self.commands.sharp_left()
+            if self.moving:
+                self.commands.pause()
+            self.commands.sharp_left()
             return LEFT, self.points[2, 1]
         elif [2, 3] in indices:
-            #if self.moving:
-                #self.commands.pause()
-            #self.commands.sharp_right()
+            if self.moving:
+                self.commands.pause()
+            self.commands.sharp_right()
             return RIGHT, self.points[2, 3]
         elif [3, 2] in indices or [4, 1] in indices or [4, 3] in indices:
-            #self.commands.c(180)
+            self.commands.c(100)
             #self.commands.backward()
             return TOP, self.points[3, 2]
         elif [3, 1] in indices or [3, 0] in indices:
-            #self.commands.c(180)
+            self.commands.c(100)
             #self.commands.backward_left()
             return RIGHT, self.points[3, 1]
         elif [3, 3] in indices or [3, 4] in indices:
-            #self.commands.c(180)
+            self.commands.c(100)
             #self.commands.backward_right()
             return LEFT, self.points[3, 3]
 

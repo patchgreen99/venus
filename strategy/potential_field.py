@@ -76,7 +76,7 @@ class Potential:
                         self.advance, self.catch_up, self.bad_minima_pass, self.bad_minima_goal, self.top_wall, self.bot_wall, self.right_wall,
                                 self.left_wall, self.penalty_box_front, self.penalty_box_top, self.penalty_box_bot]
             '''
-            self.potential_list = [self.block_pass]
+            self.potential_list = [self.ball_field]
 
             self.local_potential = np.full((5, 5), fill_value=np.inf, dtype=np.float64)
             #self.local_potential = np.zeros((5, 5), dtype=np.float64)

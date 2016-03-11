@@ -342,7 +342,7 @@ class Vision:
                         position = robots_pos[positionIndex]
                         # todo Danger hard coded
                         if positionIndex == 0:
-                            if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 80: # todo: this is different!
+                            if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 100: # todo: this is different!
                                 self.world.venus.hasBallInRange.value = True
                             else:
                                 self.world.venus.hasBallInRange.value = False
@@ -369,6 +369,7 @@ class Vision:
                 flag = False
                 for positionIndex in range(0,len(robots_pos)):
                     position = robots_pos[positionIndex]
+                    '''
                     if positionIndex == 0 and self.world.venus.hasBallInRange.value:
                         flag = True
                         # 'closest' is the robot who might have the ball, let's check that
@@ -381,6 +382,7 @@ class Vision:
                         new_y = int(position[1] + 30 * (1-ratio) * self.world.venus.orientation[1])
                         self.world.ball[0] = new_x
                         self.world.ball[1] = new_y
+                    '''
 
                     if positionIndex == 1 and self.world.friend.hasBallInRange.value :
                         flag = True

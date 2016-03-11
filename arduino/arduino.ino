@@ -381,7 +381,8 @@ void handshake() {
 
 void queryBallSensor() {
   int value = analogRead(BALL_SENSOR_ANALOG_PORT);
-  Serial.print(value > 80 ? RESP_DONE : RESP_NEGATIVE);
+  //Serial.println(value);
+  Serial.print(value > 200 ? RESP_DONE : RESP_NEGATIVE);
 }
 
 void unknown() {
