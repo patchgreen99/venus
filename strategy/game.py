@@ -1,13 +1,17 @@
 import math
+import time
 
 import cv2
 import numpy as np
 
-from potential_field import Potential
 
 
 ROBOT_SIZE = 20
 ROBOT_INFLUENCE_SIZE = 50
+CENTIMETERS_TO_PIXELS = (300.0 / 640.0)
+
+
+from potential_field import Potential
 
 
 # Directions robot is facing after the movement
@@ -29,6 +33,7 @@ class Game:
 
     def run(self):
 
+
         # example state
         while True:
             # as an example the potentials you wil need for any single state
@@ -37,7 +42,7 @@ class Game:
             # first value is the gradient eg. the response of the field
             # the second value is the constant eg. the magnitude of the field
 
-            ball_field = radial(self.world.ball, 0, 0)
+            ball_field = radial(self.world.ball, 1, -100000)
 
             # radial - constant gradient everywhere  coming out from one single spot
             # 3 3 3 3 3 3 3
@@ -60,8 +65,8 @@ class Game:
 
             free_up_pass_enemy1 = finite_axial(self.world.enemy1.position, self.world.friend.position, 0, 0)
             free_up_pass_enemy2 = finite_axial(self.world.enemy2.position, self.world.friend.position, 0, 0)
-            free_up_goal_enemy1 = finite_axial(self.world.enemy1.position, self.world.there_goal, 0, 0)
-            free_up_goal_enemy2 = finite_axial(self.world.enemy2.position, self.world.there_goal, 0, 0)
+            free_up_goal_enemy1 = finite_axial(self.world.enemy1.position, (self.world.their_goalX, self.world.their_goalmeanY), 0, 0)
+            free_up_goal_enemy2 = finite_axial(self.world.enemy2.position, (self.world.their_goalX, self.world.their_goalmeanY), 0, 0)
 
             # finite axial - field will start at start point and exist on the opposite side to the ref point and
             # continue of the pitch
@@ -72,8 +77,8 @@ class Game:
             # 3 3 3 2 3 3 3
 
             block_pass = infinite_axial(self.world.enemy1.position, self.world.enemy2.position, 0, 0)
-            block_goal_enemy1 = infinite_axial(self.world.enemy1.position, self.world.our_goal, 0, 0)
-            block_goal_enemy2 = infinite_axial(self.world.enemy2.position, self.world.our_goal, 0, 0)
+            block_goal_enemy1 = infinite_axial(self.world.enemy1.position, (self.world.our_goalX,self.world.our_goalmeanY), 0, 0)
+            block_goal_enemy2 = infinite_axial(self.world.enemy2.position, (self.world.our_goalX,self.world.our_goalmeanY), 0, 0)
             bad_minima_goal = infinite_axial(self.world.venus.position, (self.world.their_goalX, self.world.their_goalmeanY), 0, 0)
             bad_minima_pass = infinite_axial(self.world.venus.position, self.world.friend.position, 0, 0)
 
@@ -104,11 +109,14 @@ class Game:
                                              free_up_goal_enemy2, block_pass,
                                              block_goal_enemy1, block_goal_enemy2,  advance, catch_up, bad_minima_pass, bad_minima_goal)
 
+            self.current_direction = potential.last_direction
             self.local_potential, self.points = potential.get_local_potential()
-            if not self.world.grabber_open and self.world.venus.hasBallInRange:
+            print self.world.venus.hasBallInRange.value
+            if not self.world.grabber_open and self.world.venus.hasBallInRange.value:
                 self.commands.open_wide()
             turn, self.current_point = self.move()
             self.current_direction = rotate_vector(turn, self.current_direction[0], self.current_direction[1])
+            time.sleep(2)
 
     def move(self):
         """Executes command to go to minimum potential and returns robot direction after the movement"""
@@ -136,166 +144,45 @@ class Game:
             self.commands.sharp_right()
             return RIGHT, self.points[2, 3]
         elif [3, 2] in indices or [4, 1] in indices or [4, 3] in indices:
-            self.commands.backward()
+            self.commands.c(180)
+            #self.commands.backward()
             return TOP, self.points[3, 2]
         elif [3, 1] in indices or [3, 0] in indices:
-            self.commands.backward_left()
+            self.commands.c(180)
+            #self.commands.backward_left()
             return RIGHT, self.points[3, 1]
         elif [3, 3] in indices or [3, 4] in indices:
-            self.commands.backward_right()
+            self.commands.c(180)
+            #self.commands.backward_right()
             return LEFT, self.points[3, 3]
 
-    def test_fields(self):
+    def calculate_angle_length_ball(self):
+        return self.calculate_angle_length(np.array([self.world.ball[0], self.world.ball[1]]))
 
-        # example state
-        while True:
+    def calculate_angle_length(self, pos):
 
-            cv2.namedWindow('BASIC COURTESY')
+        robot_pos = np.array([self.world.venus.position[0], self.world.venus.position[1]])
+        orientation_vec = np.array([self.world.venus.orientation[0], self.world.venus.orientation[1]])
+        motion_vec = pos - robot_pos
 
-            cv2.createTrackbar('FRIEND CONSTANT', 'BASIC COURTESY', -100, 100, self.nothing)
-            cv2.createTrackbar('FRIEND GRADIENT', 'BASIC COURTESY', -10, 10, self.nothing)
-            cv2.createTrackbar('ENEMY CONSTANT', 'BASIC COURTESY', -100, 100, self.nothing)
-            cv2.createTrackbar('ENEMY GRADIENT', 'BASIC COURTESY', -10, 10, self.nothing)
+        cross_product = np.cross(orientation_vec, motion_vec)
+        dot_product = np.dot(orientation_vec, motion_vec)
+        if dot_product >= 0:  # in front of the robot
+            angle = math.degrees(
+                math.asin(cross_product / (np.linalg.norm(motion_vec) * np.linalg.norm(orientation_vec))))
+        else:
+            temp_angle = math.degrees(
+                math.asin(cross_product / (np.linalg.norm(motion_vec) * np.linalg.norm(orientation_vec))))
+            if temp_angle >= 0:
+                angle = 180 - temp_angle
+            else:
+                angle = -(180 + temp_angle)
 
-            cv2.setTrackbarPos('FRIEND CONSTANT', 'BASIC COURTESY', 0)
-            cv2.setTrackbarPos('FRIEND GRADIENT', 'BASIC COURTESY', 0)
-            cv2.setTrackbarPos('ENEMY CONSTANT', 'BASIC COURTESY', 0)
-            cv2.setTrackbarPos('ENEMY GRADIENT', 'BASIC COURTESY', 0)
+        motion_length = np.linalg.norm(motion_vec) * CENTIMETERS_TO_PIXELS
 
-            cv2.namedWindow("PROGRESSIVE STRATEGY")
+        return angle, motion_length
 
-            cv2.createTrackbar('BALL CONSTANT', 'PROGRESSIVE STRATEGY', -100, 100, self.nothing)
-            cv2.createTrackbar('BALL GRADIENT', 'PROGRESSIVE STRATEGY', -10, 10, self.nothing)
-            cv2.createTrackbar('ADVANCE CONSTANT', 'PROGRESSIVE STRATEGY', -100, 100, self.nothing)
-            cv2.createTrackbar('ADVANCE GRADIENT', 'PROGRESSIVE STRATEGY', -10, 10, self.nothing)
-            cv2.createTrackbar('CATCH_UP CONSTANT', 'PROGRESSIVE STRATEGY', -100, 100, self.nothing)
-            cv2.createTrackbar('CATCH_UP GRADIENT', 'PROGRESSIVE STRATEGY', -10, 10, self.nothing)
 
-            cv2.setTrackbarPos('BALL CONSTANT', 'PROGRESSIVE STRATEGY', 0)
-            cv2.setTrackbarPos('BALL GRADIENT', 'PROGRESSIVE STRATEGY', 0)
-            cv2.setTrackbarPos('ADVANCE CONSTANT', 'PROGRESSIVE STRATEGY', 0)
-            cv2.setTrackbarPos('ADVANCE GRADIENT', 'PROGRESSIVE STRATEGY', 0)
-            cv2.setTrackbarPos('CATCH_UP CONSTANT', 'PROGRESSIVE STRATEGY', 0)
-            cv2.setTrackbarPos('CATCH_UP GRADIENT', 'PROGRESSIVE STRATEGY', 0)
-
-            cv2.namedWindow("ATTACK")
-
-            cv2.createTrackbar('FREE_UP_PASS_ENEMY1 CONSTANT', 'ATTACK', -100, 100, self.nothing)
-            cv2.createTrackbar('FREE_UP_PASS_ENEMY1 GRADIENT', 'ATTACK', -10, 10, self.nothing)
-            cv2.createTrackbar('FREE_UP_PASS_ENEMY2 CONSTANT', 'ATTACK', -100, 100, self.nothing)
-            cv2.createTrackbar('FREE_UP_PASS_ENEMY2 GRADIENT', 'ATTACK', -10, 10, self.nothing)
-            cv2.createTrackbar('FREE_UP_GOAL_ENEMY1 CONSTANT', 'ATTACK', -100, 100, self.nothing)
-            cv2.createTrackbar('FREE_UP_GOAL_ENEMY1 GRADIENT', 'ATTACK', -10, 10, self.nothing)
-            cv2.createTrackbar('FREE_UP_GOAL_ENEMY2 CONSTANT', 'ATTACK', -100, 100, self.nothing)
-            cv2.createTrackbar('FREE_UP_GOAL_ENEMY2 GRADIENT', 'ATTACK', -10, 10, self.nothing)
-            cv2.createTrackbar('BAD_MINIMA CONSTANT', 'ATTACK', -100, 100, self.nothing)
-            cv2.createTrackbar('BAD_MINIMA GRADIENT', 'ATTACK', -10, 10, self.nothing)
-
-            cv2.setTrackbarPos('FREE_UP_PASS_ENEMY1 CONSTANT', 'ATTACK', 0)
-            cv2.setTrackbarPos('FREE_UP_PASS_ENEMY1 GRADIENT', 'ATTACK', 0)
-            cv2.setTrackbarPos('FREE_UP_PASS_ENEMY2 CONSTANT', 'ATTACK', 0)
-            cv2.setTrackbarPos('FREE_UP_PASS_ENEMY2 GRADIENT', 'ATTACK', 0)
-            cv2.setTrackbarPos('FREE_UP_GOAL_ENEMY1 CONSTANT', 'ATTACK', 0)
-            cv2.setTrackbarPos('FREE_UP_GOAL_ENEMY1 GRADIENT', 'ATTACK', 0)
-            cv2.setTrackbarPos('FREE_UP_GOAL_ENEMY2 CONSTANT', 'ATTACK', 0)
-            cv2.setTrackbarPos('FREE_UP_GOAL_ENEMY2 GRADIENT', 'ATTACK', 0)
-            cv2.setTrackbarPos('BAD_MINIMA CONSTANT', 'ATTACK', 0)
-            cv2.setTrackbarPos('BAD_MINIMA GRADIENT', 'ATTACK', 0)
-
-            cv2.namedWindow("DEFENSE")
-
-            cv2.createTrackbar('BLOCK_GOAL_ENEMY1 CONSTANT', 'DEFENSE', -100, 100, self.nothing)
-            cv2.createTrackbar('BLOCK_GOAL_ENEMY1 GRADIENT', 'DEFENSE', -10, 10, self.nothing)
-            cv2.createTrackbar('BLOCK_GOAL_ENEMY2 CONSTANT', 'DEFENSE', -100, 100, self.nothing)
-            cv2.createTrackbar('BLOCK_GOAL_ENEMY2 GRADIENT', 'DEFENSE', -10, 10, self.nothing)
-            cv2.createTrackbar('BLOCK_PASS CONSTANT', 'DEFENSE', -100, 100, self.nothing)
-            cv2.createTrackbar('BLOCK_PASS GRADIENT', 'DEFENSE', -10, 10, self.nothing)
-
-            cv2.setTrackbarPos('BLOCK_GOAL_ENEMY1 CONSTANT', 'DEFENSE', 0)
-            cv2.setTrackbarPos('BLOCK_GOAL_ENEMY1 GRADIENT', 'DEFENSE', 0)
-            cv2.setTrackbarPos('BLOCK_GOAL_ENEMY2 CONSTANT', 'DEFENSE', 0)
-            cv2.setTrackbarPos('BLOCK_GOAL_ENEMY2 GRADIENT', 'DEFENSE', 0)
-            cv2.setTrackbarPos('BLOCK_PASS CONSTANT', 'DEFENSE', 0)
-            cv2.setTrackbarPos('BLOCK_PASS GRADIENT', 'DEFENSE', 0)
-
-            # as an example the potentials you wil need for any single state
-            # if you don't understand ask Aseem, then ask me :)
-            # All the zeros are up to you
-            # first value is the gradient eg. the response of the field
-            # the second value is the constant eg. the magnitude of the field
-
-            ball_field = radial(self.world.ball, cv2.getTrackbarPos('BALL GRADIENT', 'PROGRESSIVE STRATEGY'), cv2.getTrackbarPos('BALL CONSTANT', 'PROGRESSIVE STRATEGY'))
-
-            # radial - constant gradient everywhere  coming out from one single spot
-            # 3 3 3 3 3 3 3
-            # 3 3 2 1 2 3 3
-            # 3 3 1 0 1 3 3
-            # 3 3 2 1 2 3 3
-            # 3 3 3 3 3 3 3
-
-            friend_field = solid_field(self.world.friend.position, cv2.getTrackbarPos('FRIEND GRADIENT', 'BASIC COURTESY'), cv2.getTrackbarPos('FRIEND CONSTANT', 'BASIC COURTESY'), ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy1_field = solid_field(self.world.enemy1.position, cv2.getTrackbarPos('ENEMY GRADIENT', 'BASIC COURTESY'), cv2.getTrackbarPos('ENEMY CONSTANT', 'BASIC COURTESY'), ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy2_field = solid_field(self.world.enemy2.position, cv2.getTrackbarPos('ENEMY GRADIENT', 'BASIC COURTESY'), cv2.getTrackbarPos('ENEMY CONSTANT', 'BASIC COURTESY'), ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-
-            # solid - modeled as a circle, from center 'forbidden' is unreachable and outside the influence area
-            # is unreachable
-            # 0 2 3 3 3 2 0
-            # 1 3 9 9 9 3 1
-            # 2 3 9 9 9 3 2
-            # 1 3 9 9 9 3 1
-            # 0 2 3 3 3 2 0
-
-            free_up_pass_enemy1 = finite_axial(self.world.enemy1.position, self.world.friend.position, cv2.getTrackbarPos('FREE_UP_PASS_ENEMY1 GRADIENT', 'ATTACK'), cv2.getTrackbarPos('FREE_UP_PASS_ENEMY1 CONSTANT', 'ATTACK'))
-            free_up_pass_enemy2 = finite_axial(self.world.enemy2.position, self.world.friend.position, cv2.getTrackbarPos('FREE_UP_PASS_ENEMY2 GRADIENT', 'ATTACK'), cv2.getTrackbarPos('FREE_UP_PASS_ENEMY2 CONSTANT', 'ATTACK'))
-            free_up_goal_enemy1 = finite_axial(self.world.enemy1.position, self.world.there_goal, cv2.getTrackbarPos('FREE_UP_GOAL_ENEMY1 GRADIENT', 'ATTACK'), cv2.getTrackbarPos('FREE_UP_GOAL_ENEMY1 CONSTANT', 'ATTACK'))
-            free_up_goal_enemy2 = finite_axial(self.world.enemy2.position, self.world.there_goal, cv2.getTrackbarPos('FREE_UP_GOAL_ENEMY2 GRADIENT', 'ATTACK'), cv2.getTrackbarPos('FREE_UP_GOAL_ENEMY2 CONSTANT', 'ATTACK'))
-
-            # finite axial - field will start at start point and exist on the opposite side to the ref point and
-            # continue of the pitch
-            # 3 3 3 2 3 3 3
-            # 3 2 1 1 1 2 3
-            # 0 0 0 0 0 0 0
-            # 3 2 1 1 1 2 3
-            # 3 3 3 2 3 3 3
-
-            block_pass = infinite_axial(self.world.enemy1.position, self.world.enemy2.position, cv2.getTrackbarPos('BLOCK_PASS GRADIENT', 'DEFENSE'), cv2.getTrackbarPos('BLOCK_PASS CONSTANT', 'DEFENSE'))
-            block_goal_enemy1 = infinite_axial(self.world.enemy1.position, self.world.our_goal, cv2.getTrackbarPos('BLOCK_GOAL_ENEMY1 GRADIENT', 'DEFENSE'), cv2.getTrackbarPos('BLOCK_GOAL_ENEMY1 CONSTANT', 'DEFENSE'))
-            block_goal_enemy2 = infinite_axial(self.world.enemy2.position, self.world.our_goal, cv2.getTrackbarPos('BLOCK_GOAL_ENEMY2 GRADIENT', 'DEFENSE'), cv2.getTrackbarPos('BLOCK_GOAL_ENEMY2 CONSTANT', 'DEFENSE'))
-            bad_minima = infinite_axial(self.world.venus.position, self.world.friend.position, cv2.getTrackbarPos('BAD_MINIMA GRADIENT', 'ATTACK'), cv2.getTrackbarPos('BAD_MINIMA CONSTANT', 'ATTACK'))
-
-            # infinite axial - field is only implemented between start and end points everywhere else
-            # contribution is zero
-            # 3 3 3 3 3 3 3
-            # 1 1 1 1 1 1 1
-            # 0 0 0 0 0 0 0
-            # 1 1 1 1 1 1 1
-            # 3 3 3 3 3 3 3
-
-            advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), cv2.getTrackbarPos('ADVANCE GRADIENT', 'PROGRESSIVE STRATEGY'), cv2.getTrackbarPos('ADVANCE CONSTANT', 'PROGRESSIVE STRATEGY'))
-            catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), cv2.getTrackbarPos('CATCH_UP GRADIENT', 'PROGRESSIVE STRATEGY'), cv2.getTrackbarPos('CATCH_UP CONSTANT', 'PROGRESSIVE STRATEGY'))
-
-            # step - an infinite line drawn through the point in the first argument in the direction of the vector in
-            # the second argument. The clockwise segment to the vector is cut off where as the anticlockwise segment
-            # acts like a infinite axial field over the entire pitch
-            # 9 9 9 9 9 9 9
-            # 9 9 9 9 9 9 9
-            # 3 3 3 3 3 3 3
-            # 1 1 1 1 1 1 1
-            # 0 0 0 0 0 0 0
-
-            # Constructor must always be this
-
-            potential = Potential(self.current_point, self.current_direction, self.world, ball_field, friend_field, enemy1_field, enemy2_field,
-                                             free_up_pass_enemy1, free_up_pass_enemy2, free_up_goal_enemy1,
-                                             free_up_goal_enemy2, block_pass,
-                                             block_goal_enemy1, block_goal_enemy2,  advance, catch_up, bad_minima)
-
-            self.local_potential, self.points = potential.get_local_potential()
-            turn, self.current_point = self.move()
-            self.current_direction = rotate_vector(turn, self.current_direction[0], self.current_direction[1])
-
-    def nothing(self, x):
-        pass
 
 '''POTENTIALS'''
 
@@ -353,7 +240,8 @@ class infinite_axial:
             else:
                 return 0
 
-# finite axial - field will start at start point and exist on the opposite side to the ref point anc continue of the pitch
+# finite axial - field will start at start point and exist on the opposite side to the ref point anc continue of
+# the pitch
 # 3 3 3 2 3 3 3
 # 3 2 1 1 1 2 3
 # 0 0 0 0 0 0 0
@@ -381,18 +269,18 @@ class finite_axial:
             right_ref = start_field[0]
             left_ref = end_field[0]
         else:
-            right_ref = start_field[0]
-            left_ref = end_field[0]
+            left_ref = start_field[0]
+            right_ref = end_field[0]
 
-        if start_field[0] < rotated_point[0] < end_field[0]:
+        if left_ref < rotated_point[0] < right_ref:
             b = right_ref - rotated_point[0]
             a = left_ref - rotated_point[0]
             distance_to = abs(rotated_point[1] - start_field[1])
             return self.constant*math.pow(math.log(b + math.sqrt(b**2 + distance_to**2)/a + math.sqrt(a**2 + distance_to**2), math.e), self.gradient)
         elif right_ref <= rotated_point[0]: # outside
-            return self.constant/math.pow(math.sqrt((x-right_ref[0])**2 + (y-right_ref[1])**2), self.gradient)
+            return self.constant/math.pow(math.sqrt((x-right_ref)**2 + (y-right_ref)**2), self.gradient)
         elif left_ref >= rotated_point[0]: # outside
-            return self.constant/math.pow(math.sqrt((x-left_ref[0])**2 + (y-left_ref[1])**2), self.gradient)
+            return self.constant/math.pow(math.sqrt((x-left_ref)**2 + (y-left_ref)**2), self.gradient)
 
 # solid - modeled as a circle, from center 'forbidden' is unreachable and outside the influence area is unreachable
 # 0 2 3 3 3 2 0
@@ -418,9 +306,9 @@ class solid_field:
             return 0
         else:
             if self.constant <= 0:
-                return -float("inf")
+                return -9999*self.constant
             else:
-                return float("inf")
+                return 9999*self.constant
 
 # step - an infinite line drawn through the point in the first argument in the direction of the vector in the
 # second argument. The clockwise segment to the vector is cut off where as the anticlockwise segment acts like a
@@ -446,16 +334,17 @@ class step_field:
         angle = math.atan2(self.dir_y, self.dir_x)
         rotated_point = rotate_vector(-angle, x, y)
         rotated_field = rotate_vector(-angle, self.pos_x, self.pos_y)
-        distance_to = rotated_point[1] - rotated_field[1]
+        distance_to = abs(rotated_point[1] - rotated_field[1])
         if dot_product(step_direction, (x - self.pos_x, y - self.pos_y)) > 0: # in direction step_direction
             return self.constant*math.pow(math.log(900/distance_to, math.e), self.gradient)
         else:
             if self.constant <= 0:
-                return -float("inf")
+                return -9999*self.constant
             else:
-                return float("inf")
+                return 9999*self.constant
 
 def rotate_vector(angle, x, y):
+    angle = math.radians(angle)
     return x*math.cos(angle)-y*math.sin(angle), x*math.sin(angle)+y*math.cos(angle)
 
 def normalize((x, y)):
