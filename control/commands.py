@@ -252,7 +252,7 @@ class Commands:
         self.g(400)
 
     def open_narrow(self):
-        self.g(200)
+        self.g(350)
 
     def x(self, x):
         """Kick and release"""
@@ -291,9 +291,9 @@ class Commands:
     def kick(self, distance):
         """Milestone 1: Kick"""
         distance = int(distance)
-        time_value = 0.7517522044 * distance + 199.265204612
+        time_value = 2.3530438329 * distance + 38.5507807011
         print("Time for kicking motor: " + str(time_value))
-        self.k(time_value)
+        self.x(time_value)
         '''
         if distance == 50:
             # time = 260

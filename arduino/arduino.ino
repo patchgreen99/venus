@@ -10,6 +10,7 @@
 
 #define RECEIVER_SLAVE_ADDRESS 69
 #define BALL_SENSOR_ANALOG_PORT 0
+#define BALL_SENSOR_SLAVE_ADDRESS 57
 
 #define MOTOR_LEFT 0
 #define MOTOR_RIGHT 1
@@ -381,8 +382,10 @@ void handshake() {
 
 void queryBallSensor() {
   int value = analogRead(BALL_SENSOR_ANALOG_PORT);
-  //Serial.println(value);
-  Serial.print(value > 200 ? RESP_DONE : RESP_NEGATIVE);
+  //Wire.requestFrom(BALL_SENSOR_SLAVE_ADDRESS, 1);
+  //int value = Wire.read();
+  bool hasBall = value > 230;
+  Serial.print(hasBall ? RESP_DONE : RESP_NEGATIVE);
 }
 
 void unknown() {
