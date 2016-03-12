@@ -34,7 +34,7 @@ class Commands:
         print("! vision")
         print("! connect <device_no>")
         self.init()
-        self.vision()
+        #self.vision()
         self.connect()
 
     def init(self, room_num=1, team_color='yellow', our_color='green', computer_goal=False):
@@ -226,9 +226,9 @@ class Commands:
         s = sign(x)
         x = abs(x)
         if x > 90:
-            x = 1.21333333333 * x - 37.0
+            x = 1.171111111 * x - 33.0
         else:
-            x = 0.0018160096 * (x ** 2) + 0.6415770609 * x
+            x = 0.0029623255 * (x ** 2) + 0.5561962134 * x
         x = int(x)
         if x > 0:
             self.protocol.move(x, [(MOTOR_LEFT, -100 * s),
