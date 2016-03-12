@@ -119,19 +119,19 @@ class Game:
 
             self.current_direction = potential.last_direction
             self.local_potential, self.points = potential.get_local_potential()
+            angle, length = self.calculate_angle_length_ball()
+            if potential.ball_next_square and self.world.grabber_open:
+                self.commands.c(angle)
             print self.local_potential[2][2]
             if not self.world.grabber_open and self.world.venus.hasBallInRange.value:
                 print "Opening grabber"
                 self.commands.open_wide()
             turn, self.current_point = self.move()
-            a = self.commands.protocol.query_ball()
-            b = self.world.grabber_open
-            print '>>>>>> ', a, b
-            if a and b:
-                # venus has the ball
+            if potential.ball_next_square and self.world.grabber_open:
                 self.commands.g()
+                exit(0)
             self.current_direction = rotate_vector(turn, self.current_direction[0], self.current_direction[1])
-            time.sleep(.5)
+            time.sleep(1)
 
     def move(self):
         """Executes command to go to minimum potential and returns robot direction after the movement"""

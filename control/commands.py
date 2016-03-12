@@ -226,9 +226,9 @@ class Commands:
         s = sign(x)
         x = abs(x)
         if x > 90:
-            x = 1.89444 * x - 59.5
+            x = 1.21333333333 * x - 37.0
         else:
-            x = 0.0083027347 * (x ** 2) + 0.4557515777 * x
+            x = 0.0018160096 * (x ** 2) + 0.6415770609 * x
         x = int(x)
         if x > 0:
             self.protocol.move(x, [(MOTOR_LEFT, -100 * s),
