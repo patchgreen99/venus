@@ -343,7 +343,7 @@ class Vision:
                         position = robots_pos[positionIndex]
                         # todo Danger hard coded
                         if positionIndex == 0:
-                            if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 90: # todo: this is different!
+                            if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 100: # todo: this is different!
                                 self.world.venus.hasBallInRange.value = True
                             else:
                                 self.world.venus.hasBallInRange.value = False
@@ -723,7 +723,7 @@ class Vision:
     def translate(self, frame):
         if self.world.room_num == 0:
             M = np.float32([[1,0,-5],[0,1,-5]])
-            return cv2.warpAffine(frame, M, (640,480))
+            return cv2.warpAffine(frame, M, (self.COLS, self.ROWS))
         else:
             return frame
 
@@ -742,10 +742,10 @@ class Vision:
         if self.world.room_num == 0:
             return frame
         else:
-            pts1 = np.float32([[5,5],[5,475],[640,480],[640,0]])
-            pts2 = np.float32([[0,0],[0,480],[640,480],[640,0]])
+            pts1 = np.float32([[5,5],[5,self.ROWS-5],[self.COLS, self.ROWS],[self.COLS,0]])
+            pts2 = np.float32([[0,0],[0,self.ROWS],[self.COLS, self.ROWS],[self.COLS,0]])
             M = cv2.getPerspectiveTransform(pts1,pts2)
-            dst = cv2.warpPerspective(frame, M, (640, 480))
+            dst = cv2.warpPerspective(frame, M, (self.COLS, self.ROWS))
             return dst
 
 

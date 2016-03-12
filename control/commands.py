@@ -88,8 +88,8 @@ class Commands:
     def pw(self):
         print(self.world)
 
-    def potential(self):
-        self.game.run()
+    def pot(self):
+        self.game.run("FREE_BALL_YOURS")
 
     def flush(self):
         self.protocol.flush()
@@ -104,11 +104,17 @@ class Commands:
         print self.game.move()
 
     def test2(self):
-        self.forward()
+        # for x in range(0, 10):
+        #     self.forward_right()
         self.forward_left()
         self.forward_right()
+        self.sharp_left()
         self.forward_left()
+        self.pause()
+        self.sharp_right()
+        self.backward_right()
         self.backward()
+        self.forward_right()
         self.backward()
         self.backward_left()
 
@@ -125,6 +131,37 @@ class Commands:
         self.swerve_left(200)
         self.swerve_right(200)
         self.forward()
+
+    def stopped(self):
+        self.protocol.block_until_stop()
+        print("Now it has stopped")
+
+    def turn(self, x):
+        """Turn clockwise, negative means counter-clockwise"""
+        print("  Turn %d deg" % int(x))
+
+        x = int(x)
+        s = sign(x)
+        x = abs(x)
+
+        # Last calibration: 12 March
+
+        if s > 0:  # Clockwise
+            if x > 90:
+                x = 1.8644444444 * x - 61.0
+            else:
+                x = 0.0094731306 * (x ** 2) + 0.2795037292 * x
+
+        else:  # Counter-clockwise
+            if x > 90:
+                x = 1.8511111111 * x - 65.5
+            else:
+                x = 0.0086354944 * (x ** 2) + 0.3213281698 * x
+        x = int(x)
+        if x > 0:
+            self.protocol.schedule(x, MOTOR_TURN, [(MOTOR_LEFT, -100 * s),
+                                                   (MOTOR_RIGHT, 100 * s),
+                                                   (MOTOR_TURN, 100 * s)])
 
     def forward_forever(self):
         """Move forward forever"""
@@ -154,16 +191,19 @@ class Commands:
 
     def forward(self):
         """Move a cell forward"""
+        print("  Forward")
         self.protocol.schedule(100, MOTOR_LEFT, [(MOTOR_LEFT, -100),
                                                  (MOTOR_RIGHT, -100)])
 
     def backward(self):
         """Move a cell backward"""
+        print("  Backward")
         self.protocol.schedule(100, MOTOR_LEFT, [(MOTOR_LEFT, 100),
                                                  (MOTOR_RIGHT, 100)])
 
     def forward_left(self):
         """Move forward and to left"""
+        print("  Forward left")
         self.protocol.schedule(170, MOTOR_TURN, [(MOTOR_TURN, -100),
                                                  (MOTOR_LEFT, -70),
                                                  (MOTOR_RIGHT, -100)])
@@ -172,6 +212,7 @@ class Commands:
 
     def forward_right(self):
         """Move forward and to right"""
+        print("  Forward right")
         self.protocol.schedule(240, MOTOR_TURN, [(MOTOR_TURN, 100),
                                                  (MOTOR_LEFT, -100),
                                                  (MOTOR_RIGHT, -70)])
@@ -180,6 +221,7 @@ class Commands:
 
     def backward_left(self):
         """Move backward and to left"""
+        print("  Backward left")
         self.protocol.schedule(10, MOTOR_LEFT, [(MOTOR_LEFT, 100),
                                                 (MOTOR_RIGHT, 100)])
         self.protocol.schedule(190, MOTOR_TURN, [(MOTOR_TURN, 100),
@@ -188,6 +230,7 @@ class Commands:
 
     def backward_right(self):
         """Move backward and to right"""
+        print("  Backward right")
         self.protocol.schedule(5, MOTOR_RIGHT, [(MOTOR_LEFT, 100),
                                                 (MOTOR_RIGHT, 100)])
         self.protocol.schedule(230, MOTOR_TURN, [(MOTOR_TURN, -100),
@@ -196,6 +239,7 @@ class Commands:
 
     def sharp_left(self):
         """Move to a cell left"""
+        print("  Sharp left")
         self.protocol.schedule(35, MOTOR_TURN, [(MOTOR_TURN, -100),
                                                 (MOTOR_LEFT, 100),
                                                 (MOTOR_RIGHT, -100)])
@@ -204,6 +248,7 @@ class Commands:
 
     def sharp_right(self):
         """Move to a cell right"""
+        print("  Sharp right")
         self.protocol.schedule(50, MOTOR_TURN, [(MOTOR_TURN, 100),
                                                 (MOTOR_LEFT, -100),
                                                 (MOTOR_RIGHT, 100)])
@@ -228,6 +273,9 @@ class Commands:
         x = int(x)
         s = sign(x)
         x = abs(x)
+
+        # Last calibration: 12 March
+
         if x > 90:
             x = 1.171111111 * x - 33.0
         else:
@@ -294,6 +342,9 @@ class Commands:
     def kick(self, distance):
         """Milestone 1: Kick"""
         distance = int(distance)
+
+        # Last calibration: 12 March
+
         time_value = 2.3530438329 * distance + 38.5507807011
         print("Time for kicking motor: " + str(time_value))
         self.x(time_value)

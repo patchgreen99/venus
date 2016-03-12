@@ -3,7 +3,7 @@ import serial
 
 class RobotProtocol:
     def __init__(self, device):
-        self.ser = serial.Serial(device, 115200, timeout=0.1)
+        self.ser = serial.Serial(device, 115200, timeout=0.5)
         self.seq_no = 0
         self.response = None
         self.write('H', error_check=False)
@@ -65,7 +65,9 @@ class RobotProtocol:
         self.response = self.ser.read()
         while self.response not in ['D', 'N']:
             if self.response:
-                print("Got unknown response '%s'" % self.response)
+                print("Received: %s" % self.response)
+            else:
+                print("Received no response")
             self.ser.write(message + '\r')
             self.response = self.ser.read()
 

@@ -24,7 +24,7 @@
 #define RESP_ERROR_CHECKSUM 'C'
 #define RESP_ERROR_JOBS_EXCEEDED 'X'
 
-#define MAX_JOB_COUNT 20
+#define MAX_JOB_COUNT 30
 
 #define MAX_PARAMS 20
 
@@ -52,7 +52,7 @@ timer_callback stopMotorCallbacks[] = {
 int positions[ROTARY_COUNT];
 int targetPositions[ROTARY_COUNT];
 
-/* Whether motors are moving by an amount of time units */
+/* Whether motors are moving in any way */
 bool moving[ROTARY_COUNT];
 
 struct Job {
@@ -81,13 +81,13 @@ void setup() {
   sc.addCommand("J", scheduleJob);
   sc.addCommand("P", schedulePause);
   sc.addCommand("F", flushJobs);
-  sc.addCommand("Z", stopSome);
+  //sc.addCommand("Z", stopSome);
   sc.addCommand("S", stopAll);
   sc.addCommand("I", areAllStopped);
   sc.addCommand("Y", isOneStopped);
   //sc.addCommand("T", transferByte);
   sc.addCommand("H", handshake);
-  sc.addCommand("A", queryBallSensor);
+  //sc.addCommand("A", queryBallSensor);
   sc.addDefaultHandler(unknown);
   
   timer.setInterval(ROTARY_REQUEST_INTERVAL, rotaryTimerCallback);
@@ -98,13 +98,27 @@ void loop() {
   sc.readSerial();
 }
 
+void stopMotor(int i) {
+  motorStop(i);
+  moving[i] = false;
+}
+
+void runMotor(int i, int power) {
+  if (power > 0) {
+    motorForward(i, power);
+  } else {
+    motorBackward(i, -power);
+  }
+  moving[i] = true;
+}
+
 /* Used to set timeouts after moving for some time units */
-void stopMotor0() { motorStop(0); moving[0] = false; }
-void stopMotor1() { motorStop(1); moving[1] = false; }
-void stopMotor2() { motorStop(2); moving[2] = false; }
-void stopMotor3() { motorStop(3); moving[3] = false; }
-void stopMotor4() { motorStop(4); moving[4] = false; }
-void stopMotor5() { motorStop(5); moving[5] = false; }
+void stopMotor0() { stopMotor(0); }
+void stopMotor1() { stopMotor(1); }
+void stopMotor2() { stopMotor(2); }
+void stopMotor3() { stopMotor(3); }
+void stopMotor4() { stopMotor(4); }
+void stopMotor5() { stopMotor(5); }
 
 /* Callback that stops motors after they moved for some rotary units */
 void rotaryTimerCallback() {
@@ -122,14 +136,10 @@ void rotaryTimerCallback() {
   for (int i = 0; i < ROTARY_COUNT; ++i) {
     if (starting && jobs[next].powers[i]) {
       positions[i] = 0;
-      if (jobs[next].powers[i] > 0) {
-        motorForward(i, jobs[next].powers[i]);
-      } else {
-        motorBackward(i, -jobs[next].powers[i]);
-      }
+      runMotor(i, jobs[next].powers[i]);
     } else if (stopping && jobs[head].powers[i]) {
       positions[i] = 0;
-      motorStop(i);
+      stopMotor(i);
       
       // Moving motors in other direction hoping to stop them quickly
       /*if (jobs[head].powers[i] > 0) {
@@ -150,7 +160,7 @@ void rotaryTimerCallback() {
   
   for (int i = 0; i < ROTARY_COUNT; ++i) {
     if (finished(positions[i], targetPositions[i])) {
-      motorStop(i);
+      stopMotor(i);
       positions[i] = 0;
       targetPositions[i] = 0;
     }
@@ -213,11 +223,7 @@ void moveForever() {
     int motor = params[i++];
     int power = params[i++];
     
-    if (power > 0) {
-      motorForward(motor, power);
-    } else {
-      motorBackward(motor, -power);
-    }
+    runMotor(motor, power);
   }
 }
 
@@ -233,13 +239,7 @@ void moveTimeUnits() {
     int motor = params[p++];
     int power = params[p++];
     
-    if (power > 0) {
-      motorForward(motor, power);
-    } else {
-      motorBackward(motor, -power);
-    }
-    
-    moving[motor] = true;
+    runMotor(motor, power);
     
     // Use timeout to make moveTimeUnits non-blocking
     timer.setTimeout(time, stopMotorCallbacks[motor]);
@@ -261,11 +261,11 @@ void moveRotaryUnits() {
     
     if (power > 0) {
       targetPositions[motor] = target;
-      motorForward(motor, power);
     } else {
       targetPositions[motor] = -target;
-      motorBackward(motor, -power);
     }
+    
+    runMotor(motor, power);
   }
 }
 
@@ -344,7 +344,7 @@ void stopSome() {
   while (p < paramCount) {
     int motor = params[p++];
     
-    motorStop(motor);
+    stopMotor(motor);
   }
 }
 
@@ -353,12 +353,14 @@ void stopAll() {
     return;
   }
   
-  motorAllStop();
+  for (int i = 0; i < ROTARY_COUNT; ++i) {
+    stopMotor(i);
+  }
 }
 
 void areAllStopped() {
   for (int i = 0; i < ROTARY_COUNT; ++i) {
-    if (targetPositions[i] || moving[i]) {
+    if (moving[i]) {
       return;
     }
   }
@@ -369,7 +371,7 @@ void areAllStopped() {
 void isOneStopped() {
   int motor = atoi(sc.next());
   
-  if (targetPositions[motor] || moving[motor]) {
+  if (moving[motor]) {
     return;
   }
   

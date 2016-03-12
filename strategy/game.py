@@ -36,8 +36,9 @@ class Game:
         # ENTERING STATE
         ###############################################################################################################################################################
         if state == "FREE_BALL_YOURS":
-            angle, length = self.calculate_angle_length_ball()
-            self.commands.c(angle)
+            pass
+            #angle, length = self.calculate_angle_length_ball()
+            #self.commands.c(angle)
         elif state == "FREE_BALL_2_GOALSIDE":
             pass
         elif state == "FREE_BALL_1_GOALSIDE":
@@ -57,7 +58,6 @@ class Game:
         # MID STATE
         ################################################################################################################################################################
         while True:
-
             if state == "FREE_BALL_YOURS":
 
                 # ON
@@ -105,10 +105,12 @@ class Game:
                 # MOTION
                 #######################################
 
+                self.current_direction = potential.last_direction
+                self.local_potential, self.points = potential.get_local_potential()
                 if self.world.venus.hasBallInRange.value and self.ready < 1:
                     angle, length = self.calculate_angle_length_ball()
                     self.ready += 1
-                    self.commands.c(angle)
+                    self.commands.turn(angle)
                     self.turn = angle
                     self.commands.open_wide()
                     self.current_direction = rotate_vector(angle, self.current_direction[0], self.current_direction[1]) # todo direction not right
@@ -118,7 +120,10 @@ class Game:
 
                     if self.grab_range() and self.ready > 0:
                         self.commands.g()
-                        break
+                        self.ready = 0
+
+                        print("It thinks it has the ball")
+                        return
 
                 ########################################
 
@@ -337,7 +342,6 @@ class Game:
 
                 ########################################
 
-                time.sleep(.7)
 
                 ###########################################################################################################################################
 
@@ -551,13 +555,13 @@ class Game:
             self.commands.sharp_right()
             return RIGHT, self.points[2, 3]
         elif [3, 2] in indices or [4, 1] in indices or [4, 3] in indices:
-            self.commands.c(180)
+            self.commands.turn(180)
             return BOTTOM, self.points[2, 2]
         elif [3, 1] in indices or [3, 0] in indices:
-            self.commands.c(180)
+            self.commands.turn(180)
             return BOTTOM, self.points[2, 2]
         elif [3, 3] in indices or [3, 4] in indices:
-            self.commands.c(180)
+            self.commands.turn(180)
             return BOTTOM, self.points[2, 2]
 
     def move_defense(self):
@@ -601,7 +605,7 @@ class Game:
     def grab_range(self):
         refAngle = math.atan2(self.world.venus.orientation[1], self.world.venus.orientation[0])
         ballAngle, ballLength = self.calculate_angle_length_ball()
-        if abs(ballLength) < 30 and abs(refAngle-ballLength) < 25:
+        if abs(ballLength) < 25 and abs(refAngle-ballLength) < 25:
             return True
         else:
             return False
