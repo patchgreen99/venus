@@ -30,118 +30,502 @@ class Game:
         self.ready = 0
         self.turn = 0
 
-    def run(self):
+    def run(self, state):
 
-        angle, length = self.calculate_angle_length_ball()
-        self.commands.c(angle)
+        ###############################################################################################################################################################
+        # ENTERING STATE
+        ###############################################################################################################################################################
+        if state == "FREE_BALL_YOURS":
+            angle, length = self.calculate_angle_length_ball()
+            self.commands.c(angle)
+        elif state == "FREE_BALL_2_GOALSIDE":
+            pass
+        elif state == "FREE_BALL_1_GOALSIDE":
+            pass
+        elif state == "FREE_BALL_BOTH_GOALSIDE":
+            pass
+        elif state == "FREE_BALL_NONE_GOALSIDE":
+            pass
+        elif state == "ENEMY1_BALL_TAKE_GOAL":
+            pass
+        elif state == "ENEMY2_BALL_TAKE_GOAL":
+            pass
+        elif state == "ENEMY_BALL_TAKE_PASS":
+            pass
 
-        # example state
+        ################################################################################################################################################################
+        # MID STATE
+        ################################################################################################################################################################
         while True:
-            # as an example the potentials you wil need for any single state
-            # if you don't understand ask Aseem, then ask me :)
-            # All the zeros are up to you
-            # first value is the gradient eg. the response of the field
-            # the second value is the constant eg. the magnitude of the field
 
-            ball_field = radial(self.world.ball, 1, -100)
+            if state == "FREE_BALL_YOURS":
 
-            # radial - constant gradient everywhere  coming out from one single spot
-            # 3 3 3 3 3 3 3
-            # 3 3 2 1 2 3 3
-            # 3 3 1 0 1 3 3
-            # 3 3 2 1 2 3 3
-            # 3 3 3 3 3 3 3
+                # ON
+                #####################################
 
-            friend_field = solid_field(self.world.friend.position, 2, 100000, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy1_field = solid_field(self.world.enemy1.position, 2, 100000, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy2_field = solid_field(self.world.enemy2.position, 2, 100000, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+                ball_field = radial(self.world.ball, 1, -100)
 
-            # solid - modeled as a circle, from center 'forbidden' is unreachable and outside the influence area
-            # is unreachable
-            # 0 2 3 3 3 2 0
-            # 1 3 9 9 9 3 1
-            # 2 3 9 9 9 3 2
-            # 1 3 9 9 9 3 1
-            # 0 2 3 3 3 2 0
+                friend_field = solid_field(self.world.friend.position, 2, 100000, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+                enemy1_field = solid_field(self.world.enemy1.position, 2, 100000, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+                enemy2_field = solid_field(self.world.enemy2.position, 2, 100000, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
 
-            free_up_pass_enemy1 = finite_axial_outside(self.world.enemy1.position, self.world.friend.position, 1, 10000)
-            free_up_pass_enemy2 = finite_axial_outside(self.world.enemy2.position, self.world.friend.position, 1, 10000)
-            free_up_goal_enemy1 = finite_axial_outside(self.world.enemy1.position, (self.world.their_goalX, self.world.their_goalmeanY), 1, 10000)
-            free_up_goal_enemy2 = finite_axial_outside(self.world.enemy2.position, (self.world.their_goalX, self.world.their_goalmeanY), 1, 10000)
+                advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 0, 0)
+                catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 0, 0)
 
-            # finite axial outside - field will start at start point and exist on the opposite side to the ref point and
-            # continue of the pitch
-            # 3 3 3 2 3 3 3
-            # 3 2 1 1 1 2 3
-            # 0 0 0 0 0 0 0
-            # 3 2 1 1 1 2 3
-            # 3 3 3 2 3 3 3
+                # OFF
+                #####################################
 
-            block_pass = finite_axial_inside(self.world.enemy1.position, self.world.enemy2.position, 1, -10000)
-            block_goal_enemy1 = finite_axial_inside(self.world.enemy1.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, -10000)
-            block_goal_enemy2 = finite_axial_inside(self.world.enemy2.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, -10000)
+                free_up_pass_enemy1 = finite_axial_outside(self.world.enemy1.position, self.world.friend.position, 1, 10000)
+                free_up_pass_enemy2 = finite_axial_outside(self.world.enemy2.position, self.world.friend.position, 1, 10000)
+                free_up_goal_enemy1 = finite_axial_outside(self.world.enemy1.position, (self.world.their_goalX, self.world.their_goalmeanY), 1, 10000)
+                free_up_goal_enemy2 = finite_axial_outside(self.world.enemy2.position, (self.world.their_goalX, self.world.their_goalmeanY), 1, 10000)
 
-            # finite axial inside - field is between reference points and exists everywhere
-            # 3 3 3 2 3 3 3
-            # 3 2 1 1 1 2 3
-            # 0 0 0 0 0 0 0
-            # 3 2 1 1 1 2 3
-            # 3 3 3 2 3 3 3
+                block_pass = finite_axial_inside(self.world.enemy1.position, self.world.enemy2.position, 1, -10000)
+                block_goal_enemy1 = finite_axial_inside(self.world.enemy1.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, -10000)
+                block_goal_enemy2 = finite_axial_inside(self.world.enemy2.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, -10000)
 
-            bad_minima_goal = infinite_axial(self.world.venus.position, (self.world.their_goalX, self.world.their_goalmeanY), 0, 0)
-            bad_minima_pass = infinite_axial(self.world.venus.position, self.world.friend.position, 0, 0)
+                bad_minima_goal = infinite_axial(self.world.venus.position, (self.world.their_goalX, self.world.their_goalmeanY), 0, 0)
+                bad_minima_pass = infinite_axial(self.world.venus.position, self.world.friend.position, 0, 0)
 
-            # infinite axial - field is only implemented between start and end points everywhere else
-            # contribution is zero
-            # 3 3 3 3 3 3 3
-            # 1 1 1 1 1 1 1
-            # 0 0 0 0 0 0 0
-            # 1 1 1 1 1 1 1
-            # 3 3 3 3 3 3 3
+                # BUILD FIELD AND NEXT POSITION AND DIRECTIONS
+                ####################################
+                # todo too reliant on vision, must pick what to use for look ahead
+                self.current_point = (self.world.venus.position[0], self.world.venus.position[1])
+                if self.turn != 180:
+                    self.current_direction = (self.world.venus.orientation[0], self.world.venus.orientation[1])
 
-            advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 0, 0)
-            catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 0, 0)
+                potential = Potential(self.current_point, self.current_direction, self.world, ball_field, friend_field, enemy1_field, enemy2_field,
+                                                 free_up_pass_enemy1, free_up_pass_enemy2, free_up_goal_enemy1,
+                                                 free_up_goal_enemy2, block_pass,
+                                                 block_goal_enemy1, block_goal_enemy2,  advance, catch_up, bad_minima_pass, bad_minima_goal)
 
-            # step - an infinite line drawn through the point in the first argument in the direction of the vector in
-            # the second argument. The clockwise segment to the vector is cut off where as the anticlockwise segment
-            # acts like a infinite axial field over the entire pitch
-            # 9 9 9 9 9 9 9
-            # 9 9 9 9 9 9 9
-            # 3 3 3 3 3 3 3
-            # 1 1 1 1 1 1 1
-            # 0 0 0 0 0 0 0
+                self.current_direction = potential.last_direction
+                self.local_potential, self.points = potential.get_local_potential()
 
-            # Constructor must always be this
-            self.current_point = (self.world.venus.position[0], self.world.venus.position[1])
-            if self.turn != 180:
-                self.current_direction = (self.world.venus.orientation[0], self.world.venus.orientation[1])
+                # MOTION
+                #######################################
 
-            potential = Potential(self.current_point, self.current_direction, self.world, ball_field, friend_field, enemy1_field, enemy2_field,
-                                             free_up_pass_enemy1, free_up_pass_enemy2, free_up_goal_enemy1,
-                                             free_up_goal_enemy2, block_pass,
-                                             block_goal_enemy1, block_goal_enemy2,  advance, catch_up, bad_minima_pass, bad_minima_goal)
+                if self.world.venus.hasBallInRange.value and self.ready < 1:
+                    angle, length = self.calculate_angle_length_ball()
+                    self.ready += 1
+                    self.commands.c(angle)
+                    self.turn = angle
+                    self.commands.open_wide()
+                    self.current_direction = rotate_vector(angle, self.current_direction[0], self.current_direction[1]) # todo direction not right
+                else:
+                    self.turn, self.current_point = self.move_attack() #todo current_point not right
+                    self.current_direction = rotate_vector(self.turn, self.current_direction[0], self.current_direction[1]) # todo direction not right
 
-            self.current_direction = potential.last_direction
-            self.local_potential, self.points = potential.get_local_potential()
-            if self.world.venus.hasBallInRange.value and self.ready < 1:
-                angle, length = self.calculate_angle_length_ball()
-                self.ready += 1
-                self.commands.c(angle)
-                self.turn = angle
-                self.commands.open_wide()
-                self.current_direction = rotate_vector(angle, self.current_direction[0], self.current_direction[1]) # todo direction not right
-            else:
-                self.turn, self.current_point = self.move() #todo current_point not right
-                self.current_direction = rotate_vector(self.turn, self.current_direction[0], self.current_direction[1]) # todo direction not right
+                    if self.grab_range() and self.ready > 0:
+                        self.commands.g()
+                        break
 
-                if self.grab_range() and self.ready > 0:
-                    #time.sleep(.1)
-                    self.commands.g()
-                    exit(0)
+                ########################################
 
-            time.sleep(.7)
+                time.sleep(.7)
 
-    def move(self):
+                ###########################################################################################################################################
+
+            elif state == "FREE_BALL_2_GOALSIDE":
+
+                # ON
+                #####################################
+
+                friend_field = solid_field(self.world.friend.position, 2, 100000, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+                enemy1_field = solid_field(self.world.enemy1.position, 2, 100000, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+                enemy2_field = solid_field(self.world.enemy2.position, 2, 100000, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+
+                advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 0, 0)
+                catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 0, 0)
+
+                free_up_pass_enemy1 = finite_axial_outside(self.world.enemy1.position, self.world.friend.position, 1, 10000)
+                free_up_goal_enemy2 = finite_axial_outside(self.world.enemy2.position, (self.world.their_goalX, self.world.their_goalmeanY), 1, 10000)
+
+                bad_minima_goal = infinite_axial(self.world.venus.position, (self.world.their_goalX, self.world.their_goalmeanY), 0, 0)
+                bad_minima_pass = infinite_axial(self.world.venus.position, self.world.friend.position, 0, 0)
+
+                # OFF
+                #####################################
+
+                ball_field = radial(self.world.ball, 1, -100)
+
+                free_up_pass_enemy2 = finite_axial_outside(self.world.enemy2.position, self.world.friend.position, 1, 10000)
+                free_up_goal_enemy1 = finite_axial_outside(self.world.enemy1.position, (self.world.their_goalX, self.world.their_goalmeanY), 1, 10000)
+
+                block_pass = finite_axial_inside(self.world.enemy1.position, self.world.enemy2.position, 1, -10000)
+                block_goal_enemy1 = finite_axial_inside(self.world.enemy1.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, -10000)
+                block_goal_enemy2 = finite_axial_inside(self.world.enemy2.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, -10000)
+
+                # BUILD FIELD AND NEXT POSITION AND DIRECTIONS
+                ####################################
+                # todo too reliant on vision, must pick what to use for look ahead
+                self.current_point = (self.world.venus.position[0], self.world.venus.position[1])
+                if self.turn != 180:
+                    self.current_direction = (self.world.venus.orientation[0], self.world.venus.orientation[1])
+
+                potential = Potential(self.current_point, self.current_direction, self.world, ball_field, friend_field, enemy1_field, enemy2_field,
+                                                 free_up_pass_enemy1, free_up_pass_enemy2, free_up_goal_enemy1,
+                                                 free_up_goal_enemy2, block_pass,
+                                                 block_goal_enemy1, block_goal_enemy2,  advance, catch_up, bad_minima_pass, bad_minima_goal)
+
+                self.current_direction = potential.last_direction
+                self.local_potential, self.points = potential.get_local_potential()
+
+                # MOTION
+                #######################################
+
+                ########################################
+
+                time.sleep(.7)
+
+                ###########################################################################################################################################
+
+            elif state == "FREE_BALL_1_GOALSIDE":
+
+                # ON
+                #####################################
+
+                friend_field = solid_field(self.world.friend.position, 2, 100000, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+                enemy1_field = solid_field(self.world.enemy1.position, 2, 100000, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+                enemy2_field = solid_field(self.world.enemy2.position, 2, 100000, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+
+                advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 0, 0)
+                catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 0, 0)
+
+                free_up_pass_enemy2 = finite_axial_outside(self.world.enemy1.position, self.world.friend.position, 1, 10000)
+                free_up_goal_enemy1 = finite_axial_outside(self.world.enemy2.position, (self.world.their_goalX, self.world.their_goalmeanY), 1, 10000)
+
+                bad_minima_goal = infinite_axial(self.world.venus.position, (self.world.their_goalX, self.world.their_goalmeanY), 0, 0)
+                bad_minima_pass = infinite_axial(self.world.venus.position, self.world.friend.position, 0, 0)
+
+                # OFF
+                #####################################
+
+                ball_field = radial(self.world.ball, 1, -100)
+
+                free_up_pass_enemy1 = finite_axial_outside(self.world.enemy2.position, self.world.friend.position, 1, 10000)
+                free_up_goal_enemy2 = finite_axial_outside(self.world.enemy1.position, (self.world.their_goalX, self.world.their_goalmeanY), 1, 10000)
+
+                block_pass = finite_axial_inside(self.world.enemy1.position, self.world.enemy2.position, 1, -10000)
+                block_goal_enemy1 = finite_axial_inside(self.world.enemy1.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, -10000)
+                block_goal_enemy2 = finite_axial_inside(self.world.enemy2.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, -10000)
+
+                # BUILD FIELD AND NEXT POSITION AND DIRECTIONS
+                ####################################
+                # todo too reliant on vision, must pick what to use for look ahead
+                self.current_point = (self.world.venus.position[0], self.world.venus.position[1])
+                if self.turn != 180:
+                    self.current_direction = (self.world.venus.orientation[0], self.world.venus.orientation[1])
+
+                potential = Potential(self.current_point, self.current_direction, self.world, ball_field, friend_field, enemy1_field, enemy2_field,
+                                                 free_up_pass_enemy1, free_up_pass_enemy2, free_up_goal_enemy1,
+                                                 free_up_goal_enemy2, block_pass,
+                                                 block_goal_enemy1, block_goal_enemy2,  advance, catch_up, bad_minima_pass, bad_minima_goal)
+
+                self.current_direction = potential.last_direction
+                self.local_potential, self.points = potential.get_local_potential()
+
+                # MOTION
+                #######################################
+
+                ########################################
+
+                time.sleep(.7)
+
+                ###########################################################################################################################################
+
+            elif state == "FREE_BALL_BOTH_GOALSIDE":
+
+                # ON
+                #####################################
+
+                friend_field = solid_field(self.world.friend.position, 2, 100000, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+                enemy1_field = solid_field(self.world.enemy1.position, 2, 100000, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+                enemy2_field = solid_field(self.world.enemy2.position, 2, 100000, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+
+                advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 0, 0)
+                catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 0, 0)
+
+                free_up_goal_enemy2 = finite_axial_outside(self.world.enemy1.position, (self.world.their_goalX, self.world.their_goalmeanY), 1, 10000)
+                free_up_goal_enemy1 = finite_axial_outside(self.world.enemy2.position, (self.world.their_goalX, self.world.their_goalmeanY), 1, 10000)
+
+                bad_minima_goal = infinite_axial(self.world.venus.position, (self.world.their_goalX, self.world.their_goalmeanY), 0, 0)
+                bad_minima_pass = infinite_axial(self.world.venus.position, self.world.friend.position, 0, 0)
+
+                # OFF
+                #####################################
+
+                ball_field = radial(self.world.ball, 1, -100)
+
+                free_up_pass_enemy1 = finite_axial_outside(self.world.enemy2.position, self.world.friend.position, 1, 10000)
+                free_up_pass_enemy2 = finite_axial_outside(self.world.enemy1.position, self.world.friend.position, 1, 10000)
+
+                block_pass = finite_axial_inside(self.world.enemy1.position, self.world.enemy2.position, 1, -10000)
+                block_goal_enemy1 = finite_axial_inside(self.world.enemy1.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, -10000)
+                block_goal_enemy2 = finite_axial_inside(self.world.enemy2.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, -10000)
+
+                # BUILD FIELD AND NEXT POSITION AND DIRECTIONS
+                ####################################
+                # todo too reliant on vision, must pick what to use for look ahead
+                self.current_point = (self.world.venus.position[0], self.world.venus.position[1])
+                if self.turn != 180:
+                    self.current_direction = (self.world.venus.orientation[0], self.world.venus.orientation[1])
+
+                potential = Potential(self.current_point, self.current_direction, self.world, ball_field, friend_field, enemy1_field, enemy2_field,
+                                                 free_up_pass_enemy1, free_up_pass_enemy2, free_up_goal_enemy1,
+                                                 free_up_goal_enemy2, block_pass,
+                                                 block_goal_enemy1, block_goal_enemy2,  advance, catch_up, bad_minima_pass, bad_minima_goal)
+
+                self.current_direction = potential.last_direction
+                self.local_potential, self.points = potential.get_local_potential()
+
+                # MOTION
+                #######################################
+
+                ########################################
+
+                time.sleep(.7)
+
+                ###########################################################################################################################################
+
+            elif state == "FREE_BALL_NONE_GOALSIDE":
+
+                # ON
+                #####################################
+
+                friend_field = solid_field(self.world.friend.position, 2, 100000, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+                enemy1_field = solid_field(self.world.enemy1.position, 2, 100000, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+                enemy2_field = solid_field(self.world.enemy2.position, 2, 100000, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+
+                advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 0, 0)
+                catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 0, 0)
+
+                free_up_pass_enemy1 = finite_axial_outside(self.world.enemy2.position, self.world.friend.position, 1, 10000)
+                free_up_pass_enemy2 = finite_axial_outside(self.world.enemy1.position, self.world.friend.position, 1, 10000)
+
+                bad_minima_goal = infinite_axial(self.world.venus.position, (self.world.their_goalX, self.world.their_goalmeanY), 0, 0)
+                bad_minima_pass = infinite_axial(self.world.venus.position, self.world.friend.position, 0, 0)
+
+                # OFF
+                #####################################
+                ball_field = radial(self.world.ball, 1, -100)
+
+                free_up_goal_enemy2 = finite_axial_outside(self.world.enemy1.position, (self.world.their_goalX, self.world.their_goalmeanY), 1, 10000)
+                free_up_goal_enemy1 = finite_axial_outside(self.world.enemy2.position, (self.world.their_goalX, self.world.their_goalmeanY), 1, 10000)
+
+                block_pass = finite_axial_inside(self.world.enemy1.position, self.world.enemy2.position, 1, -10000)
+                block_goal_enemy1 = finite_axial_inside(self.world.enemy1.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, -10000)
+                block_goal_enemy2 = finite_axial_inside(self.world.enemy2.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, -10000)
+
+                # BUILD FIELD AND NEXT POSITION AND DIRECTIONS
+                ####################################
+                # todo too reliant on vision, must pick what to use for look ahead
+                self.current_point = (self.world.venus.position[0], self.world.venus.position[1])
+                if self.turn != 180:
+                    self.current_direction = (self.world.venus.orientation[0], self.world.venus.orientation[1])
+
+                potential = Potential(self.current_point, self.current_direction, self.world, ball_field, friend_field, enemy1_field, enemy2_field,
+                                                 free_up_pass_enemy1, free_up_pass_enemy2, free_up_goal_enemy1,
+                                                 free_up_goal_enemy2, block_pass,
+                                                 block_goal_enemy1, block_goal_enemy2,  advance, catch_up, bad_minima_pass, bad_minima_goal)
+
+                self.current_direction = potential.last_direction
+                self.local_potential, self.points = potential.get_local_potential()
+
+                # MOTION
+                #######################################
+
+                ########################################
+
+                time.sleep(.7)
+
+                ###########################################################################################################################################
+
+            elif state == "ENEMY1_BALL_TAKE_GOAL":
+
+                # ON
+                #####################################
+                ball_field = radial(self.world.ball, 1, -100)
+
+                friend_field = solid_field(self.world.friend.position, 2, 100000, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+                enemy1_field = solid_field(self.world.enemy1.position, 2, 100000, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+                enemy2_field = solid_field(self.world.enemy2.position, 2, 100000, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+
+                advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 0, 0)
+                catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 0, 0)
+
+                block_goal_enemy1 = finite_axial_inside(self.world.enemy1.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, -10000)
+
+                # OFF
+                #####################################
+
+                free_up_pass_enemy1 = finite_axial_outside(self.world.enemy1.position, self.world.friend.position, 1, 10000)
+                free_up_pass_enemy2 = finite_axial_outside(self.world.enemy2.position, self.world.friend.position, 1, 10000)
+                free_up_goal_enemy1 = finite_axial_outside(self.world.enemy1.position, (self.world.their_goalX, self.world.their_goalmeanY), 1, 10000)
+                free_up_goal_enemy2 = finite_axial_outside(self.world.enemy2.position, (self.world.their_goalX, self.world.their_goalmeanY), 1, 10000)
+
+                block_pass = finite_axial_inside(self.world.enemy1.position, self.world.enemy2.position, 1, -10000)
+                block_goal_enemy2 = finite_axial_inside(self.world.enemy2.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, -10000)
+
+                bad_minima_goal = infinite_axial(self.world.venus.position, (self.world.their_goalX, self.world.their_goalmeanY), 0, 0)
+                bad_minima_pass = infinite_axial(self.world.venus.position, self.world.friend.position, 0, 0)
+
+                # BUILD FIELD AND NEXT POSITION AND DIRECTIONS
+                ####################################
+                # todo too reliant on vision, must pick what to use for look ahead
+                self.current_point = (self.world.venus.position[0], self.world.venus.position[1])
+                if self.turn != 180:
+                    self.current_direction = (self.world.venus.orientation[0], self.world.venus.orientation[1])
+
+                potential = Potential(self.current_point, self.current_direction, self.world, ball_field, friend_field, enemy1_field, enemy2_field,
+                                                 free_up_pass_enemy1, free_up_pass_enemy2, free_up_goal_enemy1,
+                                                 free_up_goal_enemy2, block_pass,
+                                                 block_goal_enemy1, block_goal_enemy2,  advance, catch_up, bad_minima_pass, bad_minima_goal)
+
+                self.current_direction = potential.last_direction
+                self.local_potential, self.points = potential.get_local_potential()
+
+                # MOTION
+                #######################################
+
+                ########################################
+
+                time.sleep(.7)
+
+                ###########################################################################################################################################
+
+            elif state == "ENEMY2_BALL_TAKE_GOAL":
+
+                # ON
+                #####################################
+                ball_field = radial(self.world.ball, 1, -100)
+
+                friend_field = solid_field(self.world.friend.position, 2, 100000, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+                enemy1_field = solid_field(self.world.enemy1.position, 2, 100000, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+                enemy2_field = solid_field(self.world.enemy2.position, 2, 100000, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+
+                advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 0, 0)
+                catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 0, 0)
+
+                block_goal_enemy2 = finite_axial_inside(self.world.enemy1.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, -10000)
+
+                # OFF
+                #####################################
+
+                free_up_pass_enemy1 = finite_axial_outside(self.world.enemy1.position, self.world.friend.position, 1, 10000)
+                free_up_pass_enemy2 = finite_axial_outside(self.world.enemy2.position, self.world.friend.position, 1, 10000)
+                free_up_goal_enemy1 = finite_axial_outside(self.world.enemy1.position, (self.world.their_goalX, self.world.their_goalmeanY), 1, 10000)
+                free_up_goal_enemy2 = finite_axial_outside(self.world.enemy2.position, (self.world.their_goalX, self.world.their_goalmeanY), 1, 10000)
+
+                block_pass = finite_axial_inside(self.world.enemy1.position, self.world.enemy2.position, 1, -10000)
+                block_goal_enemy1 = finite_axial_inside(self.world.enemy2.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, -10000)
+
+                bad_minima_goal = infinite_axial(self.world.venus.position, (self.world.their_goalX, self.world.their_goalmeanY), 0, 0)
+                bad_minima_pass = infinite_axial(self.world.venus.position, self.world.friend.position, 0, 0)
+
+                # BUILD FIELD AND NEXT POSITION AND DIRECTIONS
+                ####################################
+                # todo too reliant on vision, must pick what to use for look ahead
+                self.current_point = (self.world.venus.position[0], self.world.venus.position[1])
+                if self.turn != 180:
+                    self.current_direction = (self.world.venus.orientation[0], self.world.venus.orientation[1])
+
+                potential = Potential(self.current_point, self.current_direction, self.world, ball_field, friend_field, enemy1_field, enemy2_field,
+                                                 free_up_pass_enemy1, free_up_pass_enemy2, free_up_goal_enemy1,
+                                                 free_up_goal_enemy2, block_pass,
+                                                 block_goal_enemy1, block_goal_enemy2,  advance, catch_up, bad_minima_pass, bad_minima_goal)
+
+                self.current_direction = potential.last_direction
+                self.local_potential, self.points = potential.get_local_potential()
+
+                # MOTION
+                #######################################
+
+                ########################################
+
+                time.sleep(.7)
+
+                ###########################################################################################################################################
+
+            elif state == "ENEMY_BALL_TAKE_PASS":
+
+                # ON
+                #####################################
+                ball_field = radial(self.world.ball, 1, -100)
+
+                friend_field = solid_field(self.world.friend.position, 2, 100000, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+                enemy1_field = solid_field(self.world.enemy1.position, 2, 100000, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+                enemy2_field = solid_field(self.world.enemy2.position, 2, 100000, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+
+                advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 0, 0)
+                catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 0, 0)
+
+                block_pass = finite_axial_inside(self.world.enemy1.position, self.world.enemy2.position, 1, -10000)
+
+                # OFF
+                #####################################
+
+                free_up_pass_enemy1 = finite_axial_outside(self.world.enemy1.position, self.world.friend.position, 1, 10000)
+                free_up_pass_enemy2 = finite_axial_outside(self.world.enemy2.position, self.world.friend.position, 1, 10000)
+                free_up_goal_enemy1 = finite_axial_outside(self.world.enemy1.position, (self.world.their_goalX, self.world.their_goalmeanY), 1, 10000)
+                free_up_goal_enemy2 = finite_axial_outside(self.world.enemy2.position, (self.world.their_goalX, self.world.their_goalmeanY), 1, 10000)
+
+                block_goal_enemy2 = finite_axial_inside(self.world.enemy1.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, -10000)
+                block_goal_enemy1 = finite_axial_inside(self.world.enemy2.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, -10000)
+
+                bad_minima_goal = infinite_axial(self.world.venus.position, (self.world.their_goalX, self.world.their_goalmeanY), 0, 0)
+                bad_minima_pass = infinite_axial(self.world.venus.position, self.world.friend.position, 0, 0)
+
+                # BUILD FIELD AND NEXT POSITION AND DIRECTIONS
+                ####################################
+                # todo too reliant on vision, must pick what to use for look ahead
+                self.current_point = (self.world.venus.position[0], self.world.venus.position[1])
+                if self.turn != 180:
+                    self.current_direction = (self.world.venus.orientation[0], self.world.venus.orientation[1])
+
+                potential = Potential(self.current_point, self.current_direction, self.world, ball_field, friend_field, enemy1_field, enemy2_field,
+                                                 free_up_pass_enemy1, free_up_pass_enemy2, free_up_goal_enemy1,
+                                                 free_up_goal_enemy2, block_pass,
+                                                 block_goal_enemy1, block_goal_enemy2,  advance, catch_up, bad_minima_pass, bad_minima_goal)
+
+                self.current_direction = potential.last_direction
+                self.local_potential, self.points = potential.get_local_potential()
+
+                # MOTION
+                #######################################
+
+                ########################################
+
+                time.sleep(.7)
+
+                ###########################################################################################################################################
+
+        ###########################################################################################################################################################
+        # EXITING STATE
+        ###########################################################################################################################################################
+
+        if state == "FREE_BALL_YOURS":
+            pass
+        elif state == "FREE_BALL_2_GOALSIDE":
+            pass
+        elif state == "FREE_BALL_1_GOALSIDE":
+            pass
+        elif state == "FREE_BALL_BOTH_GOALSIDE":
+            pass
+        elif state == "FREE_BALL_NONE_GOALSIDE":
+            pass
+        elif state == "ENEMY1_BALL_TAKE_GOAL":
+            pass
+        elif state == "ENEMY2_BALL_TAKE_GOAL":
+            pass
+        elif state == "ENEMY_BALL_TAKE_PASS":
+            pass
+
+        ############################################################################################################################################################
+
+        ############################################################################################################################################################
+
+    def move_attack(self):
         """Executes command to go to minimum potential and returns robot direction after the movement"""
         x, y = np.where(self.local_potential == self.local_potential.min())
         indices = np.array([x, y]).T.tolist()
@@ -169,18 +553,47 @@ class Game:
         elif [3, 2] in indices or [4, 1] in indices or [4, 3] in indices:
             self.commands.c(180)
             return BOTTOM, self.points[2, 2]
-            #self.commands.backward()
-            #return TOP, self.points[3, 2]
         elif [3, 1] in indices or [3, 0] in indices:
             self.commands.c(180)
             return BOTTOM, self.points[2, 2]
-            #self.commands.backward_left()
-            #return RIGHT, self.points[3, 1]
         elif [3, 3] in indices or [3, 4] in indices:
             self.commands.c(180)
             return BOTTOM, self.points[2, 2]
-            #self.commands.backward_right()
-            #return LEFT, self.points[3, 3]
+
+    def move_defense(self):
+        """Executes command to go to minimum potential and returns robot direction after the movement"""
+        x, y = np.where(self.local_potential == self.local_potential.min())
+        indices = np.array([x, y]).T.tolist()
+        if [2, 2] in indices:
+            return TOP, self.points[2, 2]
+        elif [1, 2] in indices or [0, 1] in indices or [0, 3] in indices:
+            self.commands.forward()
+            return TOP, self.points[1, 2]
+        elif [1, 1] in indices or [1, 0] in indices:
+            self.commands.forward_left()
+            return LEFT, self.points[1, 1]
+        elif [1, 3] in indices or [1, 4] in indices:
+            self.commands.forward_right()
+            return RIGHT, self.points[1, 3]
+        elif [2, 1] in indices:
+            if self.moving:
+                self.commands.pause()
+            self.commands.sharp_left()
+            return LEFT, self.points[2, 1]
+        elif [2, 3] in indices:
+            if self.moving:
+                self.commands.pause()
+            self.commands.sharp_right()
+            return RIGHT, self.points[2, 3]
+        elif [3, 2] in indices or [4, 1] in indices or [4, 3] in indices:
+            self.commands.backward()
+            return TOP, self.points[3, 2]
+        elif [3, 1] in indices or [3, 0] in indices:
+            self.commands.backward_left()
+            return RIGHT, self.points[3, 1]
+        elif [3, 3] in indices or [3, 4] in indices:
+            self.commands.backward_right()
+            return LEFT, self.points[3, 3]
 
     def calculate_angle_length_ball(self):
         return self.calculate_angle_length(np.array([self.world.ball[0], self.world.ball[1]]))
