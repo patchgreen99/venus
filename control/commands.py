@@ -34,10 +34,10 @@ class Commands:
         print("! vision")
         print("! connect <device_no>")
         self.init()
-        #self.vision()
+        self.vision()
         self.connect()
 
-    def init(self, room_num=1, team_color='yellow', our_color='green', computer_goal=False):
+    def init(self, room_num=1, team_color='blue', our_color='pink', computer_goal=False):
         print("init: Room: %s, team color: %s, our single spot color: %s, computer goal: %s" %
               (room_num, team_color, our_color, computer_goal))
         self.world = World(int(room_num), team_color, our_color, computer_goal)

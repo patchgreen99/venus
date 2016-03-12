@@ -33,12 +33,12 @@ class Potential:
             if last_square is None:
                 self.last_square = (self.world.venus.position[0], self.world.venus.position[1])
             else:
-                self.last_square = (self.world.venus.position[0], self.world.venus.position[1])
+                self.last_square = last_square
 
             if last_direction is None:
                 self.last_direction = (self.world.venus.orientation[0], self.world.venus.orientation[1])
             else:
-                self.last_direction = (self.world.venus.orientation[0], self.world.venus.orientation[1])
+                self.last_direction = last_direction
 
             self.top_wall = step_field(PITCH_TOP_LEFT[self.world.room_num], (PITCH_TOP_RIGHT[self.world.room_num][0]-PITCH_TOP_LEFT[self.world.room_num][0], PITCH_TOP_RIGHT[self.world.room_num][1]-PITCH_TOP_LEFT[self.world.room_num][1]), 10, 0.001)
             self.bot_wall = step_field(PITCH_BOT_LEFT[self.world.room_num], (PITCH_BOT_LEFT[self.world.room_num][0]-PITCH_BOT_RIGHT[self.world.room_num][0], PITCH_BOT_LEFT[self.world.room_num][1]-PITCH_BOT_RIGHT[self.world.room_num][1]), 10, 0.001)
@@ -91,64 +91,47 @@ class Potential:
             robot_dir = normalize(self.last_direction)
 
             #row then column
-
-            self.local_potential[2, 2] = self.get_potential_at_square((robot_pos[0], robot_pos[1]))
-            self.points[2, 2] = (robot_pos[0], robot_pos[1])
-
             forwards = rotate_vector(0, robot_dir[0], robot_dir[1])
             back = rotate_vector(180, robot_dir[0], robot_dir[1])
             right = rotate_vector(90, robot_dir[0], robot_dir[1])
             left = rotate_vector(-90, robot_dir[0], robot_dir[1])
 
+            self.local_potential[2, 2] = self.get_potential_at_square((robot_pos[0], robot_pos[1]))
+            self.points[2, 2] = (robot_pos[0], robot_pos[1])
+
             point = (robot_pos[0]+POTENTIAL_GRANULARITY*forwards[0], robot_pos[1]+POTENTIAL_GRANULARITY*forwards[1])
             self.local_potential[1, 2] = self.get_potential_at_square(point)
             self.points[1, 2] = point
-            if self.check_ahead(self.world.ball, point, forwards, back, right, left):
-                self.ball_next_square = True
 
             point = (robot_pos[0]+POTENTIAL_GRANULARITY*back[0],robot_pos[1]+POTENTIAL_GRANULARITY*back[1])
             self.local_potential[3, 2] = self.get_potential_at_square(point)
             self.points[3, 2] = point
-            if self.check_ahead(self.world.ball, point, forwards, back, right, left):
-                self.ball_next_square = True
 
             point = (robot_pos[0]+POTENTIAL_GRANULARITY*right[0],robot_pos[1]+POTENTIAL_GRANULARITY*right[1])
             self.local_potential[2, 3] = self.get_potential_at_square(point)
             self.points[2, 3] = point
-            if self.check_ahead(self.world.ball, point, forwards, back, right, left):
-                self.ball_next_square = True
 
             point = (robot_pos[0]+POTENTIAL_GRANULARITY*left[0],robot_pos[1]+POTENTIAL_GRANULARITY*left[1])
             self.local_potential[2, 1] = self.get_potential_at_square(point)
             self.points[2, 1] = point
-            if self.check_ahead(self.world.ball, point, forwards, back, right, left):
-                self.ball_next_square = True
 
             # corner inner 3x3
 
             point = (robot_pos[0]+POTENTIAL_GRANULARITY*robot_dir[0]+POTENTIAL_GRANULARITY*right[0],robot_pos[1]+POTENTIAL_GRANULARITY*robot_dir[1]+POTENTIAL_GRANULARITY*right[1])
             self.local_potential[1, 3] = self.get_potential_at_square(point)
             self.points[1, 3] = point
-            if self.check_ahead(self.world.ball, point, forwards, back, right, left):
-                self.ball_next_square = True
 
             point = (robot_pos[0]+POTENTIAL_GRANULARITY*robot_dir[0]+POTENTIAL_GRANULARITY*left[0],robot_pos[1]+POTENTIAL_GRANULARITY*robot_dir[1]+POTENTIAL_GRANULARITY*left[1])
             self.local_potential[1, 1] = self.get_potential_at_square(point)
             self.points[1, 1] = point
-            if self.check_ahead(self.world.ball, point, forwards, back, right, left):
-                self.ball_next_square = True
 
             point = (robot_pos[0]+POTENTIAL_GRANULARITY*back[0]+POTENTIAL_GRANULARITY*right[0],robot_pos[1]+POTENTIAL_GRANULARITY*back[1]+POTENTIAL_GRANULARITY*right[1])
             self.local_potential[3, 3] = self.get_potential_at_square(point)
             self.points[3, 3] = point
-            if self.check_ahead(self.world.ball, point, forwards, back, right, left):
-                self.ball_next_square = True
 
             point = (robot_pos[0]+POTENTIAL_GRANULARITY*back[0]+POTENTIAL_GRANULARITY*left[0],robot_pos[1]+POTENTIAL_GRANULARITY*back[1]+POTENTIAL_GRANULARITY*left[1])
             self.local_potential[3, 1] = self.get_potential_at_square(point)
             self.points[3, 1] = point
-            if self.check_ahead(self.world.ball, point, forwards, back, right, left):
-                self.ball_next_square = True
 
             # top and bottom
 

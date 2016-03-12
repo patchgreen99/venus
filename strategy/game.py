@@ -1,10 +1,7 @@
 import math
 import time
 
-import cv2
 import numpy as np
-
-
 
 ROBOT_SIZE = 20
 ROBOT_INFLUENCE_SIZE = 300
@@ -30,9 +27,13 @@ class Game:
         self.current_direction = None
         self.commands = commands
         self.moving = True
+        self.ready = 0
+        self.turn = 0
 
     def run(self):
 
+        angle, length = self.calculate_angle_length_ball()
+        self.commands.c(angle)
 
         # example state
         while True:
@@ -111,6 +112,9 @@ class Game:
             # 0 0 0 0 0 0 0
 
             # Constructor must always be this
+            self.current_point = (self.world.venus.position[0], self.world.venus.position[1])
+            if self.turn != 180:
+                self.current_direction = (self.world.venus.orientation[0], self.world.venus.orientation[1])
 
             potential = Potential(self.current_point, self.current_direction, self.world, ball_field, friend_field, enemy1_field, enemy2_field,
                                              free_up_pass_enemy1, free_up_pass_enemy2, free_up_goal_enemy1,
@@ -119,19 +123,23 @@ class Game:
 
             self.current_direction = potential.last_direction
             self.local_potential, self.points = potential.get_local_potential()
-            angle, length = self.calculate_angle_length_ball()
-            if potential.ball_next_square and self.world.grabber_open:
+            if self.world.venus.hasBallInRange.value and self.ready < 1:
+                angle, length = self.calculate_angle_length_ball()
+                self.ready += 1
                 self.commands.c(angle)
-            print self.local_potential[2][2]
-            if not self.world.grabber_open and self.world.venus.hasBallInRange.value:
-                print "Opening grabber"
+                self.turn = angle
                 self.commands.open_wide()
-            turn, self.current_point = self.move()
-            if potential.ball_next_square and self.world.grabber_open:
-                self.commands.g()
-                exit(0)
-            self.current_direction = rotate_vector(turn, self.current_direction[0], self.current_direction[1])
-            time.sleep(1)
+                self.current_direction = rotate_vector(angle, self.current_direction[0], self.current_direction[1]) # todo direction not right
+            else:
+                self.turn, self.current_point = self.move() #todo current_point not right
+                self.current_direction = rotate_vector(self.turn, self.current_direction[0], self.current_direction[1]) # todo direction not right
+
+                if self.grab_range() and self.ready > 0:
+                    #time.sleep(.1)
+                    self.commands.g()
+                    exit(0)
+
+            time.sleep(.7)
 
     def move(self):
         """Executes command to go to minimum potential and returns robot direction after the movement"""
@@ -159,20 +167,31 @@ class Game:
             self.commands.sharp_right()
             return RIGHT, self.points[2, 3]
         elif [3, 2] in indices or [4, 1] in indices or [4, 3] in indices:
-            self.commands.c(100)
+            self.commands.c(180)
+            return BOTTOM, self.points[2, 2]
             #self.commands.backward()
-            return TOP, self.points[3, 2]
+            #return TOP, self.points[3, 2]
         elif [3, 1] in indices or [3, 0] in indices:
-            self.commands.c(100)
+            self.commands.c(180)
+            return BOTTOM, self.points[2, 2]
             #self.commands.backward_left()
-            return RIGHT, self.points[3, 1]
+            #return RIGHT, self.points[3, 1]
         elif [3, 3] in indices or [3, 4] in indices:
-            self.commands.c(100)
+            self.commands.c(180)
+            return BOTTOM, self.points[2, 2]
             #self.commands.backward_right()
-            return LEFT, self.points[3, 3]
+            #return LEFT, self.points[3, 3]
 
     def calculate_angle_length_ball(self):
         return self.calculate_angle_length(np.array([self.world.ball[0], self.world.ball[1]]))
+
+    def grab_range(self):
+        refAngle = math.atan2(self.world.venus.orientation[1], self.world.venus.orientation[0])
+        ballAngle, ballLength = self.calculate_angle_length_ball()
+        if abs(ballLength) < 30 and abs(refAngle-ballLength) < 25:
+            return True
+        else:
+            return False
 
     def calculate_angle_length(self, pos):
 
