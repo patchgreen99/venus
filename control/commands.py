@@ -91,6 +91,9 @@ class Commands:
     def potential(self):
         self.game.run()
 
+    def flush(self):
+        self.protocol.flush()
+
     def test1(self):
         self.game.local_potential = np.array([[666, 100, 666, 100, 666],
                                               [666, 100, 0, 0, 666],

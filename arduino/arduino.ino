@@ -24,9 +24,9 @@
 #define RESP_ERROR_CHECKSUM 'C'
 #define RESP_ERROR_JOBS_EXCEEDED 'X'
 
-#define MAX_JOB_COUNT 10
+#define MAX_JOB_COUNT 20
 
-#define MAX_PARAMS 30
+#define MAX_PARAMS 20
 
 SerialCommand sc;
 SimpleTimer timer;
@@ -80,11 +80,12 @@ void setup() {
   sc.addCommand("V", moveForever);
   sc.addCommand("J", scheduleJob);
   sc.addCommand("P", schedulePause);
+  sc.addCommand("F", flushJobs);
   sc.addCommand("Z", stopSome);
   sc.addCommand("S", stopAll);
   sc.addCommand("I", areAllStopped);
   sc.addCommand("Y", isOneStopped);
-  sc.addCommand("T", transferByte);
+  //sc.addCommand("T", transferByte);
   sc.addCommand("H", handshake);
   sc.addCommand("A", queryBallSensor);
   sc.addDefaultHandler(unknown);
@@ -321,6 +322,17 @@ void schedulePause() {
   
   ++count;
   tail = (tail + 1) % MAX_JOB_COUNT;
+}
+
+void flushJobs() {
+  if (ignore()) {
+    return;
+  }
+  
+  if (count > 1) {
+    count = 1;
+    tail = (head + 1) % MAX_JOB_COUNT;
+  }
 }
 
 void stopSome() {

@@ -23,6 +23,9 @@ class RobotProtocol:
     def schedule_pause(self, time):
         self.write('P', [time])
 
+    def flush(self):
+        self.write('F')
+
     def block_until_stop(self, motor=None):
         if motor:
             self.write('Y', [motor], error_check=False)
@@ -52,7 +55,7 @@ class RobotProtocol:
             params = []
         if error_check:
             tokens += [self.seq_no, sum(abs(x) for x in params)]
-            self.seq_no = (self.seq_no + 1) % 2
+            self.seq_no = (self.seq_no + 1) % 10
         if params:
             tokens += params
         message = ' '.join(str(t) for t in tokens)
