@@ -164,8 +164,8 @@ class StrategyTools:
             return False
 
     def ballwithfriend(self): # trigger on isballinrange
-        x2,y2 = self.world.friend.position
         x1,y1 = self.world.venus.position
+        x2,y2 = self.world.friend.position
         x3,y3 = self.world.enemy1.position
         x4,y4 = self.world.enemy2.position
 
@@ -183,7 +183,7 @@ class StrategyTools:
             # at this point we are sure one of the enemy robots is between venus and friend
             # so it's mainly the position of another enemy robot that might affect us
 
-            # find out which robot is on the way for us to pass todo: this is not a nice way to do it, also it (isSafeKick function) might not even work...
+            # find out which robot is on the way for us to pass todo: this is not a nice way to do it, (isSafeKick function could return number of enemy as well)...
             robot_not_middle = self.world.enemy1
             if self.isSafeKick((x2,y2),(x1,y1),[(x3, y3)]):
                 robot_not_middle = self.world.enemy2
@@ -195,15 +195,61 @@ class StrategyTools:
                 pass
                 # free_up_pass_enemy2
                 # free_up_goal_enemy1
+
+                # need to import game
+                # free_up_pass_enemy2 = self.game.finite_axial_outside(self.world.enemy2.position, self.world.friend.position, 1, 10000)
+                # free_up_goal_enemy1 = self.game.finite_axial_outside(self.world.enemy1.position, (self.world.their_goalX, self.world.their_goalmeanY), 1, 10000)
+                # then catch_ball and score!
             else:
                 pass
                 # free_up_pass_enemy1
                 # free_up_goal_enemy2
 
+                # free_up_pass_enemy1 = self.game.finite_axial_outside(self.world.enemy1.position, self.world.friend.position, 1, 10000)
+                # free_up_goal_enemy2 = self.game.finite_axial_outside(self.world.enemy2.position, (self.world.their_goalX, self.world.their_goalmeanY), 1, 10000)
+                # then catch_ball and score!
+
+            # todo: what if we can't free up goal? e.g. enemy robot is there... what if enemy robot blocks the goal too well?
+            # we should have a strategy how to attract enemy robot out of the goal, and then attack quickly?
+            # or just turn and kick very quickly such that their vision doesnt recongnize where our orientation verctor is pointing
+
             print('move to pass position')
 
     def get_pass_goal_position(self):
         pass
+
+    def penalty_attack(self):
+        x1,y1 = self.world.venus.position
+        x3,y3 = self.world.enemy1.position
+        x4,y4 = self.world.enemy2.position
+
+        robotposlist = [(x3,y3),
+                        (x4,y4)]
+
+        # todo: can we determine which enemy robot is blocking the goal? maybe pass it as argument?
+
+        goalx = self.world.their_goalX
+        highy = self.world.their_goalhighY
+        lowy = self.world.their_goallowY
+
+        i = (highy + lowy)/2
+        while i < highy:
+            if self.isSafeKick((x1,y1),(goalx,i),robotposlist ):
+                # grab_ball then turn and kick towards the right spot at the goal
+                return
+            i = i + 1
+        i = (highy + lowy)/2
+        while i > lowy:
+            if self.isSafeKick((x1,y1),(goalx,i),robotposlist):
+                # grab_ball then turn and kick towards the right spot at the goal
+                return
+            i = i - 1
+        return
+
+    def penalty_defend(self, enemy_num):
+        # pass number of the enemy that attacks, 1 - enemy1 or 2 - enemy2
+        self.commands.block_goal(enemy_num)
+        return
 
     def main(self):
         venus = self.world.venus
