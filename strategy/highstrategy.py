@@ -172,7 +172,7 @@ class StrategyTools:
         robotposlist = [(x3,y3),
                         (x4,y4)]
 
-        if self.isSafeKick((x2,y2),(x1,y1,robotposlist)) and self.world.friend.hasBallInRange:
+        if self.isSafeKick((x2,y2),(x1,y1),robotposlist) and self.world.friend.hasBallInRange:
             #recievepass
             print('receive pass')
         else:
@@ -185,10 +185,10 @@ class StrategyTools:
 
             # find out which robot is on the way for us to pass todo: this is not a nice way to do it, also it (isSafeKick function) might not even work...
             robot_not_middle = self.world.enemy1
-            if self.isSafeKick((x2,y2),(x1,y1,[(x3, y3)])):
+            if self.isSafeKick((x2,y2),(x1,y1),[(x3, y3)]):
                 robot_not_middle = self.world.enemy2
 
-            elif self.isSafeKick((x2,y2),(x1,y1,[(x4, y4)])):
+            elif self.isSafeKick((x2,y2),(x1,y1),[(x4, y4)]):
                 robot_not_middle = self.world.enemy1
 
             if robot_not_middle == self.world.enemy1:
