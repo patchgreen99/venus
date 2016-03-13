@@ -69,14 +69,14 @@ class Game:
                 # ON
                 #####################################
 
-                ball_field = radial(self.world.ball, 1, -10000)
+                ball_field = radial(self.world.ball, 1, -5)
 
                 friend_field = solid_field(self.world.friend.position, 2, 0, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
                 enemy1_field = solid_field(self.world.enemy1.position, 2, 0, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
                 enemy2_field = solid_field(self.world.enemy2.position, 2, 0, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
 
-                advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), float('inf'), 0, 0)
-                catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), float('inf'), 0, 0)
+                advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
+                catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
 
                 # OFF
                 #####################################
@@ -90,12 +90,13 @@ class Game:
                 block_goal_enemy1 = finite_axial_inside(self.world.enemy1.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, 0)
                 block_goal_enemy2 = finite_axial_inside(self.world.enemy2.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, 0)
 
-                bad_minima_goal = infinite_axial(self.world.venus.position, (self.world.their_goalX, self.world.their_goalmeanY), float('inf'), 0, 0)
-                bad_minima_pass = infinite_axial(self.world.venus.position, self.world.friend.position, float('inf'), 0, 0)
+                bad_minima_goal = infinite_axial(self.world.venus.position, (self.world.their_goalX, self.world.their_goalmeanY), 2000, 0, 0)
+                bad_minima_pass = infinite_axial(self.world.venus.position, self.world.friend.position, 2000, 0, 0)
 
                 # BUILD FIELD AND NEXT POSITION AND DIRECTIONS
                 ####################################
                 # todo too reliant on vision, must pick what to use for look ahead
+
                 self.current_point = (self.world.venus.position[0], self.world.venus.position[1])
                 if self.turn != 180:
                     self.current_direction = (self.world.venus.orientation[0], self.world.venus.orientation[1])
@@ -122,9 +123,6 @@ class Game:
                     #self.commands.open_wide() #todo comms must be sent in sync
                     self.current_direction = rotate_vector(angle, self.current_direction[0], self.current_direction[1])
                 else:
-                    self.turn, self.current_point = self.move_attack()
-                    self.current_direction = rotate_vector(self.turn, self.current_direction[0], self.current_direction[1])
-
                     if self.grab_range() and self.ready > 0:
                         #self.commands.g() #todo comms must be sent in sync
                         self.ready = 0
@@ -132,9 +130,12 @@ class Game:
                         print("It thinks it has the ball")
                         return
 
+                    self.turn, self.current_point = self.move_attack()
+                    self.current_direction = rotate_vector(self.turn, self.current_direction[0], self.current_direction[1])
+
                 ########################################
 
-                time.sleep(.7)
+                time.sleep(1)
 
                 ###########################################################################################################################################
 
@@ -147,14 +148,14 @@ class Game:
                 enemy1_field = solid_field(self.world.enemy1.position, 2, 100000, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
                 enemy2_field = solid_field(self.world.enemy2.position, 2, 100000, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
 
-                advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), float('inf'), 0, 0)
-                catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), float('inf'), 0, 0)
+                advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
+                catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
 
                 free_up_pass_enemy1 = finite_axial_outside(self.world.enemy1.position, self.world.friend.position, 1, 10000)
                 free_up_goal_enemy2 = finite_axial_outside(self.world.enemy2.position, (self.world.their_goalX, self.world.their_goalmeanY), 1, 10000)
 
-                bad_minima_goal = infinite_axial(self.world.venus.position, (self.world.their_goalX, self.world.their_goalmeanY), float('inf'), 0, 0)
-                bad_minima_pass = infinite_axial(self.world.venus.position, self.world.friend.position, float('inf'), 0, 0)
+                bad_minima_goal = infinite_axial(self.world.venus.position, (self.world.their_goalX, self.world.their_goalmeanY), 2000, 0, 0)
+                bad_minima_pass = infinite_axial(self.world.venus.position, self.world.friend.position, 2000, 0, 0)
 
                 # OFF
                 #####################################
@@ -201,14 +202,14 @@ class Game:
                 enemy1_field = solid_field(self.world.enemy1.position, 2, 100000, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
                 enemy2_field = solid_field(self.world.enemy2.position, 2, 100000, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
 
-                advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), float('inf'), 0, 0)
-                catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), float('inf'), 0, 0)
+                advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
+                catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
 
                 free_up_pass_enemy2 = finite_axial_outside(self.world.enemy1.position, self.world.friend.position, 1, 10000)
                 free_up_goal_enemy1 = finite_axial_outside(self.world.enemy2.position, (self.world.their_goalX, self.world.their_goalmeanY), 1, 10000)
 
-                bad_minima_goal = infinite_axial(self.world.venus.position, (self.world.their_goalX, self.world.their_goalmeanY), float('inf'), 0, 0)
-                bad_minima_pass = infinite_axial(self.world.venus.position, self.world.friend.position, float('inf'), 0, 0)
+                bad_minima_goal = infinite_axial(self.world.venus.position, (self.world.their_goalX, self.world.their_goalmeanY), 2000, 0, 0)
+                bad_minima_pass = infinite_axial(self.world.venus.position, self.world.friend.position, 2000, 0, 0)
 
                 # OFF
                 #####################################
@@ -255,14 +256,14 @@ class Game:
                 enemy1_field = solid_field(self.world.enemy1.position, 2, 100000, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
                 enemy2_field = solid_field(self.world.enemy2.position, 2, 100000, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
 
-                advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), float('inf'), 0, 0)
-                catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), float('inf'), 0, 0)
+                advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
+                catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
 
                 free_up_goal_enemy2 = finite_axial_outside(self.world.enemy1.position, (self.world.their_goalX, self.world.their_goalmeanY), 1, 10000)
                 free_up_goal_enemy1 = finite_axial_outside(self.world.enemy2.position, (self.world.their_goalX, self.world.their_goalmeanY), 1, 10000)
 
-                bad_minima_goal = infinite_axial(self.world.venus.position, (self.world.their_goalX, self.world.their_goalmeanY), float('inf'), 0, 0)
-                bad_minima_pass = infinite_axial(self.world.venus.position, self.world.friend.position, float('inf'), 0, 0)
+                bad_minima_goal = infinite_axial(self.world.venus.position, (self.world.their_goalX, self.world.their_goalmeanY), 2000, 0, 0)
+                bad_minima_pass = infinite_axial(self.world.venus.position, self.world.friend.position, 2000, 0, 0)
 
                 # OFF
                 #####################################
@@ -309,14 +310,14 @@ class Game:
                 enemy1_field = solid_field(self.world.enemy1.position, 2, 100000, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
                 enemy2_field = solid_field(self.world.enemy2.position, 2, 100000, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
 
-                advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), float('inf'), 0, 0)
-                catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), float('inf'), 0, 0)
+                advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
+                catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
 
                 free_up_pass_enemy1 = finite_axial_outside(self.world.enemy2.position, self.world.friend.position, 1, 10000)
                 free_up_pass_enemy2 = finite_axial_outside(self.world.enemy1.position, self.world.friend.position, 1, 10000)
 
-                bad_minima_goal = infinite_axial(self.world.venus.position, (self.world.their_goalX, self.world.their_goalmeanY), float('inf'), 0, 0)
-                bad_minima_pass = infinite_axial(self.world.venus.position, self.world.friend.position, float('inf'), 0, 0)
+                bad_minima_goal = infinite_axial(self.world.venus.position, (self.world.their_goalX, self.world.their_goalmeanY), 2000, 0, 0)
+                bad_minima_pass = infinite_axial(self.world.venus.position, self.world.friend.position, 2000, 0, 0)
 
                 # OFF
                 #####################################
@@ -362,8 +363,8 @@ class Game:
                 enemy1_field = solid_field(self.world.enemy1.position, 2, 100000, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
                 enemy2_field = solid_field(self.world.enemy2.position, 2, 100000, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
 
-                advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), float('inf'), 0, 0)
-                catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), float('inf'), 0, 0)
+                advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
+                catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
 
                 block_goal_enemy1 = finite_axial_inside(self.world.enemy1.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, -10000)
 
@@ -378,8 +379,8 @@ class Game:
                 block_pass = finite_axial_inside(self.world.enemy1.position, self.world.enemy2.position, 1, -10000)
                 block_goal_enemy2 = finite_axial_inside(self.world.enemy2.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, -10000)
 
-                bad_minima_goal = infinite_axial(self.world.venus.position, (self.world.their_goalX, self.world.their_goalmeanY), float('inf'), 0, 0)
-                bad_minima_pass = infinite_axial(self.world.venus.position, self.world.friend.position, float('inf'), 0, 0)
+                bad_minima_goal = infinite_axial(self.world.venus.position, (self.world.their_goalX, self.world.their_goalmeanY), 2000, 0, 0)
+                bad_minima_pass = infinite_axial(self.world.venus.position, self.world.friend.position, 2000, 0, 0)
 
                 # BUILD FIELD AND NEXT POSITION AND DIRECTIONS
                 ####################################
@@ -415,8 +416,8 @@ class Game:
                 enemy1_field = solid_field(self.world.enemy1.position, 2, 100000, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
                 enemy2_field = solid_field(self.world.enemy2.position, 2, 100000, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
 
-                advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), float('inf'), 0, 0)
-                catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), float('inf'), 0, 0)
+                advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
+                catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
 
                 block_goal_enemy2 = finite_axial_inside(self.world.enemy1.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, -10000)
 
@@ -431,8 +432,8 @@ class Game:
                 block_pass = finite_axial_inside(self.world.enemy1.position, self.world.enemy2.position, 1, -10000)
                 block_goal_enemy1 = finite_axial_inside(self.world.enemy2.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, -10000)
 
-                bad_minima_goal = infinite_axial(self.world.venus.position, (self.world.their_goalX, self.world.their_goalmeanY), float('inf'), 0, 0)
-                bad_minima_pass = infinite_axial(self.world.venus.position, self.world.friend.position, float('inf'), 0, 0)
+                bad_minima_goal = infinite_axial(self.world.venus.position, (self.world.their_goalX, self.world.their_goalmeanY), 2000, 0, 0)
+                bad_minima_pass = infinite_axial(self.world.venus.position, self.world.friend.position, 2000, 0, 0)
 
                 # BUILD FIELD AND NEXT POSITION AND DIRECTIONS
                 ####################################
@@ -468,8 +469,8 @@ class Game:
                 enemy1_field = solid_field(self.world.enemy1.position, 2, 100000, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
                 enemy2_field = solid_field(self.world.enemy2.position, 2, 100000, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
 
-                advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), float('inf'), 0, 0)
-                catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), float('inf'), 0, 0)
+                advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
+                catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
 
                 block_pass = finite_axial_inside(self.world.enemy1.position, self.world.enemy2.position, 1, -10000)
 
@@ -484,8 +485,8 @@ class Game:
                 block_goal_enemy2 = finite_axial_inside(self.world.enemy1.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, -10000)
                 block_goal_enemy1 = finite_axial_inside(self.world.enemy2.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, -10000)
 
-                bad_minima_goal = infinite_axial(self.world.venus.position, (self.world.their_goalX, self.world.their_goalmeanY), float('inf'), 0, 0)
-                bad_minima_pass = infinite_axial(self.world.venus.position, self.world.friend.position, float('inf'), 0, 0)
+                bad_minima_goal = infinite_axial(self.world.venus.position, (self.world.their_goalX, self.world.their_goalmeanY), 2000, 0, 0)
+                bad_minima_pass = infinite_axial(self.world.venus.position, self.world.friend.position, 2000, 0, 0)
 
                 # BUILD FIELD AND NEXT POSITION AND DIRECTIONS
                 ####################################
@@ -507,7 +508,7 @@ class Game:
 
                 ########################################
 
-                time.sleep(.7)
+                time.sleep(.6)
 
                 ###########################################################################################################################################
 
@@ -628,7 +629,7 @@ class Game:
     def grab_range(self):
         refAngle = math.atan2(self.world.venus.orientation[1], self.world.venus.orientation[0])
         ballAngle, ballLength = self.calculate_angle_length_ball()
-        if abs(ballLength) < 25 and abs(refAngle-ballLength) < 25:
+        if abs(ballLength) < 25 and abs(refAngle-ballLength) < 15:
             return True
         else:
             return False
@@ -705,13 +706,13 @@ class infinite_axial:
         if rotated_start[0] < rotated_end[0]:
             distance_to = abs(rotated_point[1] - rotated_start[1])
             if rotated_start[0] < rotated_point[0] < rotated_end[0] and distance_to < self.influence_range:
-                return self.constant*math.pow(math.log(900/distance_to, math.e), self.gradient)
+                return self.constant/math.pow(distance_to, self.gradient)
             else:
                 return 0
         else:
             distance_to = abs(rotated_point[1] - rotated_start[1])
             if rotated_end[0] < rotated_point[0] < rotated_start[0] and distance_to < self.influence_range:
-                return self.constant*math.pow(math.log(900/distance_to, math.e), self.gradient)
+                return self.constant/math.pow(distance_to, self.gradient)
             else:
                 return 0
 
@@ -750,7 +751,7 @@ class finite_axial_inside:
             b = right_ref - rotated_point[0]
             a = left_ref - rotated_point[0]
             distance_to = abs(rotated_point[1] - start_field[1])
-            return self.constant*math.pow(math.log((b + math.sqrt(b**2 + distance_to**2))/(a + math.sqrt(a**2 + distance_to**2)), math.e), self.gradient)
+            return self.constant*math.log((b + math.sqrt(b**2 + distance_to**2))/(a + math.sqrt(a**2 + distance_to**2)), math.e)
         elif right_ref <= rotated_point[0]: # outside
             return self.constant/math.pow(math.sqrt((x-right_ref)**2 + (y-right_ref)**2), self.gradient)
         elif left_ref >= rotated_point[0]: # outside
@@ -793,11 +794,11 @@ class finite_axial_outside:
             b = right_ref - rotated_point[0]
             a = left_ref - rotated_point[0]
             distance_to = abs(rotated_point[1] - start_field[1])
-            return self.constant*math.pow(math.log((b + math.sqrt(b**2 + distance_to**2))/(a + math.sqrt(a**2 + distance_to**2)), math.e), self.gradient)
+            return self.constant*math.log((b + math.sqrt(b**2 + distance_to**2))/(a + math.sqrt(a**2 + distance_to**2)), math.e) #todo no gradient
         elif right_ref <= rotated_point[0]: # outside
-            return self.constant/math.pow(math.sqrt((x-right_ref)**2 + (y-right_ref)**2), self.gradient)
+            return self.constant/((x-right_ref)**2 + (y-right_ref)**2)
         elif left_ref >= rotated_point[0]: # outside
-            return self.constant/math.pow(math.sqrt((x-left_ref)**2 + (y-left_ref)**2), self.gradient)
+            return self.constant/((x-left_ref)**2 + (y-left_ref)**2)
 
 # solid - modeled as a circle, from center 'forbidden' is unreachable and outside the influence area is unreachable
 # 0 2 3 3 3 2 0
@@ -867,7 +868,7 @@ class step_field_inside:
         if left_ref < rotated_point[0] < right_ref:
             if dot_product(step_direction, (x - self.start_x, y - self.start_y)) > 0: # in direction step_direction
                 if distance_to < self.influence_range:
-                    return self.constant*math.pow(math.log(900/distance_to, math.e), self.gradient)
+                    return self.constant/math.pow(distance_to, self.gradient)
                 else:
                     return 0
             else:
@@ -875,8 +876,7 @@ class step_field_inside:
                     return -9999*self.constant
                 else:
                     return 9999*self.constant
-        else:
-            return 0
+
 
 # step - an infinite line drawn through the point in the first argument in the direction of the vector in the
 # second argument. The clockwise segment to the vector is cut off where as the anticlockwise segment acts like a
@@ -907,7 +907,8 @@ class step_field:
 
         if distance_to < self.influence_range:
             if dot_product(step_direction, (x - self.start_x, y - self.start_y)) > 0: # in direction step_direction
-                return self.constant*math.pow(math.log(900/distance_to, math.e), self.gradient)
+                # return self.constant*math.log(self.influence_range/math.pow(distance_to, self.gradient), math.e)
+                return self.constant/math.pow(distance_to, self.gradient)
             else:
                 if self.constant <= 0:
                     return -9999*self.constant

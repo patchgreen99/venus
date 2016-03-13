@@ -77,7 +77,7 @@ class Vision:
             target.close()
 
             self.min_color_area = {
-                    'red': 0.0,
+                    'red': 1000.0,
                     'blue': 1000.0,
                     'yellow': 1000.0,
                     'pink': 2000.0,
@@ -110,7 +110,7 @@ class Vision:
             target.close()
 
             self.min_color_area = {
-                    'red': 0.0,
+                    'red': 1000.0,
                     'blue': 1000.0,
                     'yellow': 1000.0,
                     'pink': 2000.0,
@@ -371,19 +371,22 @@ class Vision:
                 for positionIndex in range(0,len(robots_pos)):
                     position = robots_pos[positionIndex]
 
-                    #if positionIndex == 0 and self.world.venus.hasBallInRange.value:
-                        #flag = True
+                    if positionIndex == 0 and self.world.venus.hasBallInRange.value:
+                        self.world.ball[0] = self.world.ball[0]
+                        self.world.ball[1] = self.world.ball[1]
+                        '''
+                        flag = True
                         # 'closest' is the robot who might have the ball, let's check that
-                        #distance_between_points = math.sqrt((position[0] - self.world.venus.orientation[0])**2 + (position[1] -
-                        #                                     self.world.venus.orientation[1])**2)
+                        distance_between_points = math.sqrt((position[0] - self.world.venus.orientation[0])**2 + (position[1] -
+                                                            self.world.venus.orientation[1])**2)
                         # we want point that is ten pixels away from the centre towards the orientation vector endpoint
-                        #ratio = 2.0/distance_between_points
+                        ratio = 2.0/distance_between_points
                         # then point's coordinates will be
-                        #new_x = int(position[0] + 20 * (1-ratio) * self.world.venus.orientation[0])
-                        #new_y = int(position[1] + 20 * (1-ratio) * self.world.venus.orientation[1])
-                        #self.world.ball[0] = new_x
-                        #self.world.ball[1] = new_y
-
+                        new_x = int(position[0] + 20 * (1-ratio) * self.world.venus.orientation[0])
+                        new_y = int(position[1] + 20 * (1-ratio) * self.world.venus.orientation[1])
+                        self.world.ball[0] = new_x
+                        self.world.ball[1] = new_y
+                    '''
                     if positionIndex == 1 and self.world.friend.hasBallInRange.value :
                         flag = True
                         # 'closest' is the robot who might have the ball, let's check that
