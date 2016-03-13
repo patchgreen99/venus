@@ -877,6 +877,17 @@ class step_field_inside:
                 else:
                     return 9999*self.constant
 
+        elif right_ref <= rotated_point[0]: # outside
+            if distance_to < self.influence_range:
+                return self.constant/math.pow(math.sqrt((x-right_ref)**2 + (y-right_ref)**2), self.gradient)
+            else:
+                return 0
+
+        elif left_ref >= rotated_point[0]: # outside
+            if distance_to < self.influence_range:
+                return self.constant/math.pow(math.sqrt((x-left_ref)**2 + (y-left_ref)**2), self.gradient)
+            else:
+                return 0
 
 # step - an infinite line drawn through the point in the first argument in the direction of the vector in the
 # second argument. The clockwise segment to the vector is cut off where as the anticlockwise segment acts like a

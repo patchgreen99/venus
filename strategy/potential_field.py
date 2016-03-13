@@ -7,8 +7,8 @@ PITCH_ROWS = 480 #pixels
 PITCH_COLS = 640 #pixels
 
 POTENTIAL_GRANULARITY = 20*CENTIMETERS_TO_PIXELS #pixels
-WALL_INFLUENCE = 60 # pixels
-PENALTY_BOX_INFLUENCE = 60 # pixels
+WALL_INFLUENCE = 30 # pixels
+PENALTY_BOX_INFLUENCE = 30 # pixels
 
 
 DEFENDING_LEFT_TOP = [(117, 114), (190, 144)]
@@ -43,10 +43,10 @@ class Potential:
             else:
                 self.last_direction = last_direction
 
-            self.top_wall = step_field_inside(PITCH_TOP_LEFT[self.world.room_num], PITCH_TOP_RIGHT[self.world.room_num], (PITCH_TOP_RIGHT[self.world.room_num][0]-PITCH_TOP_LEFT[self.world.room_num][0], PITCH_TOP_RIGHT[self.world.room_num][1]-PITCH_TOP_LEFT[self.world.room_num][1]), WALL_INFLUENCE, 1, 400) # best with 1 100
-            self.bot_wall = step_field_inside(PITCH_BOT_LEFT[self.world.room_num], PITCH_BOT_RIGHT[self.world.room_num], (PITCH_BOT_LEFT[self.world.room_num][0]-PITCH_BOT_RIGHT[self.world.room_num][0], PITCH_BOT_LEFT[self.world.room_num][1]-PITCH_BOT_RIGHT[self.world.room_num][1]), WALL_INFLUENCE, 1, 400)
-            self.right_wall = step_field_inside(PITCH_TOP_RIGHT[self.world.room_num], PITCH_BOT_RIGHT[self.world.room_num], (PITCH_BOT_RIGHT[self.world.room_num][0] - PITCH_TOP_RIGHT[self.world.room_num][0], PITCH_BOT_RIGHT[self.world.room_num][1] - PITCH_TOP_RIGHT[self.world.room_num][1]), WALL_INFLUENCE, 1, 400)
-            self.left_wall = step_field_inside(PITCH_TOP_LEFT[self.world.room_num], PITCH_BOT_LEFT[self.world.room_num], (PITCH_TOP_LEFT[self.world.room_num][0] - PITCH_BOT_LEFT[self.world.room_num][0], PITCH_TOP_LEFT[self.world.room_num][1] - PITCH_BOT_LEFT[self.world.room_num][1]), WALL_INFLUENCE, 1, 400)
+            self.top_wall = step_field_inside(PITCH_TOP_LEFT[self.world.room_num], PITCH_TOP_RIGHT[self.world.room_num], (PITCH_TOP_RIGHT[self.world.room_num][0]-PITCH_TOP_LEFT[self.world.room_num][0], PITCH_TOP_RIGHT[self.world.room_num][1]-PITCH_TOP_LEFT[self.world.room_num][1]), WALL_INFLUENCE, 2, 500) # best with 1 100
+            self.bot_wall = step_field_inside(PITCH_BOT_LEFT[self.world.room_num], PITCH_BOT_RIGHT[self.world.room_num], (PITCH_BOT_LEFT[self.world.room_num][0]-PITCH_BOT_RIGHT[self.world.room_num][0], PITCH_BOT_LEFT[self.world.room_num][1]-PITCH_BOT_RIGHT[self.world.room_num][1]), WALL_INFLUENCE, 2, 500)
+            self.right_wall = step_field_inside(PITCH_TOP_RIGHT[self.world.room_num], PITCH_BOT_RIGHT[self.world.room_num], (PITCH_BOT_RIGHT[self.world.room_num][0] - PITCH_TOP_RIGHT[self.world.room_num][0], PITCH_BOT_RIGHT[self.world.room_num][1] - PITCH_TOP_RIGHT[self.world.room_num][1]), WALL_INFLUENCE, 2, 500)
+            self.left_wall = step_field_inside(PITCH_TOP_LEFT[self.world.room_num], PITCH_BOT_LEFT[self.world.room_num], (PITCH_TOP_LEFT[self.world.room_num][0] - PITCH_BOT_LEFT[self.world.room_num][0], PITCH_TOP_LEFT[self.world.room_num][1] - PITCH_BOT_LEFT[self.world.room_num][1]), WALL_INFLUENCE, 2, 500)
 
             # use 1, 100
             if world.we_have_computer_goal and world.room_num == 1 or not world.we_have_computer_goal and world.room_num == 0: # there goal is on the right
@@ -190,6 +190,7 @@ class Potential:
         def get_potential_at_square(self, (x, y)):
             potential_sum = 0
             for potential in self.potential_list:
+                print str(potential) + " " + str(potential.field_at(x, y))
                 potential_sum = potential_sum + potential.field_at(x, y)
             return potential_sum
 
@@ -442,6 +443,17 @@ class step_field_inside:
                 else:
                     return 9999*self.constant
 
+        elif right_ref <= rotated_point[0]: # outside
+            if distance_to < self.influence_range:
+                return self.constant/math.pow(math.sqrt((x-right_ref)**2 + (y-right_ref)**2), self.gradient)
+            else:
+                return 0
+
+        elif left_ref >= rotated_point[0]: # outside
+            if distance_to < self.influence_range:
+                return self.constant/math.pow(math.sqrt((x-left_ref)**2 + (y-left_ref)**2), self.gradient)
+            else:
+                return 0
 
 # step - an infinite line drawn through the point in the first argument in the direction of the vector in the
 # second argument. The clockwise segment to the vector is cut off where as the anticlockwise segment acts like a
