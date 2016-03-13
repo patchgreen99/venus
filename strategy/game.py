@@ -553,74 +553,74 @@ class Game:
 
     ############################################################################################################################################################
 
-    def move_attack(self):
+    def move_attack(self, grab=None):
         """Executes command to go to minimum potential and returns robot direction after the movement"""
         x, y = np.where(self.local_potential == self.local_potential.min())
         indices = np.array([x, y]).T.tolist()
         if [2, 2] in indices:
             return TOP, self.points[2, 2]
         elif [1, 2] in indices or [0, 1] in indices or [0, 3] in indices:
-            self.commands.forward()
+            self.commands.forward(grab)
             return TOP, self.points[1, 2]
         elif [1, 1] in indices or [1, 0] in indices:
-            self.commands.forward_left()
+            self.commands.forward_left(grab)
             return LEFT, self.points[1, 1]
         elif [1, 3] in indices or [1, 4] in indices:
-            self.commands.forward_right()
+            self.commands.forward_right(grab)
             return RIGHT, self.points[1, 3]
         elif [2, 1] in indices:
             if self.moving:
                 self.commands.pause()
-            self.commands.sharp_left()
+            self.commands.sharp_left(grab)
             return LEFT, self.points[2, 1]
         elif [2, 3] in indices:
             if self.moving:
                 self.commands.pause()
-            self.commands.sharp_right()
+            self.commands.sharp_right(grab)
             return RIGHT, self.points[2, 3]
         elif [3, 2] in indices or [4, 1] in indices or [4, 3] in indices:
-            self.commands.turn(180)
+            self.commands.turn(180, grab)
             return BOTTOM, self.points[2, 2]
         elif [3, 1] in indices or [3, 0] in indices:
-            self.commands.turn(180)
+            self.commands.turn(180, grab)
             return BOTTOM, self.points[2, 2]
         elif [3, 3] in indices or [3, 4] in indices:
-            self.commands.turn(180)
+            self.commands.turn(180, grab)
             return BOTTOM, self.points[2, 2]
 
-    def move_defense(self):
+    def move_defense(self, grab=None):
         """Executes command to go to minimum potential and returns robot direction after the movement"""
         x, y = np.where(self.local_potential == self.local_potential.min())
         indices = np.array([x, y]).T.tolist()
         if [2, 2] in indices:
             return TOP, self.points[2, 2]
         elif [1, 2] in indices or [0, 1] in indices or [0, 3] in indices:
-            self.commands.forward()
+            self.commands.forward(grab)
             return TOP, self.points[1, 2]
         elif [1, 1] in indices or [1, 0] in indices:
-            self.commands.forward_left()
+            self.commands.forward_left(grab)
             return LEFT, self.points[1, 1]
         elif [1, 3] in indices or [1, 4] in indices:
-            self.commands.forward_right()
+            self.commands.forward_right(grab)
             return RIGHT, self.points[1, 3]
         elif [2, 1] in indices:
             if self.moving:
                 self.commands.pause()
-            self.commands.sharp_left()
+            self.commands.sharp_left(grab)
             return LEFT, self.points[2, 1]
         elif [2, 3] in indices:
             if self.moving:
                 self.commands.pause()
-            self.commands.sharp_right()
+            self.commands.sharp_right(grab)
             return RIGHT, self.points[2, 3]
         elif [3, 2] in indices or [4, 1] in indices or [4, 3] in indices:
-            self.commands.backward()
+            self.commands.backward(grab)
             return TOP, self.points[3, 2]
         elif [3, 1] in indices or [3, 0] in indices:
-            self.commands.backward_left()
+            self.commands.backward_left(grab)
             return RIGHT, self.points[3, 1]
         elif [3, 3] in indices or [3, 4] in indices:
-            self.commands.backward_right()
+            self.commands.backward_right(grab)
             return LEFT, self.points[3, 3]
 
     def calculate_angle_length_ball(self):

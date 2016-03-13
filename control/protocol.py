@@ -16,8 +16,8 @@ class RobotProtocol:
         if wait:
             self.block_until_stop()
 
-    def schedule(self, target, master, motor_powers):
-        params = [target, master] + list(sum(motor_powers, ()))
+    def schedule(self, target, master, motor_powers, grab):
+        params = [target, master, grab] + list(sum(motor_powers, ()))
         self.write('J', params)
 
     def schedule_pause(self, time):

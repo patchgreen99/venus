@@ -6,7 +6,7 @@
 
 #define ROTARY_SLAVE_ADDRESS 5
 #define ROTARY_COUNT 5
-#define ROTARY_REQUEST_INTERVAL 30
+#define ROTARY_REQUEST_INTERVAL 100
 
 #define RECEIVER_SLAVE_ADDRESS 69
 #define BALL_SENSOR_ANALOG_PORT 0
@@ -24,9 +24,10 @@
 #define RESP_ERROR_CHECKSUM 'C'
 #define RESP_ERROR_JOBS_EXCEEDED 'X'
 
-#define MAX_JOB_COUNT 30
+#define MAX_JOB_COUNT 20
+#define JOB_MOTOR_COUNT 3
 
-#define MAX_PARAMS 20
+#define MAX_PARAMS 15
 
 SerialCommand sc;
 SimpleTimer timer;
@@ -42,8 +43,7 @@ timer_callback stopMotorCallbacks[] = {
   stopMotor1,
   stopMotor2,
   stopMotor3,
-  stopMotor4,
-  stopMotor5
+  stopMotor4
 };
 
 /* Current positions and target positions when moving motors
@@ -59,7 +59,8 @@ struct Job {
   bool pause;
   int target;
   int master;
-  int powers[ROTARY_COUNT];
+  int grab;
+  int powers[JOB_MOTOR_COUNT];
 };
 
 Job jobs[MAX_JOB_COUNT];
@@ -93,6 +94,19 @@ void setup() {
   timer.setInterval(ROTARY_REQUEST_INTERVAL, rotaryTimerCallback);
 }
 
+void done() {
+  Serial.print(RESP_DONE);
+  Serial.print(RESP_DONE);
+  Serial.print(RESP_DONE);
+  Serial.print(RESP_DONE);
+  Serial.print(RESP_DONE);
+  Serial.print(RESP_DONE);
+  Serial.print(RESP_DONE);
+  Serial.print(RESP_DONE);
+  Serial.print(RESP_DONE);
+  Serial.print(RESP_DONE);
+}
+
 void loop() {
   timer.run();
   sc.readSerial();
@@ -118,7 +132,6 @@ void stopMotor1() { stopMotor(1); }
 void stopMotor2() { stopMotor(2); }
 void stopMotor3() { stopMotor(3); }
 void stopMotor4() { stopMotor(4); }
-void stopMotor5() { stopMotor(5); }
 
 /* Callback that stops motors after they moved for some rotary units */
 void rotaryTimerCallback() {
@@ -133,7 +146,7 @@ void rotaryTimerCallback() {
     timer.setTimeout(jobs[next].target, setPauseFinished);
   }
   
-  for (int i = 0; i < ROTARY_COUNT; ++i) {
+  for (int i = 0; i < JOB_MOTOR_COUNT; ++i) {
     if (starting && jobs[next].powers[i]) {
       positions[i] = 0;
       runMotor(i, jobs[next].powers[i]);
@@ -149,6 +162,15 @@ void rotaryTimerCallback() {
       }
       timer.setTimeout(400, stopMotorCallbacks[i]);*/
     }
+  }
+  
+  if (starting && jobs[next].grab) {
+    if (jobs[next].grab > 0) {
+      runMotor(MOTOR_GRAB, 100);
+    } else {
+      runMotor(MOTOR_GRAB, -100);
+    }
+    timer.setTimeout(abs(jobs[next].grab), stopMotor4);
   }
   
   if (stopping) {
@@ -191,6 +213,7 @@ bool finished(int position, int targetPosition) {
 bool ignore() {  
   int seqNo = atoi(sc.next());
   if (seqNo == lastSeqNo) {
+    done();
     return true;
   }
   
@@ -208,7 +231,7 @@ bool ignore() {
     return true;
   }
   
-  Serial.print(RESP_DONE);
+  done();
   lastSeqNo = seqNo;
   return false;
 }
@@ -284,8 +307,9 @@ void scheduleJob() {
   jobs[tail].pause = false;
   jobs[tail].target = params[p++];
   jobs[tail].master = params[p++];
+  jobs[tail].grab = params[p++];
   
-  for (int i = 0; i < ROTARY_COUNT; ++i) {
+  for (int i = 0; i < JOB_MOTOR_COUNT; ++i) {
     jobs[tail].powers[i] = 0;
   }
   
@@ -316,7 +340,7 @@ void schedulePause() {
   jobs[tail].pause = true;
   jobs[tail].target = params[0];
   
-  for (int i = 0; i < ROTARY_COUNT; ++i) {
+  for (int i = 0; i < JOB_MOTOR_COUNT; ++i) {
     jobs[tail].powers[i] = 0;
   }
   
@@ -335,7 +359,7 @@ void flushJobs() {
   }
 }
 
-void stopSome() {
+/*void stopSome() {
   if (ignore()) {
     return;
   }
@@ -346,7 +370,7 @@ void stopSome() {
     
     stopMotor(motor);
   }
-}
+}*/
 
 void stopAll() {
   if (ignore()) {
@@ -365,7 +389,7 @@ void areAllStopped() {
     }
   }
   
-  Serial.print(RESP_DONE);
+  done();
 }
 
 void isOneStopped() {
@@ -375,10 +399,10 @@ void isOneStopped() {
     return;
   }
   
-  Serial.print(RESP_DONE);
+  done();
 }
 
-void transferByte() {
+/*void transferByte() {
   if (ignore()) {
     return;
   }
@@ -387,20 +411,20 @@ void transferByte() {
   Wire.beginTransmission(RECEIVER_SLAVE_ADDRESS);
   Wire.write(value);
   Wire.endTransmission();
-}
+}*/
 
 void handshake() {
   lastSeqNo = -1;
-  Serial.print(RESP_DONE);
+  done();
 }
 
-void queryBallSensor() {
+/*void queryBallSensor() {
   int value = analogRead(BALL_SENSOR_ANALOG_PORT);
   //Wire.requestFrom(BALL_SENSOR_SLAVE_ADDRESS, 1);
   //int value = Wire.read();
   bool hasBall = value > 230;
   Serial.print(hasBall ? RESP_DONE : RESP_NEGATIVE);
-}
+}*/
 
 void unknown() {
   Serial.print(RESP_ERROR_COMMAND_UNKNOWN);

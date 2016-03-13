@@ -63,8 +63,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string.h>
 
 
-#define SERIALCOMMANDBUFFER 45
-#define MAXSERIALCOMMANDS	12
+#define SERIALCOMMANDBUFFER 40
+#define MAXSERIALCOMMANDS	10
 #define MAXDELIMETER 2
 
 #define SERIALCOMMANDDEBUG 1
