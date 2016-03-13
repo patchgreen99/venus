@@ -33,16 +33,6 @@ class Potential:
             self.world = world
             self.ball_next_square = False
 
-            if last_square is None:
-                self.last_square = (self.world.venus.position[0], self.world.venus.position[1])
-            else:
-                self.last_square = last_square
-
-            if last_direction is None:
-                self.last_direction = (self.world.venus.orientation[0], self.world.venus.orientation[1])
-            else:
-                self.last_direction = last_direction
-
             self.top_wall = step_field_inside(PITCH_TOP_LEFT[self.world.room_num], PITCH_TOP_RIGHT[self.world.room_num], (PITCH_TOP_RIGHT[self.world.room_num][0]-PITCH_TOP_LEFT[self.world.room_num][0], PITCH_TOP_RIGHT[self.world.room_num][1]-PITCH_TOP_LEFT[self.world.room_num][1]), WALL_INFLUENCE, 2, 500) # best with 1 100
             self.bot_wall = step_field_inside(PITCH_BOT_LEFT[self.world.room_num], PITCH_BOT_RIGHT[self.world.room_num], (PITCH_BOT_LEFT[self.world.room_num][0]-PITCH_BOT_RIGHT[self.world.room_num][0], PITCH_BOT_LEFT[self.world.room_num][1]-PITCH_BOT_RIGHT[self.world.room_num][1]), WALL_INFLUENCE, 2, 500)
             self.right_wall = step_field_inside(PITCH_TOP_RIGHT[self.world.room_num], PITCH_BOT_RIGHT[self.world.room_num], (PITCH_BOT_RIGHT[self.world.room_num][0] - PITCH_TOP_RIGHT[self.world.room_num][0], PITCH_BOT_RIGHT[self.world.room_num][1] - PITCH_TOP_RIGHT[self.world.room_num][1]), WALL_INFLUENCE, 2, 500)
@@ -190,7 +180,6 @@ class Potential:
         def get_potential_at_square(self, (x, y)):
             potential_sum = 0
             for potential in self.potential_list:
-                print str(potential) + " " + str(potential.field_at(x, y))
                 potential_sum = potential_sum + potential.field_at(x, y)
             return potential_sum
 
@@ -383,11 +372,11 @@ class solid_field:
         self.influence_area = influence_area
 
     def field_at(self, x, y):
-        separation = math.sqrt((x-self.pos_x)**2 + (y-self.pos_y)**2)
-        if separation > self.forbidden:
-            return self.constant/math.pow(math.sqrt((x-self.pos_x)**2 + (y-self.pos_y)**2), self.gradient)
-        elif separation > self.influence_area:
+        separation = math.sqrt((x-self.pos_x)**2 + (y-self.pos_y)**2)#
+        if separation > self.influence_area:
             return 0
+        elif separation > self.forbidden:
+            return self.constant/math.pow(math.sqrt((x-self.pos_x)**2 + (y-self.pos_y)**2), self.gradient)
         else:
             if self.constant <= 0:
                 return -9999*self.constant
@@ -442,18 +431,8 @@ class step_field_inside:
                     return -9999*self.constant
                 else:
                     return 9999*self.constant
-
-        elif right_ref <= rotated_point[0]: # outside
-            if distance_to < self.influence_range:
-                return self.constant/math.pow(math.sqrt((x-right_ref)**2 + (y-right_ref)**2), self.gradient)
-            else:
-                return 0
-
-        elif left_ref >= rotated_point[0]: # outside
-            if distance_to < self.influence_range:
-                return self.constant/math.pow(math.sqrt((x-left_ref)**2 + (y-left_ref)**2), self.gradient)
-            else:
-                return 0
+        else:
+            return 0
 
 # step - an infinite line drawn through the point in the first argument in the direction of the vector in the
 # second argument. The clockwise segment to the vector is cut off where as the anticlockwise segment acts like a

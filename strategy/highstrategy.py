@@ -1,11 +1,13 @@
 import math
 import numpy as np
+import game
 
 
 class StrategyTools:
     def __init__(self, world, commands):
         self.world = world
         self.commands = commands
+        self.game = game
 
     def attackwithball(self):
 
@@ -276,27 +278,35 @@ class StrategyTools:
         return
 
     def main(self):
-        venus = self.world.venus
-        friend = self.world.friend
-        enemy1 = self.world.enemy1
-        enemy2 = self.world.enemy2
-        if self.commands.query_ball():
-            # venus has the ball
-            self.commands.g()
-            state = self.attackwithball()
-        elif friend.hasBallInRange:
-            # friend has the ball
-            state = self.ballwithfriend()
-        elif enemy1.hasBallInRange:
-            # enemy1 has the ball
-            state = self.ballwithenemy(1)
-        elif enemy2.hasBallInRange:
-            # enemy2 has the ball
-            state = self.ballwithenemy(2)
-        else:
-            # open ball!
-            state = self.openball()
-        return state
+        start = False
+        while True:
+            venus = self.world.venus
+            friend = self.world.friend
+            enemy1 = self.world.enemy1
+            enemy2 = self.world.enemy2
+            if self.commands.query_ball():
+                # venus has the ball
+                self.commands.g()
+                state = self.attackwithball()
+            elif friend.hasBallInRange:
+                # friend has the ball
+                state = self.ballwithfriend()
+            elif enemy1.hasBallInRange:
+                # enemy1 has the ball
+                state = self.ballwithenemy(1)
+            elif enemy2.hasBallInRange:
+                # enemy2 has the ball
+                state = self.ballwithenemy(2)
+            else:
+                # open ball!
+                state = self.openball()
+
+            if start is False:
+                start = True
+                self.game.start(start)
+
+            # add rest of state here
+
     if __name__ == "__main__":
         main()
 
