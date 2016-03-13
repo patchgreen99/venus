@@ -27,21 +27,15 @@ class StrategyTools:
         i = (highy + lowy)/2
         while i < highy:
             if self.isSafeKick((x1,y1),(goalx,i),robotposlist ):
-                self.commands.goal()
-                #print('goal')
-                return
+                return "ATTACK_GOAL"
             i = i + 1
         i = (highy + lowy)/2
         while i > lowy:
             if self.isSafeKick((x1,y1),(goalx,i),robotposlist):
-                self.commands.goal()
-                #print('goal')
-                return
+                return "ATTACK_GOAL"
             i = i - 1
         if self.isSafeKick((x1, y1), (x2, y2), robotposlist):
-            self.commands.pass_ball()
-            #print('pass')
-            return
+            return "ATTACK_PASS"
         # do something instead
         print('something else')
         return
@@ -201,7 +195,7 @@ class StrategyTools:
                         (x4,y4)]
 
         if self.isSafeKick((x2,y2),(x1,y1),robotposlist) and self.world.friend.hasBallInRange:
-            self.commands.catch_ball()
+            return "RECEIVE_BALL"
             # print('receive pass')
         else:
             return self.bestpositioncase()
@@ -289,9 +283,7 @@ class StrategyTools:
         if self.commands.query_ball():
             # venus has the ball
             self.commands.g()
-            self.attackwithball()
-            #state = 'ATTACK'
-            state = ''
+            state = self.attackwithball()
         elif friend.hasBallInRange:
             # friend has the ball
             state = self.ballwithfriend()

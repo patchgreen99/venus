@@ -39,6 +39,12 @@ class Game:
             pass
             #angle, length = self.calculate_angle_length_ball()
             #self.commands.c(angle)
+        elif state == "ATTACK_PASS":
+            pass
+        elif state == "ATTACK_GOAL":
+            pass
+        elif state == "RECEIVE_PASS":
+            pass
         elif state == "FREE_BALL_2_GOALSIDE":
             pass
         elif state == "FREE_BALL_1_GOALSIDE":
@@ -504,6 +510,22 @@ class Game:
                 time.sleep(.7)
 
                 ###########################################################################################################################################
+
+            elif state == "ATTACK_PASS":
+                # pass ball to the friend, when attacking
+                self.commands.pass_ball()
+
+                ###########################################################################################################################################
+
+            elif state == "ATTACK_GOAL":
+                # you're in the good position to score
+                self.commands.goal()
+
+                ###########################################################################################################################################
+
+            elif state == "RECEIVE_PASS":
+                # you should be in the good position to catch the ball
+                self.commands.catch_ball()
 
         ###########################################################################################################################################################
         # EXITING STATE
