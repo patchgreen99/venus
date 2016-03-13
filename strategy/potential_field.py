@@ -7,6 +7,9 @@ PITCH_ROWS = 480 #pixels
 PITCH_COLS = 640 #pixels
 
 POTENTIAL_GRANULARITY = 20*CENTIMETERS_TO_PIXELS #pixels
+WALL_INFLUENCE = 30 # pixels
+PENALTY_BOX_INFLUENCE = 30 # pixels
+
 
 DEFENDING_LEFT_TOP = [(117, 114), (190, 144)]
 DEFENDING_LEFT_BOT = [(169, 365), (188, 367)]
@@ -40,19 +43,19 @@ class Potential:
             else:
                 self.last_direction = last_direction
 
-            self.top_wall = step_field(PITCH_TOP_LEFT[self.world.room_num], (PITCH_TOP_RIGHT[self.world.room_num][0]-PITCH_TOP_LEFT[self.world.room_num][0], PITCH_TOP_RIGHT[self.world.room_num][1]-PITCH_TOP_LEFT[self.world.room_num][1]), 10, 0.001)
-            self.bot_wall = step_field(PITCH_BOT_LEFT[self.world.room_num], (PITCH_BOT_LEFT[self.world.room_num][0]-PITCH_BOT_RIGHT[self.world.room_num][0], PITCH_BOT_LEFT[self.world.room_num][1]-PITCH_BOT_RIGHT[self.world.room_num][1]), 10, 0.001)
-            self.right_wall = step_field(PITCH_TOP_RIGHT[self.world.room_num], (PITCH_BOT_RIGHT[self.world.room_num][0] - PITCH_TOP_RIGHT[self.world.room_num][0], PITCH_BOT_RIGHT[self.world.room_num][1] - PITCH_TOP_RIGHT[self.world.room_num][1]), 10, 0.001)
-            self.left_wall = step_field(PITCH_TOP_LEFT[self.world.room_num], (PITCH_TOP_LEFT[self.world.room_num][0] - PITCH_BOT_LEFT[self.world.room_num][0], PITCH_TOP_LEFT[self.world.room_num][1] - PITCH_BOT_LEFT[self.world.room_num][1]), 10, 0.001)
+            self.top_wall = step_field_inside(PITCH_TOP_LEFT[self.world.room_num], PITCH_TOP_RIGHT[self.world.room_num], (PITCH_TOP_RIGHT[self.world.room_num][0]-PITCH_TOP_LEFT[self.world.room_num][0], PITCH_TOP_RIGHT[self.world.room_num][1]-PITCH_TOP_LEFT[self.world.room_num][1]), WALL_INFLUENCE, 5, 0.1)
+            self.bot_wall = step_field_inside(PITCH_BOT_LEFT[self.world.room_num], PITCH_BOT_RIGHT[self.world.room_num], (PITCH_BOT_LEFT[self.world.room_num][0]-PITCH_BOT_RIGHT[self.world.room_num][0], PITCH_BOT_LEFT[self.world.room_num][1]-PITCH_BOT_RIGHT[self.world.room_num][1]), WALL_INFLUENCE, 5, 0.1)
+            self.right_wall = step_field_inside(PITCH_TOP_RIGHT[self.world.room_num], PITCH_BOT_RIGHT[self.world.room_num], (PITCH_BOT_RIGHT[self.world.room_num][0] - PITCH_TOP_RIGHT[self.world.room_num][0], PITCH_BOT_RIGHT[self.world.room_num][1] - PITCH_TOP_RIGHT[self.world.room_num][1]), WALL_INFLUENCE, 5, 0.1)
+            self.left_wall = step_field_inside(PITCH_TOP_LEFT[self.world.room_num], PITCH_BOT_LEFT[self.world.room_num], (PITCH_TOP_LEFT[self.world.room_num][0] - PITCH_BOT_LEFT[self.world.room_num][0], PITCH_TOP_LEFT[self.world.room_num][1] - PITCH_BOT_LEFT[self.world.room_num][1]), WALL_INFLUENCE, 5, 0.1)
 
             if world.we_have_computer_goal and world.room_num == 1 or not world.we_have_computer_goal and world.room_num == 0: # there goal is on the right
-                self.penalty_box_front = infinite_axial(DEFENDING_RIGHT_TOP[self.world.room_num], DEFENDING_RIGHT_BOT[self.world.room_num], 10, 0.001)
-                self.penalty_box_top = infinite_axial(GOAL_RIGHT_TOP[self.world.room_num], DEFENDING_RIGHT_TOP[self.world.room_num], 10, 0.001)
-                self.penalty_box_bot = infinite_axial(GOAL_RIGHT_BOT[self.world.room_num], DEFENDING_RIGHT_BOT[self.world.room_num], 10, 0.001)
+                self.penalty_box_front = step_field_inside(DEFENDING_RIGHT_TOP[self.world.room_num], DEFENDING_RIGHT_BOT[self.world.room_num], (DEFENDING_RIGHT_BOT[self.world.room_num][0]-DEFENDING_RIGHT_TOP[self.world.room_num][0], DEFENDING_RIGHT_BOT[self.world.room_num][1]-DEFENDING_RIGHT_TOP[self.world.room_num][1]), PENALTY_BOX_INFLUENCE, 5, 0.01)
+                self.penalty_box_top = infinite_axial(GOAL_RIGHT_TOP[self.world.room_num], DEFENDING_RIGHT_TOP[self.world.room_num], PENALTY_BOX_INFLUENCE, 5, 0.01)
+                self.penalty_box_bot = infinite_axial(GOAL_RIGHT_BOT[self.world.room_num], DEFENDING_RIGHT_BOT[self.world.room_num], PENALTY_BOX_INFLUENCE, 5, 0.01)
             elif world.we_have_computer_goal and world.room_num == 0 or not world.we_have_computer_goal and world.room_num == 1: # obviously the left goal
-                self.penalty_box_front = infinite_axial(DEFENDING_LEFT_TOP[self.world.room_num], DEFENDING_LEFT_BOT[self.world.room_num], 10, 0.001)
-                self.penalty_box_top = infinite_axial(GOAL_LEFT_TOP[self.world.room_num], DEFENDING_LEFT_TOP[self.world.room_num], 10, 0.001)
-                self.penalty_box_bot = infinite_axial(GOAL_LEFT_BOT[self.world.room_num], DEFENDING_LEFT_BOT[self.world.room_num], 10, 0.001)
+                self.penalty_box_front = step_field_inside(DEFENDING_LEFT_TOP[self.world.room_num], DEFENDING_LEFT_BOT[self.world.room_num], (DEFENDING_LEFT_TOP[self.world.room_num][0]-DEFENDING_LEFT_BOT[self.world.room_num][0], DEFENDING_LEFT_TOP[self.world.room_num][1]-DEFENDING_LEFT_BOT[self.world.room_num][1]), PENALTY_BOX_INFLUENCE, 5, 0.01)
+                self.penalty_box_top = infinite_axial(GOAL_LEFT_TOP[self.world.room_num], DEFENDING_LEFT_TOP[self.world.room_num], PENALTY_BOX_INFLUENCE, 5, 0.01)
+                self.penalty_box_bot = infinite_axial(GOAL_LEFT_BOT[self.world.room_num], DEFENDING_LEFT_BOT[self.world.room_num], PENALTY_BOX_INFLUENCE, 5, 0.01)
 
             self.ball_field = ball_field
 
@@ -70,14 +73,14 @@ class Potential:
             self.catch_up = catch_up
             self.bad_minima_pass = bad_minima_pass
             self.bad_minima_goal = bad_minima_goal
-            '''
+
             self.potential_list = [self.ball_field, self.friend_field, self.enemy1_field, self.enemy2_field,
                      self.free_up_pass_enemy1, self.free_up_pass_enemy2, self.free_up_goal_enemy1,
                     self.free_up_goal_enemy2, self.block_pass, self.block_goal_enemy1, self.block_goal_enemy2,
                         self.advance, self.catch_up, self.bad_minima_pass, self.bad_minima_goal, self.top_wall, self.bot_wall, self.right_wall,
                                 self.left_wall, self.penalty_box_front, self.penalty_box_top, self.penalty_box_bot]
-            '''
-            self.potential_list = [self.ball_field]
+
+            #self.potential_list = [self.ball_field]
 
             self.local_potential = np.full((5, 5), fill_value=np.inf, dtype=np.float64)
             #self.local_potential = np.zeros((5, 5), dtype=np.float64)
@@ -220,7 +223,6 @@ def normalize((x, y)):
 def dot_product((ax, ay),(bx, by)):
     return ax*bx + ay*by
 
-
 '''POTENTIALS'''
 
 # radial - constant gradient everywhere  coming out from one single spot
@@ -249,13 +251,14 @@ class radial:
 # 3 3 3 3 3 3 3
 
 class infinite_axial:
-    def __init__(self, (start_x, start_y), (end_x, end_y), g, k):
+    def __init__(self, (start_x, start_y), (end_x, end_y), influence_range, g, k):
         self.start_x = start_x
         self.start_y = start_y
         self.end_x = end_x
         self.end_y = end_y
         self.dir_x = end_x - start_x
         self.dir_y = end_y - start_y
+        self.influence_range = influence_range
         self.gradient = g
         self.constant = k
 
@@ -265,14 +268,14 @@ class infinite_axial:
         rotated_start = rotate_vector(-angle, self.start_x, self.start_y)
         rotated_end = rotate_vector(-angle, self.end_x, self.end_y)
         if rotated_start[0] < rotated_end[0]:
-            if rotated_start[0] < rotated_point[0] < rotated_end[0]:
-                distance_to = abs(rotated_point[1] - rotated_start[1])
+            distance_to = abs(rotated_point[1] - rotated_start[1])
+            if rotated_start[0] < rotated_point[0] < rotated_end[0] and distance_to < self.influence_range:
                 return self.constant*math.pow(math.log(900/distance_to, math.e), self.gradient)
             else:
                 return 0
         else:
-            if rotated_end[0] < rotated_point[0] < rotated_start[0]:
-                distance_to = abs(rotated_point[1] - rotated_start[1])
+            distance_to = abs(rotated_point[1] - rotated_start[1])
+            if rotated_end[0] < rotated_point[0] < rotated_start[0] and distance_to < self.influence_range:
                 return self.constant*math.pow(math.log(900/distance_to, math.e), self.gradient)
             else:
                 return 0
@@ -296,7 +299,7 @@ class finite_axial_inside:
         self.constant = k
 
     def field_at(self, x, y):
-        angle = math.atan2(self.dir_y, self.dir_x)
+        angle = math.degrees(math.atan2(self.dir_y, self.dir_x))
         rotated_point = rotate_vector(-angle, x, y)
         start_field = rotate_vector(-angle, self.start_x, self.start_y)
         end_field = rotate_vector(-angle, self.start_x, self.start_y)
@@ -312,7 +315,7 @@ class finite_axial_inside:
             b = right_ref - rotated_point[0]
             a = left_ref - rotated_point[0]
             distance_to = abs(rotated_point[1] - start_field[1])
-            return self.constant*math.pow(math.log(b + math.sqrt(b**2 + distance_to**2)/a + math.sqrt(a**2 + distance_to**2), math.e), self.gradient)
+            return self.constant*math.pow(math.log((b + math.sqrt(b**2 + distance_to**2))/(a + math.sqrt(a**2 + distance_to**2)), math.e), self.gradient)
         elif right_ref <= rotated_point[0]: # outside
             return self.constant/math.pow(math.sqrt((x-right_ref)**2 + (y-right_ref)**2), self.gradient)
         elif left_ref >= rotated_point[0]: # outside
@@ -339,7 +342,7 @@ class finite_axial_outside:
         self.constant = k
 
     def field_at(self, x, y):
-        angle = math.atan2(self.dir_y, self.dir_x)
+        angle = math.degrees(math.atan2(self.dir_y, self.dir_x))
         rotated_point = rotate_vector(-angle, x, y)
         start_field = rotate_vector(-angle, self.start_x, self.start_y)
         end_field = rotate_vector(-angle, self.start_x + normalize((self.dir_x, self.dir_y))[0]*600,  self.start_y + normalize((self.dir_x, self.dir_y))[1]*600)
@@ -355,7 +358,7 @@ class finite_axial_outside:
             b = right_ref - rotated_point[0]
             a = left_ref - rotated_point[0]
             distance_to = abs(rotated_point[1] - start_field[1])
-            return self.constant*math.pow(math.log(b + math.sqrt(b**2 + distance_to**2)/a + math.sqrt(a**2 + distance_to**2), math.e), self.gradient)
+            return self.constant*math.pow(math.log((b + math.sqrt(b**2 + distance_to**2))/(a + math.sqrt(a**2 + distance_to**2)), math.e), self.gradient)
         elif right_ref <= rotated_point[0]: # outside
             return self.constant/math.pow(math.sqrt((x-right_ref)**2 + (y-right_ref)**2), self.gradient)
         elif left_ref >= rotated_point[0]: # outside
@@ -391,7 +394,58 @@ class solid_field:
 
 # step - an infinite line drawn through the point in the first argument in the direction of the vector in the
 # second argument. The clockwise segment to the vector is cut off where as the anticlockwise segment acts like a
-# infinite axial field over the entire pitch
+# infinite axial field over the entire pitch. also must be between start and end
+# 9 9 9 9 9 9 9
+# 9 9 9 9 9 9 9
+# 3 3 3 3 3 3 3
+# 1 1 1 1 1 1 1
+# 0 0 0 0 0 0 0
+
+
+class step_field_inside:
+    def __init__(self, (start_x, start_y), (end_x, end_y), (dir_x, dir_y), influence_range, g, k):
+        self.start_x = start_x
+        self.start_y = start_y
+        self.end_x = end_x
+        self.end_y = end_y
+        self.dir_x = dir_x
+        self.dir_y = dir_y
+        self.influence_range = influence_range
+        self.gradient = g
+        self.constant = k
+
+    def field_at(self, x, y):
+        step_direction = rotate_vector(90, self.dir_x, self.dir_y) # points towards the aloud region
+        angle = math.degrees(math.atan2(self.dir_y, self.dir_x))
+        rotated_point = rotate_vector(-angle, x, y)
+        start_field = rotate_vector(-angle, self.start_x, self.start_y)
+        end_field = rotate_vector(-angle, self.end_x, self.end_y)
+        distance_to = abs(rotated_point[1] - start_field[1])
+
+        if start_field[0] > end_field[0]:
+            right_ref = start_field[0]
+            left_ref = end_field[0]
+        else:
+            left_ref = start_field[0]
+            right_ref = end_field[0]
+
+        if left_ref < rotated_point[0] < right_ref:
+            if dot_product(step_direction, (x - self.start_x, y - self.start_y)) > 0: # in direction step_direction
+                if distance_to < self.influence_range:
+                    return self.constant*math.pow(math.log(900/distance_to, math.e), self.gradient)
+                else:
+                    return 0
+            else:
+                if self.constant <= 0:
+                    return -9999*self.constant
+                else:
+                    return 9999*self.constant
+        else:
+            return 0
+
+# step - an infinite line drawn through the point in the first argument in the direction of the vector in the
+# second argument. The clockwise segment to the vector is cut off where as the anticlockwise segment acts like a
+# infinite axial field over the entire pitch. also must be between start and end
 # 9 9 9 9 9 9 9
 # 9 9 9 9 9 9 9
 # 3 3 3 3 3 3 3
@@ -400,24 +454,29 @@ class solid_field:
 
 
 class step_field:
-    def __init__(self, (start_x, start_y), (dir_x, dir_y), g, k):
-        self.pos_x = start_x
-        self.pos_y = start_y
+    def __init__(self, (start_x, start_y), (dir_x, dir_y), influence_range, g, k):
+        self.start_x = start_x
+        self.start_y = start_y
         self.dir_x = dir_x
         self.dir_y = dir_y
+        self.influence_range = influence_range
         self.gradient = g
         self.constant = k
 
     def field_at(self, x, y):
         step_direction = rotate_vector(90, self.dir_x, self.dir_y) # points towards the aloud region
-        angle = math.atan2(self.dir_y, self.dir_x)
+        angle = math.degrees(math.atan2(self.dir_y, self.dir_x))
         rotated_point = rotate_vector(-angle, x, y)
-        rotated_field = rotate_vector(-angle, self.pos_x, self.pos_y)
-        distance_to = abs(rotated_point[1] - rotated_field[1])
-        if dot_product(step_direction, (x - self.pos_x, y - self.pos_y)) > 0: # in direction step_direction
-            return self.constant*math.pow(math.log(900/distance_to, math.e), self.gradient)
-        else:
-            if self.constant <= 0:
-                return -9999*self.constant
+        start_field = rotate_vector(-angle, self.start_x, self.start_y)
+        distance_to = abs(rotated_point[1] - start_field[1])
+
+        if distance_to < self.influence_range:
+            if dot_product(step_direction, (x - self.start_x, y - self.start_y)) > 0: # in direction step_direction
+                return self.constant*math.pow(math.log(900/distance_to, math.e), self.gradient)
             else:
-                return 9999*self.constant
+                if self.constant <= 0:
+                    return -9999*self.constant
+                else:
+                    return 9999*self.constant
+        else:
+            return 0
