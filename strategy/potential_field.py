@@ -7,18 +7,18 @@ PITCH_ROWS = 480 #pixels
 PITCH_COLS = 640 #pixels
 
 POTENTIAL_GRANULARITY = 20*CENTIMETERS_TO_PIXELS #pixels
-WALL_INFLUENCE = 30 # pixels
-PENALTY_BOX_INFLUENCE = 30 # pixels
+WALL_INFLUENCE = 60 # pixels
+PENALTY_BOX_INFLUENCE = 60 # pixels
 
 
 DEFENDING_LEFT_TOP = [(117, 114), (190, 144)]
 DEFENDING_LEFT_BOT = [(169, 365), (188, 367)]
 DEFENDING_RIGHT_TOP = [(457, 107), (462, 114)]
 DEFENDING_RIGHT_BOT = [(460, 358), (464, 368)]
-GOAL_LEFT_TOP = [(25, 114), (38, 181)]
-GOAL_LEFT_BOT = [(25, 365), (37, 304)]
-GOAL_RIGHT_TOP = [(594, 107), (618, 176)]
-GOAL_RIGHT_BOT = [(600, 358), (620, 297)]
+GOAL_LEFT_TOP = [(25, 114), (38, 144)]
+GOAL_LEFT_BOT = [(25, 365), (37, 367)]
+GOAL_RIGHT_TOP = [(594, 107), (618, 114)]
+GOAL_RIGHT_BOT = [(600, 358), (620, 368)]
 PITCH_TOP_RIGHT = [(594, 15), (617, 10)]
 PITCH_TOP_LEFT = [(25, 13), (39, 14)]
 PITCH_BOT_RIGHT = [(600, 450), (617, 464)]
@@ -43,19 +43,20 @@ class Potential:
             else:
                 self.last_direction = last_direction
 
-            self.top_wall = step_field_inside(PITCH_TOP_LEFT[self.world.room_num], PITCH_TOP_RIGHT[self.world.room_num], (PITCH_TOP_RIGHT[self.world.room_num][0]-PITCH_TOP_LEFT[self.world.room_num][0], PITCH_TOP_RIGHT[self.world.room_num][1]-PITCH_TOP_LEFT[self.world.room_num][1]), WALL_INFLUENCE, 5, 0.1)
-            self.bot_wall = step_field_inside(PITCH_BOT_LEFT[self.world.room_num], PITCH_BOT_RIGHT[self.world.room_num], (PITCH_BOT_LEFT[self.world.room_num][0]-PITCH_BOT_RIGHT[self.world.room_num][0], PITCH_BOT_LEFT[self.world.room_num][1]-PITCH_BOT_RIGHT[self.world.room_num][1]), WALL_INFLUENCE, 5, 0.1)
-            self.right_wall = step_field_inside(PITCH_TOP_RIGHT[self.world.room_num], PITCH_BOT_RIGHT[self.world.room_num], (PITCH_BOT_RIGHT[self.world.room_num][0] - PITCH_TOP_RIGHT[self.world.room_num][0], PITCH_BOT_RIGHT[self.world.room_num][1] - PITCH_TOP_RIGHT[self.world.room_num][1]), WALL_INFLUENCE, 5, 0.1)
-            self.left_wall = step_field_inside(PITCH_TOP_LEFT[self.world.room_num], PITCH_BOT_LEFT[self.world.room_num], (PITCH_TOP_LEFT[self.world.room_num][0] - PITCH_BOT_LEFT[self.world.room_num][0], PITCH_TOP_LEFT[self.world.room_num][1] - PITCH_BOT_LEFT[self.world.room_num][1]), WALL_INFLUENCE, 5, 0.1)
+            self.top_wall = step_field_inside(PITCH_TOP_LEFT[self.world.room_num], PITCH_TOP_RIGHT[self.world.room_num], (PITCH_TOP_RIGHT[self.world.room_num][0]-PITCH_TOP_LEFT[self.world.room_num][0], PITCH_TOP_RIGHT[self.world.room_num][1]-PITCH_TOP_LEFT[self.world.room_num][1]), WALL_INFLUENCE, 1, 400) # best with 1 100
+            self.bot_wall = step_field_inside(PITCH_BOT_LEFT[self.world.room_num], PITCH_BOT_RIGHT[self.world.room_num], (PITCH_BOT_LEFT[self.world.room_num][0]-PITCH_BOT_RIGHT[self.world.room_num][0], PITCH_BOT_LEFT[self.world.room_num][1]-PITCH_BOT_RIGHT[self.world.room_num][1]), WALL_INFLUENCE, 1, 400)
+            self.right_wall = step_field_inside(PITCH_TOP_RIGHT[self.world.room_num], PITCH_BOT_RIGHT[self.world.room_num], (PITCH_BOT_RIGHT[self.world.room_num][0] - PITCH_TOP_RIGHT[self.world.room_num][0], PITCH_BOT_RIGHT[self.world.room_num][1] - PITCH_TOP_RIGHT[self.world.room_num][1]), WALL_INFLUENCE, 1, 400)
+            self.left_wall = step_field_inside(PITCH_TOP_LEFT[self.world.room_num], PITCH_BOT_LEFT[self.world.room_num], (PITCH_TOP_LEFT[self.world.room_num][0] - PITCH_BOT_LEFT[self.world.room_num][0], PITCH_TOP_LEFT[self.world.room_num][1] - PITCH_BOT_LEFT[self.world.room_num][1]), WALL_INFLUENCE, 1, 400)
 
+            # use 1, 100
             if world.we_have_computer_goal and world.room_num == 1 or not world.we_have_computer_goal and world.room_num == 0: # there goal is on the right
-                self.penalty_box_front = step_field_inside(DEFENDING_RIGHT_TOP[self.world.room_num], DEFENDING_RIGHT_BOT[self.world.room_num], (DEFENDING_RIGHT_BOT[self.world.room_num][0]-DEFENDING_RIGHT_TOP[self.world.room_num][0], DEFENDING_RIGHT_BOT[self.world.room_num][1]-DEFENDING_RIGHT_TOP[self.world.room_num][1]), PENALTY_BOX_INFLUENCE, 5, 0.01)
-                self.penalty_box_top = infinite_axial(GOAL_RIGHT_TOP[self.world.room_num], DEFENDING_RIGHT_TOP[self.world.room_num], PENALTY_BOX_INFLUENCE, 5, 0.01)
-                self.penalty_box_bot = infinite_axial(GOAL_RIGHT_BOT[self.world.room_num], DEFENDING_RIGHT_BOT[self.world.room_num], PENALTY_BOX_INFLUENCE, 5, 0.01)
+                self.penalty_box_front = step_field_inside(DEFENDING_RIGHT_TOP[self.world.room_num], DEFENDING_RIGHT_BOT[self.world.room_num], (DEFENDING_RIGHT_BOT[self.world.room_num][0]-DEFENDING_RIGHT_TOP[self.world.room_num][0], DEFENDING_RIGHT_BOT[self.world.room_num][1]-DEFENDING_RIGHT_TOP[self.world.room_num][1]), PENALTY_BOX_INFLUENCE, 2, 500)
+                self.penalty_box_top = infinite_axial(GOAL_RIGHT_TOP[self.world.room_num], DEFENDING_RIGHT_TOP[self.world.room_num], PENALTY_BOX_INFLUENCE, 2, 500)
+                self.penalty_box_bot = infinite_axial(GOAL_RIGHT_BOT[self.world.room_num], DEFENDING_RIGHT_BOT[self.world.room_num], PENALTY_BOX_INFLUENCE, 2, 500)
             elif world.we_have_computer_goal and world.room_num == 0 or not world.we_have_computer_goal and world.room_num == 1: # obviously the left goal
-                self.penalty_box_front = step_field_inside(DEFENDING_LEFT_TOP[self.world.room_num], DEFENDING_LEFT_BOT[self.world.room_num], (DEFENDING_LEFT_TOP[self.world.room_num][0]-DEFENDING_LEFT_BOT[self.world.room_num][0], DEFENDING_LEFT_TOP[self.world.room_num][1]-DEFENDING_LEFT_BOT[self.world.room_num][1]), PENALTY_BOX_INFLUENCE, 5, 0.01)
-                self.penalty_box_top = infinite_axial(GOAL_LEFT_TOP[self.world.room_num], DEFENDING_LEFT_TOP[self.world.room_num], PENALTY_BOX_INFLUENCE, 5, 0.01)
-                self.penalty_box_bot = infinite_axial(GOAL_LEFT_BOT[self.world.room_num], DEFENDING_LEFT_BOT[self.world.room_num], PENALTY_BOX_INFLUENCE, 5, 0.01)
+                self.penalty_box_front = step_field_inside(DEFENDING_LEFT_TOP[self.world.room_num], DEFENDING_LEFT_BOT[self.world.room_num], (DEFENDING_LEFT_TOP[self.world.room_num][0]-DEFENDING_LEFT_BOT[self.world.room_num][0], DEFENDING_LEFT_TOP[self.world.room_num][1]-DEFENDING_LEFT_BOT[self.world.room_num][1]), PENALTY_BOX_INFLUENCE, 2, 500)
+                self.penalty_box_top = infinite_axial(GOAL_LEFT_TOP[self.world.room_num], DEFENDING_LEFT_TOP[self.world.room_num], PENALTY_BOX_INFLUENCE, 2, 500)
+                self.penalty_box_bot = infinite_axial(GOAL_LEFT_BOT[self.world.room_num], DEFENDING_LEFT_BOT[self.world.room_num], PENALTY_BOX_INFLUENCE, 2, 500)
 
             self.ball_field = ball_field
 
@@ -270,13 +271,13 @@ class infinite_axial:
         if rotated_start[0] < rotated_end[0]:
             distance_to = abs(rotated_point[1] - rotated_start[1])
             if rotated_start[0] < rotated_point[0] < rotated_end[0] and distance_to < self.influence_range:
-                return self.constant*math.pow(math.log(900/distance_to, math.e), self.gradient)
+                return self.constant/math.pow(distance_to, self.gradient)
             else:
                 return 0
         else:
             distance_to = abs(rotated_point[1] - rotated_start[1])
             if rotated_end[0] < rotated_point[0] < rotated_start[0] and distance_to < self.influence_range:
-                return self.constant*math.pow(math.log(900/distance_to, math.e), self.gradient)
+                return self.constant/math.pow(distance_to, self.gradient)
             else:
                 return 0
 
@@ -315,7 +316,7 @@ class finite_axial_inside:
             b = right_ref - rotated_point[0]
             a = left_ref - rotated_point[0]
             distance_to = abs(rotated_point[1] - start_field[1])
-            return self.constant*math.pow(math.log((b + math.sqrt(b**2 + distance_to**2))/(a + math.sqrt(a**2 + distance_to**2)), math.e), self.gradient)
+            return self.constant*math.log((b + math.sqrt(b**2 + distance_to**2))/(a + math.sqrt(a**2 + distance_to**2)), math.e)
         elif right_ref <= rotated_point[0]: # outside
             return self.constant/math.pow(math.sqrt((x-right_ref)**2 + (y-right_ref)**2), self.gradient)
         elif left_ref >= rotated_point[0]: # outside
@@ -358,11 +359,11 @@ class finite_axial_outside:
             b = right_ref - rotated_point[0]
             a = left_ref - rotated_point[0]
             distance_to = abs(rotated_point[1] - start_field[1])
-            return self.constant*math.pow(math.log((b + math.sqrt(b**2 + distance_to**2))/(a + math.sqrt(a**2 + distance_to**2)), math.e), self.gradient)
+            return self.constant*math.log((b + math.sqrt(b**2 + distance_to**2))/(a + math.sqrt(a**2 + distance_to**2)), math.e) #todo no gradient
         elif right_ref <= rotated_point[0]: # outside
-            return self.constant/math.pow(math.sqrt((x-right_ref)**2 + (y-right_ref)**2), self.gradient)
+            return self.constant/((x-right_ref)**2 + (y-right_ref)**2)
         elif left_ref >= rotated_point[0]: # outside
-            return self.constant/math.pow(math.sqrt((x-left_ref)**2 + (y-left_ref)**2), self.gradient)
+            return self.constant/((x-left_ref)**2 + (y-left_ref)**2)
 
 # solid - modeled as a circle, from center 'forbidden' is unreachable and outside the influence area is unreachable
 # 0 2 3 3 3 2 0
@@ -432,7 +433,7 @@ class step_field_inside:
         if left_ref < rotated_point[0] < right_ref:
             if dot_product(step_direction, (x - self.start_x, y - self.start_y)) > 0: # in direction step_direction
                 if distance_to < self.influence_range:
-                    return self.constant*math.pow(math.log(900/distance_to, math.e), self.gradient)
+                    return self.constant/math.pow(distance_to, self.gradient)
                 else:
                     return 0
             else:
@@ -440,8 +441,7 @@ class step_field_inside:
                     return -9999*self.constant
                 else:
                     return 9999*self.constant
-        else:
-            return 0
+
 
 # step - an infinite line drawn through the point in the first argument in the direction of the vector in the
 # second argument. The clockwise segment to the vector is cut off where as the anticlockwise segment acts like a
@@ -472,7 +472,8 @@ class step_field:
 
         if distance_to < self.influence_range:
             if dot_product(step_direction, (x - self.start_x, y - self.start_y)) > 0: # in direction step_direction
-                return self.constant*math.pow(math.log(900/distance_to, math.e), self.gradient)
+                # return self.constant*math.log(self.influence_range/math.pow(distance_to, self.gradient), math.e)
+                return self.constant/math.pow(distance_to, self.gradient)
             else:
                 if self.constant <= 0:
                     return -9999*self.constant
