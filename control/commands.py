@@ -42,8 +42,8 @@ class Commands:
               (room_num, team_color, our_color, computer_goal))
         self.world = World(int(room_num), team_color, our_color, computer_goal)
         self.strategy = SimpleStrategy(self.world, self)
-        self.highstrategy = StrategyTools(self.world, self)
         self.game = Game(self.world, self)
+        self.highstrategy = StrategyTools(self.world, self, self.game)
 
     def connect(self, device_no='0'):
         print("connect: Connecting to RF stick")

@@ -1,10 +1,8 @@
 import math
 import numpy as np
-import game
-
 
 class StrategyTools:
-    def __init__(self, world, commands):
+    def __init__(self, world, commands, game):
         self.world = world
         self.commands = commands
         self.game = game
@@ -278,9 +276,10 @@ class StrategyTools:
         return
 
     def main(self):
-        start = False
+        start = True
+        last_state = "None"
         while True:
-            venus = self.world.venus
+          #  venus = self.world.venus
             friend = self.world.friend
             enemy1 = self.world.enemy1
             enemy2 = self.world.enemy2
@@ -301,11 +300,14 @@ class StrategyTools:
                 # open ball!
                 state = self.openball()
 
-            if start is False:
-                start = True
-                self.game.start(start)
-
-            # add rest of state here
+            if start == True:
+                start = False
+                self.game.start(state)
+            elif last_state == state:
+                self.game.mid(state)
+            else:
+                self.game.end(last_state)
+                self.game.start(state)
 
     if __name__ == "__main__":
         main()
