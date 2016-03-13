@@ -27,20 +27,20 @@ class StrategyTools:
         i = (highy + lowy)/2
         while i < highy:
             if self.isSafeKick((x1,y1),(goalx,i),robotposlist ):
-                #self.commands.goal()
-                print('goal')
+                self.commands.goal()
+                #print('goal')
                 return
             i = i + 1
         i = (highy + lowy)/2
         while i > lowy:
             if self.isSafeKick((x1,y1),(goalx,i),robotposlist):
-                #self.commands.goal()
-                print('goal')
+                self.commands.goal()
+                #print('goal')
                 return
             i = i - 1
         if self.isSafeKick((x1, y1), (x2, y2), robotposlist):
-            #self.commands.pass_ball()
-            print('pass')
+            self.commands.pass_ball()
+            #print('pass')
             return
         # do something instead
         print('something else')
@@ -78,20 +78,24 @@ class StrategyTools:
         # enemy_no = int(enemystr)
         if enemy_no == 1:
             enemyposition = self.world.enemy1.position
-            if self.iclosertogoal(enemyposition) or self.world.enemy1.out: #TODO: or enemy out of pitch -- done, test!
-                '''# TODO: make the block_goal_enemy 1 on'''
-                print('block goal enemy1')
+            if self.iclosertogoal(enemyposition) or self.world.enemy2.out: #TODO: or enemy out of pitch -- done, test!
+               # self.commands.block_goal(1)
+                #print('block goal enemy1')
+                return "ENEMY1_BALL_TAKE_GOAL"
             else:
-                '''# TODO: make the block_pass on'''
-                print('block pass')
+                #self.commands.intercept()
+                #print('block pass')
+                return "ENEMY_BALL_TAKE_PASS"
         elif enemy_no == 2:
             enemyposition = self.world.enemy2.position
-            if self.iclosertogoal(enemyposition) or self.world.enemy2.out:  #TODO: or enemy out of pitch -- done, test!
-                '''# TODO: make the block_goal_enemy 1 on'''
-                print('block goal enemy2')
+            if self.iclosertogoal(enemyposition) or self.world.enemy1.out:  #TODO: or enemy out of pitch -- done, test!
+                #self.commands.block_goal(2)
+                #print('block goal enemy2')
+                return "ENEMY2_BALL_TAKE_GOAL"
             else:
-                '''# TODO: make the block_pass on'''
-                print('block pass')
+                #self.commands.intercept()
+                #print('block pass')
+                return "ENEMY_BALL_TAKE_PASS"
         else:
             print('no')
         return
@@ -138,17 +142,23 @@ class StrategyTools:
         else:
             return False
 
+    def isinbetweenY(self,(x1,y1),(x2,y2),(x,y)):
+        if y>min(y1,y2) & y<max(y1,y2) :
+            return True
+        else:
+            return False
+
+
     def euclideandist(self,(x1,y1),(x2,y2)):
         return math.sqrt((x1-x2)**2 + (y1-y2)**2)
 
     def openball(self):
         if self.icloserball():
             #grab_ball
-            print('grab ball')
+            #print('grab ball')
+            return "FREE_BALL_YOURS"
         else:
-            print('reach pass position')
-            #reachpassposition
-        return
+            return self.bestpositioncase()
 
     def icloserball(self):
         x1,y1 = self.world.venus.position
@@ -163,6 +173,24 @@ class StrategyTools:
         else:
             return False
 
+    def bestpositioncase(self):
+        x1,y1 = self.world.venus.position
+        x2,y2 = self.world.friend.position
+        x3,y3 = self.world.enemy1.position
+        x4,y4 = self.world.enemy2.position
+        x5,y5 = self.world.their_goalX, self.world.their_goalmeanY
+
+        if self.isinbetweenY((x1,y1),(x5,y5),(x3,y3)) :
+            if self.isinbetweenY((x1,y1),(x5,y5),(x4,y4)):
+                return "FREE_BALL_BOTH_GOALSIDE"
+            else:
+                return "FREE_BALL_1_GOALSIDE"
+        else:
+            if self.isinbetweenY((x1,y1),(x5,y5),(x4,y4)):
+                return "FREE_BALL_2_GOALSIDE"
+            else:
+                return "FREE_BALL_NONE_GOALSIDE"
+
     def ballwithfriend(self): # trigger on isballinrange
         x1,y1 = self.world.venus.position
         x2,y2 = self.world.friend.position
@@ -173,47 +201,49 @@ class StrategyTools:
                         (x4,y4)]
 
         if self.isSafeKick((x2,y2),(x1,y1),robotposlist) and self.world.friend.hasBallInRange:
-            #recievepass
-            print('receive pass')
+            self.commands.catch_ball()
+            # print('receive pass')
         else:
-            # change position
-            # based on positions of all robots choose the one that will ensure a safe pass
-            # switch relevant fields on
-
-            # at this point we are sure one of the enemy robots is between venus and friend
-            # so it's mainly the position of another enemy robot that might affect us
-
-            # find out which robot is on the way for us to pass todo: this is not a nice way to do it, (isSafeKick function could return number of enemy as well)...
-            robot_not_middle = self.world.enemy1
-            if self.isSafeKick((x2,y2),(x1,y1),[(x3, y3)]):
-                robot_not_middle = self.world.enemy2
-
-            elif self.isSafeKick((x2,y2),(x1,y1),[(x4, y4)]):
-                robot_not_middle = self.world.enemy1
-
-            if robot_not_middle == self.world.enemy1:
-                pass
-                # free_up_pass_enemy2
-                # free_up_goal_enemy1
-
-                # need to import game
-                # free_up_pass_enemy2 = self.game.finite_axial_outside(self.world.enemy2.position, self.world.friend.position, 1, 10000)
-                # free_up_goal_enemy1 = self.game.finite_axial_outside(self.world.enemy1.position, (self.world.their_goalX, self.world.their_goalmeanY), 1, 10000)
-                # then catch_ball and score!
-            else:
-                pass
-                # free_up_pass_enemy1
-                # free_up_goal_enemy2
-
-                # free_up_pass_enemy1 = self.game.finite_axial_outside(self.world.enemy1.position, self.world.friend.position, 1, 10000)
-                # free_up_goal_enemy2 = self.game.finite_axial_outside(self.world.enemy2.position, (self.world.their_goalX, self.world.their_goalmeanY), 1, 10000)
-                # then catch_ball and score!
-
-            # todo: what if we can't free up goal? e.g. enemy robot is there... what if enemy robot blocks the goal too well?
-            # we should have a strategy how to attract enemy robot out of the goal, and then attack quickly?
-            # or just turn and kick very quickly such that their vision doesnt recongnize where our orientation verctor is pointing
-
-            print('move to pass position')
+            return self.bestpositioncase()
+        # else:
+        #     # change position
+        #     # based on positions of all robots choose the one that will ensure a safe pass
+        #     # switch relevant fields on
+        #
+        #     # at this point we are sure one of the enemy robots is between venus and friend
+        #     # so it's mainly the position of another enemy robot that might affect us
+        #
+        #     # find out which robot is on the way for us to pass todo: this is not a nice way to do it, (isSafeKick function could return number of enemy as well)...
+        #     robot_not_middle = self.world.enemy1
+        #     if self.isSafeKick((x2,y2),(x1,y1),[(x3, y3)]):
+        #         robot_not_middle = self.world.enemy2
+        #
+        #     elif self.isSafeKick((x2,y2),(x1,y1),[(x4, y4)]):
+        #         robot_not_middle = self.world.enemy1
+        #
+        #     if robot_not_middle == self.world.enemy1:
+        #         pass
+        #         # free_up_pass_enemy2
+        #         # free_up_goal_enemy1
+        #
+        #         # need to import game
+        #         # free_up_pass_enemy2 = self.game.finite_axial_outside(self.world.enemy2.position, self.world.friend.position, 1, 10000)
+        #         # free_up_goal_enemy1 = self.game.finite_axial_outside(self.world.enemy1.position, (self.world.their_goalX, self.world.their_goalmeanY), 1, 10000)
+        #         # then catch_ball and score!
+        #     else:
+        #         pass
+        #         # free_up_pass_enemy1
+        #         # free_up_goal_enemy2
+        #
+        #         # free_up_pass_enemy1 = self.game.finite_axial_outside(self.world.enemy1.position, self.world.friend.position, 1, 10000)
+        #         # free_up_goal_enemy2 = self.game.finite_axial_outside(self.world.enemy2.position, (self.world.their_goalX, self.world.their_goalmeanY), 1, 10000)
+        #         # then catch_ball and score!
+        #
+        #     # todo: what if we can't free up goal? e.g. enemy robot is there... what if enemy robot blocks the goal too well?
+        #     # we should have a strategy how to attract enemy robot out of the goal, and then attack quickly?
+        #     # or just turn and kick very quickly such that their vision doesnt recongnize where our orientation verctor is pointing
+        #
+        #     print('move to pass position')
 
     def get_pass_goal_position(self):
         pass
@@ -260,19 +290,21 @@ class StrategyTools:
             # venus has the ball
             self.commands.g()
             self.attackwithball()
-
+            #state = 'ATTACK'
+            state = ''
         elif friend.hasBallInRange:
             # friend has the ball
-            self.ballwithfriend()
+            state = self.ballwithfriend()
         elif enemy1.hasBallInRange:
             # enemy1 has the ball
-            self.ballwithenemy(1)
+            state = self.ballwithenemy(1)
         elif enemy2.hasBallInRange:
             # enemy2 has the ball
-            self.ballwithenemy(2)
+            state = self.ballwithenemy(2)
         else:
             # open ball!
-            self.openball()
+            state = self.openball()
+        return state
     if __name__ == "__main__":
         main()
 
