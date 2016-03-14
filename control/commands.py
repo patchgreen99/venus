@@ -35,7 +35,7 @@ class Commands:
         print("! connect <device_no>")
         self.init()
         self.vision()
-        self.connect()
+        #self.connect()
 
     def init(self, room_num=1, team_color='blue', our_color='pink', computer_goal=False):
         print("init: Room: %s, team color: %s, our single spot color: %s, computer goal: %s" %
@@ -89,7 +89,10 @@ class Commands:
         print(self.world)
 
     def pot(self):
-        self.game.run("FREE_BALL_YOURS")
+        self.game.mid("FREE_BALL_YOURS")
+
+    def ptest(self):
+        self.game.mid("FREE_BALL_2_GOALSIDE")
 
     def flush(self):
         self.protocol.flush()
@@ -262,7 +265,7 @@ class Commands:
     def sharp_right(self, grab=None):
         """Move to a cell right"""
         print("  Sharp right")
-        self.protocol.schedule(50, MOTOR_TURN, [(MOTOR_TURN, 100),
+        self.protocol.schedule(70, MOTOR_TURN, [(MOTOR_TURN, 100),
                                                 (MOTOR_LEFT, -100),
                                                 (MOTOR_RIGHT, 100)], self.grab_time(grab))
         self.protocol.schedule(50, MOTOR_RIGHT, [(MOTOR_LEFT, -100),

@@ -25,44 +25,14 @@ class World:
         self.other_color = 'green' if our_color == 'pink' else 'pink'
         self.we_have_computer_goal = we_have_computer_goal
 
-        if room_num == 1:
-            if we_have_computer_goal:
-                self.our_goalX = 38 # left
-                self.our_goallowY = 181
-                self.our_goalhighY = 304
-                self.our_goalmeanY = (self.our_goalhighY + self.our_goallowY)/2
-                self.their_goalX = 618 # right
-                self.their_goallowY = 176
-                self.their_goalhighY = 297
-                self.their_goalmeanY = (self.their_goalhighY + self.their_goallowY)/2
-            else:
-                self.our_goalX = 618 # right
-                self.our_goallowY = 176
-                self.our_goalhighY = 297
-                self.our_goalmeanY = (self.our_goalhighY + self.our_goallowY)/2
-                self.their_goalX = 38 # right
-                self.their_goallowY = 181
-                self.their_goalhighY = 304
-                self.their_goalmeanY = (self.their_goalhighY + self.their_goallowY)/2
+        if self.room_num == 1:
+            target = open('vision/pitch1.txt', 'r')
         else:
-            if we_have_computer_goal:
-                self.our_goalX = 594 # right
-                self.our_goallowY = 107
-                self.our_goalhighY = 358
-                self.our_goalmeanY = (self.our_goalhighY + self.our_goallowY)/2
-                self.their_goalX = 25 # right
-                self.their_goallowY = 114
-                self.their_goalhighY = 365
-                self.their_goalmeanY = (self.their_goalhighY + self.their_goallowY)/2
-            else:
-                self.our_goalX = 25 # left
-                self.our_goallowY = 114
-                self.our_goalhighY = 365
-                self.our_goalmeanY = (self.our_goalhighY + self.our_goallowY)/2
-                self.their_goalX = 594 # right
-                self.their_goallowY = 107
-                self.their_goalhighY = 358
-                self.their_goalmeanY = (self.their_goalhighY + self.their_goallowY)/2
+            target = open('vision/pitch0.txt', 'r')
+
+        data = eval(target.read())
+        self.read_pitch(data)
+        target.close()
 
         self.ball = Array('i', [NO_VALUE, NO_VALUE]) # in pixels
         self.ball_velocity = Array('d', [NO_VALUE, NO_VALUE]) # pixels per frame
@@ -78,3 +48,49 @@ class World:
             self.ball[0], self.ball[1], self.ball_moving.value, self.speed[0], self.speed[1],
             self.venus, self.friend, self.enemy1, self.enemy2)
 
+    def read_pitch(self, data):
+        if self.we_have_computer_goal:
+            self.our_goalX = (data["leftgoal"][0][0] + data["leftgoal"][1][0] + data["leftgoal"][2][0])/3.0
+            ys = [data["leftgoal"][0][1] , data["leftgoal"][1][1] , data["leftgoal"][2][1]]
+            ys.sort()
+            self.our_goallowY = ys[0]
+            self.our_goalhighY = ys[2]
+            self.our_goalmeanY = ys[1]
+
+            self.their_goalX = (data["rightgoal"][0][0] + data["rightgoal"][1][0] + data["rightgoal"][2][0])/3.0
+            ys = [data["rightgoal"][0][1] , data["rightgoal"][1][1] , data["rightgoal"][2][1]]
+            ys.sort()
+            self.their_goallowY = ys[0]
+            self.their_goalhighY = ys[2]
+            self.their_goalmeanY = ys[1]
+
+        else:
+            self.our_goalX = (data["rightgoal"][0][0] + data["rightgoal"][1][0] + data["rightgoal"][2][0])/3.0
+            ys = [data["rightgoal"][0][1] , data["rightgoal"][1][1] , data["rightgoal"][2][1]]
+            ys.sort()
+            self.our_goallowY = ys[0]
+            self.our_goalhighY = ys[2]
+            self.our_goalmeanY = ys[1]
+
+            self.their_goalX = (data["leftgoal"][0][0] + data["leftgoal"][1][0] + data["leftgoal"][2][0])/3.0
+            ys = [data["leftgoal"][0][1] , data["leftgoal"][1][1] , data["leftgoal"][2][1]]
+            ys.sort()
+            self.their_goallowY = ys[0]
+            self.their_goalhighY = ys[2]
+            self.their_goalmeanY = ys[1]
+
+        # clockwise from top left
+        self.goal_left_top = data["leftdefend"][0]
+        self.defending_left_top = data["leftdefend"][1]
+        self.defending_left_bot = data["leftdefend"][2]
+        self.goal_left_bot = data["leftdefend"][3]
+
+        self.defending_right_top = data["rightdefend"][0]
+        self.defending_right_bot = data["rightdefend"][1]
+        self.goal_right_top = data["rightdefend"][1]
+        self.goal_right_bot = data["rightdefend"][1]
+
+        self.pitch_top_left = data["pitch"][0]
+        self.pitch_top_right = data["pitch"][1]
+        self.pitch_bot_right = data["pitch"][2]
+        self.pitch_bot_left = data["pitch"][3]

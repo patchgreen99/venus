@@ -3,7 +3,7 @@ import serial
 
 class RobotProtocol:
     def __init__(self, device):
-        self.ser = serial.Serial(device, 115200, timeout=0.5)
+        self.ser = serial.Serial(device, 115200, timeout=0.1)
         self.seq_no = 0
         self.response = None
         self.write('H', error_check=False)
@@ -16,7 +16,7 @@ class RobotProtocol:
         if wait:
             self.block_until_stop()
 
-    def schedule(self, target, master, motor_powers, grab):
+    def schedule(self, target, master, motor_powers, grab=0):
         params = [target, master, grab] + list(sum(motor_powers, ()))
         self.write('J', params)
 

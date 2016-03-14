@@ -180,7 +180,7 @@ class Vision:
 
             cv2.setTrackbarPos('CALIBRATE', 'Room', 0)
             colors = ['red', 'blue', 'yellow', 'pink', 'green']
-            data = getColors(self.world.room_num, imgOriginal) #todo uncomment if you want to save new calibrations
+            data, R_goal, L_goal, R_defend, L_defend, pitch_corners = getColors(self.world.room_num, imgOriginal)
 
             for color in colors:
                 if color in data.keys():
@@ -212,13 +212,17 @@ class Vision:
                     self.color_ranges[color] = [((min[0], min[1], min[2]), (max[0], max[1], max[2]))]
 
             if self.world.room_num == 1:
-                targetFile = open("vision/color1.txt", "w")
+                targetFile1 = open("vision/color1.txt", "w")
+                targetFile2 = open("vision/pitch1.txt", "w")
             else:
-                targetFile = open("vision/color0.txt", "w")
+                targetFile2 = open("vision/pitch0.txt", "w")
+                targetFile1 = open("vision/color0.txt", "w")
 
-            targetFile.write(str(self.color_ranges))
-            targetFile.close()
-            
+            targetFile1.write(str(self.color_ranges))
+            targetFile2.write("{'rightgoal': "+ str(R_goal) +",'leftgoal': "+ str(L_goal)+",'rightdefend': "+ str(R_defend)+",'leftdefend': "+ str(L_defend)+",'pitch': "+ str(pitch_corners)+"}")
+
+            targetFile1.close()
+            targetFile2.close()
 
         ##########################################################################################################################################
 
@@ -343,7 +347,7 @@ class Vision:
                         position = robots_pos[positionIndex]
                         # todo Danger hard coded
                         if positionIndex == 0:
-                            if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 100: # todo: this is different!
+                            if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 120: # todo: this is different!
                                 self.world.venus.hasBallInRange.value = True
                             else:
                                 self.world.venus.hasBallInRange.value = False

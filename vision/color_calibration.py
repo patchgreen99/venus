@@ -11,7 +11,13 @@ bgr = {
 }
 
 circle_coords = []
+R_goal = []
+L_goal = []
+R_defend = []
+L_defend = []
+pitchCorners = []
 color = ''
+coords = ''
 
 def nothing(x):
     pass
@@ -65,6 +71,13 @@ and getting their pixel values and appending them to the list
 def getColorValues(event,x,y,flags,param):
     global color
     global circle_coords
+    global R_goal
+    global L_goal
+    global R_defend
+    global L_defend
+    global pitchCorners
+    global coords
+
     if event == cv2.EVENT_LBUTTONDOWN:
         if color == 'blue':
             bgr['blue'].append(getPixelValue(img, y, x).tolist())
@@ -86,6 +99,21 @@ def getColorValues(event,x,y,flags,param):
             bgr['yellow'].append(getPixelValue(img, y, x).tolist())
             circle_coords.append((x,y))
 
+        elif coords == "R_goal":
+            R_goal.append((x, y))
+
+        elif coords == "L_goal":
+            L_goal.append((x, y))
+
+        elif coords == "R_defend":
+            R_defend.append((x, y))
+
+        elif coords == "L_defend":
+            L_defend.append((x, y))
+
+        elif coords == "pitch":
+            pitchCorners.append((x, y))
+
 
 '''
 getThresholds() automatically thresholds colors only by clicking on the current feed
@@ -95,12 +123,14 @@ for these colors: red, maroon, green (aka bright_green), pink, yellow, blue and 
 def getThresholds(pitch, frame):
     global color
     global img
+    global coords
+
     img = frame
     hsv_range = {}
     hsv_range['red'] = ( np.array([0, 150, 150]), np.array([5, 255, 255]) )
     hsv_range['maroon'] = ( np.array([175, 150, 150]), np.array([180, 255, 255]) )
 
-    print "Click once on the image after pressing the following: \n 'b' -> blue \n 'c' -> bright_blue \n 'p' -> pink \n 'g' -> green \n 'y' -> yellow"
+    print "Click once on the image after pressing the following: \n 'b' -> blue \n 'c' -> bright_blue \n 'p' -> pink \n 'g' -> green \n 'y' -> yellow \n 'u' -> right goal \n 'v' -> left goal \n 'w'-> right defense \n 'x' -> left defense \n 'z' -> pitch corners"
     print "If you want to redo, click corresponding color character agian."
     print "Once done with obtaining pixel values, pres ESC to proceed."
     cv2.namedWindow('image')
@@ -130,6 +160,33 @@ def getThresholds(pitch, frame):
             print "Click on YELLOW"
             bgr['yellow'] = []
             color = 'yellow'
+
+        elif k == ord("u"):
+            print "Click on the middle top and bottom of the right goal"
+            if(len(R_goal) == 3):
+                del R_goal[:]
+            coords = "R_goal"
+        elif k == ord("v"):
+            print "Click on the middle top and bottom of the left goal"
+            if(len(L_goal) == 3):
+                del L_goal[:]
+            coords = "L_goal"
+        elif k == ord("w"):
+            print "on the right, click on the four points that outline your defending area, start at top left and clockwise to bottom left"
+            if(len(R_defend) == 4):
+                del R_defend[:]
+            coords = "R_defend"
+        elif k == ord("x"):
+            print "on the left, click on the four points that outline your defending area, start at top left and clockwise to bottom left"
+            if(len(L_defend) == 4):
+                del L_defend[:]
+            coords = "L_defend"
+        elif k == ord("z"):
+            print "click on the pitch corners, start at top left and clockwise to bottom left"
+            if(len(pitchCorners) == 4):
+                del pitchCorners[:]
+            coords = "pitch"
+
         elif k == 27:
             break
 
@@ -246,9 +303,9 @@ def calibrateThresholds(pitch, frame):
 
     cv2.destroyWindow('red')
     cv2.destroyWindow('actual feed')
-    return calibrated_thresholds
+    return calibrated_thresholds, R_goal, L_goal, R_defend, L_defend, pitchCorners
 
 def getColors(room_num, img):
     pitch = room_num
-    data = calibrateThresholds(pitch, img)
-    return data
+    data, R_goal, L_goal, R_defend, L_defend, pitchCorners = calibrateThresholds(pitch, img)
+    return data,  R_goal, L_goal, R_defend, L_defend, pitchCorners
