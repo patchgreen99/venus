@@ -35,9 +35,10 @@ class Commands:
         print("! connect <device_no>")
         self.init()
         self.vision()
-        #self.connect()
+        self.connect()
+        #self.highstrategy.main()
 
-    def init(self, room_num=1, team_color='blue', our_color='pink', computer_goal=False):
+    def init(self, room_num=1, team_color='yellow', our_color='pink', computer_goal=False):
         print("init: Room: %s, team color: %s, our single spot color: %s, computer goal: %s" %
               (room_num, team_color, our_color, computer_goal))
         self.world = World(int(room_num), team_color, our_color, computer_goal)
@@ -114,15 +115,12 @@ class Commands:
         #     self.forward_right()
         self.forward_left()
         self.forward_right()
+        self.pause()
         self.sharp_left()
         self.forward_left()
         self.pause()
         self.sharp_right()
-        self.backward_right()
-        self.backward()
         self.forward_right()
-        self.backward()
-        self.backward_left()
 
     def test3(self):
         self.forward()
@@ -150,19 +148,19 @@ class Commands:
         s = sign(x)
         x = abs(x)
 
-        # Last calibration: 12 March
+        # Last calibration: 14 March
 
         if s > 0:  # Clockwise
             if x > 90:
-                x = 1.8644444444 * x - 61.0
+                x = 1.8055555556 * x - 85.0
             else:
-                x = 0.0094731306 * (x ** 2) + 0.2795037292 * x
+                x = 0.0067224213 * (x ** 2) + 0.2676702509 * x
 
         else:  # Counter-clockwise
             if x > 90:
-                x = 1.8511111111 * x - 65.5
+                x = 1.7477777778 * x - 93.5
             else:
-                x = 0.0086354944 * (x ** 2) + 0.3213281698 * x
+                x = 0.0063082437 * (x ** 2) + 0.1935483871 * x
         x = int(x)
         if x > 0:
             self.protocol.schedule(x, MOTOR_TURN, [(MOTOR_LEFT, -100 * s),
@@ -224,7 +222,7 @@ class Commands:
         """Move forward and to left"""
         print("  Forward left")
         self.protocol.schedule(170, MOTOR_TURN, [(MOTOR_TURN, -100),
-                                                 (MOTOR_LEFT, -70),
+                                                 (MOTOR_LEFT, -80),
                                                  (MOTOR_RIGHT, -100)], self.grab_time(grab))
         self.protocol.schedule(50, MOTOR_LEFT, [(MOTOR_LEFT, -100),
                                                 (MOTOR_RIGHT, -100)])
@@ -234,7 +232,7 @@ class Commands:
         print("  Forward right")
         self.protocol.schedule(240, MOTOR_TURN, [(MOTOR_TURN, 100),
                                                  (MOTOR_LEFT, -100),
-                                                 (MOTOR_RIGHT, -70)], self.grab_time(grab))
+                                                 (MOTOR_RIGHT, -80)], self.grab_time(grab))
         self.protocol.schedule(10, MOTOR_RIGHT, [(MOTOR_LEFT, -100),
                                                  (MOTOR_RIGHT, -100)])
 
@@ -254,12 +252,12 @@ class Commands:
                                                 (MOTOR_RIGHT, 100)], self.grab_time(grab))
         self.protocol.schedule(230, MOTOR_TURN, [(MOTOR_TURN, -100),
                                                  (MOTOR_LEFT, 100),
-                                                 (MOTOR_RIGHT, 60)])
+                                                 (MOTOR_RIGHT, 80)])
 
     def sharp_left(self, grab=None):
         """Move to a cell left"""
         print("  Sharp left")
-        self.protocol.schedule(35, MOTOR_TURN, [(MOTOR_TURN, -100),
+        self.protocol.schedule(12, MOTOR_TURN, [(MOTOR_TURN, -100),
                                                 (MOTOR_LEFT, 100),
                                                 (MOTOR_RIGHT, -100)], self.grab_time(grab))
         self.protocol.schedule(50, MOTOR_LEFT, [(MOTOR_LEFT, -100),
@@ -268,7 +266,7 @@ class Commands:
     def sharp_right(self, grab=None):
         """Move to a cell right"""
         print("  Sharp right")
-        self.protocol.schedule(70, MOTOR_TURN, [(MOTOR_TURN, 100),
+        self.protocol.schedule(18, MOTOR_TURN, [(MOTOR_TURN, 100),
                                                 (MOTOR_LEFT, -100),
                                                 (MOTOR_RIGHT, 100)], self.grab_time(grab))
         self.protocol.schedule(50, MOTOR_RIGHT, [(MOTOR_LEFT, -100),
@@ -279,13 +277,16 @@ class Commands:
         x = int(x)
         s = sign(x)
         if x > 0:
-            x = 13.7627360975 * x - 53.5734818271
+            if x > 17:
+                x = 7.5145299398 * x - 80.3832872418
+            else:
+                x = 0.0432484778 * (x ** 2) + 2.1632771388 * x
         else:
             x = 13.964509832 * -x - 75.2448595458
         x = int(x)
         if x > 0:
             self.protocol.move(x, [(MOTOR_LEFT, -100 * s),
-                                   (MOTOR_RIGHT, -100 * s)])
+                                   (MOTOR_RIGHT, -100 * s)], wait=True)
 
     def c(self, x):
         """Rotate clockwise, negative x means counter-clockwise"""
@@ -296,14 +297,15 @@ class Commands:
         # Last calibration: 12 March
 
         if x > 90:
-            x = 1.171111111 * x - 33.0
+            x = 1.08 * x - 49
         else:
-            x = 0.0029623255 * (x ** 2) + 0.5561962134 * x
+            x = 0.0044603744 * (x ** 2) + 0.0802867384 * x
         x = int(x)
+
         if x > 0:
             self.protocol.move(x, [(MOTOR_LEFT, -100 * s),
                                    (MOTOR_RIGHT, 100 * s),
-                                   (MOTOR_TURN, 100 * s)])
+                                   (MOTOR_TURN, 100 * s)], wait=True)
 
     def k(self, x):
         """Kick"""

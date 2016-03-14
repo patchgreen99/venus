@@ -9,7 +9,7 @@ VISION_ROOT = 'vision/'
 MAX_COLOR_COUNTS = {
     'red': 10,
     'blue': 2,
-    'yellow': 2,
+    'yellow': 10,
     'pink': 8,
     'green': 8,
 }
@@ -347,7 +347,7 @@ class Vision:
                         position = robots_pos[positionIndex]
                         # todo Danger hard coded
                         if positionIndex == 0:
-                            if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 120: # todo: this is different!
+                            if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 80: # todo: this is different!
                                 self.world.venus.hasBallInRange.value = True
                             else:
                                 self.world.venus.hasBallInRange.value = False

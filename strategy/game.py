@@ -66,6 +66,7 @@ class Game:
     ################################################################################################################################################################
     def mid(self, state):
         if state == "FREE_BALL_YOURS":
+            start = True
             while True:
 
                 # ON
@@ -100,8 +101,8 @@ class Game:
                 # todo too reliant on vision, must pick what to use for look ahead
 
                 self.current_point = (self.world.venus.position[0], self.world.venus.position[1])
-                #if self.turn != 180 or None:
-                self.current_direction = (self.world.venus.orientation[0], self.world.venus.orientation[1])
+                if self.turn != 180 or None:
+                    self.current_direction = (self.world.venus.orientation[0], self.world.venus.orientation[1])
 
                 potential = Potential(self.current_point, self.current_direction, self.world, ball_field, friend_field, enemy1_field, enemy2_field,
                                                  free_up_pass_enemy1, free_up_pass_enemy2, free_up_goal_enemy1,
@@ -120,29 +121,22 @@ class Game:
                 if self.world.venus.hasBallInRange.value and self.ready < 1:
                     angle, length = self.calculate_angle_length_ball()
                     self.ready += 1
-                    #self.commands.turn(angle, grab=False)
-                    self.commands.turn(angle, grab=None)
-                    self.commands.open_wide()
-                    self.turn = angle
-                    self.current_direction = rotate_vector(angle, self.current_direction[0], self.current_direction[1])
+
+                    self.commands.flush()
+                    self.commands.s()
+                    self.grab_ball()
+                    print("It thinks it has the ball")
+                    return
                 else:
-                    grab = None
-                    if self.grab_range() and self.ready > 0:
-                        grab = True
-                        self.commands.g()
-                        self.ready = 0
-
-                        print("It thinks it has the ball")
-
-                    self.turn, self.current_point = self.move_attack(None)
+                    if start is True:
+                        start = False
+                        self.turn, self.current_point = self.move_defense(None)
+                    else:
+                        self.turn, self.current_point = self.move_defense(None)
                     self.current_direction = rotate_vector(self.turn, self.current_direction[0], self.current_direction[1])
-
-                    if grab:
-                        return
-
                 ########################################
 
-                time.sleep(1)
+                time.sleep(.7)
 
                 ###########################################################################################################################################
 
@@ -416,7 +410,7 @@ class Game:
 
             ########################################
 
-            time.sleep(.7)
+            time.sleep(1)
 
             ###########################################################################################################################################
 
@@ -594,12 +588,18 @@ class Game:
             self.commands.sharp_right(grab)
             return RIGHT, self.points[2, 3]
         elif [3, 2] in indices or [4, 1] in indices or [4, 3] in indices:
+            if self.moving:
+                self.commands.pause()
             self.commands.turn(180, grab)
             return BOTTOM, self.points[2, 2]
         elif [3, 1] in indices or [3, 0] in indices:
+            if self.moving:
+                self.commands.pause()
             self.commands.turn(180, grab)
             return BOTTOM, self.points[2, 2]
         elif [3, 3] in indices or [3, 4] in indices:
+            if self.moving:
+                self.commands.pause()
             self.commands.turn(180, grab)
             return BOTTOM, self.points[2, 2]
 
@@ -638,16 +638,24 @@ class Game:
             self.commands.backward_right(grab)
             return LEFT, self.points[3, 3]
 
-    def calculate_angle_length_ball(self):
-        return self.calculate_angle_length(np.array([self.world.ball[0], self.world.ball[1]]))
-
     def grab_range(self):
         refAngle = math.atan2(self.world.venus.orientation[1], self.world.venus.orientation[0])
         ballAngle, ballLength = self.calculate_angle_length_ball()
-        if abs(ballLength) < 30 and abs(refAngle-ballLength) < 15:
+        if abs(ballLength) < 25 and abs(refAngle-ballLength) < 45:
             return True
         else:
             return False
+
+    def calculate_angle_length_ball(self):
+        return self.calculate_angle_length(np.array([self.world.ball[0], self.world.ball[1]]))
+
+    def calculate_angle_length_goal(self):
+        # computer goal
+        if self.world.venus.position[0] > 300:
+            return self.calculate_angle_length(np.array([589, 221]))
+        # white board goal
+        else:
+            return self.calculate_angle_length(np.array([8, 227]))
 
     def calculate_angle_length(self, pos):
 
@@ -671,6 +679,57 @@ class Game:
         motion_length = np.linalg.norm(motion_vec) * CENTIMETERS_TO_PIXELS
 
         return angle, motion_length
+
+    def approach(self, angle, motion_length):
+        print("Turning " + str(angle) + " deg then going " + str(motion_length) + " cm")
+        self.commands.c(angle)
+        #time.sleep(.4)
+        self.commands.f(motion_length)
+        #time.sleep(.4)
+
+    def grab_ball(self):
+
+        angle, motion_length = self.calculate_angle_length_ball()
+
+        while motion_length > 80:
+            self.approach(angle, 40)
+            angle, motion_length = self.calculate_angle_length_ball()
+
+        time.sleep(1)
+        angle, motion_length = self.calculate_angle_length_ball()
+        if motion_length > 30:
+            motion_length -= 30
+        else:
+            motion_length = 0
+        print("LAST BEFORE LAST: turning " + str(angle) + " deg, going " + str(motion_length) + " cm")
+        self.approach(angle, motion_length)
+
+        time.sleep(1)
+        angle, motion_length = self.calculate_angle_length_ball()
+        print("LAST: Turning " + str(angle) + " deg")
+        self.commands.c(angle)
+
+        self.commands.open_wide()
+        time.sleep(.4)
+
+        print("LAST: Going " + str(motion_length) + " cm")
+
+        motion_length -= 8 #12 #13
+        if motion_length < 5:
+            motion_length = 5
+
+        self.commands.f(motion_length)
+        self.commands.g()
+        time.sleep(1)
+
+    def magnitude(self, (x, y)):
+        return math.sqrt(x**2 + y**2)
+
+    def dot_product(self, (ax, ay),(bx, by)):
+        return ax*bx + ay*by
+
+    def cross_product(self, (ax, ay),(bx, by)):
+        return ax*by + ay*bx
 
 
 
@@ -976,3 +1035,6 @@ def get_play_direction(world):
         return 1, 0
     elif world.we_have_computer_goal and world.room_num == 0 or not world.we_have_computer_goal and world.room_num == 1:
         return -1, 0
+
+def magnitude((x, y)):
+    return math.sqrt(x**2 + y**2)

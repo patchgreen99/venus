@@ -458,9 +458,9 @@ class step_field_inside:
                     return 0
             else:
                 if self.constant <= 0:
-                    return -9999*self.constant
+                    return self.constant/math.pow(distance_to, self.gradient)
                 else:
-                    return 9999*self.constant
+                    return - self.constant/math.pow(distance_to, self.gradient)
         else:
             return 0
 

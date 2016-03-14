@@ -113,7 +113,7 @@ class StrategyTools:
         # enemy_no = int(enemystr)
         if enemy_no == 1:
             enemyposition = self.world.enemy1.position
-            if self.iclosertogoal(enemyposition) or self.world.enemy2.out: #TODO: or enemy out of pitch -- done, test!
+            if self.iclosertogoal(enemyposition) or self.world.enemy2.out.value: #TODO: or enemy out of pitch -- done, test!
                # self.commands.block_goal(1)
                 #print('block goal enemy1')
                 return "ENEMY1_BALL_TAKE_GOAL"
@@ -123,7 +123,7 @@ class StrategyTools:
                 return "ENEMY_BALL_TAKE_PASS"
         elif enemy_no == 2:
             enemyposition = self.world.enemy2.position
-            if self.iclosertogoal(enemyposition) or self.world.enemy1.out:  #TODO: or enemy out of pitch -- done, test!
+            if self.iclosertogoal(enemyposition) or self.world.enemy1.out.value:  #TODO: or enemy out of pitch -- done, test!
                 #self.commands.block_goal(2)
                 #print('block goal enemy2')
                 return "ENEMY2_BALL_TAKE_GOAL"
@@ -172,7 +172,7 @@ class StrategyTools:
             return False
 
     def isinbetween(self,(x1,y1),(x2,y2),(x,y)):
-        if x>min(x1,x2) & x <max(x1,x2) & y>min(y1,y2) & y<max(y1,y2) :
+        if x>min(int(x1),int(x2)) & x < max(int(x1), int(x2)) & y>min(y1,y2) & y<max(y1,y2) :
             return True
         else:
             return False
@@ -203,7 +203,7 @@ class StrategyTools:
         d1 = self.euclideandist((x1,y1),(x,y))
         d2 = self.euclideandist((x2,y2),(x,y))
 
-        if d1 < d2 or self.world.friend.out:         #TODO: or teamate out of pitch -- done, testing needed
+        if d1 < d2 or self.world.friend.out.value:         #TODO: or teamate out of pitch -- done, testing needed
             return True
         else:
             return False
@@ -235,7 +235,11 @@ class StrategyTools:
         robotposlist = [(x3,y3),
                         (x4,y4)]
 
+<<<<<<< HEAD
         if self.isSafe2((x2,y2),(x1,y1),robotposlist) and self.world.friend.hasBallInRange:
+=======
+        if self.isSafeKick((x2,y2),(x1,y1),robotposlist) and self.world.friend.hasBallInRange.value:
+>>>>>>> 200c0cec74448f6d784c893c47203f050e27ef2e
             return "RECEIVE_BALL"
             # print('receive pass')
         else:
@@ -320,35 +324,40 @@ class StrategyTools:
         start = True
         last_state = "None"
         while True:
-          #  venus = self.world.venus
+            venus = self.world.venus
             friend = self.world.friend
             enemy1 = self.world.enemy1
             enemy2 = self.world.enemy2
-            if self.commands.query_ball():
+           # if self.commands.query_ball():
+            print(friend.hasBallInRange.value)
+            print(enemy1.hasBallInRange.value)
+            print(enemy2.hasBallInRange.value)
+            if venus.hasBallInRange.value:
                 # venus has the ball
-                self.commands.g()
+             #   self.commands.g()
                 state = self.attackwithball()
-            elif friend.hasBallInRange:
+            elif friend.hasBallInRange.value:
                 # friend has the ball
                 state = self.ballwithfriend()
-            elif enemy1.hasBallInRange:
+            elif enemy1.hasBallInRange.value:
                 # enemy1 has the ball
                 state = self.ballwithenemy(1)
-            elif enemy2.hasBallInRange:
+            elif enemy2.hasBallInRange.value:
                 # enemy2 has the ball
                 state = self.ballwithenemy(2)
             else:
                 # open ball!
                 state = self.openball()
-
-            if start == True:
-                start = False
-                self.game.start(state)
-            elif last_state == state:
-                self.game.mid(state)
-            else:
-                self.game.end(last_state)
-                self.game.start(state)
+            print(state)
+            #
+            # if start == True:
+            #     start = False
+            #     self.game.start(state)
+            # elif last_state == state:
+            #     self.game.mid(state)
+            # else:
+            #     self.game.end(last_state)
+            #     self.game.start(state)
 
     if __name__ == "__main__":
         main()
