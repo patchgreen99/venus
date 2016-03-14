@@ -136,7 +136,7 @@ class Game:
                     self.current_direction = rotate_vector(self.turn, self.current_direction[0], self.current_direction[1])
                 ########################################
 
-                time.sleep(.7)
+                time.sleep(.5)
 
                 ###########################################################################################################################################
 
