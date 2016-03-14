@@ -26,47 +26,88 @@ class StrategyTools:
         print(self.world.enemy1.position[0],self.world.enemy1.position[1])
         i = (highy + lowy)/2
         while i < highy:
-            if self.isSafeKick((x1,y1),(goalx,i),robotposlist ):
+            if self.isSafe2((x1,y1),(goalx,i),robotposlist ):
                 return "ATTACK_GOAL"
             i = i + 1
         i = (highy + lowy)/2
         while i > lowy:
-            if self.isSafeKick((x1,y1),(goalx,i),robotposlist):
+            if self.isSafe2((x1,y1),(goalx,i),robotposlist):
                 return "ATTACK_GOAL"
             i = i - 1
-        if self.isSafeKick((x1, y1), (x2, y2), robotposlist):
+        if self.isSafe2((x1, y1), (x2, y2), robotposlist):
             return "ATTACK_PASS"
         # do something instead
         print('something else')
-        return
+        return 'NOTHING'
 
-    def isSafeKick(self, (x1, y1), (x2, y2), robotposlist):
-        rotation = 0.20
-        m1, c1 = self.rotateline(x1, y1, x2, y2, rotation)
-        m2, c2 = self.rotateline(x1, y1, x2, y2, -rotation)
-        if (y2 - m1 * x2 - c1) > 0:
-            s = 1
-        else:
-            s = -1
-        i = 0
-        while i < len(robotposlist):
-            if robotposlist[i][1] > min(y1, y2) & robotposlist[i][1] < max(y1, y2):
-                if (robotposlist[i][1] - m1 * robotposlist[i][0] - c1) * s > 0:
+    def isSafe2(self,(x1, y1), (x2, y2), robotposlist):
+        #rotation = 0.30
+        m = (y2 - y1) / (x2 - x1)
+        c = y2 - m*x2
+        for rb in robotposlist:
+            if rb[1] > min(y1, y2) & rb[1] < max(y1, y2):
+                if ((rb[1] - m * rb[0] - c) < 0.5) & ((rb[1] - m * rb[0] - c) > -0.5):
                     return False
-                if (robotposlist[i][1] - m2 * robotposlist[i][0] - c2) * s > 0:
-                    return False
-            i = i + 1
         return True
 
-    def rotateline(self, x1, y1, x2, y2, rotation):
-        diff = np.array([x2 - x1, y2 - y1])
-        r = np.array([[math.cos(rotation), -math.sin(rotation)], [math.sin(rotation), math.cos(rotation)]])
-        mul = np.multiply(r, diff)
-        newarr = np.subtract(mul, np.array([x1, y1]))
-        newlist = newarr.tolist()
-        m1 = (newlist[1][1] - y1) / (newlist[1][0] - x1)
-        c1 = newlist[1][1] - m1*newlist[1][0]
-        return (m1,c1)
+    # def isSafeKick(self,(x1, y1), (x2, y2), robotposlist):
+    #     rotation = 0.30
+    #     m = (y2 - y1) / (x2 - x1)
+    #     c = y2 - m*x2
+    #     print((m,c))
+    #     (m1, c1 )= self.rotateline(x1, y1, x2, y2, rotation)
+    #     print((m1,c1))
+    #     m2, c2 = self.rotateline(x1, y1, x2, y2, -rotation*2)
+    #     print((m2,c2))
+    #     if (y2 - (m1 * x2) - c1) > 0:
+    #         s1 = 1
+    #     else:
+    #         s1 = -1
+    #     if (y2 - (m2 * x2) - c2) > 0:
+    #         s2 = 1
+    #     else:
+    #         s2 = -1
+    #     i = 0
+    #     while i < len(robotposlist):
+    #         if robotposlist[i][1] > min(y1, y2) & robotposlist[i][1] < max(y1, y2):
+    #             if (robotposlist[i][1] - m1 * robotposlist[i][0] - c1) * s1 > 0:
+    #                 return False
+    #             if (robotposlist[i][1] - m2 * robotposlist[i][0] - c2) * s2 > 0:
+    #                 return False
+    #         i = i + 1
+    #     return True
+    #
+    # def rotateline(self,x1, y1, x2, y2, rotation):
+    #     # diff = np.array([x2 - x1, y2 - y1])
+    #     # r = np.array([[math.cos(rotation), -math.sin(rotation)], [math.sin(rotation), math.cos(rotation)]])
+    #     # mul = np.multiply(r, diff)
+    #     # newarr = np.subtract(mul, np.array([x1, y1]))
+    #     # newlist = newarr.tolist()
+    #     # m1 = (newlist[1][1] - y1) / (newlist[1][0] - x1)
+    #     # c1 = newlist[1][1] - m1*newlist[1][0]
+    #     # return (m1,c1)
+    #
+    #       #POINT rotate_point(float cx,float cy,float angle,POINT p)
+    #     s = math.sin(rotation);
+    #     c = math.cos(rotation);
+    #
+    #     m2 = (y2 - y1) / (x2 - x1)
+    #     c2 = y1 - m2*x1
+    #
+    #     x3 = x2-x1;
+    #     y3 = y2 -y1;
+    #
+    #     xnew = (x2 * c) - (y2 * s);
+    #     ynew = (y2* s) + (x2 * c);
+    #     x3 = xnew + x1;
+    #     y3 = ynew + y1;
+    #     m1 = (y3 - y1) / (x3 - x1)
+    #     c1 = y3 - m1*x3
+    #
+    #     return (m1,c1)
+    #
+
+
 
     def ballwithenemy(self, enemy_no):
         # enemy_no = int(enemystr)
@@ -194,7 +235,7 @@ class StrategyTools:
         robotposlist = [(x3,y3),
                         (x4,y4)]
 
-        if self.isSafeKick((x2,y2),(x1,y1),robotposlist) and self.world.friend.hasBallInRange:
+        if self.isSafe2((x2,y2),(x1,y1),robotposlist) and self.world.friend.hasBallInRange:
             return "RECEIVE_BALL"
             # print('receive pass')
         else:
@@ -258,13 +299,13 @@ class StrategyTools:
 
         i = (highy + lowy)/2
         while i < highy:
-            if self.isSafeKick((x1,y1),(goalx,i),robotposlist ):
+            if self.isSafeK2((x1,y1),(goalx,i),robotposlist ):
                 # grab_ball then turn and kick towards the right spot at the goal
                 return
             i = i + 1
         i = (highy + lowy)/2
         while i > lowy:
-            if self.isSafeKick((x1,y1),(goalx,i),robotposlist):
+            if self.isSafe2((x1,y1),(goalx,i),robotposlist):
                 # grab_ball then turn and kick towards the right spot at the goal
                 return
             i = i - 1
