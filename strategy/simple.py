@@ -82,7 +82,7 @@ class SimpleStrategy:
         if motion_length < 5:
             motion_length = 5
 
-        self.commands.f(motion_length, wait=True)
+        self.commands.f(motion_length)
         self.commands.g()
         time.sleep(1)
 
