@@ -235,11 +235,8 @@ class StrategyTools:
         robotposlist = [(x3,y3),
                         (x4,y4)]
 
-<<<<<<< HEAD
-        if self.isSafe2((x2,y2),(x1,y1),robotposlist) and self.world.friend.hasBallInRange:
-=======
-        if self.isSafeKick((x2,y2),(x1,y1),robotposlist) and self.world.friend.hasBallInRange.value:
->>>>>>> 200c0cec74448f6d784c893c47203f050e27ef2e
+
+        if self.isSafeKick((x2,y2),(x1,y1),robotposlist) and self.world.friend.hasBallInRange.value
             return "RECEIVE_BALL"
             # print('receive pass')
         else:
