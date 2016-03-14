@@ -58,6 +58,9 @@ class Commands:
     def query_ball(self):
         print("We have the ball: %s" % self.protocol.query_ball())
 
+    def runstrategy(self):
+        self.highstrategy.main()
+
     def attackwithball(self):
         self.highstrategy.attackwithball()
 
