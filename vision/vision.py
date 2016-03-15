@@ -458,7 +458,7 @@ class Vision:
                 counter = 0
                 if pointsSorted is not None:
                     for localPoint in pointsSorted:
-                        if sqrt((point[0] - localPoint[0]) ** 2 + (point[1] - localPoint[1]) ** 2) < 30 and counter < 5:
+                        if math.sqrt((point[0] - localPoint[0]) ** 2 + (point[1] - localPoint[1]) ** 2) < 30 and counter < 5:
                             counter += 1
                             localPoints.append(localPoint)
                             pointsUsed.append(localPoint)
@@ -663,21 +663,21 @@ class Vision:
         robot.position[0] = int(position[0])
         robot.position[1] = int(position[1])
         rad = math.radians(orientation)
-        robot.orientation[0] = sin(rad)
-        robot.orientation[1] = cos(rad)
+        robot.orientation[0] = math.sin(rad)
+        robot.orientation[1] = math.cos(rad)
 
     def three_spot(self, robot, three_spot_color, center_color, similar_bot, bot_id):
         bot = [self.world.venus, self.world.friend, self.world.enemy1, self.world.enemy2][bot_id]
         dist = []
         point_1 = []
         point_2 = []
-        dist.append(sqrt((robot[three_spot_color][0][0] - robot[three_spot_color][1][0]) ** 2 + (
+        dist.append(math.sqrt((robot[three_spot_color][0][0] - robot[three_spot_color][1][0]) ** 2 + (
             robot[three_spot_color][0][1] - robot[three_spot_color][1][1]) ** 2))
 
-        dist.append(sqrt((robot[three_spot_color][1][0] - robot[three_spot_color][2][0]) ** 2 + (
+        dist.append(math.sqrt((robot[three_spot_color][1][0] - robot[three_spot_color][2][0]) ** 2 + (
             robot[three_spot_color][1][1] - robot[three_spot_color][2][1]) ** 2))
 
-        dist.append(sqrt((robot[three_spot_color][2][0] - robot[three_spot_color][0][0]) ** 2 + (
+        dist.append(math.sqrt((robot[three_spot_color][2][0] - robot[three_spot_color][0][0]) ** 2 + (
             robot[three_spot_color][2][1] - robot[three_spot_color][0][1]) ** 2))
 
         point_1.append((robot[three_spot_color][(dist.index(max(dist))) % 3][0] +
