@@ -264,7 +264,7 @@ class Vision:
                         if 10 < center[1] < self.COLS - 10: #todo Danger hard coded
                             circles[color].append((center[1], center[0], areas[center_index], color))
                     elif color == 'blue':
-                        if 10 < center[0] < self.COLS - 10: #todo Danger hard coded
+                        if 10 < center[0] < self.COLS - 10 or 10 < center[1] < self.ROWS - 10 : #todo Danger hard coded
                             circles[color].append((center[1], center[0], areas[center_index], color))
                     else:
                         circles[color].append((center[1], center[0], areas[center_index], color))
@@ -298,21 +298,21 @@ class Vision:
             for robot_id, robot in enumerate([self.world.venus, self.world.friend, self.world.enemy1, self.world.enemy2]):
                 if robot.position[0] != NO_VALUE:
                     cv2.rectangle(imgOriginal, (robot.position[0] - 20, robot.position[1] - 20),
-                                  (robot.position[0] + 20, robot.position[1] + 20), self.robot_color(robot_id, robot.out), 2)
+                                  (robot.position[0] + 20, robot.position[1] + 20), self.robot_color(robot_id, robot.out.value), 2)
                     cv2.arrowedLine(imgOriginal, (robot.position[0], robot.position[1]),
                                     (int(robot.position[0] + robot.orientation[0] * 50.0),
                                      int(robot.position[1] + robot.orientation[1] * 50.0)),
-                                    self.robot_color(robot_id, robot.out), 2)
+                                    self.robot_color(robot_id, robot.out.value), 2)
                     cv2.putText(imgOriginal, str(robot_id), (robot.position[0] + 20, robot.position[1] + 40),
                                 cv2.FONT_HERSHEY_SIMPLEX,
-                                2, self.robot_color(robot_id, robot.out))
+                                2, self.robot_color(robot_id, robot.out.value))
             if self.start < 10:
                 self.start +=1
             self.pressed_key = cv2.waitKey(2) & 0xFF
             cv2.imshow('Room', imgOriginal)
 
     def robot_color(self, r_id, out):
-        if out is True:
+        if out == 1:
             return COLORS['blue']
         else:
             if r_id == 0:
@@ -347,7 +347,7 @@ class Vision:
                         position = robots_pos[positionIndex]
                         # todo Danger hard coded
                         if positionIndex == 0:
-                            if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 90: # todo: this is different!
+                            if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 100: # todo: this is different!
                                 self.world.venus.hasBallInRange.value = True
                             else:
                                 self.world.venus.hasBallInRange.value = False

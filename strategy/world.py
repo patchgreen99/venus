@@ -49,7 +49,7 @@ class World:
             self.venus, self.friend, self.enemy1, self.enemy2)
 
     def read_pitch(self, data):
-        if self.we_have_computer_goal:
+        if self.we_have_computer_goal and self.room_num == 1 or not self.we_have_computer_goal and self.room_num == 0 :
             self.our_goalX = (data["leftgoal"][0][0] + data["leftgoal"][1][0] + data["leftgoal"][2][0])/3.0
             ys = [data["leftgoal"][0][1] , data["leftgoal"][1][1] , data["leftgoal"][2][1]]
             ys.sort()
@@ -86,9 +86,9 @@ class World:
         self.goal_left_bot = data["leftdefend"][3]
 
         self.defending_right_top = data["rightdefend"][0]
-        self.defending_right_bot = data["rightdefend"][1]
         self.goal_right_top = data["rightdefend"][1]
-        self.goal_right_bot = data["rightdefend"][1]
+        self.goal_right_bot = data["rightdefend"][2]
+        self.defending_right_bot = data["rightdefend"][3]
 
         self.pitch_top_left = data["pitch"][0]
         self.pitch_top_right = data["pitch"][1]

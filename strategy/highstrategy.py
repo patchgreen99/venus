@@ -128,7 +128,7 @@ class StrategyTools:
         angle = math.acos(cos_)
         
         # Basically doing angle <- angle mod 360
-        ang_deg = math.degrees(angle)%360
+        ang_deg = math.degrees(abs(angle))%360
 
         if ang_deg-180>=0:
             # As in if statement

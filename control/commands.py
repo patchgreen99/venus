@@ -38,7 +38,7 @@ class Commands:
         self.connect()
         #self.highstrategy.main()
 
-    def init(self, room_num=1, team_color='blue', our_color='green', computer_goal=True):
+    def init(self, room_num=0, team_color='blue', our_color='green', computer_goal=False):
         print("init: Room: %s, team color: %s, our single spot color: %s, computer goal: %s" %
               (room_num, team_color, our_color, computer_goal))
         self.world = World(int(room_num), team_color, our_color, computer_goal)
@@ -57,8 +57,9 @@ class Commands:
             self.vision_process.start()
 
     def query_ball(self):
-        print("We have the ball: %s" % self.protocol.query_ball())
-        return self.protocol.query_ball()
+        a = self.protocol.query_ball()
+        print("We have the ball: %s" % a)
+        return a
 
     def start_game(self, case_no):
         #1 is when venus kicks off the game
@@ -112,6 +113,10 @@ class Commands:
 
     def ptest(self):
         self.game.mid("FREE_BALL_2_GOALSIDE")
+
+    def positionTest(self):
+        while True:
+            print self.world.venus.out.value
 
     def flush(self):
         self.protocol.flush()
@@ -352,15 +357,15 @@ class Commands:
         # Last calibration: 12 March
 
         if x > 90:
-            x = 1.08 * x - 49
+            x = 0.9933333333 * x - 43
         else:
-            x = 0.0044603744 * (x ** 2) + 0.0802867384 * x
+            x = 0.0018797292 * (x ** 2) + 0.420501791 * x
         x = int(x)
 
         if x > 0:
-            self.protocol.move(x, [(MOTOR_TURN, 100 * s),
-                                   (MOTOR_LEFT, -100 * s),
-                                   (MOTOR_RIGHT, 100 * s)], wait=True)
+            self.protocol.move(x, [(MOTOR_LEFT, -100 * s),
+                                   (MOTOR_RIGHT, 100 * s),
+                                   (MOTOR_TURN, 100 * s)], wait=True)
 
     def k(self, x):
         """Kick"""

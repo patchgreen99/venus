@@ -4,7 +4,7 @@ import time
 import numpy as np
 
 ROBOT_SIZE = 30
-ROBOT_INFLUENCE_SIZE = 600
+ROBOT_INFLUENCE_SIZE = 120
 CENTIMETERS_TO_PIXELS = (300.0 / 640.0)
 COLS = 640
 ROWS = 480
@@ -75,9 +75,9 @@ class Game:
 
                 ball_field = radial(self.world.ball, 1, -5)# -5
 
-                friend_field = solid_field(self.world.friend.position, 4, 0, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-                enemy1_field = solid_field(self.world.enemy1.position, 4, 0, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-                enemy2_field = solid_field(self.world.enemy2.position, 4, 0, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+                friend_field = solid_field(self.world.friend.position, 2, 10, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+                enemy1_field = solid_field(self.world.enemy1.position, 2, 10, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+                enemy2_field = solid_field(self.world.enemy2.position, 2, 10, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
 
                 advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
                 catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
@@ -118,25 +118,27 @@ class Game:
 
                 #self.current_direction = potential.last_direction
                 self.local_potential, self.points = potential.get_local_potential()
+
                 print self.local_potential
-                if self.world.venus.hasBallInRange.value and self.ready < 1:
-                    angle, length = self.calculate_angle_length_ball()
-                    self.ready += 1
-
-                    #self.commands.flush()
-                    #self.commands.s()
-                    while not self.grab_range():
-                        self.grab_ball()
-
-                    print("It thinks it has the ball")
-                    return
+                if self.world.venus.hasBallInRange.value:
+                    angle, motion_length = self.calculate_angle_length_ball()
+                    self.commands.open_wide()
+                    time.sleep(.6)
+                    self.commands.c(angle)
+                    angle, motion_length = self.calculate_angle_length_ball()
+                    self.commands.f(motion_length)
+                    self.commands.g()
+                    time.sleep(.6)
+                    if self.commands.query_ball() and self.commands.query_ball():
+                        print("It thinks it has the ball")
+                        return
+                    #else:
+                    #    self.turn, self.current_point = self.move(None)
+                    #    self.current_direction = rotate_vector(self.turn, self.current_direction[0], self.current_direction[1])
                 else:
-                    if start is True:
-                        start = False
-                        self.turn, self.current_point = self.move(None)
-                    else:
-                        self.turn, self.current_point = self.move(None)
+                    self.turn, self.current_point = self.move(None)
                     self.current_direction = rotate_vector(self.turn, self.current_direction[0], self.current_direction[1])
+
                 ########################################
 
                 #time.sleep(.5)
@@ -1003,9 +1005,9 @@ class step_field_inside:
                     return 0
             else:
                 if self.constant <= 0:
-                    return -9999*self.constant
+                    return 9999*self.constant + self.constant/math.pow(distance_to, self.gradient)
                 else:
-                    return 9999*self.constant
+                    return 9999*self.constant - self.constant/math.pow(distance_to, self.gradient)
         else:
             return 0
 

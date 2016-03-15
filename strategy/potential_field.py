@@ -8,7 +8,7 @@ PITCH_COLS = 640 #pixels
 
 POTENTIAL_GRANULARITY = 20*CENTIMETERS_TO_PIXELS #pixels
 WALL_INFLUENCE = 100 # pixels
-PENALTY_BOX_INFLUENCE = 30 # pixels
+PENALTY_BOX_INFLUENCE = 100# pixels
 
 '''
 DEFENDING_LEFT_TOP = [(117, 114), (190, 144)]
@@ -36,20 +36,20 @@ class Potential:
             self.last_square = last_square
             self.last_direction = last_direction
 
-            self.top_wall = step_field_inside(self.world.pitch_top_left, self.world.pitch_top_right, (self.world.pitch_top_right[0]-self.world.pitch_top_left[0], self.world.pitch_top_right[1]-self.world.pitch_top_left[1]), WALL_INFLUENCE, 3, 3) # best with 2 500
-            self.bot_wall = step_field_inside(self.world.pitch_bot_left, self.world.pitch_bot_right, (self.world.pitch_bot_left[0]-self.world.pitch_bot_right[0], self.world.pitch_bot_left[1]-self.world.pitch_bot_right[1]), WALL_INFLUENCE, 3, 3)
-            self.right_wall = step_field_inside(self.world.pitch_top_right, self.world.pitch_bot_right, (self.world.pitch_bot_right[0] - self.world.pitch_top_right[0], self.world.pitch_bot_right[1] - self.world.pitch_top_right[1]), WALL_INFLUENCE, 3, 3)
-            self.left_wall = step_field_inside(self.world.pitch_top_left, self.world.pitch_bot_left, (self.world.pitch_top_left[0] - self.world.pitch_bot_left[0], self.world.pitch_top_left[1] - self.world.pitch_bot_left[1]), WALL_INFLUENCE, 3, 3)
+            self.top_wall = step_field_inside(self.world.pitch_top_left, self.world.pitch_top_right, (self.world.pitch_top_right[0]-self.world.pitch_top_left[0], self.world.pitch_top_right[1]-self.world.pitch_top_left[1]), WALL_INFLUENCE, 3, 15) # best with 3 5
+            self.bot_wall = step_field_inside(self.world.pitch_bot_left, self.world.pitch_bot_right, (self.world.pitch_bot_left[0]-self.world.pitch_bot_right[0], self.world.pitch_bot_left[1]-self.world.pitch_bot_right[1]), WALL_INFLUENCE, 3, 15)
+            self.right_wall = step_field_inside(self.world.pitch_top_right, self.world.pitch_bot_right, (self.world.pitch_bot_right[0] - self.world.pitch_top_right[0], self.world.pitch_bot_right[1] - self.world.pitch_top_right[1]), WALL_INFLUENCE, 3, 15)
+            self.left_wall = step_field_inside(self.world.pitch_top_left, self.world.pitch_bot_left, (self.world.pitch_top_left[0] - self.world.pitch_bot_left[0], self.world.pitch_top_left[1] - self.world.pitch_bot_left[1]), WALL_INFLUENCE, 3, 15)
 
             # use 1, 100
             if world.we_have_computer_goal and world.room_num == 1 or not world.we_have_computer_goal and world.room_num == 0: # there goal is on the right
-                self.penalty_box_front = step_field_inside(self.world.defending_right_top, self.world.defending_right_bot, (self.world.defending_right_bot[0]-self.world.defending_right_top[0], self.world.defending_right_bot[1]-self.world.defending_right_top[1]), PENALTY_BOX_INFLUENCE, 2, 0) # 2, 500
-                self.penalty_box_top = infinite_axial_inside(self.world.goal_right_top, self.world.defending_right_top, PENALTY_BOX_INFLUENCE, 2, 0)
-                self.penalty_box_bot = infinite_axial_inside(self.world.goal_right_bot, self.world.defending_right_bot, PENALTY_BOX_INFLUENCE, 2, 0)
+                self.penalty_box_front = step_field_inside(self.world.defending_right_top, self.world.defending_right_bot, (self.world.defending_right_bot[0]-self.world.defending_right_top[0], self.world.defending_right_bot[1]-self.world.defending_right_top[1]), PENALTY_BOX_INFLUENCE, 2, 15) # 2, 500
+                self.penalty_box_top = infinite_axial_inside(self.world.goal_right_top, self.world.defending_right_top, PENALTY_BOX_INFLUENCE, 2, 15)
+                self.penalty_box_bot = infinite_axial_inside(self.world.goal_right_bot, self.world.defending_right_bot, PENALTY_BOX_INFLUENCE, 2, 15)
             elif world.we_have_computer_goal and world.room_num == 0 or not world.we_have_computer_goal and world.room_num == 1: # obviously the left goal
-                self.penalty_box_front = step_field_inside(self.world.defending_left_top, self.world.defending_left_bot, (self.world.defending_left_top[0]-self.world.defending_left_bot[0], self.world.defending_left_top[1]-self.world.defending_left_bot[1]), PENALTY_BOX_INFLUENCE, 2, 0)
-                self.penalty_box_top = infinite_axial_inside(self.world.goal_left_top, self.world.defending_left_top, PENALTY_BOX_INFLUENCE, 2, 0)
-                self.penalty_box_bot = infinite_axial_inside(self.world.goal_left_bot, self.world.defending_left_bot, PENALTY_BOX_INFLUENCE, 2, 0)
+                self.penalty_box_front = step_field_inside(self.world.defending_left_top, self.world.defending_left_bot, (self.world.defending_left_top[0]-self.world.defending_left_bot[0], self.world.defending_left_top[1]-self.world.defending_left_bot[1]), PENALTY_BOX_INFLUENCE, 2, 15)
+                self.penalty_box_top = infinite_axial_inside(self.world.goal_left_top, self.world.defending_left_top, PENALTY_BOX_INFLUENCE, 2, 15)
+                self.penalty_box_bot = infinite_axial_inside(self.world.goal_left_bot, self.world.defending_left_bot, PENALTY_BOX_INFLUENCE, 2, 15)
 
             self.ball_field = ball_field
 
@@ -458,9 +458,9 @@ class step_field_inside:
                     return 0
             else:
                 if self.constant <= 0:
-                    return self.constant/math.pow(distance_to, self.gradient)
+                    return 9999*self.constant + self.constant/math.pow(distance_to, self.gradient)
                 else:
-                    return - self.constant/math.pow(distance_to, self.gradient)
+                    return 9999*self.constant - self.constant/math.pow(distance_to, self.gradient)
         else:
             return 0
 
