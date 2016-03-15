@@ -27,21 +27,25 @@ class StrategyTools:
         i = (highy + lowy)/2
         while i < highy:
             if self.isSafe2((x1,y1),(goalx,i),robotposlist ):
+                print("AG")
                 return "ATTACK_GOAL"
             i = i + 1
         i = (highy + lowy)/2
         while i > lowy:
             if self.isSafe2((x1,y1),(goalx,i),robotposlist):
+                print("AG")
+
                 return "ATTACK_GOAL"
             i = i - 1
         if self.isSafe2((x1, y1), (x2, y2), robotposlist):
+            print("AP")
             return "ATTACK_PASS"
         # do something instead
         print('something else')
         return 'NOTHING'
 
     def isSafe2(self,(x1, y1), (x2, y2), robotposlist):
-        rotation = 30 # todo needs adjusting!
+        rotation = 40 # todo needs adjusting!
 
         safe_kick = True
         for (x, y) in robotposlist:
@@ -50,7 +54,7 @@ class StrategyTools:
                 # there is a robot in the area
                 # find angle
                 angle = self.ang((x1,y1), (x,y), (x2,y2))
-                print angle
+                #print angle
                 if (angle < rotation):
                     return False
             else:
@@ -71,9 +75,13 @@ class StrategyTools:
         magA = self.dot(vA, vA)**0.5
         magB = self.dot(vB, vB)**0.5
         # Get cosine value
-        cos_ = dot_prod/magA/magB
+
+       # cos_ = dot_prod/magA/magB
         # Get angle in radians and then convert to degrees
-        angle = math.acos(dot_prod/magB/magA)
+        if (magB != 0 and magA != 0):
+            angle = math.acos(dot_prod/magB/magA)
+        else:
+            angle = 0
         # Basically doing angle <- angle mod 360
         ang_deg = math.degrees(angle)%360
 
@@ -142,26 +150,26 @@ class StrategyTools:
     #
 
     def ballwithenemy(self, enemy_no):
-        # enemy_no = int(enemystr)
+        #enemy_no = int(enemystr)
         if enemy_no == 1:
             enemyposition = self.world.enemy1.position
             if self.iclosertogoal2(enemyposition) or self.world.enemy2.out.value: #TODO: or enemy out of pitch -- done, test!
                # self.commands.block_goal(1)
-                #print('block goal enemy1')
+                print('block goal enemy1')
                 return "ENEMY1_BALL_TAKE_GOAL"
             else:
                 #self.commands.intercept()
-                #print('block pass')
+                print('block pass')
                 return "ENEMY_BALL_TAKE_PASS"
         elif enemy_no == 2:
             enemyposition = self.world.enemy2.position
             if self.iclosertogoal2(enemyposition) or self.world.enemy1.out.value:  #TODO: or enemy out of pitch -- done, test!
                 #self.commands.block_goal(2)
-                #print('block goal enemy2')
+                print('block goal enemy2')
                 return "ENEMY2_BALL_TAKE_GOAL"
             else:
                 #self.commands.intercept()
-                #print('block pass')
+                print('block pass')
                 return "ENEMY_BALL_TAKE_PASS"
         else:
             print('no')
@@ -411,6 +419,7 @@ class StrategyTools:
                 # open ball!
                 state = self.openball()
             print(state)
+            print(self.isSafe2((x1,y1), (x2,y2), [(x3,y3), (x4,y4)]))
             #
             # if start == True:
             #     start = False

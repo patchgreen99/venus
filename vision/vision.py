@@ -336,7 +336,7 @@ class Vision:
             for i in range(0, len(circles['red'])-1):
                 its_robot = False
                 for position in robots_pos:
-                    if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 22: #todo Danger hard coded
+                    if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 25: #todo Danger hard coded
                         its_robot = True
                 if not its_robot:
                     found = True
@@ -347,7 +347,7 @@ class Vision:
                         position = robots_pos[positionIndex]
                         # todo Danger hard coded
                         if positionIndex == 0:
-                            if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 60: # todo: this is different!
+                            if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 90: # todo: this is different!
                                 self.world.venus.hasBallInRange.value = True
                             else:
                                 self.world.venus.hasBallInRange.value = False

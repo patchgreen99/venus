@@ -35,10 +35,10 @@ class Commands:
         print("! connect <device_no>")
         self.init()
         self.vision()
-        #self.connect()
-        #self.highstrategy.main()
+       # self.connect()
+        self.highstrategy.main()
 
-    def init(self, room_num=1, team_color='yellow', our_color='pink', computer_goal=False):
+    def init(self, room_num=0, team_color='blue', our_color='green', computer_goal=False):
         print("init: Room: %s, team color: %s, our single spot color: %s, computer goal: %s" %
               (room_num, team_color, our_color, computer_goal))
         self.world = World(int(room_num), team_color, our_color, computer_goal)
@@ -66,7 +66,7 @@ class Commands:
         self.highstrategy.attackwithball()
 
     def ballwithenemy(self, no):
-        self.highstrategy.ballwithenemy(no)
+        self.highstrategy.ballwithenemy(int(no))
 
     def grab_ball(self):
         self.strategy.grab_ball()
@@ -191,7 +191,7 @@ class Commands:
 
     def pause(self):
         """Pause between motions that immediately change motor direction"""
-        self.protocol.schedule_pause(400)
+        #self.protocol.schedule_pause(400)
 
     def grab_time(self, grab):
         if grab == 'T':
@@ -209,68 +209,108 @@ class Commands:
     def forward(self, grab=None):
         """Move a cell forward"""
         print("  Forward")
-        self.protocol.schedule(100, MOTOR_LEFT, [(MOTOR_LEFT, -100),
-                                                 (MOTOR_RIGHT, -100)], self.grab_time(grab))
+        self.protocol.move(80, [(MOTOR_LEFT, -100),
+                                (MOTOR_RIGHT, -100)], wait=True)
+        # self.protocol.schedule(90, MOTOR_LEFT, [(MOTOR_LEFT, -100),
+        #                                          (MOTOR_RIGHT, -100)], self.grab_time(grab))
 
     def backward(self, grab=None):
         """Move a cell backward"""
         print("  Backward")
-        self.protocol.schedule(100, MOTOR_LEFT, [(MOTOR_LEFT, 100),
-                                                 (MOTOR_RIGHT, 100)], self.grab_time(grab))
+        self.protocol.move(90, [(MOTOR_LEFT, 100),
+                                                 (MOTOR_RIGHT, 100)], wait=True)
+        # self.protocol.schedule(70, MOTOR_LEFT, [(MOTOR_LEFT, 100),
+        #                                          (MOTOR_RIGHT, 100)], self.grab_time(grab))
 
     def forward_left(self, grab=None):
         """Move forward and to left"""
         print("  Forward left")
-        self.protocol.schedule(170, MOTOR_TURN, [(MOTOR_TURN, -100),
+        self.protocol.move(150, [(MOTOR_TURN, -100),
                                                  (MOTOR_LEFT, -80),
-                                                 (MOTOR_RIGHT, -100)], self.grab_time(grab))
-        self.protocol.schedule(50, MOTOR_LEFT, [(MOTOR_LEFT, -100),
-                                                (MOTOR_RIGHT, -100)])
+                                                 (MOTOR_RIGHT, -100)], wait=True)
+        #self.protocol.move(50, [(MOTOR_LEFT, -100),
+        #                                        (MOTOR_RIGHT, -100)], wait=True)
+
+        # self.protocol.schedule(170, MOTOR_TURN, [(MOTOR_TURN, -100),
+        #                                          (MOTOR_LEFT, -80),
+        #                                          (MOTOR_RIGHT, -100)], self.grab_time(grab))
+        # self.protocol.schedule(50, MOTOR_LEFT, [(MOTOR_LEFT, -100),
+        #                                         (MOTOR_RIGHT, -100)])
 
     def forward_right(self, grab=None):
         """Move forward and to right"""
         print("  Forward right")
-        self.protocol.schedule(240, MOTOR_TURN, [(MOTOR_TURN, 100),
+        self.protocol.move(240, [(MOTOR_TURN, 100),
                                                  (MOTOR_LEFT, -100),
-                                                 (MOTOR_RIGHT, -80)], self.grab_time(grab))
-        self.protocol.schedule(10, MOTOR_RIGHT, [(MOTOR_LEFT, -100),
-                                                 (MOTOR_RIGHT, -100)])
+                                                 (MOTOR_RIGHT, -80)], wait=True)
+
+        #self.protocol.move(50, [(MOTOR_LEFT, -100),
+         #                                        (MOTOR_RIGHT, -100)], wait=True)
+
+        # self.protocol.schedule(170, MOTOR_TURN, [(MOTOR_TURN, 100),
+        #                                          (MOTOR_LEFT, -100),
+        #                                          (MOTOR_RIGHT, -60)], self.grab_time(grab))
+        # self.protocol.schedule(50, MOTOR_RIGHT, [(MOTOR_LEFT, -100),
+        #                                          (MOTOR_RIGHT, -100)])
 
     def backward_left(self, grab=None):
         """Move backward and to left"""
         print("  Backward left")
-        self.protocol.schedule(10, MOTOR_LEFT, [(MOTOR_LEFT, 100),
-                                                (MOTOR_RIGHT, 100)], self.grab_time(grab))
-        self.protocol.schedule(190, MOTOR_TURN, [(MOTOR_TURN, 100),
+        #self.protocol.move(20, [(MOTOR_LEFT, 100),
+        #                                      (MOTOR_RIGHT, 100)], wait=True)
+        self.protocol.move(190, [(MOTOR_TURN, 100),
                                                  (MOTOR_LEFT, 80),
-                                                 (MOTOR_RIGHT, 100)])
+                                                 (MOTOR_RIGHT, 100)], wait=True)
+        # self.protocol.schedule(3, MOTOR_LEFT, [(MOTOR_LEFT, 100),
+        #                                         (MOTOR_RIGHT, 100)], self.grab_time(grab))
+        # self.protocol.schedule(190, MOTOR_TURN, [(MOTOR_TURN, 100),
+        #                                          (MOTOR_LEFT, 80),
+        #                                          (MOTOR_RIGHT, 100)])
 
     def backward_right(self, grab=None):
         """Move backward and to right"""
         print("  Backward right")
-        self.protocol.schedule(5, MOTOR_RIGHT, [(MOTOR_LEFT, 100),
-                                                (MOTOR_RIGHT, 100)], self.grab_time(grab))
-        self.protocol.schedule(230, MOTOR_TURN, [(MOTOR_TURN, -100),
+        #self.protocol.schedule(20, MOTOR_RIGHT, [(MOTOR_LEFT, 100),
+        #                                       (MOTOR_RIGHT, 100)], self.grab_time(grab))
+
+        self.protocol.move(250, [(MOTOR_TURN, -100),
                                                  (MOTOR_LEFT, 100),
-                                                 (MOTOR_RIGHT, 80)])
+                                                 (MOTOR_RIGHT, 80)], wait=True)
+
+        #this was commented out before changing to move:
+
+
+        # self.protocol.schedule(230, MOTOR_TURN, [(MOTOR_TURN, -100),
+        #                                          (MOTOR_LEFT, 100),
+        #                                          (MOTOR_RIGHT, 80)])
 
     def sharp_left(self, grab=None):
         """Move to a cell left"""
         print("  Sharp left")
-        self.protocol.schedule(12, MOTOR_TURN, [(MOTOR_TURN, -100),
+        self.protocol.move(12, [(MOTOR_TURN, -100),
                                                 (MOTOR_LEFT, 100),
-                                                (MOTOR_RIGHT, -100)], self.grab_time(grab))
-        self.protocol.schedule(50, MOTOR_LEFT, [(MOTOR_LEFT, -100),
-                                                (MOTOR_RIGHT, -100)])
+                                                (MOTOR_RIGHT, -100)], wait=True)
+        self.protocol.move(50, [(MOTOR_LEFT, -100),
+                                                (MOTOR_RIGHT, -100)], wait=True)
+        # self.protocol.schedule(12, MOTOR_TURN, [(MOTOR_TURN, -100),
+        #                                         (MOTOR_LEFT, 100),
+        #                                         (MOTOR_RIGHT, -100)], self.grab_time(grab))
+        # self.protocol.schedule(50, MOTOR_LEFT, [(MOTOR_LEFT, -100),
+        #                                         (MOTOR_RIGHT, -100)])
 
     def sharp_right(self, grab=None):
         """Move to a cell right"""
         print("  Sharp right")
-        self.protocol.schedule(18, MOTOR_TURN, [(MOTOR_TURN, 100),
+        self.protocol.move(18, [(MOTOR_TURN, 100),
                                                 (MOTOR_LEFT, -100),
-                                                (MOTOR_RIGHT, 100)], self.grab_time(grab))
-        self.protocol.schedule(50, MOTOR_RIGHT, [(MOTOR_LEFT, -100),
-                                                 (MOTOR_RIGHT, -100)])
+                                                (MOTOR_RIGHT, 100)], wait=True)
+        self.protocol.move(50, [(MOTOR_LEFT, -100),
+                                                 (MOTOR_RIGHT, -100)], wait=True)
+        # self.protocol.schedule(18, MOTOR_TURN, [(MOTOR_TURN, 100),
+        #                                         (MOTOR_LEFT, -100),
+        #                                         (MOTOR_RIGHT, 100)], self.grab_time(grab))
+        # self.protocol.schedule(50, MOTOR_RIGHT, [(MOTOR_LEFT, -100),
+        #                                          (MOTOR_RIGHT, -100)])
 
     def f(self, x):
         """Move forward, negative x means backward"""

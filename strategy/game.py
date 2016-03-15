@@ -29,6 +29,7 @@ class Game:
         self.current_direction = None
         self.commands = commands
         self.moving = True
+        self.moving_backwards = False
         self.ready = 0
         self.turn = 0
 
@@ -72,7 +73,7 @@ class Game:
                 # ON
                 #####################################
 
-                ball_field = radial(self.world.ball, 1, -5)
+                ball_field = radial(self.world.ball, 1, -5)# -5
 
                 friend_field = solid_field(self.world.friend.position, 4, 0, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
                 enemy1_field = solid_field(self.world.enemy1.position, 4, 0, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
@@ -122,21 +123,23 @@ class Game:
                     angle, length = self.calculate_angle_length_ball()
                     self.ready += 1
 
-                    self.commands.flush()
-                    self.commands.s()
-                    self.grab_ball()
+                    #self.commands.flush()
+                    #self.commands.s()
+                    while not self.grab_range():
+                        self.grab_ball()
+
                     print("It thinks it has the ball")
                     return
                 else:
                     if start is True:
                         start = False
-                        self.turn, self.current_point = self.move_defense(None)
+                        self.turn, self.current_point = self.move(None)
                     else:
-                        self.turn, self.current_point = self.move_defense(None)
+                        self.turn, self.current_point = self.move(None)
                     self.current_direction = rotate_vector(self.turn, self.current_direction[0], self.current_direction[1])
                 ########################################
 
-                time.sleep(.5)
+                #time.sleep(.5)
 
                 ###########################################################################################################################################
 
@@ -217,8 +220,8 @@ class Game:
             free_up_pass_enemy2 = finite_axial_outside(self.world.enemy1.position, self.world.friend.position, 1, 10000)
             free_up_goal_enemy1 = finite_axial_outside(self.world.enemy2.position, (self.world.their_goalX, self.world.their_goalmeanY), 1, 10000)
 
-            bad_minima_goal = infinite_axial(self.world.venus.position, (self.world.their_goalX, self.world.their_goalmeanY), 2000, 0, 0)
-            bad_minima_pass = infinite_axial(self.world.venus.position, self.world.friend.position, 2000, 0, 0)
+            bad_minima_goal = infinite_axial_outside(self.world.venus.position, (self.world.their_goalX, self.world.their_goalmeanY), 2000, 0, 0)
+            bad_minima_pass = infinite_axial_outside(self.world.venus.position, self.world.friend.position, 2000, 0, 0)
 
             # OFF
             #####################################
@@ -271,8 +274,8 @@ class Game:
             free_up_goal_enemy2 = finite_axial_outside(self.world.enemy1.position, (self.world.their_goalX, self.world.their_goalmeanY), 1, 10000)
             free_up_goal_enemy1 = finite_axial_outside(self.world.enemy2.position, (self.world.their_goalX, self.world.their_goalmeanY), 1, 10000)
 
-            bad_minima_goal = infinite_axial(self.world.venus.position, (self.world.their_goalX, self.world.their_goalmeanY), 2000, 0, 0)
-            bad_minima_pass = infinite_axial(self.world.venus.position, self.world.friend.position, 2000, 0, 0)
+            bad_minima_goal = infinite_axial_outside(self.world.venus.position, (self.world.their_goalX, self.world.their_goalmeanY), 2000, 0, 0)
+            bad_minima_pass = infinite_axial_outside(self.world.venus.position, self.world.friend.position, 2000, 0, 0)
 
             # OFF
             #####################################
@@ -325,8 +328,8 @@ class Game:
             free_up_pass_enemy1 = finite_axial_outside(self.world.enemy2.position, self.world.friend.position, 1, 10000)
             free_up_pass_enemy2 = finite_axial_outside(self.world.enemy1.position, self.world.friend.position, 1, 10000)
 
-            bad_minima_goal = infinite_axial(self.world.venus.position, (self.world.their_goalX, self.world.their_goalmeanY), 2000, 0, 0)
-            bad_minima_pass = infinite_axial(self.world.venus.position, self.world.friend.position, 2000, 0, 0)
+            bad_minima_goal = infinite_axial_outside(self.world.venus.position, (self.world.their_goalX, self.world.their_goalmeanY), 2000, 0, 0)
+            bad_minima_pass = infinite_axial_outside(self.world.venus.position, self.world.friend.position, 2000, 0, 0)
 
             # OFF
             #####################################
@@ -387,8 +390,8 @@ class Game:
             block_pass = finite_axial_inside(self.world.enemy1.position, self.world.enemy2.position, 1, -10000)
             block_goal_enemy2 = finite_axial_inside(self.world.enemy2.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, -10000)
 
-            bad_minima_goal = infinite_axial(self.world.venus.position, (self.world.their_goalX, self.world.their_goalmeanY), 2000, 0, 0)
-            bad_minima_pass = infinite_axial(self.world.venus.position, self.world.friend.position, 2000, 0, 0)
+            bad_minima_goal = infinite_axial_outside(self.world.venus.position, (self.world.their_goalX, self.world.their_goalmeanY), 2000, 0, 0)
+            bad_minima_pass = infinite_axial_outside(self.world.venus.position, self.world.friend.position, 2000, 0, 0)
 
             # BUILD FIELD AND NEXT POSITION AND DIRECTIONS
             ####################################
@@ -440,8 +443,8 @@ class Game:
             block_pass = finite_axial_inside(self.world.enemy1.position, self.world.enemy2.position, 1, -10000)
             block_goal_enemy1 = finite_axial_inside(self.world.enemy2.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, -10000)
 
-            bad_minima_goal = infinite_axial(self.world.venus.position, (self.world.their_goalX, self.world.their_goalmeanY), 2000, 0, 0)
-            bad_minima_pass = infinite_axial(self.world.venus.position, self.world.friend.position, 2000, 0, 0)
+            bad_minima_goal = infinite_axial_outside(self.world.venus.position, (self.world.their_goalX, self.world.their_goalmeanY), 2000, 0, 0)
+            bad_minima_pass = infinite_axial_outside(self.world.venus.position, self.world.friend.position, 2000, 0, 0)
 
             # BUILD FIELD AND NEXT POSITION AND DIRECTIONS
             ####################################
@@ -493,8 +496,8 @@ class Game:
             block_goal_enemy2 = finite_axial_inside(self.world.enemy1.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, -10000)
             block_goal_enemy1 = finite_axial_inside(self.world.enemy2.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, -10000)
 
-            bad_minima_goal = infinite_axial(self.world.venus.position, (self.world.their_goalX, self.world.their_goalmeanY), 2000, 0, 0)
-            bad_minima_pass = infinite_axial(self.world.venus.position, self.world.friend.position, 2000, 0, 0)
+            bad_minima_goal = infinite_axial_outside(self.world.venus.position, (self.world.their_goalX, self.world.their_goalmeanY), 2000, 0, 0)
+            bad_minima_pass = infinite_axial_outside(self.world.venus.position, self.world.friend.position, 2000, 0, 0)
 
             # BUILD FIELD AND NEXT POSITION AND DIRECTIONS
             ####################################
@@ -561,61 +564,79 @@ class Game:
     ############################################################################################################################################################
 
     ############################################################################################################################################################
-
+    '''
     def move_attack(self, grab=None):
         """Executes command to go to minimum potential and returns robot direction after the movement"""
         x, y = np.where(self.local_potential == self.local_potential.min())
         indices = np.array([x, y]).T.tolist()
         if [2, 2] in indices:
+            self.moving = False
             return TOP, self.points[2, 2]
         elif [1, 2] in indices or [0, 1] in indices or [0, 3] in indices:
             self.commands.forward(grab)
+            self.moving = True
             return TOP, self.points[1, 2]
         elif [1, 1] in indices or [1, 0] in indices:
             self.commands.forward_left(grab)
+            self.moving = True
             return LEFT, self.points[1, 1]
         elif [1, 3] in indices or [1, 4] in indices:
             self.commands.forward_right(grab)
+            self.moving = True
             return RIGHT, self.points[1, 3]
         elif [2, 1] in indices:
             if self.moving:
                 self.commands.pause()
+            self.moving = True
             self.commands.sharp_left(grab)
             return LEFT, self.points[2, 1]
         elif [2, 3] in indices:
             if self.moving:
                 self.commands.pause()
+            self.moving = True
             self.commands.sharp_right(grab)
             return RIGHT, self.points[2, 3]
         elif [3, 2] in indices or [4, 1] in indices or [4, 3] in indices:
             if self.moving:
+                self.moving = False
                 self.commands.pause()
             self.commands.turn(180, grab)
             return BOTTOM, self.points[2, 2]
         elif [3, 1] in indices or [3, 0] in indices:
             if self.moving:
+                self.moving = False
                 self.commands.pause()
             self.commands.turn(180, grab)
             return BOTTOM, self.points[2, 2]
         elif [3, 3] in indices or [3, 4] in indices:
             if self.moving:
+                self.moving = False
                 self.commands.pause()
             self.commands.turn(180, grab)
             return BOTTOM, self.points[2, 2]
-
-    def move_defense(self, grab=None):
+    '''
+    def move(self, grab=None):
         """Executes command to go to minimum potential and returns robot direction after the movement"""
         x, y = np.where(self.local_potential == self.local_potential.min())
         indices = np.array([x, y]).T.tolist()
         if [2, 2] in indices:
             return TOP, self.points[2, 2]
         elif [1, 2] in indices or [0, 1] in indices or [0, 3] in indices:
+            if self.moving_backwards:
+                self.moving_backwards = False
+                self.commands.pause()
             self.commands.forward(grab)
             return TOP, self.points[1, 2]
         elif [1, 1] in indices or [1, 0] in indices:
+            if self.moving_backwards:
+                self.moving_backwards = False
+                self.commands.pause()
             self.commands.forward_left(grab)
             return LEFT, self.points[1, 1]
         elif [1, 3] in indices or [1, 4] in indices:
+            if self.moving_backwards:
+                self.moving_backwards = False
+                self.commands.pause()
             self.commands.forward_right(grab)
             return RIGHT, self.points[1, 3]
         elif [2, 1] in indices:
@@ -629,19 +650,28 @@ class Game:
             self.commands.sharp_right(grab)
             return RIGHT, self.points[2, 3]
         elif [3, 2] in indices or [4, 1] in indices or [4, 3] in indices:
+            if not self.moving_backwards:
+                self.moving_backwards = True
+                self.commands.pause()
             self.commands.backward(grab)
             return TOP, self.points[3, 2]
         elif [3, 1] in indices or [3, 0] in indices:
+            if not self.moving_backwards:
+                self.moving_backwards = True
+                self.commands.pause()
             self.commands.backward_left(grab)
             return RIGHT, self.points[3, 1]
         elif [3, 3] in indices or [3, 4] in indices:
+            if not self.moving_backwards:
+                self.moving_backwards = True
+                self.commands.pause()
             self.commands.backward_right(grab)
             return LEFT, self.points[3, 3]
 
     def grab_range(self):
         refAngle = math.atan2(self.world.venus.orientation[1], self.world.venus.orientation[0])
         ballAngle, ballLength = self.calculate_angle_length_ball()
-        if abs(ballLength) < 25 and abs(refAngle-ballLength) < 45:
+        if abs(ballLength) < 10 and abs(refAngle-ballLength) < 45:
             return True
         else:
             return False
@@ -695,7 +725,7 @@ class Game:
             self.approach(angle, 40)
             angle, motion_length = self.calculate_angle_length_ball()
 
-        time.sleep(1)
+        #time.sleep(1)
         angle, motion_length = self.calculate_angle_length_ball()
         if motion_length > 30:
             motion_length -= 30
@@ -704,13 +734,13 @@ class Game:
         print("LAST BEFORE LAST: turning " + str(angle) + " deg, going " + str(motion_length) + " cm")
         self.approach(angle, motion_length)
 
-        time.sleep(1)
+        #time.sleep(1)
         angle, motion_length = self.calculate_angle_length_ball()
         print("LAST: Turning " + str(angle) + " deg")
         self.commands.c(angle)
 
         self.commands.open_wide()
-        time.sleep(.4)
+
 
         print("LAST: Going " + str(motion_length) + " cm")
 
@@ -720,7 +750,6 @@ class Game:
 
         self.commands.f(motion_length)
         self.commands.g()
-        time.sleep(1)
 
     def magnitude(self, (x, y)):
         return math.sqrt(x**2 + y**2)
