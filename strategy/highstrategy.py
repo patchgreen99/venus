@@ -467,15 +467,14 @@ class StrategyTools:
                 state = self.openball()
             print(state)
 
-            #
-            # if start == True:
-            #     start = False
-            #     self.game.start(state)
-            # elif last_state == state:
-            #     self.game.mid(state)
-            # else:
-            #     self.game.end(last_state)
-            #     self.game.start(state)
+            if start == True:
+                start = False
+                self.game.start(state)
+            elif last_state == state:
+                self.game.mid(state)
+            else:
+                self.game.exit(last_state)
+                self.game.start(state)
 
     if __name__ == "__main__":
         main()

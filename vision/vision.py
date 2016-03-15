@@ -261,7 +261,7 @@ class Vision:
                 if color is not None and len(circles[color]) < MAX_COLOR_COUNTS[color] and areas[center_index] > \
                         self.min_color_area[color]:
                     if color == 'red':
-                        if 10 < center[1] < self.COLS - 10: #todo Danger hard coded
+                        if 20 < center[1] < self.COLS - 20: #todo Danger hard coded
                             circles[color].append((center[1], center[0], areas[center_index], color))
                     elif color == 'blue':
                         if 10 < center[0] < self.COLS - 10 or 10 < center[1] < self.ROWS - 10 : #todo Danger hard coded

@@ -38,7 +38,7 @@ class Commands:
         self.connect()
         #self.highstrategy.main()
 
-    def init(self, room_num=0, team_color='blue', our_color='green', computer_goal=False):
+    def init(self, room_num=1, team_color='yellow', our_color='green', computer_goal=False):
         print("init: Room: %s, team color: %s, our single spot color: %s, computer goal: %s" %
               (room_num, team_color, our_color, computer_goal))
         self.world = World(int(room_num), team_color, our_color, computer_goal)
@@ -108,11 +108,13 @@ class Commands:
     def pw(self):
         print(self.world)
 
-    def pot(self):
-        self.game.mid("FREE_BALL_YOURS")
+    def pot2(self):
+        while True:
+            self.game.mid("FREE_BALL_2_GOALSIDE")
 
-    def ptest(self):
-        self.game.mid("FREE_BALL_2_GOALSIDE")
+    def pot1(self):
+        while True:
+            self.game.mid("FREE_BALL_1_GOALSIDE")
 
     def positionTest(self):
         while True:
@@ -307,10 +309,11 @@ class Commands:
     def sharp_left(self, grab=None):
         """Move to a cell left"""
         print("  Sharp left")
-        self.protocol.move(12, [(MOTOR_TURN, -100),
-                                                (MOTOR_LEFT, 100),
-                                                (MOTOR_RIGHT, -100)], wait=True)
-        self.protocol.move(50, [(MOTOR_LEFT, -100),
+        self.c(-90)
+        # self.protocol.move(12, [(MOTOR_TURN, -100),
+        #                                         (MOTOR_LEFT, 100),
+        #                                         (MOTOR_RIGHT, -100)], wait=True)
+        self.protocol.move(80, [(MOTOR_LEFT, -100),
                                                 (MOTOR_RIGHT, -100)], wait=True)
         # self.protocol.schedule(12, MOTOR_TURN, [(MOTOR_TURN, -100),
         #                                         (MOTOR_LEFT, 100),
@@ -321,10 +324,11 @@ class Commands:
     def sharp_right(self, grab=None):
         """Move to a cell right"""
         print("  Sharp right")
-        self.protocol.move(18, [(MOTOR_TURN, 100),
-                                                (MOTOR_LEFT, -100),
-                                                (MOTOR_RIGHT, 100)], wait=True)
-        self.protocol.move(50, [(MOTOR_LEFT, -100),
+        self.c(90)
+        # self.protocol.move(18, [(MOTOR_TURN, 100),
+        #                                         (MOTOR_LEFT, -100),
+        #                                         (MOTOR_RIGHT, 100)], wait=True)
+        self.protocol.move(80, [(MOTOR_LEFT, -100),
                                                  (MOTOR_RIGHT, -100)], wait=True)
         # self.protocol.schedule(18, MOTOR_TURN, [(MOTOR_TURN, 100),
         #                                         (MOTOR_LEFT, -100),
