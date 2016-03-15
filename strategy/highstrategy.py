@@ -1,18 +1,24 @@
 import math
 import numpy as np
+import time
 
 class StrategyTools:
-    def __init__(self, world, commands, game):
+    def __init__(self, world, commands, game, simple):
         self.world = world
         self.commands = commands
         self.game = game
+        self.simple = simple
 
     def attackwithball(self):
 
-        x2,y2 = self.world.friend.position
-        x1,y1 = self.world.venus.position
-        x3,y3 = self.world.enemy1.position
-        x4,y4 = self.world.enemy2.position
+        x1 = self.world.venus.position[0]
+        y1 = self.world.venus.position[1]
+        x2 = self.world.friend.position[0]
+        y2 = self.world.friend.position[1]
+        x3 = self.world.enemy1.position[0]
+        y3 = self.world.enemy1.position[1]
+        x4 = self.world.enemy2.position[0]
+        y4 = self.world.enemy2.position[1]
 
         robotposlist = [(x3,y3),
                         (x4,y4)]
@@ -37,11 +43,37 @@ class StrategyTools:
         if self.isSafe2((x1, y1), (x2, y2), robotposlist):
             return "ATTACK_PASS"
         # do something instead
-        print('something else')
-        return 'NOTHING'
+        #print('something else')
+        angle, motion_length = self.simple.calculate_angle_length_goal()
+        self.commands.c(angle)
+        time.sleep(3)
+        i = (highy + lowy)/2
+        while i < highy:
+            if self.isSafe2((x1,y1),(goalx,i),robotposlist ):
+                return "ATTACK_GOAL"
+            i = i + 1
+        i = (highy + lowy)/2
+        while i > lowy:
+            if self.isSafe2((x1,y1),(goalx,i),robotposlist):
+                return "ATTACK_GOAL"
+            i = i - 1
+        if self.isSafe2((x1, y1), (x2, y2), robotposlist):
+            return "ATTACK_PASS"
+        self.commands.c(20)
+        self.commands.x()
+
+        # i = 0
+        # while i< 5:
+        #     self.commands.c(20)
+        #
+        #     go_x = -0.5*(-2*self.world.venus.position[0] + 2*m*(c-self.world.venus.position[1]))/(1+m**2)
+        #     go_y = go_x*m + c
+        #
+        #
+        return
 
     def isSafe2(self,(x1, y1), (x2, y2), robotposlist):
-        rotation = 30 # todo needs adjusting!
+        rotation = 20 # todo needs adjusting!
 
         safe_kick = True
         for (x, y) in robotposlist:
@@ -49,6 +81,7 @@ class StrategyTools:
             if self.isinbetweenY((x1,y1),(x2,y2),(x,y)):
                 # there is a robot in the area
                 # find angle
+                print(x1)
                 angle = self.ang((x1,y1), (x,y), (x2,y2))
                 print angle
                 if (angle < rotation):
@@ -189,8 +222,11 @@ class StrategyTools:
     def iclosertogoal2(self,enemyposition):
         linex1,liney1 = (self.world.our_goalX, self.world.our_goalmeanY)
         linex2,liney2 = enemyposition
-        x1,y1 = self.world.venus.position
-        x2,y2 = self.world.friend.position
+        x1 = self.world.venus.position[0]
+        y1 = self.world.venus.position[1]
+        x2 = self.world.friend.position[0]
+        y2 = self.world.friend.position[1]
+
         venusin = y1 > min(liney1,liney2) & y1 < max(liney1,liney2)
         friendin = y2 > min(liney1,liney2) & y2 < max(liney1,liney2)
 
@@ -275,9 +311,12 @@ class StrategyTools:
             return self.bestpositioncase()
 
     def icloserball(self):
-        x1,y1 = self.world.venus.position
-        x2,y2 = self.world.friend.position
-        x,y = self.world.ball
+        x1 = self.world.venus.position[0]
+        y1 = self.world.venus.position[1]
+        x2 = self.world.friend.position[0]
+        y2 = self.world.friend.position[1]
+        x = self.world.ball[0]
+        y = self.world.ball[1]
 
         d1 = self.euclideandist((x1,y1),(x,y))
         d2 = self.euclideandist((x2,y2),(x,y))
@@ -288,11 +327,16 @@ class StrategyTools:
             return False
 
     def bestpositioncase(self):
-        x1,y1 = self.world.venus.position
-        x2,y2 = self.world.friend.position
-        x3,y3 = self.world.enemy1.position
-        x4,y4 = self.world.enemy2.position
-        x5,y5 = self.world.their_goalX, self.world.their_goalmeanY
+        x1 = self.world.venus.position[0]
+        y1 = self.world.venus.position[1]
+        x2 = self.world.friend.position[0]
+        y2 = self.world.friend.position[1]
+        x3 = self.world.enemy1.position[0]
+        y3 = self.world.enemy1.position[1]
+        x4 = self.world.enemy2.position[0]
+        y4 = self.world.enemy2.position[1]
+        x5 = self.world.their_goalX
+        y5 = self.world.their_goalmeanY
 
         if self.isinbetweenY((x1,y1),(x5,y5),(x3,y3)) :
             if self.isinbetweenY((x1,y1),(x5,y5),(x4,y4)):
@@ -306,10 +350,14 @@ class StrategyTools:
                 return "FREE_BALL_NONE_GOALSIDE"
 
     def ballwithfriend(self): # trigger on isballinrange
-        x1,y1 = self.world.venus.position
-        x2,y2 = self.world.friend.position
-        x3,y3 = self.world.enemy1.position
-        x4,y4 = self.world.enemy2.position
+        x1 = self.world.venus.position[0]
+        y1 = self.world.venus.position[1]
+        x2 = self.world.friend.position[0]
+        y2 = self.world.friend.position[1]
+        x3 = self.world.enemy1.position[0]
+        y3 = self.world.enemy1.position[1]
+        x4 = self.world.enemy2.position[0]
+        y4 = self.world.enemy2.position[1]
 
         robotposlist = [(x3,y3),
                         (x4,y4)]
@@ -324,9 +372,14 @@ class StrategyTools:
         pass
 
     def penalty_attack(self):
-        x1,y1 = self.world.venus.position
-        x3,y3 = self.world.enemy1.position
-        x4,y4 = self.world.enemy2.position
+        x1 = self.world.venus.position[0]
+        y1 = self.world.venus.position[1]
+        x2 = self.world.friend.position[0]
+        y2 = self.world.friend.position[1]
+        x3 = self.world.enemy1.position[0]
+        y3 = self.world.enemy1.position[1]
+        x4 = self.world.enemy2.position[0]
+        y4 = self.world.enemy2.position[1]
 
         robotposlist = [(x3,y3),
                         (x4,y4)]
@@ -358,12 +411,26 @@ class StrategyTools:
 
     def main(self):
         start = True
-        x1,y1 = self.world.venus.position
-        x2, y2 = self.world.friend.position
-        x3,y3 = self.world.enemy1.position
-        x4,y4 = self.world.enemy2.position
+        x1 = self.world.venus.position[0]
+        y1 = self.world.venus.position[1]
+        x2 = self.world.friend.position[0]
+        y2 = self.world.friend.position[1]
+        x3 = self.world.enemy1.position[0]
+        y3 = self.world.enemy1.position[1]
+        x4 = self.world.enemy2.position[0]
+        y4 = self.world.enemy2.position[1]
+
         last_state = "None"
         while True:
+
+            x1 = self.world.venus.position[0]
+            y1 = self.world.venus.position[1]
+            x2 = self.world.friend.position[0]
+            y2 = self.world.friend.position[1]
+            x3 = self.world.enemy1.position[0]
+            y3 = self.world.enemy1.position[1]
+            x4 = self.world.enemy2.position[0]
+            y4 = self.world.enemy2.position[1]
             venus = self.world.venus
             friend = self.world.friend
             enemy1 = self.world.enemy1
@@ -389,7 +456,7 @@ class StrategyTools:
                 # open ball!
                 state = self.openball()
             print(state)
-            print(self.isSafe2((x1,y1), (x2,y2), [(x3,y3), (x4,y4)]))
+
             #
             # if start == True:
             #     start = False
