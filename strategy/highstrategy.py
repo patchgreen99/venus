@@ -133,7 +133,8 @@ class StrategyTools:
     #     xnew = (x2 * c) - (y2 * s);
     #     ynew = (y2* s) + (x2 * c);
     #     x3 = xnew + x1;
-    #     y3 = ynew + y1;
+    #     y3 = ynew + y1;def iclosertogoal(self,enemyposition):
+
     #     m1 = (y3 - y1) / (x3 - x1)
     #     c1 = y3 - m1*x3
     #
@@ -144,7 +145,7 @@ class StrategyTools:
         # enemy_no = int(enemystr)
         if enemy_no == 1:
             enemyposition = self.world.enemy1.position
-            if self.iclosertogoal(enemyposition) or self.world.enemy2.out.value: #TODO: or enemy out of pitch -- done, test!
+            if self.iclosertogoal2(enemyposition) or self.world.enemy2.out.value: #TODO: or enemy out of pitch -- done, test!
                # self.commands.block_goal(1)
                 #print('block goal enemy1')
                 return "ENEMY1_BALL_TAKE_GOAL"
@@ -154,7 +155,7 @@ class StrategyTools:
                 return "ENEMY_BALL_TAKE_PASS"
         elif enemy_no == 2:
             enemyposition = self.world.enemy2.position
-            if self.iclosertogoal(enemyposition) or self.world.enemy1.out.value:  #TODO: or enemy out of pitch -- done, test!
+            if self.iclosertogoal2(enemyposition) or self.world.enemy1.out.value:  #TODO: or enemy out of pitch -- done, test!
                 #self.commands.block_goal(2)
                 #print('block goal enemy2')
                 return "ENEMY2_BALL_TAKE_GOAL"
@@ -165,6 +166,37 @@ class StrategyTools:
         else:
             print('no')
         return
+
+    def iclosertogoal2(self,enemyposition):
+        linex1,liney1 = (self.world.our_goalX, self.world.our_goalmeanY)
+        linex2,liney2 = enemyposition
+        x1,y1 = self.world.venus.position
+        x2,y2 = self.world.friend.position
+        venusin = y1 > min(liney1,liney2) & y1 < max(liney1,liney2)
+        friendin = y2 > min(liney1,liney2) & y2 < max(liney1,liney2)
+
+        if venusin and friendin :
+            midx = (linex1 + linex2) / 2
+            midy = (liney1 + liney2) / 2
+            adist = self.euclideandist((x1,y1),(midx,midy))
+            bdist = self.euclideandist((x2,y2),(midx,midy))
+            if adist>bdist:
+                return True
+            else:
+                return False
+        elif venusin:
+            return True
+        elif friendin:
+            return False
+        else:
+            minvenddist = min( self.euclideandist((linex1,liney1),(x1,y1)),self.euclideandist((linex2,liney2),(x1,y1)))
+            minfenddist = min( self.euclideandist((linex1,liney1),(x2,y2)),self.euclideandist((linex2,liney2),(x2,y2)))
+            if minvenddist < minfenddist:
+                return True
+            else:
+                return False
+
+
 
     def iclosertogoal(self,enemyposition):
         linex1,liney1 = (self.world.our_goalX,self.world.our_goalmeanY)
