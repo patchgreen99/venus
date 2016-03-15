@@ -182,9 +182,12 @@ void rotaryTimerCallback() {
   
   for (int i = 0; i < ROTARY_COUNT; ++i) {
     if (finished(positions[i], targetPositions[i])) {
-      stopMotor(i);
-      positions[i] = 0;
-      targetPositions[i] = 0;
+      motorAllStop();
+      for (int j = 0; j < ROTARY_COUNT; ++j) {
+        moving[j] = false;
+        positions[j] = 0;
+        targetPositions[j] = 0;
+      }
     }
   }
 }
@@ -276,17 +279,23 @@ void moveRotaryUnits() {
   
   int p = 0;
   int target = params[p++];
+  
+  int motor = params[p++];
+  int power = params[p++];
+  positions[motor] = 0;
+  
+  if (power > 0) {
+    targetPositions[motor] = target;
+  } else {
+    targetPositions[motor] = -target;
+  }
+  
+  runMotor(motor, power);
 
   while (p < paramCount) {
     int motor = params[p++];
     int power = params[p++];
     positions[motor] = 0;
-    
-    if (power > 0) {
-      targetPositions[motor] = target;
-    } else {
-      targetPositions[motor] = -target;
-    }
     
     runMotor(motor, power);
   }

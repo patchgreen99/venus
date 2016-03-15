@@ -87,9 +87,13 @@ class StrategyTools:
         magA = self.dot(vA, vA)**0.5
         magB = self.dot(vB, vB)**0.5
         # Get cosine value
-        cos_ = dot_prod/magA/magB
+        if magA != 0 and magB != 0:
+            cos_ = dot_prod/magA/magB
+        else:
+            cos_ = 1
         # Get angle in radians and then convert to degrees
-        angle = math.acos(dot_prod/magB/magA)
+        angle = math.acos(cos_)
+        
         # Basically doing angle <- angle mod 360
         ang_deg = math.degrees(angle)%360
 
@@ -149,8 +153,7 @@ class StrategyTools:
     #     xnew = (x2 * c) - (y2 * s);
     #     ynew = (y2* s) + (x2 * c);
     #     x3 = xnew + x1;
-    #     y3 = ynew + y1;def iclosertogoal(self,enemyposition):
-
+    #     y3 = ynew + y1;
     #     m1 = (y3 - y1) / (x3 - x1)
     #     c1 = y3 - m1*x3
     #
@@ -158,26 +161,26 @@ class StrategyTools:
     #
 
     def ballwithenemy(self, enemy_no):
-        # enemy_no = int(enemystr)
+        #enemy_no = int(enemystr)
         if enemy_no == 1:
             enemyposition = self.world.enemy1.position
             if self.iclosertogoal2(enemyposition) or self.world.enemy2.out.value: #TODO: or enemy out of pitch -- done, test!
                # self.commands.block_goal(1)
-                #print('block goal enemy1')
+                print('block goal enemy1')
                 return "ENEMY1_BALL_TAKE_GOAL"
             else:
                 #self.commands.intercept()
-                #print('block pass')
+                print('block pass')
                 return "ENEMY_BALL_TAKE_PASS"
         elif enemy_no == 2:
             enemyposition = self.world.enemy2.position
             if self.iclosertogoal2(enemyposition) or self.world.enemy1.out.value:  #TODO: or enemy out of pitch -- done, test!
                 #self.commands.block_goal(2)
-                #print('block goal enemy2')
+                print('block goal enemy2')
                 return "ENEMY2_BALL_TAKE_GOAL"
             else:
                 #self.commands.intercept()
-                #print('block pass')
+                print('block pass')
                 return "ENEMY_BALL_TAKE_PASS"
         else:
             print('wrong no')
@@ -427,6 +430,7 @@ class StrategyTools:
                 # open ball!
                 state = self.openball()
             print(state)
+            print(self.isSafe2((x1,y1), (x2,y2), [(x3,y3), (x4,y4)]))
             #
             # if start == True:
             #     start = False

@@ -7,7 +7,7 @@ PITCH_ROWS = 480 #pixels
 PITCH_COLS = 640 #pixels
 
 POTENTIAL_GRANULARITY = 20*CENTIMETERS_TO_PIXELS #pixels
-WALL_INFLUENCE = 30 # pixels
+WALL_INFLUENCE = 100 # pixels
 PENALTY_BOX_INFLUENCE = 30 # pixels
 
 '''
@@ -36,10 +36,10 @@ class Potential:
             self.last_square = last_square
             self.last_direction = last_direction
 
-            self.top_wall = step_field_inside(self.world.pitch_top_left, self.world.pitch_top_right, (self.world.pitch_top_right[0]-self.world.pitch_top_left[0], self.world.pitch_top_right[1]-self.world.pitch_top_left[1]), WALL_INFLUENCE, 2, 0) # best with 2 500
-            self.bot_wall = step_field_inside(self.world.pitch_bot_left, self.world.pitch_bot_right, (self.world.pitch_bot_left[0]-self.world.pitch_bot_right[0], self.world.pitch_bot_left[1]-self.world.pitch_bot_right[1]), WALL_INFLUENCE, 2, 0)
-            self.right_wall = step_field_inside(self.world.pitch_top_right, self.world.pitch_bot_right, (self.world.pitch_bot_right[0] - self.world.pitch_top_right[0], self.world.pitch_bot_right[1] - self.world.pitch_top_right[1]), WALL_INFLUENCE, 2, 0)
-            self.left_wall = step_field_inside(self.world.pitch_top_left, self.world.pitch_bot_left, (self.world.pitch_top_left[0] - self.world.pitch_bot_left[0], self.world.pitch_top_left[1] - self.world.pitch_bot_left[1]), WALL_INFLUENCE, 2, 0)
+            self.top_wall = step_field_inside(self.world.pitch_top_left, self.world.pitch_top_right, (self.world.pitch_top_right[0]-self.world.pitch_top_left[0], self.world.pitch_top_right[1]-self.world.pitch_top_left[1]), WALL_INFLUENCE, 3, 3) # best with 2 500
+            self.bot_wall = step_field_inside(self.world.pitch_bot_left, self.world.pitch_bot_right, (self.world.pitch_bot_left[0]-self.world.pitch_bot_right[0], self.world.pitch_bot_left[1]-self.world.pitch_bot_right[1]), WALL_INFLUENCE, 3, 3)
+            self.right_wall = step_field_inside(self.world.pitch_top_right, self.world.pitch_bot_right, (self.world.pitch_bot_right[0] - self.world.pitch_top_right[0], self.world.pitch_bot_right[1] - self.world.pitch_top_right[1]), WALL_INFLUENCE, 3, 3)
+            self.left_wall = step_field_inside(self.world.pitch_top_left, self.world.pitch_bot_left, (self.world.pitch_top_left[0] - self.world.pitch_bot_left[0], self.world.pitch_top_left[1] - self.world.pitch_bot_left[1]), WALL_INFLUENCE, 3, 3)
 
             # use 1, 100
             if world.we_have_computer_goal and world.room_num == 1 or not world.we_have_computer_goal and world.room_num == 0: # there goal is on the right
