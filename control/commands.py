@@ -60,6 +60,20 @@ class Commands:
         print("We have the ball: %s" % self.protocol.query_ball())
         return self.protocol.query_ball()
 
+    def start_game(self, case_no):
+        #1 is when venus kicks off the game
+        if case_no == 1:
+            self.highstrategy.kick_off_us()
+        else:
+            self.highstrategy.kick_off_them()
+        self.runstrategy()
+
+    def penalty_attack(self):
+        self.highstrategy.penalty_attack(self)
+
+    def penalty_defend(self):
+        self.highstrategy.penalty_defend(self)
+
     def runstrategy(self):
         self.highstrategy.main()
 

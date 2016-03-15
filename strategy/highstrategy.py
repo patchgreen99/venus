@@ -372,41 +372,53 @@ class StrategyTools:
         pass
 
     def penalty_attack(self):
-        x1 = self.world.venus.position[0]
-        y1 = self.world.venus.position[1]
-        x2 = self.world.friend.position[0]
-        y2 = self.world.friend.position[1]
-        x3 = self.world.enemy1.position[0]
-        y3 = self.world.enemy1.position[1]
-        x4 = self.world.enemy2.position[0]
-        y4 = self.world.enemy2.position[1]
-
-        robotposlist = [(x3,y3),
-                        (x4,y4)]
-
-        # todo: can we determine which enemy robot is blocking the goal? maybe pass it as argument?
-
-        goalx = self.world.their_goalX
-        highy = self.world.their_goalhighY
-        lowy = self.world.their_goallowY
-
-        i = (highy + lowy)/2
-        while i < highy:
-            if self.isSafe2((x1,y1),(goalx,i),robotposlist ):
-                # grab_ball then turn and kick towards the right spot at the goal
-                return
-            i = i + 1
-        i = (highy + lowy)/2
-        while i > lowy:
-            if self.isSafe2((x1,y1),(goalx,i),robotposlist):
-                # grab_ball then turn and kick towards the right spot at the goal
-                return
-            i = i - 1
-        return
+        self.game.grab_ball()
+        self.simple.goal()
+        # x1 = self.world.venus.position[0]
+        # y1 = self.world.venus.position[1]
+        # x2 = self.world.friend.position[0]
+        # y2 = self.world.friend.position[1]
+        # x3 = self.world.enemy1.position[0]
+        # y3 = self.world.enemy1.position[1]
+        # x4 = self.world.enemy2.position[0]
+        # y4 = self.world.enemy2.position[1]
+        #
+        # robotposlist = [(x3,y3),
+        #                 (x4,y4)]
+        #
+        # # todo: can we determine which enemy robot is blocking the goal? maybe pass it as argument?
+        # # todo add grab ball and kick goal??
+        # goalx = self.world.their_goalX
+        # highy = self.world.their_goalhighY
+        # lowy = self.world.their_goallowY
+        #
+        # i = (highy + lowy)/2
+        # while i < highy:
+        #     if self.isSafe2((x1,y1),(goalx,i),robotposlist ):
+        #         # grab_ball then turn and kick towards the right spot at the goal
+        #         return
+        #     i = i + 1
+        # i = (highy + lowy)/2
+        # while i > lowy:
+        #     if self.isSafe2((x1,y1),(goalx,i),robotposlist):
+        #         # grab_ball then turn and kick towards the right spot at the goal
+        #         return
+        #     i = i - 1
+        # return
 
     def penalty_defend(self, enemy_num):
         # pass number of the enemy that attacks, 1 - enemy1 or 2 - enemy2
         self.commands.block_goal(enemy_num)
+        return
+
+    def kick_off_us(self):
+        self.commands.x()
+        self.commands.g()
+        return
+
+    def kick_off_them(self):
+        while not self.world.ball_moving.value:
+            pass
         return
 
     def main(self):
@@ -439,9 +451,7 @@ class StrategyTools:
            #  print(friend.hasBallInRange.value)
            #  print(enemy1.hasBallInRange.value)
            #  print(enemy2.hasBallInRange.value)
-            if self.commands.query_ball(): # todo change to sensor's value
-                # venus has the ball
-             #   self.commands.g()
+            if self.commands.query_ball():
                 state = self.attackwithball()
             elif friend.hasBallInRange.value:
                 # friend has the ball
