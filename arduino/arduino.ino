@@ -76,6 +76,16 @@ int paramCount;
 void setup() {
   SDPsetup();
   
+  Wire.begin();
+  Wire.beginTransmission(57);
+  Wire.write(0x43);
+  delay(100);
+  Wire.write(0x18);
+  delay(100);
+  Wire.write(0x03);
+  delay(100);
+  Wire.endTransmission();
+  
   sc.addCommand("M", moveTimeUnits);
   sc.addCommand("R", moveRotaryUnits);
   sc.addCommand("V", moveForever);
@@ -88,11 +98,28 @@ void setup() {
   sc.addCommand("Y", isOneStopped);
   //sc.addCommand("T", transferByte);
   sc.addCommand("H", handshake);
-  //sc.addCommand("A", queryBallSensor);
+  sc.addCommand("A", queryBallSensor);
   sc.addDefaultHandler(unknown);
   
   timer.setInterval(ROTARY_REQUEST_INTERVAL, rotaryTimerCallback);
 }
+
+
+/*
+void setup(){
+    
+  Serial.begin(112500);
+  Wire.begin();
+  Wire.beginTransmission(57);
+  Wire.write(0x43);
+  delay(100);
+  Wire.write(0x18);
+  delay(100);
+  Wire.write(0x03);
+  delay(100);
+  Wire.endTransmission();
+}
+*/
 
 void done() {
   Serial.print(RESP_DONE);
@@ -107,9 +134,10 @@ void done() {
   Serial.print(RESP_DONE);
 }
 
-void loop() {
+void loop(){
   timer.run();
   sc.readSerial();
+  //queryBallSensor();
 }
 
 void stopMotor(int i) {
@@ -427,13 +455,20 @@ void handshake() {
   done();
 }
 
-/*void queryBallSensor() {
-  int value = analogRead(BALL_SENSOR_ANALOG_PORT);
-  //Wire.requestFrom(BALL_SENSOR_SLAVE_ADDRESS, 1);
-  //int value = Wire.read();
-  bool hasBall = value > 230;
-  Serial.print(hasBall ? RESP_DONE : RESP_NEGATIVE);
-}*/
+void queryBallSensor() {
+  bool has_ball = false;
+  
+  
+    Wire.requestFrom(57, 1);
+    int test = Wire.read();
+    if (test > 190){
+	has_ball = true;		
+	}
+  
+    Serial.println(has_ball);
+    delay(20);
+    return;
+}
 
 void unknown() {
   Serial.print(RESP_ERROR_COMMAND_UNKNOWN);
