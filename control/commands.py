@@ -35,8 +35,8 @@ class Commands:
         print("! connect <device_no>")
         self.init()
         self.vision()
-       # self.connect()
-        self.highstrategy.main()
+        self.connect()
+        #self.highstrategy.main()
 
     def init(self, room_num=0, team_color='blue', our_color='green', computer_goal=False):
         print("init: Room: %s, team color: %s, our single spot color: %s, computer goal: %s" %
@@ -343,9 +343,9 @@ class Commands:
         x = int(x)
 
         if x > 0:
-            self.protocol.move(x, [(MOTOR_LEFT, -100 * s),
-                                   (MOTOR_RIGHT, 100 * s),
-                                   (MOTOR_TURN, 100 * s)], wait=True)
+            self.protocol.move(x, [(MOTOR_TURN, 100 * s),
+                                   (MOTOR_LEFT, -100 * s),
+                                   (MOTOR_RIGHT, 100 * s)], wait=True)
 
     def k(self, x):
         """Kick"""
