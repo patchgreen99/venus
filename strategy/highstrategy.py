@@ -57,6 +57,22 @@ class StrategyTools:
                 safe_kick = True
         return safe_kick
 
+    # check if there is other robot between ball/goal and our robot
+    # return True if there is something in between
+    # else return false
+    # USE THIS !!!!!
+
+    def isSafe3(self, pt1, pt2, robotlist):
+        for rb in robotlist:
+            distance1 = self.euclideandist(pt1, rb)
+            distance2 = self.euclideandist(pt2, rb)
+            distance3 = self.euclideandist(pt1, pt2)
+
+            if (abs((distance1 + distance2) - distance3) < 20):
+                # Object is on the line.
+                return False
+        return True
+
     def dot(self, vectorA, vectorB):
         return vectorA[0]*vectorB[0]+vectorA[1]*vectorB[1]
 
@@ -164,7 +180,7 @@ class StrategyTools:
                 #print('block pass')
                 return "ENEMY_BALL_TAKE_PASS"
         else:
-            print('no')
+            print('wrong no')
         return
 
     def iclosertogoal2(self,enemyposition):
