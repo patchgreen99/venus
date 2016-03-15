@@ -35,8 +35,8 @@ class Commands:
         print("! connect <device_no>")
         self.init()
         self.vision()
-        #self.connect()
-        self.highstrategy.main()
+        self.connect()
+        #self.highstrategy.main()
 
     def init(self, room_num=1, team_color='blue', our_color='green', computer_goal=True):
         print("init: Room: %s, team color: %s, our single spot color: %s, computer goal: %s" %
@@ -58,6 +58,7 @@ class Commands:
 
     def query_ball(self):
         print("We have the ball: %s" % self.protocol.query_ball())
+        return self.protocol.query_ball()
 
     def runstrategy(self):
         self.highstrategy.main()

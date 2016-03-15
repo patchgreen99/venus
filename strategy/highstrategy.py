@@ -439,7 +439,7 @@ class StrategyTools:
            #  print(friend.hasBallInRange.value)
            #  print(enemy1.hasBallInRange.value)
            #  print(enemy2.hasBallInRange.value)
-            if venus.hasBallInRange.value: # todo change to sensor's value
+            if self.commands.query_ball(): # todo change to sensor's value
                 # venus has the ball
              #   self.commands.g()
                 state = self.attackwithball()

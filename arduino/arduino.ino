@@ -456,18 +456,9 @@ void handshake() {
 }
 
 void queryBallSensor() {
-  bool has_ball = false;
-  
-  
-    Wire.requestFrom(57, 1);
-    int test = Wire.read();
-    if (test > 190){
-	has_ball = true;		
-	}
-  
-    Serial.println(has_ball);
-    delay(20);
-    return;
+  Wire.requestFrom(BALL_SENSOR_SLAVE_ADDRESS, 1);
+  int value = Wire.read();
+  Serial.print(value > 190 ? RESP_DONE : RESP_NEGATIVE);
 }
 
 void unknown() {
