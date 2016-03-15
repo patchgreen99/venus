@@ -41,14 +41,47 @@ class StrategyTools:
         return 'NOTHING'
 
     def isSafe2(self,(x1, y1), (x2, y2), robotposlist):
-        #rotation = 0.30
-        m = (y2 - y1) / (x2 - x1)
-        c = y2 - m*x2
-        for rb in robotposlist:
-            if rb[1] > min(y1, y2) & rb[1] < max(y1, y2):
-                if ((rb[1] - m * rb[0] - c) < 0.5) & ((rb[1] - m * rb[0] - c) > -0.5):
+        rotation = 30 # todo needs adjusting!
+
+        safe_kick = True
+        for (x, y) in robotposlist:
+            # determine if in y area
+            if self.isinbetweenY((x1,y1),(x2,y2),(x,y)):
+                # there is a robot in the area
+                # find angle
+                angle = self.ang((x1,y1), (x,y), (x2,y2))
+                print angle
+                if (angle < rotation):
                     return False
-        return True
+            else:
+                safe_kick = True
+        return safe_kick
+
+    def dot(self, vectorA, vectorB):
+        return vectorA[0]*vectorB[0]+vectorA[1]*vectorB[1]
+
+    def ang(self, (x1, y1), (x2, y2), (x, y)):
+        # one line is (x1, y1) to (x2, y2), second line is (x1, y1) and (x, y)
+        # Get nicer vector form
+        vA = [(x1-x2), (y1-y2)]
+        vB = [(x1-x), (y1-y)]
+        # Get dot prod
+        dot_prod = self.dot(vA, vB)
+        # Get magnitudes
+        magA = self.dot(vA, vA)**0.5
+        magB = self.dot(vB, vB)**0.5
+        # Get cosine value
+        cos_ = dot_prod/magA/magB
+        # Get angle in radians and then convert to degrees
+        angle = math.acos(dot_prod/magB/magA)
+        # Basically doing angle <- angle mod 360
+        ang_deg = math.degrees(angle)%360
+
+        if ang_deg-180>=0:
+            # As in if statement
+            return 360 - ang_deg
+        else:
+            return ang_deg
 
     # def isSafeKick(self,(x1, y1), (x2, y2), robotposlist):
     #     rotation = 0.30
@@ -106,8 +139,6 @@ class StrategyTools:
     #
     #     return (m1,c1)
     #
-
-
 
     def ballwithenemy(self, enemy_no):
         # enemy_no = int(enemystr)
@@ -172,17 +203,16 @@ class StrategyTools:
             return False
 
     def isinbetween(self,(x1,y1),(x2,y2),(x,y)):
-        if x>min(int(x1),int(x2)) & x < max(int(x1), int(x2)) & y>min(y1,y2) & y<max(y1,y2) :
+        if x>min(int(x1),int(x2)) and x < max(int(x1), int(x2)) and y>min(y1,y2) and y<max(y1,y2) :
             return True
         else:
             return False
 
     def isinbetweenY(self,(x1,y1),(x2,y2),(x,y)):
-        if y>min(y1,y2) & y<max(y1,y2) :
+        if y>=min(y1,y2) and y<=max(y1,y2) :
             return True
         else:
             return False
-
 
     def euclideandist(self,(x1,y1),(x2,y2)):
         return math.sqrt((x1-x2)**2 + (y1-y2)**2)
@@ -235,8 +265,7 @@ class StrategyTools:
         robotposlist = [(x3,y3),
                         (x4,y4)]
 
-
-        if self.isSafeKick((x2,y2),(x1,y1),robotposlist) and self.world.friend.hasBallInRange.value
+        if self.isSafe2((x2,y2),(x1,y1),robotposlist) and self.world.friend.hasBallInRange.value:
             return "RECEIVE_BALL"
             # print('receive pass')
         else:
@@ -300,7 +329,7 @@ class StrategyTools:
 
         i = (highy + lowy)/2
         while i < highy:
-            if self.isSafeK2((x1,y1),(goalx,i),robotposlist ):
+            if self.isSafe2((x1,y1),(goalx,i),robotposlist ):
                 # grab_ball then turn and kick towards the right spot at the goal
                 return
             i = i + 1
@@ -319,6 +348,10 @@ class StrategyTools:
 
     def main(self):
         start = True
+        x1,y1 = self.world.venus.position
+        x2, y2 = self.world.friend.position
+        x3,y3 = self.world.enemy1.position
+        x4,y4 = self.world.enemy2.position
         last_state = "None"
         while True:
             venus = self.world.venus
@@ -326,9 +359,9 @@ class StrategyTools:
             enemy1 = self.world.enemy1
             enemy2 = self.world.enemy2
            # if self.commands.query_ball():
-            print(friend.hasBallInRange.value)
-            print(enemy1.hasBallInRange.value)
-            print(enemy2.hasBallInRange.value)
+           #  print(friend.hasBallInRange.value)
+           #  print(enemy1.hasBallInRange.value)
+           #  print(enemy2.hasBallInRange.value)
             if venus.hasBallInRange.value:
                 # venus has the ball
              #   self.commands.g()
