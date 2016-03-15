@@ -34,9 +34,9 @@ class Commands:
         print("! vision")
         print("! connect <device_no>")
         self.init()
-        self.vision()
-        self.connect()
-        #self.highstrategy.main()
+        # self.vision()
+        #self.connect()
+        self.highstrategy.main()
 
     def init(self, room_num=0, team_color='blue', our_color='green', computer_goal=False):
         print("init: Room: %s, team color: %s, our single spot color: %s, computer goal: %s" %

@@ -27,25 +27,21 @@ class StrategyTools:
         i = (highy + lowy)/2
         while i < highy:
             if self.isSafe2((x1,y1),(goalx,i),robotposlist ):
-                print("AG")
                 return "ATTACK_GOAL"
             i = i + 1
         i = (highy + lowy)/2
         while i > lowy:
             if self.isSafe2((x1,y1),(goalx,i),robotposlist):
-                print("AG")
-
                 return "ATTACK_GOAL"
             i = i - 1
         if self.isSafe2((x1, y1), (x2, y2), robotposlist):
-            print("AP")
             return "ATTACK_PASS"
         # do something instead
         print('something else')
         return 'NOTHING'
 
     def isSafe2(self,(x1, y1), (x2, y2), robotposlist):
-        rotation = 40 # todo needs adjusting!
+        rotation = 30 # todo needs adjusting!
 
         safe_kick = True
         for (x, y) in robotposlist:
@@ -54,7 +50,7 @@ class StrategyTools:
                 # there is a robot in the area
                 # find angle
                 angle = self.ang((x1,y1), (x,y), (x2,y2))
-                #print angle
+                print angle
                 if (angle < rotation):
                     return False
             else:
@@ -75,13 +71,13 @@ class StrategyTools:
         magA = self.dot(vA, vA)**0.5
         magB = self.dot(vB, vB)**0.5
         # Get cosine value
-
-       # cos_ = dot_prod/magA/magB
-        # Get angle in radians and then convert to degrees
-        if (magB != 0 and magA != 0):
-            angle = math.acos(dot_prod/magB/magA)
+        if magA != 0 and magB != 0:
+            cos_ = dot_prod/magA/magB
         else:
-            angle = 0
+            cos_ = 1
+        # Get angle in radians and then convert to degrees
+        angle = math.acos(cos_)
+        
         # Basically doing angle <- angle mod 360
         ang_deg = math.degrees(angle)%360
 
@@ -141,8 +137,7 @@ class StrategyTools:
     #     xnew = (x2 * c) - (y2 * s);
     #     ynew = (y2* s) + (x2 * c);
     #     x3 = xnew + x1;
-    #     y3 = ynew + y1;def iclosertogoal(self,enemyposition):
-
+    #     y3 = ynew + y1;
     #     m1 = (y3 - y1) / (x3 - x1)
     #     c1 = y3 - m1*x3
     #
