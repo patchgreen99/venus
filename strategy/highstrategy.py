@@ -215,8 +215,6 @@ class StrategyTools:
             else:
                 return False
 
-
-
     def iclosertogoal(self,enemyposition):
         linex1,liney1 = (self.world.our_goalX,self.world.our_goalmeanY)
         linex2,liney2 = enemyposition
@@ -321,45 +319,6 @@ class StrategyTools:
             # print('receive pass')
         else:
             return self.bestpositioncase()
-        # else:
-        #     # change position
-        #     # based on positions of all robots choose the one that will ensure a safe pass
-        #     # switch relevant fields on
-        #
-        #     # at this point we are sure one of the enemy robots is between venus and friend
-        #     # so it's mainly the position of another enemy robot that might affect us
-        #
-        #     # find out which robot is on the way for us to pass todo: this is not a nice way to do it, (isSafeKick function could return number of enemy as well)...
-        #     robot_not_middle = self.world.enemy1
-        #     if self.isSafeKick((x2,y2),(x1,y1),[(x3, y3)]):
-        #         robot_not_middle = self.world.enemy2
-        #
-        #     elif self.isSafeKick((x2,y2),(x1,y1),[(x4, y4)]):
-        #         robot_not_middle = self.world.enemy1
-        #
-        #     if robot_not_middle == self.world.enemy1:
-        #         pass
-        #         # free_up_pass_enemy2
-        #         # free_up_goal_enemy1
-        #
-        #         # need to import game
-        #         # free_up_pass_enemy2 = self.game.finite_axial_outside(self.world.enemy2.position, self.world.friend.position, 1, 10000)
-        #         # free_up_goal_enemy1 = self.game.finite_axial_outside(self.world.enemy1.position, (self.world.their_goalX, self.world.their_goalmeanY), 1, 10000)
-        #         # then catch_ball and score!
-        #     else:
-        #         pass
-        #         # free_up_pass_enemy1
-        #         # free_up_goal_enemy2
-        #
-        #         # free_up_pass_enemy1 = self.game.finite_axial_outside(self.world.enemy1.position, self.world.friend.position, 1, 10000)
-        #         # free_up_goal_enemy2 = self.game.finite_axial_outside(self.world.enemy2.position, (self.world.their_goalX, self.world.their_goalmeanY), 1, 10000)
-        #         # then catch_ball and score!
-        #
-        #     # todo: what if we can't free up goal? e.g. enemy robot is there... what if enemy robot blocks the goal too well?
-        #     # we should have a strategy how to attract enemy robot out of the goal, and then attack quickly?
-        #     # or just turn and kick very quickly such that their vision doesnt recongnize where our orientation verctor is pointing
-        #
-        #     print('move to pass position')
 
     def get_pass_goal_position(self):
         pass
@@ -413,7 +372,7 @@ class StrategyTools:
            #  print(friend.hasBallInRange.value)
            #  print(enemy1.hasBallInRange.value)
            #  print(enemy2.hasBallInRange.value)
-            if venus.hasBallInRange.value:
+            if venus.hasBallInRange.value: # todo change to sensor's value
                 # venus has the ball
              #   self.commands.g()
                 state = self.attackwithball()
