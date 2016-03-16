@@ -38,7 +38,7 @@ class Commands:
         self.connect()
         #self.highstrategy.main()
 
-    def init(self, room_num=1, team_color='yellow', our_color='green', computer_goal=True):
+    def init(self, room_num=1, team_color='yellow', our_color='green', computer_goal=False):
         print("init: Room: %s, team color: %s, our single spot color: %s, computer goal: %s" %
               (room_num, team_color, our_color, computer_goal))
         self.world = World(int(room_num), team_color, our_color, computer_goal)
@@ -108,9 +108,9 @@ class Commands:
     def pw(self):
         print(self.world)
 
-    def pot2(self):
+    def pot(self):
         while True:
-            self.game.mid("FREE_BALL_2_GOALSIDE")
+            self.game.mid("FREE_BALL_YOURS")
 
     def pot1(self):
         while True:

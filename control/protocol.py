@@ -66,8 +66,8 @@ class RobotProtocol:
         while self.response not in ['D', 'N']:
             if self.response:
                 print("Received: %s" % self.response)
-            else:
-                print("Received no response")
+            # else:
+            #     print("Received no response")
             self.ser.write(message + '\r')
             self.response = self.ser.read()
 

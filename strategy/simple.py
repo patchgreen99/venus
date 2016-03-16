@@ -99,8 +99,9 @@ class SimpleStrategy:
         print("Turning " + str(angle) + " deg then kicking " + str(motion_length) + " cm")
         self.commands.c(angle)
         time.sleep(1)
-        self.commands.kick(motion_length + 50)
-        self.commands.open_narrow()
+        self.commands.x(500)
+        #self.commands.kick(motion_length + 50)
+        #self.commands.open_narrow()
         time.sleep(1)
         self.commands.g()
 
@@ -110,38 +111,45 @@ class SimpleStrategy:
         #while not self.world.ball_moving.value:
         #    pass
 
-        print("The ball is moving")
+        time.sleep(1)
 
         angle, length = self.calculate_angle_length_ball()
         print("Turning " + str(angle) + " deg, releasing grabber")
         self.commands.c(angle)
 
-        time.sleep(1)
-
         self.commands.open_wide()
         # speed in cm per frame
 
+        #t = time.time()
+
         angle, length = self.calculate_angle_length_ball()
-        speed = math.sqrt((self.world.future_ball[0]-self.world.ball[0])**2 + (self.world.future_ball[1]-self.world.ball[1])**2)
-        while length > 24:# or not self.world.ball_moving.value:
+        ball_moved = False
+        vel = math.sqrt(self.world.ball_velocity[0]**2 + self.world.ball_velocity[1]**2)
+        while length > 24 and (not ball_moved or vel > 5):
+
+            print "Velocity is", vel
+            if vel > 10:
+                print "Ball moved above threshold"
+                ball_moved = True
+
             angle, length = self.calculate_angle_length_ball()
-            speed = math.sqrt((self.world.future_ball[0]-self.world.ball[0])**2 + (self.world.future_ball[1]-self.world.ball[1])**2)
             print("Ball is " + str(length))
+
+            vel = math.sqrt(self.world.ball_velocity[0]**2 + self.world.ball_velocity[1]**2)
+
         print("The ball is " + str(length) + " m away, " + str(angle) + " deg")
 
         self.commands.g()
-        time.sleep(1)
-        self.commands.g(150)
+        #time.sleep(1)
+        #self.commands.g(150)
 
-        time.sleep(2)
-
-        angle, length = self.calculate_angle_length_ball()
-        print("The ball is " + str(length) + " m away")
-        while length > 18:
-            self.grab_ball()
-            time.sleep(1)
-            angle, length = self.calculate_angle_length_ball()
-            print("Ball is " + str(length))
+        #angle, length = self.calculate_angle_length_ball()
+        #print("The ball is " + str(length) + " m away")
+        #while length > 18:
+            #self.grab_ball()
+            #time.sleep(1)
+            #angle, length = self.calculate_angle_length_ball()
+            #print("Ball is " + str(length))
 
     def intercept(self):
         #print("Waiting for the ball to move")

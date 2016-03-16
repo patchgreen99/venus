@@ -77,7 +77,7 @@ class Vision:
             target.close()
 
             self.min_color_area = {
-                    'red': 1000.0,
+                    'red': 100.0,
                     'blue': 1000.0,
                     'yellow': 1000.0,
                     'pink': 2000.0,
@@ -110,7 +110,7 @@ class Vision:
             target.close()
 
             self.min_color_area = {
-                    'red': 1000.0,
+                    'red': 100.0,
                     'blue': 1000.0,
                     'yellow': 1000.0,
                     'pink': 2000.0,
@@ -338,7 +338,7 @@ class Vision:
                 for position in robots_pos:
                     if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 25: #todo Danger hard coded
                         its_robot = True
-                if not its_robot:
+                if not its_robot and circles['red'][i][1] < 460:
                     found = True
                     self.world.ball[0] = int(circles['red'][i][0])
                     self.world.ball[1] = int(circles['red'][i][1])
@@ -347,7 +347,7 @@ class Vision:
                         position = robots_pos[positionIndex]
                         # todo Danger hard coded
                         if positionIndex == 0:
-                            if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 100: # todo: this is different!
+                            if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 60: # todo: this is different!
                                 self.world.venus.hasBallInRange.value = True
                             else:
                                 self.world.venus.hasBallInRange.value = False

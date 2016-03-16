@@ -28,39 +28,54 @@ class StrategyTools:
         highy = self.world.their_goalhighY
         lowy = self.world.their_goallowY
 
-        print(goalx,highy,lowy)
-        print(self.world.enemy1.position[0],self.world.enemy1.position[1])
+        #print(goalx,highy,lowy)
+        #print(self.world.enemy1.position[0],self.world.enemy1.position[1])
         i = (highy + lowy)/2
         while i < highy:
-            if self.isSafe2((x1,y1),(goalx,i),robotposlist ):
+            if self.isSafe3((x1,y1),(goalx,i),robotposlist ):
+                print('a1')
+                print(self.isSafe2((x1,y1),(goalx,i),robotposlist ))
                 return "ATTACK_GOAL"
+
             i = i + 1
         i = (highy + lowy)/2
         while i > lowy:
-            if self.isSafe2((x1,y1),(goalx,i),robotposlist):
+            if self.isSafe3((x1,y1),(goalx,i),robotposlist):
+                print('a2')
                 return "ATTACK_GOAL"
+
             i = i - 1
-        if self.isSafe2((x1, y1), (x2, y2), robotposlist):
+        if self.isSafe3((x1, y1), (x2, y2), robotposlist):
+            print('p')
             return "ATTACK_PASS"
+
         # do something instead
-        #print('something else')
+        print('something else')
         angle, motion_length = self.simple.calculate_angle_length_goal()
         self.commands.c(angle)
         time.sleep(3)
         i = (highy + lowy)/2
         while i < highy:
-            if self.isSafe2((x1,y1),(goalx,i),robotposlist ):
+            if self.isSafe3((x1,y1),(goalx,i),robotposlist ):
+                print('a')
                 return "ATTACK_GOAL"
+
             i = i + 1
         i = (highy + lowy)/2
         while i > lowy:
-            if self.isSafe2((x1,y1),(goalx,i),robotposlist):
+            if self.isSafe3((x1,y1),(goalx,i),robotposlist):
+                print('a')
                 return "ATTACK_GOAL"
+
             i = i - 1
-        if self.isSafe2((x1, y1), (x2, y2), robotposlist):
+        if self.isSafe3((x1, y1), (x2, y2), robotposlist):
+            print('p')
             return "ATTACK_PASS"
+        print('yolo')
         self.commands.c(20)
-        self.commands.x()
+        self.commands.x(500)
+        time.sleep(1)
+        self.commands.g()
 
         # i = 0
         # while i< 5:
@@ -73,7 +88,7 @@ class StrategyTools:
         return
 
     def isSafe2(self,(x1, y1), (x2, y2), robotposlist):
-        rotation = 20 # todo needs adjusting!
+        rotation = 65 # todo needs adjusting!
 
         safe_kick = True
         for (x, y) in robotposlist:
@@ -81,12 +96,14 @@ class StrategyTools:
             if self.isinbetweenY((x1,y1),(x2,y2),(x,y)):
                 # there is a robot in the area
                 # find angle
-                print(x1)
+                #print(x1)
                 angle = self.ang((x1,y1), (x,y), (x2,y2))
                 print angle
                 if (angle < rotation):
+                    print("HEREEE")
                     return False
             else:
+                print(x,y)
                 safe_kick = True
         return safe_kick
 
@@ -362,8 +379,8 @@ class StrategyTools:
         robotposlist = [(x3,y3),
                         (x4,y4)]
 
-        if self.isSafe2((x2,y2),(x1,y1),robotposlist) and self.world.friend.hasBallInRange.value:
-            return "RECEIVE_BALL"
+        if self.isSafe3((x2,y2),(x1,y1),robotposlist) and self.world.friend.hasBallInRange.value:
+            return "RECEIVE_PASS"
             # print('receive pass')
         else:
             return self.bestpositioncase()

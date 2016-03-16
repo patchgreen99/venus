@@ -7,8 +7,8 @@ PITCH_ROWS = 480 #pixels
 PITCH_COLS = 640 #pixels
 
 POTENTIAL_GRANULARITY = 20*CENTIMETERS_TO_PIXELS #pixels
-WALL_INFLUENCE = 600 # pixels
-PENALTY_BOX_INFLUENCE = 600# pixels
+WALL_INFLUENCE = 1000 # pixels
+PENALTY_BOX_INFLUENCE = 1000# pixels
 
 '''
 DEFENDING_LEFT_TOP = [(117, 114), (190, 144)]
@@ -26,9 +26,7 @@ PITCH_BOT_LEFT = [(25, 457), (34, 466)]
 '''
 
 class Potential:
-        def __init__(self, last_square, last_direction, world, ball_field, friend_field, enemy1_field, enemy2_field,
-                     free_up_pass_enemy1, free_up_pass_enemy2, free_up_goal_enemy1, free_up_goal_enemy2, block_pass,
-                     block_goal_enemy1, block_goal_enemy2, advance, catch_up, bad_minima_pass, bad_minima_goal):
+        def __init__(self, last_square, last_direction, world, potentials):
 
             self.world = world
             self.ball_next_square = False
@@ -36,43 +34,22 @@ class Potential:
             self.last_square = last_square
             self.last_direction = last_direction
 
-            self.top_wall = step_field_inside(self.world.pitch_top_left, self.world.pitch_top_right, (self.world.pitch_top_right[0]-self.world.pitch_top_left[0], self.world.pitch_top_right[1]-self.world.pitch_top_left[1]), WALL_INFLUENCE, 2, 15) # best with 3 5
-            self.bot_wall = step_field_inside(self.world.pitch_bot_left, self.world.pitch_bot_right, (self.world.pitch_bot_left[0]-self.world.pitch_bot_right[0], self.world.pitch_bot_left[1]-self.world.pitch_bot_right[1]), WALL_INFLUENCE, 2, 15)
-            self.right_wall = step_field_inside(self.world.pitch_top_right, self.world.pitch_bot_right, (self.world.pitch_bot_right[0] - self.world.pitch_top_right[0], self.world.pitch_bot_right[1] - self.world.pitch_top_right[1]), WALL_INFLUENCE, 2, 15)
-            self.left_wall = step_field_inside(self.world.pitch_top_left, self.world.pitch_bot_left, (self.world.pitch_top_left[0] - self.world.pitch_bot_left[0], self.world.pitch_top_left[1] - self.world.pitch_bot_left[1]), WALL_INFLUENCE, 2, 15)
+            self.top_wall = step_field_inside(self.world.pitch_top_left, self.world.pitch_top_right, (self.world.pitch_top_right[0]-self.world.pitch_top_left[0], self.world.pitch_top_right[1]-self.world.pitch_top_left[1]), WALL_INFLUENCE, 2, 20) # best with 3 5
+            self.bot_wall = step_field_inside(self.world.pitch_bot_left, self.world.pitch_bot_right, (self.world.pitch_bot_left[0]-self.world.pitch_bot_right[0], self.world.pitch_bot_left[1]-self.world.pitch_bot_right[1]), WALL_INFLUENCE, 2, 20)
+            self.right_wall = step_field_inside(self.world.pitch_top_right, self.world.pitch_bot_right, (self.world.pitch_bot_right[0] - self.world.pitch_top_right[0], self.world.pitch_bot_right[1] - self.world.pitch_top_right[1]), WALL_INFLUENCE, 2, 20)
+            self.left_wall = step_field_inside(self.world.pitch_top_left, self.world.pitch_bot_left, (self.world.pitch_top_left[0] - self.world.pitch_bot_left[0], self.world.pitch_top_left[1] - self.world.pitch_bot_left[1]), WALL_INFLUENCE, 2, 20)
 
             # use 1, 100
             if world.we_have_computer_goal and world.room_num == 1 or not world.we_have_computer_goal and world.room_num == 0: # there goal is on the right
-                self.penalty_box_front = step_field_inside(self.world.defending_right_top, self.world.defending_right_bot, (self.world.defending_right_bot[0]-self.world.defending_right_top[0], self.world.defending_right_bot[1]-self.world.defending_right_top[1]), PENALTY_BOX_INFLUENCE, 2, 10) # 2, 500
-                self.penalty_box_top = infinite_axial_inside(self.world.goal_right_top, self.world.defending_right_top, PENALTY_BOX_INFLUENCE, 2, 10)
-                self.penalty_box_bot = infinite_axial_inside(self.world.goal_right_bot, self.world.defending_right_bot, PENALTY_BOX_INFLUENCE, 2, 10)
+                self.penalty_box_front = step_field_inside(self.world.defending_right_top, self.world.defending_right_bot, (self.world.defending_right_bot[0]-self.world.defending_right_top[0], self.world.defending_right_bot[1]-self.world.defending_right_top[1]), PENALTY_BOX_INFLUENCE, 2, 15) # 2, 500
+                self.penalty_box_top = infinite_axial_inside(self.world.goal_right_top, self.world.defending_right_top, PENALTY_BOX_INFLUENCE, 2, 15)
+                self.penalty_box_bot = infinite_axial_inside(self.world.goal_right_bot, self.world.defending_right_bot, PENALTY_BOX_INFLUENCE, 2, 15)
             elif world.we_have_computer_goal and world.room_num == 0 or not world.we_have_computer_goal and world.room_num == 1: # obviously the left goal
-                self.penalty_box_front = step_field_inside(self.world.defending_left_top, self.world.defending_left_bot, (self.world.defending_left_top[0]-self.world.defending_left_bot[0], self.world.defending_left_top[1]-self.world.defending_left_bot[1]), PENALTY_BOX_INFLUENCE, 2, 10)
-                self.penalty_box_top = infinite_axial_inside(self.world.goal_left_top, self.world.defending_left_top, PENALTY_BOX_INFLUENCE, 2, 10)
-                self.penalty_box_bot = infinite_axial_inside(self.world.goal_left_bot, self.world.defending_left_bot, PENALTY_BOX_INFLUENCE, 2, 10)
+                self.penalty_box_front = step_field_inside(self.world.defending_left_top, self.world.defending_left_bot, (self.world.defending_left_top[0]-self.world.defending_left_bot[0], self.world.defending_left_top[1]-self.world.defending_left_bot[1]), PENALTY_BOX_INFLUENCE, 2, 15)
+                self.penalty_box_top = infinite_axial_inside(self.world.goal_left_top, self.world.defending_left_top, PENALTY_BOX_INFLUENCE, 2, 15)
+                self.penalty_box_bot = infinite_axial_inside(self.world.goal_left_bot, self.world.defending_left_bot, PENALTY_BOX_INFLUENCE, 2, 15)
 
-            self.ball_field = ball_field
-
-            self.friend_field = friend_field
-            self.enemy1_field = enemy1_field
-            self.enemy2_field = enemy2_field
-            self.free_up_pass_enemy1 = free_up_pass_enemy1
-            self.free_up_pass_enemy2 = free_up_pass_enemy2
-            self.free_up_goal_enemy1 = free_up_goal_enemy1
-            self.free_up_goal_enemy2 = free_up_goal_enemy2
-            self.block_pass = block_pass
-            self.block_goal_enemy1 = block_goal_enemy1
-            self.block_goal_enemy2 = block_goal_enemy2
-            self.advance = advance
-            self.catch_up = catch_up
-            self.bad_minima_pass = bad_minima_pass
-            self.bad_minima_goal = bad_minima_goal
-
-            self.potential_list = [self.ball_field, self.friend_field, self.enemy1_field, self.enemy2_field,
-                     self.free_up_pass_enemy1, self.free_up_pass_enemy2, self.free_up_goal_enemy1,
-                    self.free_up_goal_enemy2, self.block_pass, self.block_goal_enemy1, self.block_goal_enemy2,
-                        self.advance, self.catch_up, self.bad_minima_pass, self.bad_minima_goal, self.top_wall, self.bot_wall, self.right_wall,
-                                self.left_wall, self.penalty_box_front, self.penalty_box_top, self.penalty_box_bot]
+            self.potential_list = potentials + [self.top_wall, self.bot_wall, self.right_wall, self.left_wall, self.penalty_box_front, self.penalty_box_bot, self.penalty_box_top]
 
             #self.potential_list = [self.ball_field]
 
