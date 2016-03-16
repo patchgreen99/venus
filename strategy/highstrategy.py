@@ -423,15 +423,6 @@ class StrategyTools:
 
     def main(self):
         start = True
-        x1 = self.world.venus.position[0]
-        y1 = self.world.venus.position[1]
-        x2 = self.world.friend.position[0]
-        y2 = self.world.friend.position[1]
-        x3 = self.world.enemy1.position[0]
-        y3 = self.world.enemy1.position[1]
-        x4 = self.world.enemy2.position[0]
-        y4 = self.world.enemy2.position[1]
-
         last_state = "None"
         while True:
 
@@ -465,16 +456,19 @@ class StrategyTools:
             else:
                 # open ball!
                 state = self.openball()
+            # if(last_state != state):
+            #     self.game.mid(state)
             print(state)
+            last_state = state
 
-            if start == True:
-                start = False
-                self.game.start(state)
-            elif last_state == state:
-                self.game.mid(state)
-            else:
-                self.game.exit(last_state)
-                self.game.start(state)
+            # if start == True:
+            #     start = False
+            #     self.game.start(state)
+            # elif last_state == state:
+            #     self.game.mid(state)
+            # else:
+            #     self.game.exit(last_state)
+            #     self.game.start(state)
 
     if __name__ == "__main__":
         main()
