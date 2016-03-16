@@ -214,7 +214,9 @@ class StrategyTools:
         #enemy_no = int(enemystr)
         if enemy_no == 1:
             enemyposition = self.world.enemy1.position
-            if self.iclosertogoal2(enemyposition) or self.world.enemy2.out.value: #TODO: or enemy out of pitch -- done, test!
+            print enemyposition[0]
+            print enemyposition[1]
+            if self.iclosertogoal(enemyposition) or self.world.enemy2.out.value: #TODO: or enemy out of pitch -- done, test!
                # self.commands.block_goal(1)
                 print('block goal enemy1')
                 return "ENEMY1_BALL_TAKE_GOAL"
@@ -224,7 +226,8 @@ class StrategyTools:
                 return "ENEMY_BALL_TAKE_PASS"
         elif enemy_no == 2:
             enemyposition = self.world.enemy2.position
-            if self.iclosertogoal2(enemyposition) or self.world.enemy1.out.value:  #TODO: or enemy out of pitch -- done, test!
+           # print enemyposition
+            if self.iclosertogoal(enemyposition) or self.world.enemy1.out.value:  #TODO: or enemy out of pitch -- done, test!
                 #self.commands.block_goal(2)
                 print('block goal enemy2')
                 return "ENEMY2_BALL_TAKE_GOAL"
@@ -238,6 +241,7 @@ class StrategyTools:
 
     def iclosertogoal2(self,enemyposition):
         linex1,liney1 = (self.world.our_goalX, self.world.our_goalmeanY)
+        print (linex1, liney1)
         linex2,liney2 = enemyposition
         x1 = self.world.venus.position[0]
         y1 = self.world.venus.position[1]
@@ -257,6 +261,7 @@ class StrategyTools:
             else:
                 return False
         elif venusin:
+            print("HERE")
             return True
         elif friendin:
             return False
@@ -269,14 +274,17 @@ class StrategyTools:
                 return False
 
     def iclosertogoal(self,enemyposition):
+        '''
         linex1,liney1 = (self.world.our_goalX,self.world.our_goalmeanY)
         linex2,liney2 = enemyposition
         m = (liney2-liney1) / (linex2 -linex1)
         c = -(liney2 - m * linex2)
         a = -m
 
-        vx,vy = self.world.venus.position
-        fx,fy = self.world.friend.position
+        vy = self.world.venus.position[1]
+        vx = self.world.venus.position[0]
+        fx = self.world.friend.position[0]
+        fy = self.world.friend.position[0]
 
         pvx = ((vx - a*vy) - a*c)/ (a**2 + 1)
         pfx = ((fx - a*fy) - a*c)/ (a**2 + 1)
@@ -286,20 +294,52 @@ class StrategyTools:
 
         vlinedist= abs((liney2-liney1)*vx - (linex2-linex1)*vy + (linex1*liney2) + (linex2*liney1))/self.euclideandist((linex1,liney1),(linex2,liney2))
         flinedist= abs((liney2-liney1)*fx - (linex2-linex1)*fy + (linex1*liney2) + (linex2*liney1))/self.euclideandist((linex1,liney1),(linex2,liney2))
+        '''
 
-        minvenddist = min( self.euclideandist((linex1,liney1),(vx,vy)),self.euclideandist((linex2,liney2),(vx,vy)))
-        minfenddist = min( self.euclideandist((linex1,liney1),(fx,fy)),self.euclideandist((linex2,liney2),(fx,fy)))
+        dir_x = self.world.our_goalX - enemyposition[0]
+        dir_y = self.world.our_goalmeanY - enemyposition[1]
+        angle = math.degrees(math.atan2(dir_y, dir_x))
+        rotated_venus = self.rotate_vector(-angle, self.world.venus.position[0], self.world.venus.position[1])
+        rotated_friend = self.rotate_vector(-angle, self.world.friend.position[0], self.world.friend.position[1])
+        rotated_enemy = self.rotate_vector(-angle, enemyposition[0], enemyposition[1])
+        rotated_goal = self.rotate_vector(-angle, self.world.our_goalX, self.world.our_goalmeanY)
 
-        if self.isinbetween((linex1,liney1),(linex2,liney2),(pvx,pvy)):
-            minvdist = vlinedist
+        if rotated_goal[0] > rotated_enemy[0]:
+            right_ref = rotated_goal[0]
+            left_ref = rotated_enemy[0]
         else:
-            minvdist = minvenddist
+            left_ref = rotated_goal[0]
+            right_ref = rotated_enemy[0]
 
-        if self.isinbetween((linex1,liney1),(linex2,liney2),(pfx,pfy)):
-            minfdist = flinedist
+        if left_ref < rotated_venus[0] < right_ref:
+            vlinedist = abs(rotated_venus[1] - rotated_enemy[1])
         else:
-            minfdist = minfenddist
-        if minvdist < minfdist:
+            vlinedist = self.euclideandist(self.world.venus.position, enemyposition)
+
+        if left_ref < rotated_friend[0] < right_ref:
+            flinedist = abs(rotated_friend[1] - rotated_enemy[1])
+        else:
+            flinedist = self.euclideandist(self.world.friend.position, enemyposition)
+
+
+
+        # minvenddist = min( self.euclideandist((linex1,liney1),(vx,vy)),self.euclideandist((linex2,liney2),(vx,vy)))
+        # minfenddist = min( self.euclideandist((linex1,liney1),(fx,fy)),self.euclideandist((linex2,liney2),(fx,fy)))
+        # minvenddist = minvenddist +10
+        # minfenddist = minfenddist + 10
+        #
+        #
+        # if self.isinbetween((linex1,liney1),(linex2,liney2),(pvx,pvy)):
+        #     minvdist = vlinedist
+        # else:
+        #     minvdist = minvenddist
+
+        # if self.isinbetween((linex1,liney1),(linex2,liney2),(pfx,pfy)):
+        #     minfdist = flinedist
+        # else:
+        #     minfdist = minfenddist
+        print(vlinedist, flinedist)
+        if vlinedist < flinedist:
             return True
         else:
             return False
@@ -326,6 +366,10 @@ class StrategyTools:
             return "FREE_BALL_YOURS"
         else:
             return self.bestpositioncase()
+
+    def rotate_vector(self, angle, x, y): # clock_wise negative degrees
+        angle = math.radians(angle)
+        return x*math.cos(angle)-y*math.sin(angle), x*math.sin(angle)+y*math.cos(angle)
 
     def icloserball(self):
         x1 = self.world.venus.position[0]
@@ -423,25 +467,31 @@ class StrategyTools:
         #     i = i - 1
         # return
     def ballindefensearea(self):
-        if((self.world.room_num == 0 and self.world.we_have_computer_goal) or (not self.world.we_have_computer_goal and self.world.room_num == 1 )):
-            backxup = self.world.goal_right_bot[0]
-            backyup = self.world.goal_right_bot[1]
-            backxdown = self.world.goal_left_bot[0]
-            frontyup = self.world.defending_right_bot[1]
-            ballx = self.world.ball[0]
-            bally = self.world.ball[1]
+        if self.world.room_num == 0 and self.world.we_have_computer_goal or self.world.room_num == 1 and not self.world.we_have_computer_goal:
+            penalty_point = self.world.defending_left_bot[0]
         else:
-            backxup = self.world.defending_right_bot[0]
-            backyup = self.world.defending_left_bot_right_bot[1]
-            backxdown = self.world.defending_left_bot_left_bot[0]
-            frontyup = self.world.goal_right_bot[1]
-            ballx = self.world.ball[0]
-            bally = self.world.ball[1]
+            penalty_point = self.world.defending_right_bot[0]
 
-        if(ballx > min(backxup,backxdown ) and (ballx < max(backxup,backxdown ) )) and (bally < max(frontyup,backyup) and bally > min(frontyup,backyup)):
-            return True
-        else:
-            return False
+        return self.world.venus.hasBallInRange.value and not (self.world.venus.position[0] < penalty_point < self.world.ball[0] or self.world.venus.position[0] > penalty_point > self.world.ball[0])
+        # if((self.world.room_num == 0 and self.world.we_have_computer_goal) or (not self.world.we_have_computer_goal and self.world.room_num == 1 )):
+        #     backxup = self.world.goal_right_bot[0]
+        #     backyup = self.world.goal_right_bot[1]
+        #     backxdown = self.world.goal_left_bot[0]
+        #     frontyup = self.world.defending_right_bot[1]
+        #     ballx = self.world.ball[0]
+        #     bally = self.world.ball[1]
+        # else:
+        #     backxup = self.world.defending_right_bot[0]
+        #     backyup = self.world.defending_left_bot_right_bot[1]
+        #     backxdown = self.world.defending_left_bot_left_bot[0]
+        #     frontyup = self.world.goal_right_bot[1]
+        #     ballx = self.world.ball[0]
+        #     bally = self.world.ball[1]
+        #
+        # if(ballx > min(backxup,backxdown ) and (ballx < max(backxup,backxdown ) )) and (bally < max(frontyup,backyup) and bally > min(frontyup,backyup)):
+        #     return True
+        # else:
+        #     return False
 
 
 

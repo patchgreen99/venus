@@ -85,7 +85,8 @@ class Commands:
         self.highstrategy.ballwithenemy(int(no))
 
     def ballindefensearea(self):
-        self.highstrategy.ballindefensearea()
+        a= self.highstrategy.ballindefensearea()
+        print(a)
 
     def grab_ball(self):
         self.strategy.grab_ball()
@@ -113,15 +114,15 @@ class Commands:
 
     def pot(self):
         while True:
-            self.game.mid("FREE_BALL_YOURS")
+            self.game.mid("ENEMY1_BALL_TAKE_GOAL")
 
     def pot1(self):
         while True:
             self.game.mid("FREE_BALL_1_GOALSIDE")
 
     def positionTest(self):
-        while True:
-            print self.world.venus.out.value
+        print self.world.our_goalX, self.world.our_goalmeanY
+
 
     def flush(self):
         self.protocol.flush()

@@ -278,7 +278,7 @@ class infinite_axial_outside:
         else:
             return 0
 
-# finite axial inside - field is between reference points and exists everywhere
+# # finite axial inside - field is between reference points and exists everywhere
 # 3 3 3 2 3 3 3
 # 3 2 1 1 1 2 3
 # 0 0 0 0 0 0 0
@@ -289,8 +289,8 @@ class finite_axial_inside:
     def __init__(self, (start_x, start_y), (ref_x, ref_y), g, k):
         self.start_x = start_x
         self.start_y = start_y
-        self.ref_x = ref_x
-        self.ref_y = ref_y
+        self.end_x = ref_x
+        self.end_y = ref_y
         self.dir_x = start_x - ref_x
         self.dir_y = start_y - ref_y
         self.gradient = g
@@ -300,7 +300,7 @@ class finite_axial_inside:
         angle = math.degrees(math.atan2(self.dir_y, self.dir_x))
         rotated_point = rotate_vector(-angle, x, y)
         start_field = rotate_vector(-angle, self.start_x, self.start_y)
-        end_field = rotate_vector(-angle, self.start_x, self.start_y)
+        end_field = rotate_vector(-angle, self.end_x, self.end_y)
 
         if start_field[0] > end_field[0]:
             right_ref = start_field[0]
@@ -315,9 +315,10 @@ class finite_axial_inside:
             distance_to = abs(rotated_point[1] - start_field[1])
             return self.constant*math.log((b + math.sqrt(b**2 + distance_to**2))/(a + math.sqrt(a**2 + distance_to**2)), math.e)
         elif right_ref <= rotated_point[0]: # outside
-            return self.constant/math.pow(math.sqrt((x-right_ref)**2 + (y-right_ref)**2), self.gradient)
+            return self.constant/math.pow(math.sqrt((x-(right_ref+left_ref)/2.0)**2 + (y-(right_ref+left_ref)/2.0)**2), self.gradient)
         elif left_ref >= rotated_point[0]: # outside
-            return self.constant/math.pow(math.sqrt((x-left_ref)**2 + (y-left_ref)**2), self.gradient)
+            return self.constant/math.pow(math.sqrt((x-(left_ref+right_ref)/2.0)**2 + (y-(left_ref+right_ref)/2.0)**2), self.gradient)
+
 
 
 # finite axial outside - field will start at start point and exist on the opposite side to the ref point anc continue of
