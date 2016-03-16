@@ -63,17 +63,17 @@ class Commands:
 
     def start_game(self, case_no):
         #1 is when venus kicks off the game
-        if case_no == 1:
+        if int(case_no) == 1:
             self.highstrategy.kick_off_us()
         else:
             self.highstrategy.kick_off_them()
         self.runstrategy()
 
-    def penalty_attack(self):
-        self.highstrategy.penalty_attack(self)
+    def penalty_attack(self, clockno):
+        self.highstrategy.penalty_attack(clockno)
 
     def penalty_defend(self):
-        self.highstrategy.penalty_defend(self)
+        self.highstrategy.penalty_defend()
 
     def runstrategy(self):
         self.highstrategy.main()
@@ -114,7 +114,7 @@ class Commands:
 
     def pot(self):
         while True:
-            self.game.mid("ENEMY1_BALL_TAKE_GOAL")
+            self.game.mid("FREE_BALL_YOURS")
 
     def pot1(self):
         while True:

@@ -4,7 +4,7 @@ import time
 import numpy as np
 
 ROBOT_SIZE = 50
-ROBOT_INFLUENCE_SIZE = 600
+ROBOT_INFLUENCE_SIZE = 1000
 CENTIMETERS_TO_PIXELS = (300.0 / 640.0)
 POSITION_INFLUENCE_RANGE = 1000
 COLS = 640
@@ -72,9 +72,9 @@ class Game:
 
             ball_field = radial(self.world.ball, 1, -5)# -5
 
-            friend_field = solid_field(self.world.friend.position, 2, 20, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy1_field = solid_field(self.world.enemy1.position, 2, 20, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy2_field = solid_field(self.world.enemy2.position, 2, 20, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            friend_field = solid_field(self.world.friend.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy1_field = solid_field(self.world.enemy1.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy2_field = solid_field(self.world.enemy2.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
 
             advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
             catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
@@ -100,7 +100,7 @@ class Game:
             else:
                 penalty_point = self.world.defending_right_bot[0]
 
-            if self.world.venus.hasBallInRange.value and not (self.world.venus.position[0] < penalty_point < self.world.ball[0] or self.world.venus.position[0] > penalty_point > self.world.ball[0]):
+            if self.world.venus.hasBallInRange.value == 1 and not (self.world.venus.position[0] < penalty_point < self.world.ball[0] or self.world.venus.position[0] > penalty_point > self.world.ball[0]):
                 time.sleep(1)
                 angle, motion_length = self.calculate_angle_length_ball()
                 self.commands.open_wide()
@@ -110,7 +110,7 @@ class Game:
                 self.commands.g()
                 time.sleep(.6)
                 # todo need to implement considering objects
-                if self.commands.query_ball() and self.commands.query_ball():
+                if self.commands.query_ball():
                     print("It thinks it has the ball")
                     return
             else:
@@ -126,9 +126,9 @@ class Game:
             # ON
             #####################################
 
-            friend_field = solid_field(self.world.friend.position, 2, 20, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy1_field = solid_field(self.world.enemy1.position, 2, 20, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy2_field = solid_field(self.world.enemy2.position, 2, 20, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            friend_field = solid_field(self.world.friend.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy1_field = solid_field(self.world.enemy1.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy2_field = solid_field(self.world.enemy2.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
 
             advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
             catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
@@ -160,9 +160,9 @@ class Game:
             # ON
             #####################################
 
-            friend_field = solid_field(self.world.friend.position, 2, 20, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy1_field = solid_field(self.world.enemy1.position, 2, 20, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy2_field = solid_field(self.world.enemy2.position, 2, 20, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            friend_field = solid_field(self.world.friend.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy1_field = solid_field(self.world.enemy1.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy2_field = solid_field(self.world.enemy2.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
 
             advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
             catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
@@ -195,9 +195,9 @@ class Game:
             # ON
             #####################################
 
-            friend_field = solid_field(self.world.friend.position, 2, 20, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy1_field = solid_field(self.world.enemy1.position, 2, 20, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy2_field = solid_field(self.world.enemy2.position, 2, 20, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            friend_field = solid_field(self.world.friend.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy1_field = solid_field(self.world.enemy1.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy2_field = solid_field(self.world.enemy2.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
 
             advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
             catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
@@ -227,9 +227,9 @@ class Game:
             # ON
             #####################################
 
-            friend_field = solid_field(self.world.friend.position, 2, 20, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy1_field = solid_field(self.world.enemy1.position, 2, 20, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy2_field = solid_field(self.world.enemy2.position, 2, 20, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            friend_field = solid_field(self.world.friend.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy1_field = solid_field(self.world.enemy1.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy2_field = solid_field(self.world.enemy2.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
 
             advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
             catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
@@ -261,14 +261,14 @@ class Game:
             #####################################
             ball_field = radial(self.world.ball, 1, 0)
 
-            friend_field = solid_field(self.world.friend.position, 2, 20, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy1_field = solid_field(self.world.enemy1.position, 2, 20, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy2_field = solid_field(self.world.enemy2.position, 2, 20, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            friend_field = solid_field(self.world.friend.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy1_field = solid_field(self.world.enemy1.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy2_field = solid_field(self.world.enemy2.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
 
             advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
             catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
 
-            block_goal_enemy1 = finite_axial_inside(self.world.enemy1.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, -8)
+            block_goal_enemy1 = finite_axial_inside(self.world.enemy1.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, -100)
 
             # BUILD FIELD AND NEXT POSITION AND DIRECTIONS
             ####################################
@@ -295,14 +295,14 @@ class Game:
             #####################################
             ball_field = radial(self.world.ball, 1, 0)
 
-            friend_field = solid_field(self.world.friend.position, 2, 20, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy1_field = solid_field(self.world.enemy1.position, 2, 20, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy2_field = solid_field(self.world.enemy2.position, 2, 20, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            friend_field = solid_field(self.world.friend.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy1_field = solid_field(self.world.enemy1.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy2_field = solid_field(self.world.enemy2.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
 
             advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
             catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
 
-            block_goal_enemy2 = finite_axial_inside(self.world.enemy1.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, -8)
+            block_goal_enemy2 = finite_axial_inside(self.world.enemy1.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, -100)
 
             # BUILD FIELD AND NEXT POSITION AND DIRECTIONS
             ####################################
@@ -328,14 +328,14 @@ class Game:
             #####################################
             ball_field = radial(self.world.ball, 1, 0)
 
-            friend_field = solid_field(self.world.friend.position, 2, 20, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy1_field = solid_field(self.world.enemy1.position, 2, 20, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy2_field = solid_field(self.world.enemy2.position, 2, 20, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            friend_field = solid_field(self.world.friend.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy1_field = solid_field(self.world.enemy1.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy2_field = solid_field(self.world.enemy2.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
 
             advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
             catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
 
-            block_pass = finite_axial_inside(self.world.enemy1.position, self.world.enemy2.position, 1, -8)
+            block_pass = finite_axial_inside(self.world.enemy1.position, self.world.enemy2.position, 1, -100)
 
             # BUILD FIELD AND NEXT POSITION AND DIRECTIONS
             ####################################
@@ -348,6 +348,8 @@ class Game:
 
             # MOTION
             #######################################
+            if self.getPerpendicular(self.world.enemy1.position, self.world.enemy2.position, self.world.venus.position) < 30:
+                pass
 
             self.local_potential, self.points = potential.get_local_potential()
             self.turn, self.current_point = self.move(None)

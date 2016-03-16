@@ -347,22 +347,22 @@ class Vision:
                         position = robots_pos[positionIndex]
                         # todo Danger hard coded
                         if positionIndex == 0:
-                            if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 60: # todo: this is different!
+                            if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 90: # todo: this is different!
                                 self.world.venus.hasBallInRange.value = True
                             else:
                                 self.world.venus.hasBallInRange.value = False
                         if positionIndex == 1:
-                            if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 45:
+                            if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 60:
                                 self.world.friend.hasBallInRange.value = True
                             else:
                                 self.world.friend.hasBallInRange.value = False
                         if positionIndex == 2:
-                            if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 45:
+                            if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 30:
                                 self.world.enemy1.hasBallInRange.value = True
                             else:
                                 self.world.enemy1.hasBallInRange.value = False
                         if positionIndex == 3:
-                            if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 45:
+                            if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 30:
                                 self.world.enemy2.hasBallInRange.value = True
                             else:
                                 self.world.enemy2.hasBallInRange.value = False
@@ -375,7 +375,7 @@ class Vision:
                 for positionIndex in range(0,len(robots_pos)):
                     position = robots_pos[positionIndex]
 
-                    if positionIndex == 0 and self.world.venus.hasBallInRange.value:
+                    if positionIndex == 0 and self.world.venus.hasBallInRange.value == 1:
                         self.world.ball[0] = self.world.ball[0]
                         self.world.ball[1] = self.world.ball[1]
                         '''
@@ -391,7 +391,7 @@ class Vision:
                         self.world.ball[0] = new_x
                         self.world.ball[1] = new_y
                     '''
-                    if positionIndex == 1 and self.world.friend.hasBallInRange.value :
+                    if positionIndex == 1 and self.world.friend.hasBallInRange.value == 1:
                         flag = True
                         # 'closest' is the robot who might have the ball, let's check that
                         distance_between_points = math.sqrt((position[0] - self.world.friend.orientation[0])**2 + (position[1] -
@@ -405,7 +405,7 @@ class Vision:
                         self.world.ball[0] = new_x
                         self.world.ball[1] = new_y
 
-                    if positionIndex == 2 and self.world.enemy1.hasBallInRange.value :
+                    if positionIndex == 2 and self.world.enemy1.hasBallInRange.value == 1:
                         flag = True
                         # 'closest' is the robot who might have the ball, let's check that
                         distance_between_points = math.sqrt((position[0] - self.world.enemy1.orientation[0])**2 + (position[1] -
@@ -419,7 +419,7 @@ class Vision:
                         self.world.ball[0] = new_x
                         self.world.ball[1] = new_y
 
-                    if positionIndex == 3 and self.world.enemy2.hasBallInRange.value :
+                    if positionIndex == 3 and self.world.enemy2.hasBallInRange.value == 1:
                         flag = True
                         # 'closest' is the robot who might have the ball, let's check that
                         distance_between_points = math.sqrt((position[0] - self.world.enemy2.orientation[0])**2 + (position[1] -

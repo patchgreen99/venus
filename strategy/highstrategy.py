@@ -33,20 +33,20 @@ class StrategyTools:
         i = (highy + lowy)/2
         while i < highy:
             if self.isSafe3((x1,y1),(goalx,i),robotposlist ):
-                print('a1')
-                print(self.isSafe2((x1,y1),(goalx,i),robotposlist ))
+                #print('a1')
+                #print(self.isSafe2((x1,y1),(goalx,i),robotposlist ))
                 return "ATTACK_GOAL"
 
             i = i + 1
         i = (highy + lowy)/2
         while i > lowy:
             if self.isSafe3((x1,y1),(goalx,i),robotposlist):
-                print('a2')
+                #print('a2')
                 return "ATTACK_GOAL"
 
             i = i - 1
         if self.isSafe3((x1, y1), (x2, y2), robotposlist):
-            print('p')
+            #print('p')
             return "ATTACK_PASS"
 
         # do something instead
@@ -57,21 +57,21 @@ class StrategyTools:
         i = (highy + lowy)/2
         while i < highy:
             if self.isSafe3((x1,y1),(goalx,i),robotposlist ):
-                print('a')
+               # print('a')
                 return "ATTACK_GOAL"
 
             i = i + 1
         i = (highy + lowy)/2
         while i > lowy:
             if self.isSafe3((x1,y1),(goalx,i),robotposlist):
-                print('a')
+                #print('a')
                 return "ATTACK_GOAL"
 
             i = i - 1
-        if self.isSafe3((x1, y1), (x2, y2), robotposlist):
-            print('p')
+        if self.isSafe3((x1, y1), (x2, y2), robotposlist) and self.world.friend.out.value == 0:
+            # print('p')
             return "ATTACK_PASS"
-        print('yolo')
+        #print('yolo')
         self.commands.c(20)
         self.commands.x(500)
         time.sleep(1)
@@ -98,12 +98,12 @@ class StrategyTools:
                 # find angle
                 #print(x1)
                 angle = self.ang((x1,y1), (x,y), (x2,y2))
-                print angle
+                #print angle
                 if (angle < rotation):
-                    print("HEREEE")
+                    #print("HEREEE")
                     return False
             else:
-                print(x,y)
+                #print(x,y)
                 safe_kick = True
         return safe_kick
 
@@ -214,26 +214,26 @@ class StrategyTools:
         #enemy_no = int(enemystr)
         if enemy_no == 1:
             enemyposition = self.world.enemy1.position
-            print enemyposition[0]
-            print enemyposition[1]
-            if self.iclosertogoal(enemyposition) or self.world.enemy2.out.value: #TODO: or enemy out of pitch -- done, test!
+            #print enemyposition[0]
+            #print enemyposition[1]
+            if self.iclosertogoal(enemyposition) or self.world.enemy2.out.value == 1: #TODO: or enemy out of pitch -- done, test!
                # self.commands.block_goal(1)
-                print('block goal enemy1')
+                #print('block goal enemy1')
                 return "ENEMY1_BALL_TAKE_GOAL"
             else:
                 #self.commands.intercept()
-                print('block pass')
+                #print('block pass')
                 return "ENEMY_BALL_TAKE_PASS"
         elif enemy_no == 2:
             enemyposition = self.world.enemy2.position
            # print enemyposition
-            if self.iclosertogoal(enemyposition) or self.world.enemy1.out.value:  #TODO: or enemy out of pitch -- done, test!
+            if self.iclosertogoal(enemyposition) or self.world.enemy1.out.value == 1:  #TODO: or enemy out of pitch -- done, test!
                 #self.commands.block_goal(2)
-                print('block goal enemy2')
+                #print('block goal enemy2')
                 return "ENEMY2_BALL_TAKE_GOAL"
             else:
                 #self.commands.intercept()
-                print('block pass')
+                #print('block pass')
                 return "ENEMY_BALL_TAKE_PASS"
         else:
             print('wrong no')
@@ -241,7 +241,7 @@ class StrategyTools:
 
     def iclosertogoal2(self,enemyposition):
         linex1,liney1 = (self.world.our_goalX, self.world.our_goalmeanY)
-        print (linex1, liney1)
+        #print (linex1, liney1)
         linex2,liney2 = enemyposition
         x1 = self.world.venus.position[0]
         y1 = self.world.venus.position[1]
@@ -261,7 +261,7 @@ class StrategyTools:
             else:
                 return False
         elif venusin:
-            print("HERE")
+            #print("HERE")
             return True
         elif friendin:
             return False
@@ -338,7 +338,7 @@ class StrategyTools:
         #     minfdist = flinedist
         # else:
         #     minfdist = minfenddist
-        print(vlinedist, flinedist)
+        #print(vlinedist, flinedist)
         if vlinedist < flinedist:
             return True
         else:
@@ -382,7 +382,7 @@ class StrategyTools:
         d1 = self.euclideandist((x1,y1),(x,y))
         d2 = self.euclideandist((x2,y2),(x,y))
 
-        if d1 < d2 or self.world.friend.out.value:         #TODO: or teamate out of pitch -- done, testing needed
+        if d1*(0.7) < d2 or self.world.friend.out.value == 1:         #TODO: or teamate out of pitch -- done, testing needed
             return True
         else:
             return False
@@ -423,7 +423,7 @@ class StrategyTools:
         robotposlist = [(x3,y3),
                         (x4,y4)]
 
-        if self.isSafe3((x2,y2),(x1,y1),robotposlist) and self.world.friend.hasBallInRange.value:
+        if self.isSafe3((x2,y2),(x1,y1),robotposlist) and self.world.friend.hasBallInRange.value == 1:
             return "RECEIVE_PASS"
             # print('receive pass')
         else:
@@ -432,9 +432,13 @@ class StrategyTools:
     def get_pass_goal_position(self):
         pass
 
-    def penalty_attack(self):
-        self.game.grab_ball()
-        self.simple.goal()
+    def penalty_attack(self, clockno):
+        #1 for clockwise, -1 for anti , 0 straight
+        #self.game.grab_ball()
+        self.commands.c(25*(int(clockno)))
+        self.commands.x(500)
+        time.sleep(1)
+        self.commands.g()
         # x1 = self.world.venus.position[0]
         # y1 = self.world.venus.position[1]
         # x2 = self.world.friend.position[0]
@@ -472,7 +476,7 @@ class StrategyTools:
         else:
             penalty_point = self.world.defending_right_bot[0]
 
-        return self.world.venus.hasBallInRange.value and not (self.world.venus.position[0] < penalty_point < self.world.ball[0] or self.world.venus.position[0] > penalty_point > self.world.ball[0])
+        return self.world.venus.hasBallInRange.value == 1and not (self.world.venus.position[0] < penalty_point < self.world.ball[0] or self.world.venus.position[0] > penalty_point > self.world.ball[0])
         # if((self.world.room_num == 0 and self.world.we_have_computer_goal) or (not self.world.we_have_computer_goal and self.world.room_num == 1 )):
         #     backxup = self.world.goal_right_bot[0]
         #     backyup = self.world.goal_right_bot[1]
@@ -501,12 +505,13 @@ class StrategyTools:
         return
 
     def kick_off_us(self):
-        self.commands.x()
+        self.commands.x(500)
+        time.sleep(1)
         self.commands.g()
         return
 
     def kick_off_them(self):
-        while not self.world.ball_moving.value:
+        while self.world.ball_moving.value== 0:
             pass
         return
 
@@ -528,18 +533,20 @@ class StrategyTools:
             enemy1 = self.world.enemy1
             enemy2 = self.world.enemy2
            # if self.commands.query_ball():
-           #  print(friend.hasBallInRange.value)
-           #  print(enemy1.hasBallInRange.value)
-           #  print(enemy2.hasBallInRange.value)
+            #print(friend.hasBallInRange.value)
+            #print(enemy1.hasBallInRange.value)
+            #print(enemy2.hasBallInRange.value)
             if self.commands.query_ball():
                 state = self.attackwithball()
-            elif friend.hasBallInRange.value:
+            elif friend.hasBallInRange.value == 0 and enemy1.hasBallInRange.value == 0 and enemy2.hasBallInRange.value == 0:
+                state = self.openball()
+            elif friend.hasBallInRange.value == 1:
                 # friend has the ball
                 state = self.ballwithfriend()
-            elif enemy1.hasBallInRange.value:
+            elif enemy1.hasBallInRange.value == 1:
                 # enemy1 has the ball
                 state = self.ballwithenemy(1)
-            elif enemy2.hasBallInRange.value:
+            elif enemy2.hasBallInRange.value == 1:
                 # enemy2 has the ball
                 state = self.ballwithenemy(2)
             elif self.ballindefensearea():

@@ -36,18 +36,18 @@ class Potential:
 
             self.top_wall = step_field_inside(self.world.pitch_top_left, self.world.pitch_top_right, (self.world.pitch_top_right[0]-self.world.pitch_top_left[0], self.world.pitch_top_right[1]-self.world.pitch_top_left[1]), WALL_INFLUENCE, 2, 20) # best with 3 5
             self.bot_wall = step_field_inside(self.world.pitch_bot_left, self.world.pitch_bot_right, (self.world.pitch_bot_left[0]-self.world.pitch_bot_right[0], self.world.pitch_bot_left[1]-self.world.pitch_bot_right[1]), WALL_INFLUENCE, 2, 20)
-            self.right_wall = step_field_inside(self.world.pitch_top_right, self.world.pitch_bot_right, (self.world.pitch_bot_right[0] - self.world.pitch_top_right[0], self.world.pitch_bot_right[1] - self.world.pitch_top_right[1]), WALL_INFLUENCE, 2, 20)
-            self.left_wall = step_field_inside(self.world.pitch_top_left, self.world.pitch_bot_left, (self.world.pitch_top_left[0] - self.world.pitch_bot_left[0], self.world.pitch_top_left[1] - self.world.pitch_bot_left[1]), WALL_INFLUENCE, 2, 20)
+            self.right_wall = step_field_inside(self.world.pitch_top_right, self.world.pitch_bot_right, (self.world.pitch_bot_right[0] - self.world.pitch_top_right[0], self.world.pitch_bot_right[1] - self.world.pitch_top_right[1]), WALL_INFLUENCE, 2, 30)
+            self.left_wall = step_field_inside(self.world.pitch_top_left, self.world.pitch_bot_left, (self.world.pitch_top_left[0] - self.world.pitch_bot_left[0], self.world.pitch_top_left[1] - self.world.pitch_bot_left[1]), WALL_INFLUENCE, 2, 30)
 
             # use 1, 100
             if world.we_have_computer_goal and world.room_num == 1 or not world.we_have_computer_goal and world.room_num == 0: # there goal is on the right
-                self.penalty_box_front = step_field_inside(self.world.defending_right_top, self.world.defending_right_bot, (self.world.defending_right_bot[0]-self.world.defending_right_top[0], self.world.defending_right_bot[1]-self.world.defending_right_top[1]), PENALTY_BOX_INFLUENCE, 2, 15) # 2, 500
-                self.penalty_box_top = infinite_axial_inside(self.world.goal_right_top, self.world.defending_right_top, PENALTY_BOX_INFLUENCE, 2, 15)
-                self.penalty_box_bot = infinite_axial_inside(self.world.goal_right_bot, self.world.defending_right_bot, PENALTY_BOX_INFLUENCE, 2, 15)
+                self.penalty_box_front = step_field_inside(self.world.defending_right_top, self.world.defending_right_bot, (self.world.defending_right_bot[0]-self.world.defending_right_top[0], self.world.defending_right_bot[1]-self.world.defending_right_top[1]), PENALTY_BOX_INFLUENCE, 2, 20) # 2, 500
+                self.penalty_box_top = infinite_axial_inside(self.world.goal_right_top, self.world.defending_right_top, PENALTY_BOX_INFLUENCE, 2, 20)
+                self.penalty_box_bot = infinite_axial_inside(self.world.goal_right_bot, self.world.defending_right_bot, PENALTY_BOX_INFLUENCE, 2, 20)
             elif world.we_have_computer_goal and world.room_num == 0 or not world.we_have_computer_goal and world.room_num == 1: # obviously the left goal
-                self.penalty_box_front = step_field_inside(self.world.defending_left_top, self.world.defending_left_bot, (self.world.defending_left_top[0]-self.world.defending_left_bot[0], self.world.defending_left_top[1]-self.world.defending_left_bot[1]), PENALTY_BOX_INFLUENCE, 2, 15)
-                self.penalty_box_top = infinite_axial_inside(self.world.goal_left_top, self.world.defending_left_top, PENALTY_BOX_INFLUENCE, 2, 15)
-                self.penalty_box_bot = infinite_axial_inside(self.world.goal_left_bot, self.world.defending_left_bot, PENALTY_BOX_INFLUENCE, 2, 15)
+                self.penalty_box_front = step_field_inside(self.world.defending_left_top, self.world.defending_left_bot, (self.world.defending_left_top[0]-self.world.defending_left_bot[0], self.world.defending_left_top[1]-self.world.defending_left_bot[1]), PENALTY_BOX_INFLUENCE, 2, 20)
+                self.penalty_box_top = infinite_axial_inside(self.world.goal_left_top, self.world.defending_left_top, PENALTY_BOX_INFLUENCE, 2, 20)
+                self.penalty_box_bot = infinite_axial_inside(self.world.goal_left_bot, self.world.defending_left_bot, PENALTY_BOX_INFLUENCE, 2, 20)
 
             self.potential_list = potentials + [self.top_wall, self.bot_wall, self.right_wall, self.left_wall, self.penalty_box_front, self.penalty_box_bot, self.penalty_box_top]
 

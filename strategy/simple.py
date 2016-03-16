@@ -179,7 +179,7 @@ class SimpleStrategy:
         print("Blocking enemy " + str(enemy_num))
 
         enemy = self.world.enemy1 if enemy_num == 1 else self.world.enemy2
-        while not self.world.ball_moving.value:
+        while self.world.ball_moving.value == 0:
              pass
         # t = (enemy.position[0]*enemy.orientation[1] - enemy.position[1]*enemy.orientation[0]+
         #      self.world.venus.position[1]*enemy.orientation[0] - self.world.venus.position[0]*enemy.orientation[1])/(self.world.venus.orientation[0]*enemy.orientation[1] - self.world.venus.orientation[1]*enemy.orientation[0])
