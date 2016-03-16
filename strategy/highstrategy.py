@@ -422,6 +422,28 @@ class StrategyTools:
         #         return
         #     i = i - 1
         # return
+    def ballindefensearea(self):
+        if((self.world.room_num == 0 and self.world.we_have_computer_goal) or (not self.world.we_have_computer_goal and self.world.room_num == 1 )):
+            backxup = self.world.goal_right_bot[0]
+            backyup = self.world.goal_right_bot[1]
+            backxdown = self.world.goal_left_bot[0]
+            frontyup = self.world.defending_right_bot[1]
+            ballx = self.world.ball[0]
+            bally = self.world.ball[1]
+        else:
+            backxup = self.world.defending_right_bot[0]
+            backyup = self.world.defending_left_bot_right_bot[1]
+            backxdown = self.world.defending_left_bot_left_bot[0]
+            frontyup = self.world.goal_right_bot[1]
+            ballx = self.world.ball[0]
+            bally = self.world.ball[1]
+
+        if(ballx > min(backxup,backxdown ) and (ballx < max(backxup,backxdown ) )) and (bally < max(frontyup,backyup) and bally > min(frontyup,backyup)):
+            return True
+        else:
+            return False
+
+
 
     def penalty_defend(self, enemy_num):
         # pass number of the enemy that attacks, 1 - enemy1 or 2 - enemy2
@@ -470,6 +492,9 @@ class StrategyTools:
             elif enemy2.hasBallInRange.value:
                 # enemy2 has the ball
                 state = self.ballwithenemy(2)
+            elif self.ballindefensearea():
+                # enemy2 has the ball
+                state = self.ballwithenemy(1)
             else:
                 # open ball!
                 state = self.openball()

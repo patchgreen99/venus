@@ -84,6 +84,9 @@ class Commands:
     def ballwithenemy(self, no):
         self.highstrategy.ballwithenemy(int(no))
 
+    def ballindefensearea(self):
+        self.highstrategy.ballindefensearea()
+
     def grab_ball(self):
         self.strategy.grab_ball()
 
