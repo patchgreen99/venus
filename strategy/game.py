@@ -100,8 +100,7 @@ class Game:
             # todo too reliant on vision, must pick what to use for look ahead
 
             self.current_point = (self.world.venus.position[0], self.world.venus.position[1])
-            if self.turn != 180 or self.current_direction is None:
-                self.current_direction = (self.world.venus.orientation[0], self.world.venus.orientation[1])
+            self.current_direction = (self.world.venus.orientation[0], self.world.venus.orientation[1])
 
             potential = Potential(self.current_point, self.current_direction, self.world, ball_field, friend_field, enemy1_field, enemy2_field,
                                              free_up_pass_enemy1, free_up_pass_enemy2, free_up_goal_enemy1,
@@ -177,8 +176,7 @@ class Game:
             ####################################
             # todo too reliant on vision, must pick what to use for look ahead
             self.current_point = (self.world.venus.position[0], self.world.venus.position[1])
-            if self.turn != 180 or self.current_direction is None :
-                self.current_direction = (self.world.venus.orientation[0], self.world.venus.orientation[1])
+            self.current_direction = (self.world.venus.orientation[0], self.world.venus.orientation[1])
 
             potential = Potential(self.current_point, self.current_direction, self.world, ball_field, friend_field, enemy1_field, enemy2_field,
                                              free_up_pass_enemy1, free_up_pass_enemy2, free_up_goal_enemy1,
@@ -202,15 +200,15 @@ class Game:
             # ON
             #####################################
 
-            friend_field = solid_field(self.world.friend.position, 2, 20, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            friend_field = solid_field(self.world.friend.position, 1, 20, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
             enemy1_field = solid_field(self.world.enemy1.position, 2, 20, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
             enemy2_field = solid_field(self.world.enemy2.position, 2, 20, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
 
             advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
             catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
 
-            free_up_pass_enemy2 = finite_axial_outside(self.world.enemy1.position, self.world.friend.position, 1, 1)
-            free_up_goal_enemy1 = finite_axial_outside(self.world.enemy2.position, (self.world.their_goalX, self.world.their_goalmeanY), 1, 1)
+            free_up_pass_enemy2 = finite_axial_outside(self.world.enemy1.position, self.world.friend.position, 200, 1, 1)
+            free_up_goal_enemy1 = finite_axial_outside(self.world.enemy2.position, (self.world.their_goalX, self.world.their_goalmeanY), 100, 1, 1)
 
             bad_minima_goal = infinite_axial_outside(self.world.venus.position, (self.world.their_goalX, self.world.their_goalmeanY), 2000, 0, 0)
             bad_minima_pass = infinite_axial_outside(self.world.venus.position, self.world.friend.position, 2000, 0, 0)
@@ -220,8 +218,8 @@ class Game:
 
             ball_field = radial(self.world.ball, 1, 0)
 
-            free_up_pass_enemy1 = finite_axial_outside(self.world.enemy2.position, self.world.friend.position, 1, 0)
-            free_up_goal_enemy2 = finite_axial_outside(self.world.enemy1.position, (self.world.their_goalX, self.world.their_goalmeanY), 1, 0)
+            free_up_pass_enemy1 = finite_axial_outside(self.world.enemy2.position, self.world.friend.position, 100, 1, 0)
+            free_up_goal_enemy2 = finite_axial_outside(self.world.enemy1.position, (self.world.their_goalX, self.world.their_goalmeanY), 100, 1, 0)
 
             block_pass = finite_axial_inside(self.world.enemy1.position, self.world.enemy2.position, 1, 0)
             block_goal_enemy1 = finite_axial_inside(self.world.enemy1.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, 0)
@@ -231,8 +229,7 @@ class Game:
             ####################################
             # todo too reliant on vision, must pick what to use for look ahead
             self.current_point = (self.world.venus.position[0], self.world.venus.position[1])
-            if self.turn != 180 and self.current_direction is None:
-                self.current_direction = (self.world.venus.orientation[0], self.world.venus.orientation[1])
+            self.current_direction = (self.world.venus.orientation[0], self.world.venus.orientation[1])
 
             potential = Potential(self.current_point, self.current_direction, self.world, ball_field, friend_field, enemy1_field, enemy2_field,
                                              free_up_pass_enemy1, free_up_pass_enemy2, free_up_goal_enemy1,
@@ -901,7 +898,7 @@ class finite_axial_inside:
 # 3 3 3 2 3 3 3
 
 class finite_axial_outside:
-    def __init__(self, (start_x, start_y), (ref_x, ref_y), g, k):
+    def __init__(self, (start_x, start_y), (ref_x, ref_y), influence, g, k):
         self.start_x = start_x
         self.start_y = start_y
         self.ref_x = ref_x
@@ -910,12 +907,13 @@ class finite_axial_outside:
         self.dir_y = start_y - ref_y
         self.gradient = g
         self.constant = k
+        self.influence = influence
 
     def field_at(self, x, y):
         angle = math.degrees(math.atan2(self.dir_y, self.dir_x))
         rotated_point = rotate_vector(-angle, x, y)
         start_field = rotate_vector(-angle, self.start_x, self.start_y)
-        end_field = rotate_vector(-angle, self.start_x + normalize((self.dir_x, self.dir_y))[0]*600,  self.start_y + normalize((self.dir_x, self.dir_y))[1]*600)
+        end_field = rotate_vector(-angle, self.start_x + normalize((self.dir_x, self.dir_y))[0]*6000,  self.start_y + normalize((self.dir_x, self.dir_y))[1]*6000)
 
         if start_field[0] > end_field[0]:
             right_ref = start_field[0]
@@ -928,11 +926,22 @@ class finite_axial_outside:
             b = right_ref - rotated_point[0]
             a = left_ref - rotated_point[0]
             distance_to = abs(rotated_point[1] - start_field[1])
-            return self.constant*math.log((b + math.sqrt(b**2 + distance_to**2))/(a + math.sqrt(a**2 + distance_to**2)), math.e) #todo no gradient
+            if self.influence > distance_to:
+                return self.constant*math.log((b + math.sqrt(b**2 + distance_to**2))/(a + math.sqrt(a**2 + distance_to**2)), math.e) #todo no gradient
+            else:
+                return 0
         elif right_ref <= rotated_point[0]: # outside
-            return self.constant/((x-right_ref)**2 + (y-right_ref)**2)
+            distance_to = (x-right_ref)**2 + (y-right_ref)**2
+            if self.influence > distance_to:
+                return self.constant/(distance_to)
+            else:
+                return 0
         elif left_ref >= rotated_point[0]: # outside
-            return self.constant/((x-left_ref)**2 + (y-left_ref)**2)
+            distance_to = (x-right_ref)**2 + (y-right_ref)**2
+            if self.influence > distance_to:
+                return self.constant/(distance_to)
+            else:
+                return 0
 
 # solid - modeled as a circle, from center 'forbidden' is unreachable and outside the influence area is unreachable
 # 0 2 3 3 3 2 0

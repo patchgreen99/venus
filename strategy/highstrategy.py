@@ -457,9 +457,9 @@ class StrategyTools:
                 # open ball!
                 state = self.openball()
             # if(last_state != state):
-            #     self.game.mid(state)
+            self.game.mid(state)
             print(state)
-            last_state = state
+            #last_state = state
 
             # if start == True:
             #     start = False

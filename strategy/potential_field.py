@@ -352,7 +352,7 @@ class finite_axial_inside:
 # 3 3 3 2 3 3 3
 
 class finite_axial_outside:
-    def __init__(self, (start_x, start_y), (ref_x, ref_y), g, k):
+    def __init__(self, (start_x, start_y), (ref_x, ref_y), influence, g, k):
         self.start_x = start_x
         self.start_y = start_y
         self.ref_x = ref_x
@@ -361,12 +361,13 @@ class finite_axial_outside:
         self.dir_y = start_y - ref_y
         self.gradient = g
         self.constant = k
+        self.influence = influence
 
     def field_at(self, x, y):
         angle = math.degrees(math.atan2(self.dir_y, self.dir_x))
         rotated_point = rotate_vector(-angle, x, y)
         start_field = rotate_vector(-angle, self.start_x, self.start_y)
-        end_field = rotate_vector(-angle, self.start_x + normalize((self.dir_x, self.dir_y))[0]*600,  self.start_y + normalize((self.dir_x, self.dir_y))[1]*600)
+        end_field = rotate_vector(-angle, self.start_x + normalize((self.dir_x, self.dir_y))[0]*6000,  self.start_y + normalize((self.dir_x, self.dir_y))[1]*6000)
 
         if start_field[0] > end_field[0]:
             right_ref = start_field[0]
@@ -379,11 +380,22 @@ class finite_axial_outside:
             b = right_ref - rotated_point[0]
             a = left_ref - rotated_point[0]
             distance_to = abs(rotated_point[1] - start_field[1])
-            return self.constant*math.log((b + math.sqrt(b**2 + distance_to**2))/(a + math.sqrt(a**2 + distance_to**2)), math.e) #todo no gradient
+            if self.influence > distance_to:
+                return self.constant*math.log((b + math.sqrt(b**2 + distance_to**2))/(a + math.sqrt(a**2 + distance_to**2)), math.e) #todo no gradient
+            else:
+                return 0
         elif right_ref <= rotated_point[0]: # outside
-            return self.constant/((x-right_ref)**2 + (y-right_ref)**2)
+            distance_to = (x-right_ref)**2 + (y-right_ref)**2
+            if self.influence > distance_to:
+                return self.constant/(distance_to)
+            else:
+                return 0
         elif left_ref >= rotated_point[0]: # outside
-            return self.constant/((x-left_ref)**2 + (y-left_ref)**2)
+            distance_to = (x-right_ref)**2 + (y-right_ref)**2
+            if self.influence > distance_to:
+                return self.constant/(distance_to)
+            else:
+                return 0
 
 # solid - modeled as a circle, from center 'forbidden' is unreachable and outside the influence area is unreachable
 # 0 2 3 3 3 2 0
