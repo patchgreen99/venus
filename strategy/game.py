@@ -1,14 +1,14 @@
 import math
 import time
-
+import matplotlib.pyplot as plt
 import numpy as np
 
-ROBOT_SIZE = 50
+ROBOT_SIZE = 20
 ROBOT_INFLUENCE_SIZE = 1000
 CENTIMETERS_TO_PIXELS = (300.0 / 640.0)
 POSITION_INFLUENCE_RANGE = 1000
-COLS = 640
-ROWS = 480
+PITCH_ROWS = 480+1 #pixels
+PITCH_COLS = 640+1 #pixels
 
 
 from potential_field import Potential
@@ -25,6 +25,7 @@ class Game:
     def __init__(self, world, commands):
         self.world = world
         self.local_potential = None
+        self.heat_map = None
         self.points = None
         self.current_point = None
         self.current_direction = None
@@ -64,7 +65,7 @@ class Game:
     ################################################################################################################################################################
     # MID STATE
     ################################################################################################################################################################
-    def mid(self, state):
+    def mid(self, state, sim):
         if state == "FREE_BALL_YOURS":
 
             # ON
@@ -72,9 +73,9 @@ class Game:
 
             ball_field = radial(self.world.ball, 1, -5)# -5
 
-            friend_field = solid_field(self.world.friend.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy1_field = solid_field(self.world.enemy1.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy2_field = solid_field(self.world.enemy2.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            friend_field = solid_field(self.world.friend.position, 1, 5, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy1_field = solid_field(self.world.enemy1.position, 1, 5, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy2_field = solid_field(self.world.enemy2.position, 1, 5, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
 
             advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
             catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
@@ -92,30 +93,50 @@ class Game:
 
             # MOTION
             #######################################
+            if sim is False:
+                self.local_potential, self.points = potential.get_local_potential()
+                #todo broken badly aseem says 4 points
+                if self.world.room_num == 0 and self.world.we_have_computer_goal or self.world.room_num == 1 and not self.world.we_have_computer_goal:
+                    penalty_point = self.world.defending_left_bot[0]
+                else:
+                    penalty_point = self.world.defending_right_bot[0]
 
-            self.local_potential, self.points = potential.get_local_potential()
-            #todo broken badly aseem says 4 points
-            if self.world.room_num == 0 and self.world.we_have_computer_goal or self.world.room_num == 1 and not self.world.we_have_computer_goal:
-                penalty_point = self.world.defending_left_bot[0]
-            else:
-                penalty_point = self.world.defending_right_bot[0]
+                if self.world.venus.hasBallInRange.value == 1 and not (self.world.venus.position[0] < penalty_point < self.world.ball[0] or self.world.venus.position[0] > penalty_point > self.world.ball[0]):
+                    time.sleep(1)
+                    angle, motion_length = self.calculate_angle_length_ball()
+                    self.commands.open_wide()
+                    self.commands.c(angle)
+                    angle, motion_length = self.calculate_angle_length_ball()
+                    self.commands.f(motion_length)
+                    self.commands.g()
+                    time.sleep(.6)
+                    # todo need to implement considering objects
+                    if self.commands.query_ball():
+                        print("It thinks it has the ball")
+                        return
+                else:
+                    self.turn, self.current_point = self.move(None)
+                    self.current_direction = rotate_vector(self.turn, self.current_direction[0], self.current_direction[1])
 
-            if self.world.venus.hasBallInRange.value == 1 and not (self.world.venus.position[0] < penalty_point < self.world.ball[0] or self.world.venus.position[0] > penalty_point > self.world.ball[0]):
-                time.sleep(1)
-                angle, motion_length = self.calculate_angle_length_ball()
-                self.commands.open_wide()
-                self.commands.c(angle)
-                angle, motion_length = self.calculate_angle_length_ball()
-                self.commands.f(motion_length)
-                self.commands.g()
-                time.sleep(.6)
-                # todo need to implement considering objects
-                if self.commands.query_ball():
-                    print("It thinks it has the ball")
-                    return
+            ########################################
+
+            # TESTING
+            ########################################
             else:
-                self.turn, self.current_point = self.move(None)
-                self.current_direction = rotate_vector(self.turn, self.current_direction[0], self.current_direction[1])
+                heat_map = potential.get_heat_map()
+                x = np.arange(PITCH_COLS)
+                y = np.arange(PITCH_ROWS)
+
+                X, Y = np.meshgrid(x, y)
+
+                intensity = np.array(heat_map)
+
+                fig, ax = plt.subplots()
+                ax.pcolor(X, Y, intensity, vmin=-1, vmax=1)
+                ax.invert_yaxis()
+                ax.xaxis.tick_top()
+                fig.colorbar()
+                fig.show() #boom
 
             ########################################
 
@@ -126,15 +147,15 @@ class Game:
             # ON
             #####################################
 
-            friend_field = solid_field(self.world.friend.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy1_field = solid_field(self.world.enemy1.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy2_field = solid_field(self.world.enemy2.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            friend_field = solid_field(self.world.friend.position, 1, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy1_field = solid_field(self.world.enemy1.position, 1, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy2_field = solid_field(self.world.enemy2.position, 1, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
 
             advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
             catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
 
-            free_up_pass_enemy1 = finite_axial_outside(self.world.enemy1.position, self.world.friend.position, POSITION_INFLUENCE_RANGE, 1, 5)
-            free_up_goal_enemy2 = finite_axial_outside(self.world.enemy2.position, (self.world.their_goalX, self.world.their_goalmeanY), POSITION_INFLUENCE_RANGE, 1, 5)
+            free_up_pass_enemy1 = finite_axial_outside(self.world.enemy1.position, self.world.friend.position, POSITION_INFLUENCE_RANGE, 10, -0.4)
+            free_up_goal_enemy2 = finite_axial_outside(self.world.enemy2.position, (self.world.their_goalX, self.world.their_goalmeanY), POSITION_INFLUENCE_RANGE, 10, -0.4)
 
             # BUILD FIELD AND NEXT POSITION AND DIRECTIONS
             ####################################
@@ -147,9 +168,29 @@ class Game:
 
             # MOTION
             #######################################
-            self.local_potential, self.points = potential.get_local_potential()
-            self.turn, self.current_point = self.move(None)
-            self.current_direction = rotate_vector(self.turn, self.current_direction[0], self.current_direction[1])
+            if sim is False:
+                self.local_potential, self.points = potential.get_local_potential()
+                self.turn, self.current_point = self.move(None)
+                self.current_direction = rotate_vector(self.turn, self.current_direction[0], self.current_direction[1])
+
+            ########################################
+
+            # TESTING
+            ########################################
+            else:
+                heat_map = potential.get_heat_map()
+                x = np.arange(PITCH_COLS)
+                y = np.arange(PITCH_ROWS)
+
+                X, Y = np.meshgrid(x, y)
+
+                intensity = np.array(heat_map)
+
+                fig, ax = plt.subplots()
+                ax.pcolor(X, Y, intensity, vmin=-1, vmax=1)
+                ax.invert_yaxis()
+                ax.xaxis.tick_top()
+                fig.show() #boom
 
             ########################################
 
@@ -160,15 +201,15 @@ class Game:
             # ON
             #####################################
 
-            friend_field = solid_field(self.world.friend.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy1_field = solid_field(self.world.enemy1.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy2_field = solid_field(self.world.enemy2.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            friend_field = solid_field(self.world.friend.position, 1, 5, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy1_field = solid_field(self.world.enemy1.position, 1, 5, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy2_field = solid_field(self.world.enemy2.position, 1, 5, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
 
             advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
             catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
 
-            free_up_pass_enemy2 = finite_axial_outside(self.world.enemy1.position, self.world.friend.position, POSITION_INFLUENCE_RANGE, 1, 1)
-            free_up_goal_enemy1 = finite_axial_outside(self.world.enemy2.position, (self.world.their_goalX, self.world.their_goalmeanY), POSITION_INFLUENCE_RANGE, 1, 1)
+            free_up_pass_enemy2 = finite_axial_outside(self.world.enemy1.position, self.world.friend.position, POSITION_INFLUENCE_RANGE, 1, -0.4)
+            free_up_goal_enemy1 = finite_axial_outside(self.world.enemy2.position, (self.world.their_goalX, self.world.their_goalmeanY), POSITION_INFLUENCE_RANGE, 1, -0.4)
 
 
             # BUILD FIELD AND NEXT POSITION AND DIRECTIONS
@@ -182,9 +223,29 @@ class Game:
 
             # MOTION
             #######################################
-            self.local_potential, self.points = potential.get_local_potential()
-            self.turn, self.current_point = self.move(None)
-            self.current_direction = rotate_vector(self.turn, self.current_direction[0], self.current_direction[1])
+            if sim is False:
+                self.local_potential, self.points = potential.get_local_potential()
+                self.turn, self.current_point = self.move(None)
+                self.current_direction = rotate_vector(self.turn, self.current_direction[0], self.current_direction[1])
+
+            ########################################
+
+            # TESTING
+            ########################################
+            else:
+                heat_map = potential.get_heat_map()
+                x = np.arange(PITCH_COLS)
+                y = np.arange(PITCH_ROWS)
+
+                X, Y = np.meshgrid(x, y)
+
+                intensity = np.array(heat_map)
+
+                fig, ax = plt.subplots()
+                ax.pcolor(X, Y, intensity, vmin=-1, vmax=1)
+                ax.invert_yaxis()
+                ax.xaxis.tick_top()
+                fig.show() #boom
 
             ########################################
 
@@ -195,15 +256,15 @@ class Game:
             # ON
             #####################################
 
-            friend_field = solid_field(self.world.friend.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy1_field = solid_field(self.world.enemy1.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy2_field = solid_field(self.world.enemy2.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            friend_field = solid_field(self.world.friend.position, 1, 5, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy1_field = solid_field(self.world.enemy1.position, 1, 5, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy2_field = solid_field(self.world.enemy2.position, 1, 5, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
 
             advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
             catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
 
-            free_up_goal_enemy2 = finite_axial_outside(self.world.enemy1.position, (self.world.their_goalX, self.world.their_goalmeanY), POSITION_INFLUENCE_RANGE, 1, 1)
-            free_up_goal_enemy1 = finite_axial_outside(self.world.enemy2.position, (self.world.their_goalX, self.world.their_goalmeanY), POSITION_INFLUENCE_RANGE, 1, 1)
+            free_up_goal_enemy2 = finite_axial_outside(self.world.enemy1.position, (self.world.their_goalX, self.world.their_goalmeanY), POSITION_INFLUENCE_RANGE, 1, -0.4)
+            free_up_goal_enemy1 = finite_axial_outside(self.world.enemy2.position, (self.world.their_goalX, self.world.their_goalmeanY), POSITION_INFLUENCE_RANGE, 1, -0.4)
 
             # BUILD FIELD AND NEXT POSITION AND DIRECTIONS
             ####################################
@@ -216,9 +277,29 @@ class Game:
 
             # MOTION
             #######################################
-            self.local_potential, self.points = potential.get_local_potential()
-            self.turn, self.current_point = self.move(None)
-            self.current_direction = rotate_vector(self.turn, self.current_direction[0], self.current_direction[1])
+            if sim is False:
+                self.local_potential, self.points = potential.get_local_potential()
+                self.turn, self.current_point = self.move(None)
+                self.current_direction = rotate_vector(self.turn, self.current_direction[0], self.current_direction[1])
+            ########################################
+
+            # TESTING
+            ########################################
+            else:
+                heat_map = potential.get_heat_map()
+                x = np.arange(PITCH_COLS)
+                y = np.arange(PITCH_ROWS)
+
+                X, Y = np.meshgrid(x, y)
+
+                intensity = np.array(heat_map)
+
+                fig, ax = plt.subplots()
+                ax.pcolor(X, Y, intensity, vmin=-1, vmax=1)
+                ax.invert_yaxis()
+                ax.xaxis.tick_top()
+                fig.show() #boom
+
             ########################################
             ###########################################################################################################################################
 
@@ -227,15 +308,15 @@ class Game:
             # ON
             #####################################
 
-            friend_field = solid_field(self.world.friend.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy1_field = solid_field(self.world.enemy1.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy2_field = solid_field(self.world.enemy2.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            friend_field = solid_field(self.world.friend.position, 1, 5, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy1_field = solid_field(self.world.enemy1.position, 1, 5, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy2_field = solid_field(self.world.enemy2.position, 1, 5, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
 
             advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
             catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
 
-            free_up_pass_enemy1 = finite_axial_outside(self.world.enemy2.position, self.world.friend.position, POSITION_INFLUENCE_RANGE, 1, 1)
-            free_up_pass_enemy2 = finite_axial_outside(self.world.enemy1.position, self.world.friend.position, POSITION_INFLUENCE_RANGE, 1, 1)
+            free_up_pass_enemy1 = finite_axial_outside(self.world.enemy2.position, self.world.friend.position, POSITION_INFLUENCE_RANGE, 1, -0.4)
+            free_up_pass_enemy2 = finite_axial_outside(self.world.enemy1.position, self.world.friend.position, POSITION_INFLUENCE_RANGE, 1, -0.4)
 
             # BUILD FIELD AND NEXT POSITION AND DIRECTIONS
             ####################################
@@ -248,9 +329,29 @@ class Game:
 
             # MOTION
             #######################################
-            self.local_potential, self.points = potential.get_local_potential()
-            self.turn, self.current_point = self.move(None)
-            self.current_direction = rotate_vector(self.turn, self.current_direction[0], self.current_direction[1])
+            if sim is False:
+                self.local_potential, self.points = potential.get_local_potential()
+                self.turn, self.current_point = self.move(None)
+                self.current_direction = rotate_vector(self.turn, self.current_direction[0], self.current_direction[1])
+            ########################################
+
+            # TESTING
+            ########################################
+            else:
+                heat_map = potential.get_heat_map()
+                x = np.arange(PITCH_COLS)
+                y = np.arange(PITCH_ROWS)
+
+                X, Y = np.meshgrid(x, y)
+
+                intensity = np.array(heat_map)
+
+                fig, ax = plt.subplots()
+                ax.pcolor(X, Y, intensity, vmin=-1, vmax=1)
+                ax.invert_yaxis()
+                ax.xaxis.tick_top()
+                fig.show() #boom
+
             ########################################
 
             ###########################################################################################################################################
@@ -261,14 +362,14 @@ class Game:
             #####################################
             ball_field = radial(self.world.ball, 1, 0)
 
-            friend_field = solid_field(self.world.friend.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy1_field = solid_field(self.world.enemy1.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy2_field = solid_field(self.world.enemy2.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            friend_field = solid_field(self.world.friend.position, 1, 5, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy1_field = solid_field(self.world.enemy1.position, 1, 5, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy2_field = solid_field(self.world.enemy2.position, 1, 5, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
 
             advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
             catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
 
-            block_goal_enemy1 = finite_axial_inside(self.world.enemy1.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, -100)
+            block_goal_enemy1 = finite_axial_inside(self.world.enemy1.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, 0.4)
 
             # BUILD FIELD AND NEXT POSITION AND DIRECTIONS
             ####################################
@@ -281,10 +382,29 @@ class Game:
 
             # MOTION
             #######################################
+            if sim is False:
+                self.local_potential, self.points = potential.get_local_potential()
+                self.turn, self.current_point = self.move(None)
+                self.current_direction = rotate_vector(self.turn, self.current_direction[0], self.current_direction[1])
 
-            self.local_potential, self.points = potential.get_local_potential()
-            self.turn, self.current_point = self.move(None)
-            self.current_direction = rotate_vector(self.turn, self.current_direction[0], self.current_direction[1])
+            ########################################
+
+            # TESTING
+            ########################################
+            else:
+                heat_map = potential.get_heat_map()
+                x = np.arange(PITCH_COLS)
+                y = np.arange(PITCH_ROWS)
+
+                X, Y = np.meshgrid(x, y)
+
+                intensity = np.array(heat_map)
+
+                fig, ax = plt.subplots()
+                ax.pcolor(X, Y, intensity, vmin=-1, vmax=1)
+                ax.invert_yaxis()
+                ax.xaxis.tick_top()
+                fig.show() #boom
 
             ########################################
             ###########################################################################################################################################
@@ -295,14 +415,14 @@ class Game:
             #####################################
             ball_field = radial(self.world.ball, 1, 0)
 
-            friend_field = solid_field(self.world.friend.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy1_field = solid_field(self.world.enemy1.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy2_field = solid_field(self.world.enemy2.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            friend_field = solid_field(self.world.friend.position, 1, 5, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy1_field = solid_field(self.world.enemy1.position, 1, 5, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy2_field = solid_field(self.world.enemy2.position, 1, 5, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
 
             advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
             catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
 
-            block_goal_enemy2 = finite_axial_inside(self.world.enemy1.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, -100)
+            block_goal_enemy2 = finite_axial_inside(self.world.enemy1.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, 0.4)
 
             # BUILD FIELD AND NEXT POSITION AND DIRECTIONS
             ####################################
@@ -316,9 +436,29 @@ class Game:
             # MOTION
             #######################################
 
-            self.local_potential, self.points = potential.get_local_potential()
-            self.turn, self.current_point = self.move(None)
-            self.current_direction = rotate_vector(self.turn, self.current_direction[0], self.current_direction[1])
+            if sim is False:
+                self.local_potential, self.points = potential.get_local_potential()
+                self.turn, self.current_point = self.move(None)
+                self.current_direction = rotate_vector(self.turn, self.current_direction[0], self.current_direction[1])
+            ########################################
+
+            # TESTING
+            ########################################
+            else:
+                heat_map = potential.get_heat_map()
+                x = np.arange(PITCH_COLS)
+                y = np.arange(PITCH_ROWS)
+
+                X, Y = np.meshgrid(x, y)
+
+                intensity = np.array(heat_map)
+
+                fig, ax = plt.subplots()
+                ax.pcolor(X, Y, intensity, vmin=-1, vmax=1)
+                ax.invert_yaxis()
+                ax.xaxis.tick_top()
+                fig.show() #boom
+
             ########################################
             ###########################################################################################################################################
 
@@ -328,14 +468,14 @@ class Game:
             #####################################
             ball_field = radial(self.world.ball, 1, 0)
 
-            friend_field = solid_field(self.world.friend.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy1_field = solid_field(self.world.enemy1.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy2_field = solid_field(self.world.enemy2.position, 2, 25, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            friend_field = solid_field(self.world.friend.position, 1, 5, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy1_field = solid_field(self.world.enemy1.position, 1, 5, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy2_field = solid_field(self.world.enemy2.position, 1, 5, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
 
             advance = step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
             catch_up = step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 0, 0)
 
-            block_pass = finite_axial_inside(self.world.enemy1.position, self.world.enemy2.position, 1, -100)
+            block_pass = finite_axial_inside(self.world.enemy1.position, self.world.enemy2.position, 1, 0.4)
 
             # BUILD FIELD AND NEXT POSITION AND DIRECTIONS
             ####################################
@@ -348,13 +488,32 @@ class Game:
 
             # MOTION
             #######################################
-            if self.getPerpendicular(self.world.enemy1.position, self.world.enemy2.position, self.world.venus.position) < 30:
-                pass
 
-            self.local_potential, self.points = potential.get_local_potential()
-            self.turn, self.current_point = self.move(None)
-            self.current_direction = rotate_vector(self.turn, self.current_direction[0], self.current_direction[1])
+            if sim is False:
+                self.local_potential, self.points = potential.get_local_potential()
+                self.turn, self.current_point = self.move(None)
+                self.current_direction = rotate_vector(self.turn, self.current_direction[0], self.current_direction[1])
             ########################################
+
+            # TESTING
+            ########################################
+            else:
+                heat_map = potential.get_heat_map()
+                x = np.arange(PITCH_COLS)
+                y = np.arange(PITCH_ROWS)
+
+                X, Y = np.meshgrid(x, y)
+
+                intensity = np.array(heat_map)
+
+                fig, ax = plt.subplots()
+                ax.pcolor(X, Y, intensity, vmin=-1, vmax=1)
+                ax.invert_yaxis()
+                ax.xaxis.tick_top()
+                fig.show() #boom
+
+            ########################################
+
             ###########################################################################################################################################
 
         elif state == "ATTACK_PASS":
@@ -587,6 +746,14 @@ class radial:
     def field_at(self, x, y):
         return self.constant/math.pow(math.sqrt((x-self.pos_x)**2 + (y-self.pos_y)**2), self.gradient)
 
+    def add_field(self, local_potential):
+        for x in range(0, PITCH_COLS):
+            for y in range(0, PITCH_ROWS):
+                distance_to = math.sqrt((x-self.pos_x)**2 + (y-self.pos_y)**2)
+                if distance_to != 0:
+                    local_potential[y, x] += self.constant/math.pow(distance_to, self.gradient)
+        return local_potential
+
 
 # infinite axial - field is only implemented between start and end points everywhere else contribution is zero
 # 3 3 3 3 3 3 3
@@ -615,7 +782,7 @@ class infinite_axial_inside:
         if rotated_start[0] < rotated_end[0]:
             distance_to = abs(rotated_point[1] - rotated_start[1])
             if rotated_start[0] < rotated_point[0] < rotated_end[0] and distance_to < self.influence_range:
-                return self.constant/math.pow(distance_to, self.gradient)
+                return self.constant/math.pow(distance_to, self.gradient) #todo dividing by zero
             else:
                 return 0
         else:
@@ -624,6 +791,23 @@ class infinite_axial_inside:
                 return self.constant/math.pow(distance_to, self.gradient)
             else:
                 return 0
+
+    def add_field(self, local_potential):
+        angle = math.degrees(math.atan2(self.dir_y, self.dir_x))
+        rotated_start = rotate_vector(-angle, self.start_x, self.start_y)
+        rotated_end = rotate_vector(-angle, self.end_x, self.end_y)
+        for x in range(0, PITCH_COLS):
+            for y in range(0, PITCH_ROWS):
+                rotated_point = rotate_vector(-angle, x, y)
+                distance_to = abs(rotated_point[1] - rotated_start[1])
+                if rotated_start[0] < rotated_end[0]:
+                    if rotated_start[0] < rotated_point[0] < rotated_end[0] and distance_to < self.influence_range and distance_to != 0:
+                        local_potential[y,x] += self.constant/math.pow(distance_to, self.gradient)
+                else:
+                    if rotated_end[0] < rotated_point[0] < rotated_start[0] and distance_to < self.influence_range and distance_to != 0:
+                        local_potential[y,x] += self.constant/math.pow(distance_to, self.gradient)
+
+        return local_potential
 
 # infinite axial - field is only implemented between start and end points everywhere else contribution is zero
 # 3 3 3 3 3 3 3
@@ -652,7 +836,19 @@ class infinite_axial_outside:
         else:
             return 0
 
-# finite axial inside - field is between reference points and exists everywhere
+    def add_field(self, local_potential):
+        angle = math.degrees(math.atan2(self.dir_y, self.dir_x))
+        rotated_start = rotate_vector(-angle, self.start_x, self.start_y)
+        for x in range(0, PITCH_COLS):
+            for y in range(0, PITCH_ROWS):
+                rotated_point = rotate_vector(-angle, x, y)
+                distance_to = abs(rotated_point[1] - rotated_start[1])
+                if distance_to < self.influence_range and distance_to != 0:
+                    local_potential[y,x] += self.constant/math.pow(distance_to, self.gradient)
+
+        return local_potential
+
+# # finite axial inside - field is between reference points and exists everywhere
 # 3 3 3 2 3 3 3
 # 3 2 1 1 1 2 3
 # 0 0 0 0 0 0 0
@@ -683,15 +879,40 @@ class finite_axial_inside:
             left_ref = start_field[0]
             right_ref = end_field[0]
 
-        if left_ref < rotated_point[0] < right_ref:
-            b = right_ref - rotated_point[0]
-            a = left_ref - rotated_point[0]
-            distance_to = abs(rotated_point[1] - start_field[1])
-            return self.constant*math.log((b + math.sqrt(b**2 + distance_to**2))/(a + math.sqrt(a**2 + distance_to**2)), math.e)
-        elif right_ref <= rotated_point[0]: # outside
-            return self.constant/math.pow(math.sqrt((x-(right_ref+left_ref)/2.0)**2 + (y-(right_ref+left_ref)/2.0)**2), self.gradient)
-        elif left_ref >= rotated_point[0]: # outside
-            return self.constant/math.pow(math.sqrt((x-(left_ref+right_ref)/2.0)**2 + (y-(left_ref+right_ref)/2.0)**2), self.gradient)
+        b = rotated_point[0] - right_ref
+        a = rotated_point[0] - left_ref
+        distance_to = rotated_point[1] - start_field[1]
+        denominator = (a + math.sqrt(a**2 + distance_to**2))
+        numerator = (b + math.sqrt(b**2 + distance_to**2))
+        if denominator != 0 and numerator != 0:
+            return self.constant*math.log(self.gradient*numerator/denominator, math.e)
+        else:
+            return 0
+
+    def add_field(self, local_potential):
+        angle = math.degrees(math.atan2(self.dir_y, self.dir_x))
+        start_field = rotate_vector(-angle, self.start_x, self.start_y)
+        end_field = rotate_vector(-angle, self.end_x, self.end_y)
+
+        if start_field[0] > end_field[0]:
+            right_ref = start_field[0]
+            left_ref = end_field[0]
+        else:
+            left_ref = start_field[0]
+            right_ref = end_field[0]
+
+        for x in range(0, PITCH_COLS):
+            for y in range(0, PITCH_ROWS):
+                rotated_point = rotate_vector(-angle, x, y)
+                b = rotated_point[0] - right_ref
+                a = rotated_point[0] - left_ref
+                distance_to = rotated_point[1] - start_field[1]
+                denominator = (a + math.sqrt(a**2 + distance_to**2))
+                numerator = (b + math.sqrt(b**2 + distance_to**2))
+                if denominator != 0 and numerator != 0:
+                    local_potential[y,x] += self.constant*math.log(self.gradient*numerator/denominator, math.e)
+
+        return local_potential
 
 
 # finite axial outside - field will start at start point and exist on the opposite side to the ref point anc continue of
@@ -718,7 +939,7 @@ class finite_axial_outside:
         angle = math.degrees(math.atan2(self.dir_y, self.dir_x))
         rotated_point = rotate_vector(-angle, x, y)
         start_field = rotate_vector(-angle, self.start_x, self.start_y)
-        end_field = rotate_vector(-angle, self.start_x + normalize((self.dir_x, self.dir_y))[0]*6000,  self.start_y + normalize((self.dir_x, self.dir_y))[1]*6000)
+        end_field = rotate_vector(-angle, self.start_x + normalize((self.dir_x, self.dir_y))[0]*600,  self.start_y + normalize((self.dir_x, self.dir_y))[1]*600)
 
         if start_field[0] > end_field[0]:
             right_ref = start_field[0]
@@ -727,27 +948,46 @@ class finite_axial_outside:
             left_ref = start_field[0]
             right_ref = end_field[0]
 
-        if left_ref < rotated_point[0] < right_ref:
-            b = right_ref - rotated_point[0]
-            a = left_ref - rotated_point[0]
-            distance_to = abs(rotated_point[1] - start_field[1])
-            if self.influence > distance_to:
-                return self.constant*math.log((b + math.sqrt(b**2 + distance_to**2))/(a + math.sqrt(a**2 + distance_to**2)), math.e) #todo no gradient
+        b = rotated_point[0] - right_ref
+        a = rotated_point[0] - left_ref
+        distance_to = rotated_point[1] - start_field[1]
+        denominator = (a + math.sqrt(a**2 + distance_to**2))
+        numerator = (b + math.sqrt(b**2 + distance_to**2))
+        if denominator != 0 and numerator != 0:
+            result = self.constant*math.log(self.gradient*numerator/denominator, math.e)
+            if result >= 0:
+                return result
             else:
                 return 0
+        else:
+            return 0
 
-        elif right_ref <= rotated_point[0]: # outside
-            distance_to = (x-right_ref)**2 + (y-right_ref)**2
-            if self.influence > distance_to:
-                return self.constant/(distance_to)
-            else:
-                return 0
-        elif left_ref >= rotated_point[0]: # outside
-            distance_to = (x-right_ref)**2 + (y-right_ref)**2
-            if self.influence > distance_to:
-                return self.constant/(distance_to)
-            else:
-                return 0
+    def add_field(self, local_potential):
+        angle = math.degrees(math.atan2(self.dir_y, self.dir_x))
+        start_field = rotate_vector(-angle, self.start_x, self.start_y)
+        end_field = rotate_vector(-angle, self.start_x + normalize((self.dir_x, self.dir_y))[0]*600,  self.start_y + normalize((self.dir_x, self.dir_y))[1]*600)
+
+        if start_field[0] > end_field[0]:
+            right_ref = start_field[0]
+            left_ref = end_field[0]
+        else:
+            left_ref = start_field[0]
+            right_ref = end_field[0]
+
+        for x in range(0, PITCH_COLS):
+            for y in range(0, PITCH_ROWS):
+                rotated_point = rotate_vector(-angle, x, y)
+                b = rotated_point[0] - right_ref
+                a = rotated_point[0] - left_ref
+                distance_to = rotated_point[1] - start_field[1]
+                denominator = (a + math.sqrt(a**2 + distance_to**2))
+                numerator = (b + math.sqrt(b**2 + distance_to**2))
+                if denominator != 0 and numerator != 0:
+                    result = self.constant*math.log(self.gradient*numerator/denominator, math.e)
+                    if result >= 0:
+                       local_potential[y,x] += result
+
+        return local_potential
 
 # solid - modeled as a circle, from center 'forbidden' is unreachable and outside the influence area is unreachable
 # 0 2 3 3 3 2 0
@@ -766,16 +1006,30 @@ class solid_field:
         self.influence_area = influence_area
 
     def field_at(self, x, y):
-        separation = math.sqrt((x-self.pos_x)**2 + (y-self.pos_y)**2)#
+        separation = math.sqrt((x-self.pos_x)**2 + (y-self.pos_y)**2)
         if separation > self.influence_area:
             return 0
         elif separation > self.forbidden:
-            return self.constant/math.pow(math.sqrt((x-self.pos_x)**2 + (y-self.pos_y)**2), self.gradient)
+            return self.constant/math.pow(separation-self.forbidden, self.gradient)
         else:
             if self.constant <= 0:
                 return -9999*self.constant
             else:
                 return 9999*self.constant
+
+    def add_field(self, local_potential):
+        for x in range(0, PITCH_COLS):
+            for y in range(0, PITCH_ROWS):
+                separation = math.sqrt((x-self.pos_x)**2 + (y-self.pos_y)**2)
+                if separation > self.forbidden and separation != 0:
+                    local_potential[y,x] += self.constant/math.pow(separation-self.forbidden, self.gradient)
+                else:
+                    if self.constant <= 0:
+                        local_potential[y,x] += -9999*self.constant
+                    else:
+                        local_potential[y,x] += 9999*self.constant
+
+        return local_potential
 
 # step - an infinite line drawn through the point in the first argument in the direction of the vector in the
 # second argument. The clockwise segment to the vector is cut off where as the anticlockwise segment acts like a
@@ -825,8 +1079,50 @@ class step_field_inside:
                     return 9999*self.constant + self.constant/math.pow(distance_to, self.gradient)
                 else:
                     return 9999*self.constant - self.constant/math.pow(distance_to, self.gradient)
+        elif rotated_point[0] <= left_ref :
+            if dot_product(step_direction, (x - self.start_x, y - self.start_y)) > 0: # in direction step_direction
+                return self.constant/math.pow(math.sqrt((x-left_ref)**2 + distance_to**2), self.gradient)
+            else:
+                return 0
+        elif rotated_point[0] >= right_ref :
+            if dot_product(step_direction, (x - self.start_x, y - self.start_y)) > 0: # in direction step_direction
+                return self.constant/math.pow(math.sqrt((x-right_ref)**2 + distance_to**2), self.gradient)
+            else:
+                return 0
+
+    def add_field(self, local_potential):
+        step_direction = rotate_vector(90, self.dir_x, self.dir_y) # points towards the aloud region
+        angle = math.degrees(math.atan2(self.dir_y, self.dir_x))
+        start_field = rotate_vector(-angle, self.start_x, self.start_y)
+        end_field = rotate_vector(-angle, self.end_x, self.end_y)
+
+        if start_field[0] > end_field[0]:
+            right_ref = start_field[0]
+            left_ref = end_field[0]
         else:
-            return 0
+            left_ref = start_field[0]
+            right_ref = end_field[0]
+
+        for x in range(0, PITCH_COLS):
+            for y in range(0, PITCH_ROWS):
+                rotated_point = rotate_vector(-angle, x, y)
+                distance_to = abs(rotated_point[1] - start_field[1])
+                step = dot_product(step_direction, (x - self.start_x, y - self.start_y))
+                if left_ref < rotated_point[0] < right_ref and distance_to != 0:
+                    if step > 0: # in direction step_direction
+                        if distance_to < self.influence_range:
+                            local_potential[y,x] += self.constant/math.pow(distance_to, self.gradient)
+                    else:
+                        if self.constant <= 0:
+                            local_potential[y,x] += 9999*self.constant + self.constant/math.pow(distance_to, self.gradient)
+                        else:
+                            local_potential[y,x] += 9999*self.constant - self.constant/math.pow(distance_to, self.gradient)
+                elif rotated_point[0] <= left_ref and step > 0 and distance_to != 0:
+                    local_potential[y,x] += self.constant/math.pow(math.sqrt((rotated_point[0]-left_ref)**2 + distance_to**2), self.gradient)
+                elif rotated_point[0] >= right_ref and step > 0 and distance_to != 0:
+                    local_potential[y,x] += self.constant/math.pow(math.sqrt((rotated_point[0]-right_ref)**2 + distance_to**2), self.gradient)
+
+        return local_potential
 
 # step - an infinite line drawn through the point in the first argument in the direction of the vector in the
 # second argument. The clockwise segment to the vector is cut off where as the anticlockwise segment acts like a
@@ -866,6 +1162,26 @@ class step_field:
                     return 9999*self.constant
         else:
             return 0
+
+    def add_field(self, local_potential):
+        step_direction = rotate_vector(90, self.dir_x, self.dir_y) # points towards the aloud region
+        angle = math.degrees(math.atan2(self.dir_y, self.dir_x))
+        start_field = rotate_vector(-angle, self.start_x, self.start_y)
+
+        for x in range(0, PITCH_COLS):
+            for y in range(0, PITCH_ROWS):
+
+                rotated_point = rotate_vector(-angle, x, y)
+                distance_to = abs(rotated_point[1] - start_field[1])
+                if distance_to < self.influence_range and distance_to != 0:
+                    if dot_product(step_direction, (x - self.start_x, y - self.start_y)) > 0: # in direction step_direction
+                        local_potential[y,x] += self.constant/math.pow(distance_to, self.gradient)
+                    else:
+                        if self.constant <= 0:
+                            local_potential[y,x] += -9999*self.constant
+                        else:
+                            local_potential[y,x] += 9999*self.constant
+        return local_potential
 
 
 def rotate_vector(angle, x, y): # takes degrees

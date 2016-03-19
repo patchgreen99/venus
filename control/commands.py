@@ -35,10 +35,10 @@ class Commands:
         print("! connect <device_no>")
         self.init()
         self.vision()
-        self.connect()
+        #self.connect()
         #self.highstrategy.main()
 
-    def init(self, room_num=1, team_color='yellow', our_color='green', computer_goal=False):
+    def init(self, room_num=0, team_color='yellow', our_color='green', computer_goal=False):
         print("init: Room: %s, team color: %s, our single spot color: %s, computer goal: %s" %
               (room_num, team_color, our_color, computer_goal))
         self.world = World(int(room_num), team_color, our_color, computer_goal)
@@ -113,12 +113,10 @@ class Commands:
         print(self.world)
 
     def pot(self):
-        while True:
-            self.game.mid("FREE_BALL_YOURS")
+        self.game.mid("FREE_BALL_YOURS", True)
 
     def pot1(self):
-        while True:
-            self.game.mid("FREE_BALL_1_GOALSIDE")
+        self.game.mid("FREE_BALL_2_GOALSIDE", True)
 
     def positionTest(self):
         print self.world.our_goalX, self.world.our_goalmeanY

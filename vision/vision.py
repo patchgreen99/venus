@@ -171,7 +171,9 @@ class Vision:
         pass
 
     def frame(self):
-        status, frame = self.capture.read()
+        #status, frame = self.capture.read()
+        #cv2.imwrite("test1.jpg", frame)
+        frame = cv2.imread("test.jpg")
         imgOriginal = self.step(frame)
         #blur = imgOriginal
         blur = cv2.GaussianBlur(imgOriginal, (3, 3), 2) #todo: what values are best
