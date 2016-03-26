@@ -413,9 +413,10 @@ void stopAll() {
   if (ignore()) {
     return;
   }
-  
+
+  motorAllStop();
   for (int i = 0; i < ROTARY_COUNT; ++i) {
-    stopMotor(i);
+    moving[i] = false;
   }
 }
 

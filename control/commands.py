@@ -10,10 +10,10 @@ from strategy.world import World
 from strategy.game import Game
 from vision.vision import Vision
 
-MOTOR_LEFT = 0
-MOTOR_RIGHT = 1
-MOTOR_TURN = 2
-MOTOR_KICK = 3
+FRONT_LEFT = 0
+FRONT_RIGHT = 1
+BACK_RIGHT = 2
+BACK_LEFT = 3
 MOTOR_GRAB = 4
 
 
@@ -35,10 +35,10 @@ class Commands:
         print("! connect <device_no>")
         self.init()
         self.vision()
-        #self.connect()
+        self.connect()
         #self.highstrategy.main()
 
-    def init(self, room_num=0, team_color='yellow', our_color='green', computer_goal=False):
+    def init(self, room_num=1, team_color='yellow', our_color='green', computer_goal=False):
         print("init: Room: %s, team color: %s, our single spot color: %s, computer goal: %s" %
               (room_num, team_color, our_color, computer_goal))
         self.world = World(int(room_num), team_color, our_color, computer_goal)
@@ -160,6 +160,11 @@ class Commands:
         self.swerve_right(200)
         self.forward()
 
+    def hol(self):
+        self.protocol.move(10, [(FRONT_LEFT, 100), (BACK_LEFT, 100), (FRONT_RIGHT, -100), (BACK_RIGHT, -100), ], wait=True)
+        time.sleep(20)
+        self.s()
+
     def stopped(self):
         self.protocol.block_until_stop()
         print("Now it has stopped")
@@ -269,7 +274,7 @@ class Commands:
                                                  (MOTOR_RIGHT, -80)], wait=True)
 
         #self.protocol.move(50, [(MOTOR_LEFT, -100),
-         #                                        (MOTOR_RIGHT, -100)], wait=True)
+        #                                        (MOTOR_RIGHT, -100)], wait=True)
 
         # self.protocol.schedule(170, MOTOR_TURN, [(MOTOR_TURN, 100),
         #                                          (MOTOR_LEFT, -100),
@@ -377,7 +382,7 @@ class Commands:
         """Kick"""
         x = int(x)
         # Not using rotary encoders, granularity too low
-        self.protocol.move(x, [(MOTOR_KICK, 100)], time=True)
+        self.protocol.move(x, [(2, 100)], time=True)
 
     def g(self, x=-300):
         """Grab, positive x means release"""

@@ -45,7 +45,7 @@ class World:
 
     def __str__(self):
         return "World state: ball {} {} {}, future ball {} {}, venus {}, friend {}, enemy1 {}, enemy2 {}".format(
-            self.ball[0], self.ball[1], self.ball_moving.value, self.speed[0], self.speed[1],
+            self.ball[0], self.ball[1], self.ball_moving.value, self.ball_velocity[0], self.ball_velocity[1],
             self.venus, self.friend, self.enemy1, self.enemy2)
 
     def read_pitch(self, data):

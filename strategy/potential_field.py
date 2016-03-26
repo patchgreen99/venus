@@ -1,11 +1,14 @@
 import math
 import numpy as np
 import cv2
-from game import *
+import potentials as g
+import matplotlib.pyplot as plt
+from pylab import *
 
 PITCH_ROWS = 480+1 #pixels
 PITCH_COLS = 640+1 #pixels
 
+CENTIMETERS_TO_PIXELS = (300.0 / 640.0)
 POTENTIAL_GRANULARITY = 20*CENTIMETERS_TO_PIXELS #pixels
 WALL_INFLUENCE = 1000 # pixels
 PENALTY_BOX_INFLUENCE = 1000# pixels
@@ -34,22 +37,22 @@ class Potential:
             self.last_square = last_square
             self.last_direction = last_direction
 
-            self.top_wall = step_field(self.world.pitch_top_left, (self.world.pitch_top_right[0]-self.world.pitch_top_left[0], self.world.pitch_top_right[1]-self.world.pitch_top_left[1]), WALL_INFLUENCE, 2, 20) # best with 3 5
-            self.bot_wall = step_field(self.world.pitch_bot_left, (self.world.pitch_bot_left[0]-self.world.pitch_bot_right[0], self.world.pitch_bot_left[1]-self.world.pitch_bot_right[1]), WALL_INFLUENCE, 2, 20)
-            self.right_wall = step_field(self.world.pitch_top_right, (self.world.pitch_bot_right[0] - self.world.pitch_top_right[0], self.world.pitch_bot_right[1] - self.world.pitch_top_right[1]), WALL_INFLUENCE, 2, 30)
-            self.left_wall = step_field(self.world.pitch_top_left, (self.world.pitch_top_left[0] - self.world.pitch_bot_left[0], self.world.pitch_top_left[1] - self.world.pitch_bot_left[1]), WALL_INFLUENCE, 2, 30)
+            self.top_wall = g.step_field(self.world.pitch_top_left, (self.world.pitch_top_right[0]-self.world.pitch_top_left[0], self.world.pitch_top_right[1]-self.world.pitch_top_left[1]), WALL_INFLUENCE, 1, 10) # best with 3 5
+            self.bot_wall = g.step_field(self.world.pitch_bot_left, (self.world.pitch_bot_left[0]-self.world.pitch_bot_right[0], self.world.pitch_bot_left[1]-self.world.pitch_bot_right[1]), WALL_INFLUENCE, 1, 10)
+            self.right_wall = g.step_field(self.world.pitch_top_right, (self.world.pitch_bot_right[0] - self.world.pitch_top_right[0], self.world.pitch_bot_right[1] - self.world.pitch_top_right[1]), WALL_INFLUENCE, 1, 10)
+            self.left_wall = g.step_field(self.world.pitch_top_left, (self.world.pitch_top_left[0] - self.world.pitch_bot_left[0], self.world.pitch_top_left[1] - self.world.pitch_bot_left[1]), WALL_INFLUENCE, 1, 10)
 
             # use 1, 100
             if world.we_have_computer_goal and world.room_num == 1 or not world.we_have_computer_goal and world.room_num == 0: # there goal is on the right
-                self.penalty_box_front = step_field_inside(self.world.defending_right_top, self.world.defending_right_bot, (self.world.defending_right_bot[0]-self.world.defending_right_top[0], self.world.defending_right_bot[1]-self.world.defending_right_top[1]), PENALTY_BOX_INFLUENCE, 2, 20) # 2, 500
-                self.penalty_box_top = infinite_axial_inside(self.world.goal_right_top, self.world.defending_right_top, PENALTY_BOX_INFLUENCE, 2, 20)
-                self.penalty_box_bot = infinite_axial_inside(self.world.goal_right_bot, self.world.defending_right_bot, PENALTY_BOX_INFLUENCE, 2, 20)
+                self.penalty_box_front = g.step_field_inside(self.world.defending_right_top, self.world.defending_right_bot, (self.world.defending_right_bot[0]-self.world.defending_right_top[0], self.world.defending_right_bot[1]-self.world.defending_right_top[1]), PENALTY_BOX_INFLUENCE, 1, 10) # 2, 500
+                self.penalty_box_top = g.infinite_axial_inside((self.world.goal_right_top[0], self.world.defending_right_top[1]), self.world.defending_right_top, PENALTY_BOX_INFLUENCE, 1, 10)
+                self.penalty_box_bot = g.infinite_axial_inside((self.world.goal_right_bot[0], self.world.defending_right_bot[1]), self.world.defending_right_bot, PENALTY_BOX_INFLUENCE, 1, 10)
             elif world.we_have_computer_goal and world.room_num == 0 or not world.we_have_computer_goal and world.room_num == 1: # obviously the left goal
-                self.penalty_box_front = step_field_inside(self.world.defending_left_top, self.world.defending_left_bot, (self.world.defending_left_top[0]-self.world.defending_left_bot[0], self.world.defending_left_top[1]-self.world.defending_left_bot[1]), PENALTY_BOX_INFLUENCE, 2, 20)
-                self.penalty_box_top = infinite_axial_inside(self.world.goal_left_top, self.world.defending_left_top, PENALTY_BOX_INFLUENCE, 2, 20)
-                self.penalty_box_bot = infinite_axial_inside(self.world.goal_left_bot, self.world.defending_left_bot, PENALTY_BOX_INFLUENCE, 2, 20)
+                self.penalty_box_front = g.step_field_inside(self.world.defending_left_top, self.world.defending_left_bot, (self.world.defending_left_top[0]-self.world.defending_left_bot[0], self.world.defending_left_top[1]-self.world.defending_left_bot[1]), PENALTY_BOX_INFLUENCE, 1, 10)
+                self.penalty_box_top = g.infinite_axial_inside((self.world.goal_left_top[0], self.world.defending_left_top[1]), self.world.defending_left_top, PENALTY_BOX_INFLUENCE, 1, 10)
+                self.penalty_box_bot = g.infinite_axial_inside((self.world.goal_left_bot[0], self.world.defending_left_bot[1]), self.world.defending_left_bot, PENALTY_BOX_INFLUENCE, 1, 10)
 
-            self.potential_list = potentials + [self.top_wall, self.bot_wall, self.right_wall, self.left_wall, self.penalty_box_front, self.penalty_box_bot, self.penalty_box_top]
+            self.potential_list = potentials + [self.top_wall, self.bot_wall, self.right_wall, self.left_wall, self.penalty_box_bot, self.penalty_box_top, self.penalty_box_front]
 
             #self.potential_list = [self.ball_field]
 
@@ -58,12 +61,64 @@ class Potential:
             self.points = np.zeros((5, 5, 2))
             self.heat_map = np.zeros((PITCH_ROWS, PITCH_COLS))
 
+
         def nothing(self, x):
             pass
+
+        def map(self):
+            heat_map = self.get_heat_map()
+            x = np.arange(PITCH_COLS)
+            y = np.arange(PITCH_ROWS)
+            dx = np.zeros((PITCH_ROWS, PITCH_COLS))
+            dy = np.zeros((PITCH_ROWS, PITCH_COLS))
+
+            X, Y = np.meshgrid(x, y)
+
+            fig, ax = plt.subplots()
+            heatmap = ax.pcolor(X, Y, heat_map, vmin=-20, vmax=20)
+            fig.colorbar(heatmap, ax=ax, shrink=0.9)
+            #ax.invert_yaxis()
+            #ax.xaxis.tick_top()
+            #fig.show() #boom
+
+            for p in self.potential_list:
+                dx, dy = p.add_force(dx, dy)
+
+            for x in range(0, PITCH_COLS):
+                for y in range(0, PITCH_ROWS):
+                    compx = dx[y,x]
+                    compy = dy[y,x]
+                    dx[y,x] /= math.sqrt(compx**2 + compy**2)
+                    dy[y,x] /= math.sqrt(compx**2 + compy**2)
+                    dx[y,x] *= 2
+                    dy[y,x] *= 2
+
+            #fig, ax = plt.subplots()
+            # M = np.hypot(U[::20, ::20], -V[::20, ::20])
+            plt.quiver(X[::15, ::15], Y[::15, ::15], dx[::15, ::15], -dy[::15, ::15], headwidth=5)
+            #plt.colorbar()
+            plt.axis([-10, PITCH_COLS+10, -10, PITCH_ROWS+10])
+            ax.invert_yaxis()
+            ax.xaxis.tick_top()
+
+            fig.show()
 
         def build_field(self):
             for potential in self.potential_list:
                 potential.add_field(self.local_potential)
+
+        def get_force(self):
+            return self.build_force()
+
+        def build_force(self):
+            dx, dy = 0, 0
+            for potential in self.potential_list:
+                tempx, tempy = potential.force_at(self.world.venus.position[0], self.world.venus.position[1])
+                dx += tempx
+                dy += tempy
+                print potential
+                print dx
+            return dx, dy
 
         def build_grid(self):
             robot_pos = self.last_square
@@ -203,460 +258,3 @@ def normalize((x, y)):
 
 def dot_product((ax, ay),(bx, by)):
     return ax*bx + ay*by
-
-'''POTENTIALS'''
-
-# radial - constant gradient everywhere  coming out from one single spot
-# 3 3 3 3 3 3 3
-# 3 3 2 1 2 3 3
-# 3 3 1 0 1 3 3
-# 3 3 2 1 2 3 3
-# 3 3 3 3 3 3 3
-
-class radial:
-    def __init__(self, (pos_x, pos_y), g, k):
-        self.pos_x = pos_x
-        self.pos_y = pos_y
-        self.gradient = g
-        self.constant = k
-
-    def field_at(self, x, y):
-        return self.constant/math.pow(math.sqrt((x-self.pos_x)**2 + (y-self.pos_y)**2), self.gradient)
-
-    def add_field(self, local_potential):
-        for x in range(0, PITCH_COLS):
-            for y in range(0, PITCH_ROWS):
-                distance_to = math.sqrt((x-self.pos_x)**2 + (y-self.pos_y)**2)
-                if distance_to != 0:
-                    local_potential[y, x] += self.constant/math.pow(distance_to, self.gradient)
-        return local_potential
-
-
-# infinite axial - field is only implemented between start and end points everywhere else contribution is zero
-# 3 3 3 3 3 3 3
-# 1 1 1 1 1 1 1
-# 0 0 0 0 0 0 0
-# 1 1 1 1 1 1 1
-# 3 3 3 3 3 3 3
-
-class infinite_axial_inside:
-    def __init__(self, (start_x, start_y), (end_x, end_y), influence_range, g, k):
-        self.start_x = start_x
-        self.start_y = start_y
-        self.end_x = end_x
-        self.end_y = end_y
-        self.dir_x = end_x - start_x
-        self.dir_y = end_y - start_y
-        self.influence_range = influence_range
-        self.gradient = g
-        self.constant = k
-
-    def field_at(self, x, y):
-        angle = math.degrees(math.atan2(self.dir_y, self.dir_x))
-        rotated_point = rotate_vector(-angle, x, y)
-        rotated_start = rotate_vector(-angle, self.start_x, self.start_y)
-        rotated_end = rotate_vector(-angle, self.end_x, self.end_y)
-        if rotated_start[0] < rotated_end[0]:
-            distance_to = abs(rotated_point[1] - rotated_start[1])
-            if rotated_start[0] < rotated_point[0] < rotated_end[0] and distance_to < self.influence_range:
-                return self.constant/math.pow(distance_to, self.gradient) #todo dividing by zero
-            else:
-                return 0
-        else:
-            distance_to = abs(rotated_point[1] - rotated_start[1])
-            if rotated_end[0] < rotated_point[0] < rotated_start[0] and distance_to < self.influence_range:
-                return self.constant/math.pow(distance_to, self.gradient)
-            else:
-                return 0
-
-    def add_field(self, local_potential):
-        angle = math.degrees(math.atan2(self.dir_y, self.dir_x))
-        rotated_start = rotate_vector(-angle, self.start_x, self.start_y)
-        rotated_end = rotate_vector(-angle, self.end_x, self.end_y)
-        for x in range(0, PITCH_COLS):
-            for y in range(0, PITCH_ROWS):
-                rotated_point = rotate_vector(-angle, x, y)
-                distance_to = abs(rotated_point[1] - rotated_start[1])
-                if rotated_start[0] < rotated_end[0]:
-                    if rotated_start[0] < rotated_point[0] < rotated_end[0] and distance_to < self.influence_range and distance_to != 0:
-                        local_potential[y,x] += self.constant/math.pow(distance_to, self.gradient)
-                else:
-                    if rotated_end[0] < rotated_point[0] < rotated_start[0] and distance_to < self.influence_range and distance_to != 0:
-                        local_potential[y,x] += self.constant/math.pow(distance_to, self.gradient)
-
-        return local_potential
-
-# infinite axial - field is only implemented between start and end points everywhere else contribution is zero
-# 3 3 3 3 3 3 3
-# 1 1 1 1 1 1 1
-# 0 0 0 0 0 0 0
-# 1 1 1 1 1 1 1
-# 3 3 3 3 3 3 3
-
-class infinite_axial_outside:
-    def __init__(self, (start_x, start_y), (end_x, end_y), influence_range, g, k):
-        self.start_x = start_x
-        self.start_y = start_y
-        self.dir_x = end_x - start_x
-        self.dir_y = end_y - start_y
-        self.influence_range = influence_range
-        self.gradient = g
-        self.constant = k
-
-    def field_at(self, x, y):
-        angle = math.degrees(math.atan2(self.dir_y, self.dir_x))
-        rotated_point = rotate_vector(-angle, x, y)
-        rotated_start = rotate_vector(-angle, self.start_x, self.start_y)
-        distance_to = abs(rotated_point[1] - rotated_start[1])
-        if distance_to < self.influence_range:
-            return self.constant/math.pow(distance_to, self.gradient)
-        else:
-            return 0
-
-    def add_field(self, local_potential):
-        angle = math.degrees(math.atan2(self.dir_y, self.dir_x))
-        rotated_start = rotate_vector(-angle, self.start_x, self.start_y)
-        for x in range(0, PITCH_COLS):
-            for y in range(0, PITCH_ROWS):
-                rotated_point = rotate_vector(-angle, x, y)
-                distance_to = abs(rotated_point[1] - rotated_start[1])
-                if distance_to < self.influence_range and distance_to != 0:
-                    local_potential[y,x] += self.constant/math.pow(distance_to, self.gradient)
-
-        return local_potential
-
-# # finite axial inside - field is between reference points and exists everywhere
-# 3 3 3 2 3 3 3
-# 3 2 1 1 1 2 3
-# 0 0 0 0 0 0 0
-# 3 2 1 1 1 2 3
-# 3 3 3 2 3 3 3
-
-class finite_axial_inside:
-    def __init__(self, (start_x, start_y), (ref_x, ref_y), g, k):
-        self.start_x = start_x
-        self.start_y = start_y
-        self.end_x = ref_x
-        self.end_y = ref_y
-        self.dir_x = start_x - ref_x
-        self.dir_y = start_y - ref_y
-        self.gradient = g
-        self.constant = k
-
-    def field_at(self, x, y):
-        angle = math.degrees(math.atan2(self.dir_y, self.dir_x))
-        rotated_point = rotate_vector(-angle, x, y)
-        start_field = rotate_vector(-angle, self.start_x, self.start_y)
-        end_field = rotate_vector(-angle, self.end_x, self.end_y)
-
-        if start_field[0] > end_field[0]:
-            right_ref = start_field[0]
-            left_ref = end_field[0]
-        else:
-            left_ref = start_field[0]
-            right_ref = end_field[0]
-
-        b = rotated_point[0] - right_ref
-        a = rotated_point[0] - left_ref
-        distance_to = rotated_point[1] - start_field[1]
-        denominator = (a + math.sqrt(a**2 + distance_to**2))
-        numerator = (b + math.sqrt(b**2 + distance_to**2))
-        if denominator != 0 and numerator != 0:
-            return self.constant*math.log(self.gradient*numerator/denominator, math.e)
-        else:
-            return 0
-
-    def add_field(self, local_potential):
-        angle = math.degrees(math.atan2(self.dir_y, self.dir_x))
-        start_field = rotate_vector(-angle, self.start_x, self.start_y)
-        end_field = rotate_vector(-angle, self.end_x, self.end_y)
-
-        if start_field[0] > end_field[0]:
-            right_ref = start_field[0]
-            left_ref = end_field[0]
-        else:
-            left_ref = start_field[0]
-            right_ref = end_field[0]
-
-        for x in range(0, PITCH_COLS):
-            for y in range(0, PITCH_ROWS):
-                rotated_point = rotate_vector(-angle, x, y)
-                b = rotated_point[0] - right_ref
-                a = rotated_point[0] - left_ref
-                distance_to = rotated_point[1] - start_field[1]
-                denominator = (a + math.sqrt(a**2 + distance_to**2))
-                numerator = (b + math.sqrt(b**2 + distance_to**2))
-                if denominator != 0 and numerator != 0:
-                    local_potential[y,x] += self.constant*math.log(self.gradient*numerator/denominator, math.e)
-
-        return local_potential
-
-
-# finite axial outside - field will start at start point and exist on the opposite side to the ref point anc continue of
-# the pitch
-# 3 3 3 2 3 3 3
-# 3 2 1 1 1 2 3
-# 0 0 0 0 0 0 0
-# 3 2 1 1 1 2 3
-# 3 3 3 2 3 3 3
-
-class finite_axial_outside:
-    def __init__(self, (start_x, start_y), (ref_x, ref_y), influence, g, k):
-        self.start_x = start_x
-        self.start_y = start_y
-        self.ref_x = ref_x
-        self.ref_y = ref_y
-        self.dir_x = start_x - ref_x
-        self.dir_y = start_y - ref_y
-        self.gradient = g
-        self.constant = k
-        self.influence = influence
-
-    def field_at(self, x, y):
-        angle = math.degrees(math.atan2(self.dir_y, self.dir_x))
-        rotated_point = rotate_vector(-angle, x, y)
-        start_field = rotate_vector(-angle, self.start_x, self.start_y)
-        end_field = rotate_vector(-angle, self.start_x + normalize((self.dir_x, self.dir_y))[0]*600,  self.start_y + normalize((self.dir_x, self.dir_y))[1]*600)
-
-        if start_field[0] > end_field[0]:
-            right_ref = start_field[0]
-            left_ref = end_field[0]
-        else:
-            left_ref = start_field[0]
-            right_ref = end_field[0]
-
-        b = rotated_point[0] - right_ref
-        a = rotated_point[0] - left_ref
-        distance_to = rotated_point[1] - start_field[1]
-        denominator = (a + math.sqrt(a**2 + distance_to**2))
-        numerator = (b + math.sqrt(b**2 + distance_to**2))
-        if denominator != 0 and numerator != 0:
-            result =  self.constant*math.log(self.gradient*numerator/denominator, math.e)
-            if result < 0:
-                return 0
-            else:
-                return result
-        else:
-            return 0
-
-    def add_field(self, local_potential):
-        angle = math.degrees(math.atan2(self.dir_y, self.dir_x))
-        start_field = rotate_vector(-angle, self.start_x, self.start_y)
-        end_field = rotate_vector(-angle, self.start_x + normalize((self.dir_x, self.dir_y))[0]*600,  self.start_y + normalize((self.dir_x, self.dir_y))[1]*600)
-
-        if start_field[0] > end_field[0]:
-            right_ref = start_field[0]
-            left_ref = end_field[0]
-        else:
-            left_ref = start_field[0]
-            right_ref = end_field[0]
-
-        for x in range(0, PITCH_COLS):
-            for y in range(0, PITCH_ROWS):
-                rotated_point = rotate_vector(-angle, x, y)
-                b = rotated_point[0] - right_ref
-                a = rotated_point[0] - left_ref
-                distance_to = rotated_point[1] - start_field[1]
-                denominator = (a + math.sqrt(a**2 + distance_to**2))
-                numerator = (b + math.sqrt(b**2 + distance_to**2))
-                if denominator != 0 and numerator != 0:
-                    result = self.constant*math.log(self.gradient*numerator/denominator, math.e)
-                    if result >= 0:
-                       local_potential[y,x] += result
-
-        return local_potential
-
-
-# solid - modeled as a circle, from center 'forbidden' is unreachable and outside the influence area is unreachable
-# 0 2 3 3 3 2 0
-# 1 3 9 9 9 3 1
-# 2 3 9 9 9 3 2
-# 1 3 9 9 9 3 1
-# 0 2 3 3 3 2 0
-
-class solid_field:
-    def __init__(self, (pos_x, pos_y), g, k, forbidden, influence_area):
-        self.pos_x = pos_x
-        self.pos_y = pos_y
-        self.gradient = g
-        self.constant = k
-        self.forbidden = forbidden
-        self.influence_area = influence_area
-
-    def field_at(self, x, y):
-        separation = math.sqrt((x-self.pos_x)**2 + (y-self.pos_y)**2)
-        if separation > self.influence_area:
-            return 0
-        elif separation > self.forbidden:
-            return self.constant/math.pow(separation-self.forbidden, self.gradient)
-        else:
-            if self.constant <= 0:
-                return -9999*self.constant
-            else:
-                return 9999*self.constant
-
-    def add_field(self, local_potential):
-        for x in range(0, PITCH_COLS):
-            for y in range(0, PITCH_ROWS):
-                separation = math.sqrt((x-self.pos_x)**2 + (y-self.pos_y)**2)
-                if separation > self.forbidden and separation != 0:
-                    local_potential[y,x] += self.constant/math.pow(separation-self.forbidden, self.gradient)
-                else:
-                    if self.constant <= 0:
-                        local_potential[y,x] += -9999*self.constant
-                    else:
-                        local_potential[y,x] += 9999*self.constant
-
-        return local_potential
-
-# step - an infinite line drawn through the point in the first argument in the direction of the vector in the
-# second argument. The clockwise segment to the vector is cut off where as the anticlockwise segment acts like a
-# infinite axial field over the entire pitch. also must be between start and end
-# 9 9 9 9 9 9 9
-# 9 9 9 9 9 9 9
-# 3 3 3 3 3 3 3
-# 1 1 1 1 1 1 1
-# 0 0 0 0 0 0 0
-
-
-class step_field_inside:
-    def __init__(self, (start_x, start_y), (end_x, end_y), (dir_x, dir_y), influence_range, g, k):
-        self.start_x = start_x
-        self.start_y = start_y
-        self.end_x = end_x
-        self.end_y = end_y
-        self.dir_x = dir_x
-        self.dir_y = dir_y
-        self.influence_range = influence_range
-        self.gradient = g
-        self.constant = k
-
-    def field_at(self, x, y):
-        step_direction = rotate_vector(90, self.dir_x, self.dir_y) # points towards the aloud region
-        angle = math.degrees(math.atan2(self.dir_y, self.dir_x))
-        rotated_point = rotate_vector(-angle, x, y)
-        start_field = rotate_vector(-angle, self.start_x, self.start_y)
-        end_field = rotate_vector(-angle, self.end_x, self.end_y)
-        distance_to = abs(rotated_point[1] - start_field[1])
-
-        if start_field[0] > end_field[0]:
-            right_ref = start_field[0]
-            left_ref = end_field[0]
-        else:
-            left_ref = start_field[0]
-            right_ref = end_field[0]
-
-        if left_ref < rotated_point[0] < right_ref:
-            if dot_product(step_direction, (x - self.start_x, y - self.start_y)) > 0: # in direction step_direction
-                if distance_to < self.influence_range:
-                    return self.constant/math.pow(distance_to, self.gradient)
-                else:
-                    return 0
-            else:
-                if self.constant <= 0:
-                    return 9999*self.constant + self.constant/math.pow(distance_to, self.gradient)
-                else:
-                    return 9999*self.constant - self.constant/math.pow(distance_to, self.gradient)
-        elif rotated_point[0] <= left_ref :
-            if dot_product(step_direction, (x - self.start_x, y - self.start_y)) > 0: # in direction step_direction
-                return self.constant/math.pow(math.sqrt((x-left_ref)**2 + distance_to**2), self.gradient)
-            else:
-                return 0
-        elif rotated_point[0] >= right_ref :
-            if dot_product(step_direction, (x - self.start_x, y - self.start_y)) > 0: # in direction step_direction
-                return self.constant/math.pow(math.sqrt((x-right_ref)**2 + distance_to**2), self.gradient)
-            else:
-                return 0
-
-    def add_field(self, local_potential):
-        step_direction = rotate_vector(90, self.dir_x, self.dir_y) # points towards the aloud region
-        angle = math.degrees(math.atan2(self.dir_y, self.dir_x))
-        start_field = rotate_vector(-angle, self.start_x, self.start_y)
-        end_field = rotate_vector(-angle, self.end_x, self.end_y)
-
-        if start_field[0] > end_field[0]:
-            right_ref = start_field[0]
-            left_ref = end_field[0]
-        else:
-            left_ref = start_field[0]
-            right_ref = end_field[0]
-
-        for x in range(0, PITCH_COLS):
-            for y in range(0, PITCH_ROWS):
-                rotated_point = rotate_vector(-angle, x, y)
-                distance_to = abs(rotated_point[1] - start_field[1])
-                step = dot_product(step_direction, (x - self.start_x, y - self.start_y))
-                if left_ref < rotated_point[0] < right_ref and distance_to != 0:
-                    if step > 0: # in direction step_direction
-                        if distance_to < self.influence_range:
-                            local_potential[y,x] += self.constant/math.pow(distance_to, self.gradient)
-                    else:
-                        if self.constant <= 0:
-                            local_potential[y,x] += 9999*self.constant + self.constant/math.pow(distance_to, self.gradient)
-                        else:
-                            local_potential[y,x] += 9999*self.constant - self.constant/math.pow(distance_to, self.gradient)
-                elif rotated_point[0] <= left_ref and step > 0 and distance_to != 0:
-                    local_potential[y,x] += self.constant/math.pow(math.sqrt((rotated_point[0]-left_ref)**2 + distance_to**2), self.gradient)
-                elif rotated_point[0] >= right_ref and step > 0 and distance_to != 0:
-                    local_potential[y,x] += self.constant/math.pow(math.sqrt((rotated_point[0]-right_ref)**2 + distance_to**2), self.gradient)
-
-        return local_potential
-
-# step - an infinite line drawn through the point in the first argument in the direction of the vector in the
-# second argument. The clockwise segment to the vector is cut off where as the anticlockwise segment acts like a
-# infinite axial field over the entire pitch. also must be between start and end
-# 9 9 9 9 9 9 9
-# 9 9 9 9 9 9 9
-# 3 3 3 3 3 3 3
-# 1 1 1 1 1 1 1
-# 0 0 0 0 0 0 0
-
-
-class step_field:
-    def __init__(self, (start_x, start_y), (dir_x, dir_y), influence_range, g, k):
-        self.start_x = start_x
-        self.start_y = start_y
-        self.dir_x = dir_x
-        self.dir_y = dir_y
-        self.influence_range = influence_range
-        self.gradient = g
-        self.constant = k
-
-    def field_at(self, x, y):
-        step_direction = rotate_vector(90, self.dir_x, self.dir_y) # points towards the aloud region
-        angle = math.degrees(math.atan2(self.dir_y, self.dir_x))
-        rotated_point = rotate_vector(-angle, x, y)
-        start_field = rotate_vector(-angle, self.start_x, self.start_y)
-        distance_to = abs(rotated_point[1] - start_field[1])
-
-        if distance_to < self.influence_range:
-            if dot_product(step_direction, (x - self.start_x, y - self.start_y)) > 0: # in direction step_direction
-                # return self.constant*math.log(self.influence_range/math.pow(distance_to, self.gradient), math.e)
-                return self.constant/math.pow(distance_to, self.gradient)
-            else:
-                if self.constant <= 0:
-                    return -9999*self.constant
-                else:
-                    return 9999*self.constant
-        else:
-            return 0
-
-    def add_field(self, local_potential):
-        step_direction = rotate_vector(90, self.dir_x, self.dir_y) # points towards the aloud region
-        angle = math.degrees(math.atan2(self.dir_y, self.dir_x))
-        start_field = rotate_vector(-angle, self.start_x, self.start_y)
-
-        for x in range(0, PITCH_COLS):
-            for y in range(0, PITCH_ROWS):
-
-                rotated_point = rotate_vector(-angle, x, y)
-                distance_to = abs(rotated_point[1] - start_field[1])
-                if distance_to < self.influence_range and distance_to != 0:
-                    if dot_product(step_direction, (x - self.start_x, y - self.start_y)) > 0: # in direction step_direction
-                        local_potential[y,x] += self.constant/math.pow(distance_to, self.gradient)
-                    else:
-                        if self.constant <= 0:
-                            local_potential[y,x] += -9999*self.constant
-                        else:
-                            local_potential[y,x] += 9999*self.constant
-        return local_potential
