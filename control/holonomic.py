@@ -11,10 +11,10 @@ from strategy.world import World
 from strategy.game import Game
 from vision.vision import Vision
 
-FRONT_LEFT = 0
-FRONT_RIGHT = 1
-BACK_RIGHT = 2
-BACK_LEFT = 3
+FRONT_RIGHT = 0
+BACK_RIGHT = 1
+BACK_LEFT = 2
+FRONT_LEFT = 3
 MOTOR_GRAB = 4
 MOTOR_KICK = 5
 
@@ -36,7 +36,7 @@ class Commands:
         print("! vision")
         print("! connect <device_no>")
         self.init()
-        self.vision()
+        #self.vision()
         self.connect()
         #self.highstrategy.main()
 
@@ -103,19 +103,12 @@ class Commands:
         """Move forward, negative x means backward"""
         x = int(x)
         s = sign(x)
-        '''
-        if x > 0:
-            if x > 17:
-                x = 7.5145299398 * x - 80.3832872418
-            else:
-                x = 0.0432484778 * (x ** 2) + 2.1632771388 * x
-        else:
-            x = 13.964509832 * -x - 75.2448595458
+        x = abs(x)
+        # Calibrated for the holonomic robot on 27 March, only forward
+        x = 5.3169850194 * x - 14.9575723714
         x = int(x)
-        '''
         if x > 0:
-            self.protocol.move(x, [(0, 100 * s),
-                                   (1, -100 * s), (2, -100 * s), (3, 100 * s)], wait=True)
+            self.protocol.move(x, [(0, 100 * s), (1, -100 * s), (2, -100 * s), (3, 100 * s)], wait=True)
 
     def c(self, x):
         """Rotate clockwise, negative x means counter-clockwise"""
@@ -123,17 +116,15 @@ class Commands:
         s = sign(x)
         x = abs(x)
 
-        # Last calibration: 12 March
-
+        # Calibrated for the holonomic robot on 27 March
         if x > 90:
-            x = 0.9933333333 * x - 43
+            x = 0.8133333333 * x - 29.0
         else:
-            x = 0.0018797292 * (x ** 2) + 0.420501791 * x
+            x = 0.0028306977 * (x ** 2) + 0.2889794061 * x
         x = int(x)
 
         if x > 0:
-            self.protocol.move(x, [(0, 100 * s),
-                                   (1, -100 * s), (2, -100 * s), (3, 100 * s)], wait=True)
+            self.protocol.move(x, [(0, -90 * s), (1, -90 * s), (2, -90 * s), (3, -90 * s)], wait=True)
 
     def s(self):
         self.protocol.stop()
@@ -141,7 +132,7 @@ class Commands:
     def k(self):
         self.protocol.move(500, [(4, -100)], time=True)
 
-    def c(self):
+    def u(self):
         self.protocol.move(500, [(4, 100)], time=True)
 
     def g(self):
