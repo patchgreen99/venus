@@ -317,7 +317,7 @@ class finite_axial_inside:
         denominator = (a + math.sqrt(a**2 + distance_to**2))
         numerator = (b + math.sqrt(b**2 + distance_to**2))
         if denominator != 0 and numerator != 0:
-            local_potential = self.constant*math.log(self.gradient*numerator/denominator, math.e)
+            local_potential = self.constant*math.log(numerator/(denominator*self.gradient), math.e)
             return local_potential
         else:
             return 0
@@ -343,7 +343,7 @@ class finite_axial_inside:
                 denominator = (a + math.sqrt(a**2 + distance_to**2))
                 numerator = (b + math.sqrt(b**2 + distance_to**2))
                 if denominator != 0 and numerator != 0:
-                    local_potential[y,x] += self.constant*math.log(self.gradient*numerator/denominator, math.e)
+                    local_potential[y,x] += self.constant*math.log(numerator/(denominator*self.gradient), math.e)
 
         return local_potential
 
@@ -440,7 +440,7 @@ class finite_axial_outside:
         denominator = (a + math.sqrt(a**2 + distance_to**2))
         numerator = (b + math.sqrt(b**2 + distance_to**2))
         if denominator != 0 and numerator != 0:
-            result = self.constant*math.log(self.gradient*numerator/denominator, math.e)
+            result = self.constant*math.log(numerator/(denominator*self.gradient), math.e)
             local_potential = result
             return local_potential
         else:
@@ -467,7 +467,7 @@ class finite_axial_outside:
                 denominator = (a + math.sqrt(a**2 + distance_to**2))
                 numerator = (b + math.sqrt(b**2 + distance_to**2))
                 if denominator != 0 and numerator != 0:
-                    result = self.constant*math.log(self.gradient*numerator/denominator, math.e)
+                    result = self.constant*math.log(numerator/(denominator*self.gradient), math.e)
                     local_potential[y,x] += result
 
         return local_potential
