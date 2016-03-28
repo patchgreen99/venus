@@ -37,13 +37,13 @@ class Commands:
         print("! connect <device_no>")
         self.init()
         self.vision()
-        #self.connect()
+        self.connect()
         #self.highstrategy.main()
 
     def hs(self):
         self.highstrategy.main()
 
-    def init(self, room_num=1, team_color='yellow', our_color='pink', computer_goal=False):
+    def init(self, room_num=1, team_color='yellow', our_color='pink', computer_goal=True):
         print("init: Room: %s, team color: %s, our single spot color: %s, computer goal: %s" %
               (room_num, team_color, our_color, computer_goal))
         self.world = World(int(room_num), team_color, our_color, computer_goal)

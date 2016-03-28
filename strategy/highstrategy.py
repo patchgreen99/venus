@@ -35,7 +35,7 @@ class StrategyTools:
         i = (highy + lowy)/2
         while i < highy:
             if self.isSafe3((x1,y1),(goalx,i),robotposlist ):
-                #print('a1')
+                print('a1')
                 #print(self.isSafe2((x1,y1),(goalx,i),robotposlist ))
                 return "ATTACK_GOAL"
 
@@ -43,12 +43,12 @@ class StrategyTools:
         i = (highy + lowy)/2
         while i > lowy:
             if self.isSafe3((x1,y1),(goalx,i),robotposlist):
-                #print('a2')
+                print('a2')
                 return "ATTACK_GOAL"
 
             i = i - 1
         if self.isSafe3((x1, y1), (x2, y2), robotposlist) and self.retarded_robot((x1, y1), (x2, y2)):
-            #print('p')
+            print('p')
             return "ATTACK_PASS"
 
         # do something instead
@@ -59,19 +59,19 @@ class StrategyTools:
         i = (highy + lowy)/2
         while i < highy:
             if self.isSafe3((x1,y1),(goalx,i),robotposlist ):
-               # print('a')
+                print('a')
                 return "ATTACK_GOAL"
 
             i = i + 1
         i = (highy + lowy)/2
         while i > lowy:
             if self.isSafe3((x1,y1),(goalx,i),robotposlist):
-                #print('a')
+                print('a')
                 return "ATTACK_GOAL"
 
             i = i - 1
         if self.isSafe3((x1, y1), (x2, y2), robotposlist) and self.isSafe3 ((x1,y1), (x5,y5), [(x2,y2)]) and self.world.friend.out[0] == 0 and self.retarded_robot((x1, y1), (x2, y2)):
-            # print('p')
+            print('p')
             return "ATTACK_PASS"
         #print('yolo')
         print "No nice shot"

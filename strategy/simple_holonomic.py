@@ -148,38 +148,39 @@ class SimpleStrategy:
 
     def shot_correction(self, angle):
         if self.world.room_num == 0 and self.world.we_have_computer_goal or self.world.room_num == 1 and not self.world.we_have_computer_goal:
-            if self.world.venus.position[1] < PITCH_ROWS/2.0: # TOP
-                correction = 90
-                if -correction <= angle <= 0:
-                    print "CASE A"
-                    turn = -(correction-angle)
-                elif angle < -correction:
-                    print "CASE B"
-                    turn = (180+angle)+correction
-                elif 0 < angle <= correction:
-                    print "CASE C"
-                    turn = -(correction-angle)
-                elif angle > correction:
-                    print "CASE D"
-                    turn = (180-angle)
-                d = 1
-            else:
-                correction = 90
-                if -correction <= angle <= 0:
-                    print "CASE A"
-                    turn = correction-angle
-                elif angle < -correction:
-                    print "CASE B"
-                    turn = (correction+angle)
-                elif 0 < angle <= correction:
-                    print "CASE C"
-                    turn = (correction+angle)
-                elif angle > correction:
-                    print "CASE D"
-                    turn = -(correction+(180-angle))
+            if self.world.venus.position[1] < PITCH_ROWS/2.0: # TOP#
+                print angle
+                correction = 43
+                if angle < 0:
+                    turn = -(180 - angle + correction)
+                else:
+                    turn = -(-angle + 180 + correction)
                 d = -1
+            else:
+                print angle
+                correction = 65
+                if angle < 0:
+                    turn = 180 + angle + correction
+                else:
+                    turn = angle + 180 + correction
+                d = 1
 
         else:
-            print "not done yet"
+            if self.world.venus.position[1] < PITCH_ROWS/2.0: # TOP#
+                print angle
+                correction = 65
+                if angle < 0:
+                    turn = 180 + angle + correction
+                else:
+                    turn = angle + 180 + correction
+                d = 1
+            else:
+                print angle
+                correction = 43
+                if angle < 0:
+                    turn = -(180 - angle + correction)
+                else:
+                    turn = -(-angle + 180 + correction)
+                d = -1
 
         return turn, d
