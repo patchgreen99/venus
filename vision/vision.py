@@ -286,7 +286,7 @@ class Vision:
             # Draw balls trajectory
             delta_x = self.trajectory_list[len(self.trajectory_list) - 1][0] - self.trajectory_list[0][0]
             if abs(delta_x) > 10:
-                self.world.ball_moving.value = True
+                self.world.ball_moving[0] = True
                 future_x = self.trajectory_list[len(self.trajectory_list) - 1][0] + delta_x
                 m = (self.trajectory_list[len(self.trajectory_list) - 1][1] - self.trajectory_list[0][1]) / float(delta_x)
                 future_y = (future_x - self.trajectory_list[0][0]) * m + self.trajectory_list[0][1]
@@ -294,20 +294,20 @@ class Vision:
                 self.world.ball_velocity[1] = (future_y - self.world.ball[1])/6.0
                 cv2.line(imgOriginal, (int(self.trajectory_list[len(self.trajectory_list) - 1][0]), int(self.trajectory_list[len(self.trajectory_list) - 1][1])), (int(future_x), int(future_y)), COLORS['red'], 1)
             else:
-                self.world.ball_moving.value = False
+                self.world.ball_moving[0] = False
 
             # Draw robots
             for robot_id, robot in enumerate([self.world.venus, self.world.friend, self.world.enemy1, self.world.enemy2]):
                 if robot.position[0] != NO_VALUE:
                     cv2.rectangle(imgOriginal, (robot.position[0] - 20, robot.position[1] - 20),
-                                  (robot.position[0] + 20, robot.position[1] + 20), self.robot_color(robot_id, robot.out.value), 2)
+                                  (robot.position[0] + 20, robot.position[1] + 20), self.robot_color(robot_id, robot.out[0]), 2)
                     cv2.arrowedLine(imgOriginal, (robot.position[0], robot.position[1]),
                                     (int(robot.position[0] + robot.orientation[0] * 50.0),
                                      int(robot.position[1] + robot.orientation[1] * 50.0)),
-                                    self.robot_color(robot_id, robot.out.value), 2)
+                                    self.robot_color(robot_id, robot.out[0]), 2)
                     cv2.putText(imgOriginal, str(robot_id), (robot.position[0] + 20, robot.position[1] + 40),
                                 cv2.FONT_HERSHEY_SIMPLEX,
-                                2, self.robot_color(robot_id, robot.out.value))
+                                2, self.robot_color(robot_id, robot.out[0]))
             if self.start < 10:
                 self.start +=1
             self.pressed_key = cv2.waitKey(2) & 0xFF
@@ -340,104 +340,103 @@ class Vision:
                 for position in robots_pos:
                     if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 25: #todo Danger hard coded
                         its_robot = True
-                if not its_robot and circles['red'][i][1] < 460:
+                if not its_robot:
                     found = True
                     self.world.ball[0] = int(circles['red'][i][0])
                     self.world.ball[1] = int(circles['red'][i][1])
+
+                    self.trajectory_list.append((int(circles['red'][i][0]), int(circles['red'][i][1])))
+                    self.trajectory_list.pop(0)
 
                     for positionIndex in range(0, len(robots_pos)):
                         position = robots_pos[positionIndex]
                         # todo Danger hard coded
                         if positionIndex == 0:
-                            if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 90: # todo: this is different!
-                                self.world.venus.hasBallInRange.value = True
+                            if math.sqrt((position[0]-self.world.ball[0])**2 + (position[1]-self.world.ball[1])**2) < 60: # todo: this is different!
+                                self.world.venus.hasBallInRange[0] = 1
                             else:
-                                self.world.venus.hasBallInRange.value = False
+                                self.world.venus.hasBallInRange[0] = 0
                         if positionIndex == 1:
-                            if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 60:
-                                self.world.friend.hasBallInRange.value = True
+                            if math.sqrt((position[0]-self.world.ball[0])**2 + (position[1]-self.world.ball[1])**2) < 60:
+                                self.world.friend.hasBallInRange[0] = 1
                             else:
-                                self.world.friend.hasBallInRange.value = False
+                                self.world.friend.hasBallInRange[0] = 0
                         if positionIndex == 2:
-                            if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 30:
-                                self.world.enemy1.hasBallInRange.value = True
+                            if math.sqrt((position[0]-self.world.ball[0])**2 + (position[1]-self.world.ball[1])**2) < 60:
+                                self.world.enemy1.hasBallInRange[0] = 1
                             else:
-                                self.world.enemy1.hasBallInRange.value = False
+                                self.world.enemy1.hasBallInRange[0] = 0
                         if positionIndex == 3:
-                            if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 30:
-                                self.world.enemy2.hasBallInRange.value = True
+                            if math.sqrt((position[0]-self.world.ball[0])**2 + (position[1]-self.world.ball[1])**2) < 60:
+                                self.world.enemy2.hasBallInRange[0] = 1
                             else:
-                                self.world.enemy2.hasBallInRange.value = False
+                                self.world.enemy2.hasBallInRange[0] = 0
+                break
 
-                    self.trajectory_list.append((int(circles['red'][i][0]), int(circles['red'][i][1])))
-                    self.trajectory_list.pop(0)
-                    break
-            if not found:
-                flag = False
-                for positionIndex in range(0,len(robots_pos)):
-                    position = robots_pos[positionIndex]
+        if not found:
+            flag = False
+            for positionIndex in range(0,len(robots_pos)):
+                position = robots_pos[positionIndex]
 
-                    if positionIndex == 0 and self.world.venus.hasBallInRange.value == 1:
-                        self.world.ball[0] = self.world.ball[0]
-                        self.world.ball[1] = self.world.ball[1]
-                        '''
-                        flag = True
-                        # 'closest' is the robot who might have the ball, let's check that
-                        distance_between_points = math.sqrt((position[0] - self.world.venus.orientation[0])**2 + (position[1] -
-                                                            self.world.venus.orientation[1])**2)
-                        # we want point that is ten pixels away from the centre towards the orientation vector endpoint
-                        ratio = 2.0/distance_between_points
-                        # then point's coordinates will be
-                        new_x = int(position[0] + 20 * (1-ratio) * self.world.venus.orientation[0])
-                        new_y = int(position[1] + 20 * (1-ratio) * self.world.venus.orientation[1])
-                        self.world.ball[0] = new_x
-                        self.world.ball[1] = new_y
+                if positionIndex == 0 and self.world.venus.hasBallInRange[0] == 1:
                     '''
-                    if positionIndex == 1 and self.world.friend.hasBallInRange.value == 1:
-                        flag = True
-                        # 'closest' is the robot who might have the ball, let's check that
-                        distance_between_points = math.sqrt((position[0] - self.world.friend.orientation[0])**2 + (position[1] -
-                                                             self.world.friend.orientation[1])**2)
-                        # we want point that is ten pixels away from the centre towards the orientation vector endpoint
-                        ratio = 2.0/distance_between_points
+                    flag = True
+                    # 'closest' is the robot who might have the ball, let's check that
+                    distance_between_points = math.sqrt((position[0] - self.world.venus.orientation[0])**2 + (position[1] -
+                                                        self.world.venus.orientation[1])**2)
+                    # we want point that is ten pixels away from the centre towards the orientation vector endpoint
+                    ratio = 2.0/distance_between_points
+                    # then point's coordinates will be
+                    new_x = int(position[0] + 20 * (1-ratio) * self.world.venus.orientation[0])
+                    new_y = int(position[1] + 20 * (1-ratio) * self.world.venus.orientation[1])
+                    self.world.ball[0] = new_x
+                    self.world.ball[1] = new_y
+                '''
+                if positionIndex == 1 and self.world.friend.hasBallInRange[0] == 1:
+                    flag = True
+                    # 'closest' is the robot who might have the ball, let's check that
+                    distance_between_points = math.sqrt((position[0] - self.world.friend.orientation[0])**2 + (position[1] -
+                                                         self.world.friend.orientation[1])**2)
+                    # we want point that is ten pixels away from the centre towards the orientation vector endpoint
+                    ratio = 2.0/distance_between_points
 
-                        # then point's coordinates will be
-                        new_x = int(position[0] + 20 * (1-ratio) * self.world.friend.orientation[0])
-                        new_y = int(position[1] + 20 * (1-ratio) * self.world.friend.orientation[1])
-                        self.world.ball[0] = new_x
-                        self.world.ball[1] = new_y
+                    # then point's coordinates will be
+                    new_x = int(position[0] + 20 * (1-ratio) * self.world.friend.orientation[0])
+                    new_y = int(position[1] + 20 * (1-ratio) * self.world.friend.orientation[1])
+                    self.world.ball[0] = new_x
+                    self.world.ball[1] = new_y
 
-                    if positionIndex == 2 and self.world.enemy1.hasBallInRange.value == 1:
-                        flag = True
-                        # 'closest' is the robot who might have the ball, let's check that
-                        distance_between_points = math.sqrt((position[0] - self.world.enemy1.orientation[0])**2 + (position[1] -
-                                                             self.world.enemy1.orientation[1])**2)
-                        # we want point that is ten pixels away from the centre towards the orientation vector endpoint
-                        ratio = 2.0/distance_between_points
+                if positionIndex == 2 and self.world.enemy1.hasBallInRange[0] == 1:
+                    flag = True
+                    # 'closest' is the robot who might have the ball, let's check that
+                    distance_between_points = math.sqrt((position[0] - self.world.enemy1.orientation[0])**2 + (position[1] -
+                                                         self.world.enemy1.orientation[1])**2)
+                    # we want point that is ten pixels away from the centre towards the orientation vector endpoint
+                    ratio = 2.0/distance_between_points
 
-                        # then point's coordinates will be
-                        new_x = int(position[0] + 20 * (1-ratio) * self.world.enemy1.orientation[0])
-                        new_y = int(position[1] + 20 * (1-ratio) * self.world.enemy1.orientation[1])
-                        self.world.ball[0] = new_x
-                        self.world.ball[1] = new_y
+                    # then point's coordinates will be
+                    new_x = int(position[0] + 20 * (1-ratio) * self.world.enemy1.orientation[0])
+                    new_y = int(position[1] + 20 * (1-ratio) * self.world.enemy1.orientation[1])
+                    self.world.ball[0] = new_x
+                    self.world.ball[1] = new_y
 
-                    if positionIndex == 3 and self.world.enemy2.hasBallInRange.value == 1:
-                        flag = True
-                        # 'closest' is the robot who might have the ball, let's check that
-                        distance_between_points = math.sqrt((position[0] - self.world.enemy2.orientation[0])**2 + (position[1] -
-                                                             self.world.enemy2.orientation[1])**2)
-                        # we want point that is ten pixels away from the centre towards the orientation vector endpoint
-                        ratio = 2.0/distance_between_points
+                if positionIndex == 3 and self.world.enemy2.hasBallInRange[0] == 1:
+                    flag = True
+                    # 'closest' is the robot who might have the ball, let's check that
+                    distance_between_points = math.sqrt((position[0] - self.world.enemy2.orientation[0])**2 + (position[1] -
+                                                         self.world.enemy2.orientation[1])**2)
+                    # we want point that is ten pixels away from the centre towards the orientation vector endpoint
+                    ratio = 2.0/distance_between_points
 
-                        # then point's coordinates will be
-                        new_x = int(position[0] + 20 * (1-ratio) * self.world.enemy2.orientation[0])
-                        new_y = int(position[1] + 20 * (1-ratio) * self.world.enemy2.orientation[1])
-                        self.world.ball[0] = new_x
-                        self.world.ball[1] = new_y
+                    # then point's coordinates will be
+                    new_x = int(position[0] + 20 * (1-ratio) * self.world.enemy2.orientation[0])
+                    new_y = int(position[1] + 20 * (1-ratio) * self.world.enemy2.orientation[1])
+                    self.world.ball[0] = new_x
+                    self.world.ball[1] = new_y
 
-                if not flag:
-                    self.world.ball[0] = self.world.ball[0]
-                    self.world.ball[1] = self.world.ball[1]
+            if not flag:
+                self.world.ball[0] = self.world.ball[0]
+                self.world.ball[1] = self.world.ball[1]
 
     def getRobots(self, circles):
         pointList = circles["green"] + circles["pink"] + circles["blue"] + circles["yellow"]
@@ -547,7 +546,7 @@ class Vision:
             self.out_counter[0] += 1
             if self.out_counter[0] > 100:
                 self.out_counter[0] = 0
-                self.world.venus.out.value = True
+                self.world.venus.out[0] = 1
 
         if self.flag[1] is False:
             angle = math.degrees(math.atan2(self.world.friend.orientation[0], self.world.friend.orientation[1]))
@@ -556,7 +555,7 @@ class Vision:
             self.out_counter[1] += 1
             if self.out_counter[1] > 100:
                 self.out_counter[1] = 0
-                self.world.friend.out.value = True
+                self.world.friend.out[0] = 1
 
         if self.flag[2] is False:
             angle = math.degrees(math.atan2(self.world.enemy1.orientation[0], self.world.enemy1.orientation[1]))
@@ -565,7 +564,7 @@ class Vision:
             self.out_counter[2] += 1
             if self.out_counter[2] > 100:
                 self.out_counter[2] = 0
-                self.world.enemy1.out.value = True
+                self.world.enemy1.out[0] = 1
 
         if self.flag[3] is False:
             angle = math.degrees(math.atan2(self.world.enemy2.orientation[0], self.world.enemy2.orientation[1]))
@@ -574,7 +573,7 @@ class Vision:
             self.out_counter[3] += 1
             if self.out_counter[3] > 100:
                 self.out_counter[3] = 0
-                self.world.enemy2.out.value = True
+                self.world.enemy2.out[0] = 1
 
             # venus
             ###################################################################################################################
@@ -700,7 +699,7 @@ class Vision:
 
         if math.sqrt((center_x-similar_bot.position[0])**2 + (center_y-similar_bot.position[1])**2) > 50:
             self.save_robot((center_x, center_y), angle, bot_id)
-            bot.out.value = False
+            bot.out[0] = 0
             self.flag[bot_id] = True
             self.last_save[bot_id] = 1
 
@@ -709,7 +708,7 @@ class Vision:
         angle = self.normalize_angle(math.degrees(math.atan2(robot[single_color][0][0] - robot[center_color][0][0],
                                             robot[single_color][0][1] - robot[center_color][0][1])) - 150)
         self.save_robot((robot[center_color][0][0], robot[center_color][0][1]), angle, bot_id)
-        bot.out.value = False
+        bot.out[0] = 0
         self.flag[bot_id] = True
         self.last_save[bot_id] = 0
 

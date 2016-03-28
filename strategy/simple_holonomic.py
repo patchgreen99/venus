@@ -105,8 +105,6 @@ class SimpleStrategy:
     def catch_ball(self):
         print("Waiting for the ball to move")
 
-        #while not self.world.ball_moving.value:
-        #    pass
 
         angle, length = self.calculate_angle_length_ball()
         print("Turning " + str(angle) + " deg, releasing grabber")
