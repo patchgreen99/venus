@@ -90,7 +90,7 @@ class SimpleStrategy:
         self.commands.c(turn)
         self.commands.ee(d)
         self.commands.g()
-        exit(0)
+        #exit(0)
 
     def pass_ball(self):
         friend_pos = np.array([self.world.friend.position[0], self.world.friend.position[1]])
@@ -100,7 +100,7 @@ class SimpleStrategy:
         self.commands.c(turn)
         self.commands.ee(d)
         self.commands.g()
-        exit(0)
+        #exit(0)
 
     def catch_ball(self):
         print("Waiting for the ball to move")

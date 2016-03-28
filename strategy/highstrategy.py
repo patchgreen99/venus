@@ -45,7 +45,7 @@ class StrategyTools:
                 return "ATTACK_GOAL"
 
             i = i - 1
-        if self.isSafe3((x1, y1), (x2, y2), robotposlist):
+        if self.isSafe3((x1, y1), (x2, y2), robotposlist) and self.retarded_robot((x1, y1), (x2, y2)):
             #print('p')
             return "ATTACK_PASS"
 
@@ -68,14 +68,15 @@ class StrategyTools:
                 return "ATTACK_GOAL"
 
             i = i - 1
-        if self.isSafe3((x1, y1), (x2, y2), robotposlist) and self.world.friend.out.value == 0:
+        if self.isSafe3((x1, y1), (x2, y2), robotposlist) and self.world.friend.out.value == 0 and self.retarded_robot((x1, y1), (x2, y2)):
             # print('p')
             return "ATTACK_PASS"
         #print('yolo')
-        self.commands.c(20)
-        self.commands.x(500)
-        time.sleep(1)
-        self.commands.g()
+        print "No nice shot"
+        #self.commands.c(20)
+        #self.commands.x(500)
+        #time.sleep(1)
+        #self.commands.g()
 
         # i = 0
         # while i< 5:
@@ -122,6 +123,17 @@ class StrategyTools:
                 # Object is on the line.
                 return False
         return True
+
+    def retarded_robot(self, you, friend):
+        kick = (friend[0] - you[0], friend[1] - you[1])
+        if self.world.we_have_computer_goal and self.world.room_num == 1 or not self.world.we_have_computer_goal and self.world.room_num == 0:
+            play = (1, 0)
+        else:
+            play = (-1, 0)
+        if self.dot(play, kick) >= 0:
+            return True
+        else:
+            return False
 
     def dot(self, vectorA, vectorB):
         return vectorA[0]*vectorB[0]+vectorA[1]*vectorB[1]
@@ -556,7 +568,7 @@ class StrategyTools:
                 # open ball!
                 state = self.openball()
             # if(last_state != state):
-            self.game.mid(state)
+            self.game.mid(state, False)
             print(state)
             #last_state = state
 

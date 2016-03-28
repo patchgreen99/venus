@@ -459,7 +459,8 @@ void handshake() {
 void queryBallSensor() {
   Wire.requestFrom(BALL_SENSOR_SLAVE_ADDRESS, 1);
   int value = Wire.read();
-  Serial.print(value > 195 ? RESP_DONE : RESP_NEGATIVE);
+  //Serial.println(value);
+  Serial.print(value > 192 ? RESP_DONE : RESP_NEGATIVE);
 }
 
 void unknown() {

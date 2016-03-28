@@ -12,8 +12,8 @@ class Robot:
         self.hasBallInRange = Value('b')
 
     def __str__(self):
-        return "(pos: {} {}, ori: {})".format(self.position[0], self.position[1],
-                                              self.orientation[0], self.orientation[1])
+        return "(pos: {} {}, ori: {}, out: {}, hasBallInRange: {})".format(self.position[0], self.position[1],
+                                              self.orientation[0], self.orientation[1], self.out.value, self.hasBallInRange.value)
 
 
 class World:

@@ -74,9 +74,9 @@ class Game:
 
             ball_field = P.radial(self.world.ball, 1, -100)# -5
 
-            friend_field = P.solid_field(self.world.friend.position, 1, 10, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy1_field = P.solid_field(self.world.enemy1.position, 1, 10, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy2_field = P.solid_field(self.world.enemy2.position, 1, 10, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            friend_field = P.solid_field(self.world.friend.position, 1, 15, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy1_field = P.solid_field(self.world.enemy1.position, 1, 15, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy2_field = P.solid_field(self.world.enemy2.position, 1, 15, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
 
             advance = P.step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
             catch_up = P.step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
@@ -96,20 +96,20 @@ class Game:
             # MOTION
             #######################################
             if sim is False:
-                if potential.get_potential() < -0.5:
+                if potential.get_potential() < -0.75:
                     print("HAS BALL IN RANGE")
                     self.commands.s()
-                    time.sleep(1)
+                    time.sleep(.5)
                     angle, motion_length = self.calculate_angle_length_ball()
                     self.commands.o()
                     self.commands.c(angle)
 
                     angle, motion_length = self.calculate_angle_length_ball()
-                    self.commands.f(motion_length-7) # todo hack
+                    self.commands.f(motion_length-8) # todo hack
                     self.commands.g()
                     time.sleep(.6)
                     # todo need to implement considering objects
-                    if self.commands.query_ball():
+                    if self.commands.query_ball() or self.commands.query_ball():
                         print("It thinks it has the ball")
                         #exit(0)
                 else:
@@ -311,9 +311,9 @@ class Game:
             #####################################
             ball_field = P.radial(self.world.ball, 1, 0)
 
-            friend_field = P.solid_field(self.world.friend.position, 1, 15, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy1_field = P.solid_field(self.world.enemy1.position, 1, 15, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy2_field = P.solid_field(self.world.enemy2.position, 1, 15, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            friend_field = P.solid_field(self.world.friend.position, 1, 20, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy1_field = P.solid_field(self.world.enemy1.position, 1, 20, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy2_field = P.solid_field(self.world.enemy2.position, 1, 20, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
 
             advance = P.step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
             catch_up = P.step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
@@ -353,9 +353,9 @@ class Game:
             #####################################
             ball_field = P.radial(self.world.ball, 1, 0)
 
-            friend_field = P.solid_field(self.world.friend.position, 1, 15, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy1_field = P.solid_field(self.world.enemy1.position, 1, 15, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy2_field = P.solid_field(self.world.enemy2.position, 1, 15, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            friend_field = P.solid_field(self.world.friend.position, 1, 20, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy1_field = P.solid_field(self.world.enemy1.position, 1, 20, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy2_field = P.solid_field(self.world.enemy2.position, 1, 20, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
 
             advance = P.step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
             catch_up = P.step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
