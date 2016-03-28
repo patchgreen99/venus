@@ -44,13 +44,13 @@ class Potential:
 
             # use 1, 100
             if world.we_have_computer_goal and world.room_num == 1 or not world.we_have_computer_goal and world.room_num == 0: # there goal is on the right
-                self.penalty_box_front = g.step_field_inside(self.world.defending_right_top, self.world.defending_right_bot, (self.world.defending_right_bot[0]-self.world.defending_right_top[0], self.world.defending_right_bot[1]-self.world.defending_right_top[1]), PENALTY_BOX_INFLUENCE, 1, 10) # 2, 500
-                self.penalty_box_top = g.infinite_axial_inside((self.world.goal_right_top[0], self.world.defending_right_top[1]), self.world.defending_right_top, PENALTY_BOX_INFLUENCE, 1, 10)
-                self.penalty_box_bot = g.infinite_axial_inside((self.world.goal_right_bot[0], self.world.defending_right_bot[1]), self.world.defending_right_bot, PENALTY_BOX_INFLUENCE, 1, 10)
+                self.penalty_box_front = g.step_field_inside(self.world.defending_right_top, self.world.defending_right_bot, (self.world.defending_right_bot[0]-self.world.defending_right_top[0], self.world.defending_right_bot[1]-self.world.defending_right_top[1]), PENALTY_BOX_INFLUENCE, 1, 8) # 2, 500
+                self.penalty_box_top = g.infinite_axial_inside((self.world.goal_right_top[0], self.world.defending_right_top[1]), self.world.defending_right_top, PENALTY_BOX_INFLUENCE, 1, 8)
+                self.penalty_box_bot = g.infinite_axial_inside((self.world.goal_right_bot[0], self.world.defending_right_bot[1]), self.world.defending_right_bot, PENALTY_BOX_INFLUENCE, 1, 8)
             elif world.we_have_computer_goal and world.room_num == 0 or not world.we_have_computer_goal and world.room_num == 1: # obviously the left goal
-                self.penalty_box_front = g.step_field_inside(self.world.defending_left_top, self.world.defending_left_bot, (self.world.defending_left_top[0]-self.world.defending_left_bot[0], self.world.defending_left_top[1]-self.world.defending_left_bot[1]), PENALTY_BOX_INFLUENCE, 1, 10)
-                self.penalty_box_top = g.infinite_axial_inside((self.world.goal_left_top[0], self.world.defending_left_top[1]), self.world.defending_left_top, PENALTY_BOX_INFLUENCE, 1, 10)
-                self.penalty_box_bot = g.infinite_axial_inside((self.world.goal_left_bot[0], self.world.defending_left_bot[1]), self.world.defending_left_bot, PENALTY_BOX_INFLUENCE, 1, 10)
+                self.penalty_box_front = g.step_field_inside(self.world.defending_left_top, self.world.defending_left_bot, (self.world.defending_left_top[0]-self.world.defending_left_bot[0], self.world.defending_left_top[1]-self.world.defending_left_bot[1]), PENALTY_BOX_INFLUENCE, 1, 8)
+                self.penalty_box_top = g.infinite_axial_inside((self.world.goal_left_top[0], self.world.defending_left_top[1]), self.world.defending_left_top, PENALTY_BOX_INFLUENCE, 1, 8)
+                self.penalty_box_bot = g.infinite_axial_inside((self.world.goal_left_bot[0], self.world.defending_left_bot[1]), self.world.defending_left_bot, PENALTY_BOX_INFLUENCE, 1, 8)
 
             self.potential_list = potentials + [self.top_wall, self.bot_wall, self.right_wall, self.left_wall, self.penalty_box_bot, self.penalty_box_top, self.penalty_box_front]
 
@@ -108,17 +108,19 @@ class Potential:
                 potential.add_field(self.local_potential)
 
         def get_force(self):
-            return self.build_force()
-
-        def build_force(self):
             dx, dy = 0, 0
             for potential in self.potential_list:
                 tempx, tempy = potential.force_at(self.world.venus.position[0], self.world.venus.position[1])
                 dx += tempx
                 dy += tempy
-                print potential
-                print dx
             return dx, dy
+
+        def get_potential(self):
+            p = 0
+            for potential in self.potential_list:
+                tempp = potential.field_at(self.world.venus.position[0], self.world.venus.position[1])
+                p += tempp
+            return p
 
         def build_grid(self):
             robot_pos = self.last_square

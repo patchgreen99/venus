@@ -72,7 +72,7 @@ class Game:
             # ON
             #####################################
 
-            ball_field = P.radial(self.world.ball, 1, -25)# -5
+            ball_field = P.radial(self.world.ball, 1, -100)# -5
 
             friend_field = P.solid_field(self.world.friend.position, 1, 10, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
             enemy1_field = P.solid_field(self.world.enemy1.position, 1, 10, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
@@ -96,36 +96,37 @@ class Game:
             # MOTION
             #######################################
             if sim is False:
-                self.current_force = potential.get_force()
-                #print self.current_force
-                bearing = self.calculate_angle(self.current_force)
-                #print bearing
-                self.commands.move(bearing, 0)
-                #self.local_potential, self.points = potential.get_local_potential()
-                '''
-                if self.world.venus.hasBallInRange.value == 1:
+                if potential.get_potential() < -0.5:
+                    print("HAS BALL IN RANGE")
+                    self.commands.s()
                     time.sleep(1)
                     angle, motion_length = self.calculate_angle_length_ball()
-                    self.commands.open_wide()
+                    self.commands.o()
                     self.commands.c(angle)
+
                     angle, motion_length = self.calculate_angle_length_ball()
-                    self.commands.f(motion_length)
+                    self.commands.f(motion_length-7) # todo hack
                     self.commands.g()
                     time.sleep(.6)
                     # todo need to implement considering objects
                     if self.commands.query_ball():
                         print("It thinks it has the ball")
-                        return
+                        #exit(0)
                 else:
-                    self.turn, self.current_point = self.move(None)
-                    self.current_direction = rotate_vector(self.turn, self.current_direction[0], self.current_direction[1])
-                '''
+                    self.current_force = potential.get_force()
+                    #print self.current_force
+                    bearing = self.calculate_angle(self.current_force)
+                    #print bearing
+                    self.commands.move(bearing, 0)
+                    #self.local_potential, self.points = potential.get_local_potential()
+
             ########################################
 
             # TESTING
             ########################################
             else:
-                potential.map()
+                #potential.map()
+                print potential.get_potential()
 
             ########################################
 
@@ -446,7 +447,10 @@ class Game:
 
         elif state == "RECEIVE_PASS":
             # you should be in the good position to catch the ball
-            self.commands.catch_ball()
+            if not self.commands.query_ball():
+                self.commands.catch_ball()
+            else:
+                print "This should not happen"
 
     ###########################################################################################################################################################
     # EXITING STATE

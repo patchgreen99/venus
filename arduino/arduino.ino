@@ -25,7 +25,7 @@
 #define RESP_ERROR_JOBS_EXCEEDED 'X'
 
 #define MAX_JOB_COUNT 20
-#define JOB_MOTOR_COUNT 3
+#define JOB_MOTOR_COUNT 4
 
 #define MAX_PARAMS 15
 
@@ -459,7 +459,7 @@ void handshake() {
 void queryBallSensor() {
   Wire.requestFrom(BALL_SENSOR_SLAVE_ADDRESS, 1);
   int value = Wire.read();
-  Serial.print(value > 190 ? RESP_DONE : RESP_NEGATIVE);
+  Serial.print(value > 195 ? RESP_DONE : RESP_NEGATIVE);
 }
 
 void unknown() {

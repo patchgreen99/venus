@@ -5,7 +5,7 @@ import numpy as np
 import math
 
 from control.protocol import RobotProtocol
-from strategy.simple import SimpleStrategy
+from strategy.simple_holonomic import SimpleStrategy
 from strategy.highstrategy import StrategyTools
 from strategy.world import World
 from strategy.game import Game
@@ -36,11 +36,11 @@ class Commands:
         print("! vision")
         print("! connect <device_no>")
         self.init()
-        #self.vision()
+        self.vision()
         self.connect()
         #self.highstrategy.main()
 
-    def init(self, room_num=1, team_color='yellow', our_color='pink', computer_goal=False):
+    def init(self, room_num=0, team_color='yellow', our_color='pink', computer_goal=False):
         print("init: Room: %s, team color: %s, our single spot color: %s, computer goal: %s" %
               (room_num, team_color, our_color, computer_goal))
         self.world = World(int(room_num), team_color, our_color, computer_goal)
@@ -73,17 +73,10 @@ class Commands:
         else:
             d = -(dir - 45)
 
-        '''
-        if ang < 0:
-            a = 45 - ang
-        else:
-            a = -(ang - 45)
-        '''
-
-        a = math.radians(ang)
+        a = -math.radians(ang)
         dir = math.radians(d)
         idea = np.array([np.cos(dir), np.sin(dir), a])
-        rad = 0.25
+        rad = 0.1
         m = np.array([[1, 0, rad],
                       [0, -1, rad],
                       [-1, 0, rad],
@@ -130,16 +123,61 @@ class Commands:
         self.protocol.stop()
 
     def k(self):
-        self.protocol.move(500, [(4, -100)], time=True)
-
-    def u(self):
-        self.protocol.move(500, [(4, 100)], time=True)
-
-    def g(self):
-        self.protocol.move(300, [(5, -100)], time=True)
+        # self.protocol.move(500, [(4, -100)], time=True)
+        self.protocol.move_forever([(0, -100), (1, 100), (2, 100), (3, -100), ])
+        time.sleep(0.5)
+        self.protocol.move_forever([(0, 100), (1, -100), (2, -100), (3, 100), ])
+        time.sleep(1)
+        self.protocol.stop()
 
     def o(self):
-        self.protocol.move(300, [(5, 100)], time=True)
+        self.protocol.move(400, [(4, -100)], time=True, wait=True)
+
+    def g(self):
+        self.protocol.move(400, [(4, 80)], time=True, wait=True)
+
+    def ss(self, x):
+        x = int(x)
+        s = sign(x)
+        x = abs(x)
+
+        if x < 90:
+            return
+
+        if x > 90:
+            if s > 0:
+                x = 0.0008417761 * (x ** 2) + 0.3865014241 * x - 41.5767918089
+            else:
+                x = 0.0013813605 * (x ** 2) + 0.1536110506 * x - 25.1058020478
+            x = int(x)
+            self.protocol.schedule(x, 0, [(0, -100 * s), (1, -100 * s), (2, -100 * s), (3, -100 * s)])
+
+        self.protocol.schedule(200, 0, [(0, -100 * s), (1, -100 * s), (2, -100 * s), (3, -100 * s)], grab=-400)
+
+        #self.protocol.move(400, [(4, -100)], time=True)
+
+    def flush(self):
+        self.protocol.flush()
+
+    def ee(self, x):
+        x = int(x)
+        s = sign(x)
+        self.protocol.move(400, [(4, -100)], time=True)
+        self.protocol.move(100, [(0, -100 * s), (1, -100 * s), (2, -100 * s), (3, -100 * s)], wait=True)
 
     def w(self):
-        print self.world.__str__()
+        print self.world
+
+    def query_ball(self):
+        a = self.protocol.query_ball()
+        print("We have the ball: %s" % a)
+        return a
+
+    def pass_ball(self):
+        self.strategy.pass_ball()
+
+    def catch_ball(self):
+        self.strategy.catch_ball()
+
+    def goal(self):
+        self.strategy.goal()
