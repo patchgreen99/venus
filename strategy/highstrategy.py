@@ -19,12 +19,14 @@ class StrategyTools:
         y3 = self.world.enemy1.position[1]
         x4 = self.world.enemy2.position[0]
         y4 = self.world.enemy2.position[1]
-
+        x5 = self.world.our_goalX
+        y5 = self.world.our_goalmeanY
         robotposlist = [(x3,y3),
                         (x4,y4)]
         # TODO: if self.world.enemy1.out[0] == False:
 
         goalx = self.world.their_goalX
+
         highy = self.world.their_goalhighY
         lowy = self.world.their_goallowY
 
@@ -68,7 +70,7 @@ class StrategyTools:
                 return "ATTACK_GOAL"
 
             i = i - 1
-        if self.isSafe3((x1, y1), (x2, y2), robotposlist) and self.world.friend.out[0] == 0 and self.retarded_robot((x1, y1), (x2, y2)):
+        if self.isSafe3((x1, y1), (x2, y2), robotposlist) and self.isSafe3 ((x1,y1), (x5,y5), [(x2,y2)]) and self.world.friend.out[0] == 0 and self.retarded_robot((x1, y1), (x2, y2)):
             # print('p')
             return "ATTACK_PASS"
         #print('yolo')
