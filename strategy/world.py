@@ -8,12 +8,12 @@ class Robot:
     def __init__(self):
         self.position = Array('i', [NO_VALUE, NO_VALUE])
         self.orientation = Array('d', [NO_VALUE, NO_VALUE])
-        self.out = Value('b')
-        self.hasBallInRange = Value('b')
+        self.out = Array('i', [NO_VALUE])
+        self.hasBallInRange = Array('i', [0])
 
     def __str__(self):
         return "(pos: {} {}, ori: {}, out: {}, hasBallInRange: {})".format(self.position[0], self.position[1],
-                                              self.orientation[0], self.orientation[1], self.out.value, self.hasBallInRange.value)
+                                              self.orientation[0], self.orientation[1], self.out[0], self.hasBallInRange[0])
 
 
 class World:
@@ -36,7 +36,7 @@ class World:
 
         self.ball = Array('i', [NO_VALUE, NO_VALUE]) # in pixels
         self.ball_velocity = Array('d', [NO_VALUE, NO_VALUE]) # pixels per frame
-        self.ball_moving = Value('b')
+        self.ball_moving = Array('i', [NO_VALUE])
         self.venus = Robot()
         self.friend = Robot()
         self.enemy1 = Robot()
@@ -45,7 +45,7 @@ class World:
 
     def __str__(self):
         return "World state: ball {} {} {}, future ball {} {}, venus {}, friend {}, enemy1 {}, enemy2 {}".format(
-            self.ball[0], self.ball[1], self.ball_moving.value, self.ball_velocity[0], self.ball_velocity[1],
+            self.ball[0], self.ball[1], self.ball_moving[0], self.ball_velocity[0], self.ball_velocity[1],
             self.venus, self.friend, self.enemy1, self.enemy2)
 
     def read_pitch(self, data):

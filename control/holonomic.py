@@ -37,7 +37,7 @@ class Commands:
         print("! connect <device_no>")
         self.init()
         self.vision()
-        self.connect()
+        #self.connect()
         #self.highstrategy.main()
 
     def hs(self):
@@ -94,6 +94,29 @@ class Commands:
         print movement
         self.protocol.move_forever([(0, int(movement[0])), (1, int(movement[1])), (2, int(movement[2])), (3, int(movement[3])), ])
         #self.protocol.move(20, [(0, movement[0]), (1, movement[1]), (2, movement[2]), (3, movement[3]), ], wait=True)
+
+    def penalty_attack(self, clockno):
+        self.highstrategy.penalty_attack(clockno)
+
+    def penalty_defend(self):
+        self.highstrategy.penalty_defend()
+
+    def runstrategy(self):
+        self.highstrategy.main()
+
+    def attackwithball(self):
+        self.highstrategy.attackwithball()
+
+    def ballwithenemy(self, no):
+        self.highstrategy.ballwithenemy(int(no))
+
+    def ballindefensearea(self):
+        a= self.highstrategy.ballindefensearea()
+        print(a)
+
+    def ballwithfriend(self):
+        self.highstrategy.ballwithfriend()
+
 
     def f(self, x):
         """Move forward, negative x means backward"""
@@ -184,3 +207,15 @@ class Commands:
 
     def goal(self):
         self.strategy.goal()
+
+    def who(self):
+        print "Who has the ball?"
+        if self.world.venus.hasBallInRange[0]:
+            print "0: venus"
+        if self.world.friend.hasBallInRange[0]:
+            print "1: friend"
+        if self.world.enemy1.hasBallInRange[0]:
+            print "2: enemy1"
+        if self.world.enemy2.hasBallInRange[0]:
+            print "3: enemy2"
+

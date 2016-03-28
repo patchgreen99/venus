@@ -144,8 +144,8 @@ class Game:
             advance = P.step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), POSITION_INFLUENCE_RANGE, 1, 0)
             catch_up = P.step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), POSITION_INFLUENCE_RANGE, 1, 0)
 
-            free_up_pass_enemy1 = P.finite_axial_outside(self.world.enemy1.position, self.world.friend.position, POSITION_INFLUENCE_RANGE, 1, 2)
-            free_up_goal_enemy2 = P.finite_axial_outside(self.world.enemy2.position, (self.world.their_goalX, self.world.their_goalmeanY), POSITION_INFLUENCE_RANGE, 1, 2)
+            free_up_pass_enemy1 = P.finite_axial_outside(self.world.enemy1.position, self.world.friend.position, POSITION_INFLUENCE_RANGE, 1.3, 2.5)
+            free_up_goal_enemy2 = P.finite_axial_outside(self.world.enemy2.position, (self.world.their_goalX, self.world.their_goalmeanY), POSITION_INFLUENCE_RANGE, 1.3, 2.5)
 
             # BUILD FIELD AND NEXT POSITION AND DIRECTIONS
             ####################################
@@ -187,8 +187,8 @@ class Game:
             advance = P.step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
             catch_up = P.step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
 
-            free_up_pass_enemy2 = P.finite_axial_outside(self.world.enemy1.position, self.world.friend.position, POSITION_INFLUENCE_RANGE, 1, 2)
-            free_up_goal_enemy1 = P.finite_axial_outside(self.world.enemy2.position, (self.world.their_goalX, self.world.their_goalmeanY), POSITION_INFLUENCE_RANGE, 1, 2)
+            free_up_pass_enemy2 = P.finite_axial_outside(self.world.enemy1.position, self.world.friend.position, POSITION_INFLUENCE_RANGE, 1.3, 2.5)
+            free_up_goal_enemy1 = P.finite_axial_outside(self.world.enemy2.position, (self.world.their_goalX, self.world.their_goalmeanY), POSITION_INFLUENCE_RANGE, 1.3, 2.5)
 
 
             # BUILD FIELD AND NEXT POSITION AND DIRECTIONS
@@ -231,8 +231,8 @@ class Game:
             advance = P.step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
             catch_up = P.step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
 
-            free_up_goal_enemy2 = P.finite_axial_outside(self.world.enemy1.position, (self.world.their_goalX, self.world.their_goalmeanY), POSITION_INFLUENCE_RANGE, 1, 2)
-            free_up_goal_enemy1 = P.finite_axial_outside(self.world.enemy2.position, (self.world.their_goalX, self.world.their_goalmeanY), POSITION_INFLUENCE_RANGE, 1, 2)
+            free_up_goal_enemy2 = P.finite_axial_outside(self.world.enemy1.position, (self.world.their_goalX, self.world.their_goalmeanY), POSITION_INFLUENCE_RANGE, 1.3, 2.5)
+            free_up_goal_enemy1 = P.finite_axial_outside(self.world.enemy2.position, (self.world.their_goalX, self.world.their_goalmeanY), POSITION_INFLUENCE_RANGE, 1.3, 2.5)
 
             # BUILD FIELD AND NEXT POSITION AND DIRECTIONS
             ####################################
@@ -274,8 +274,8 @@ class Game:
             advance = P.step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
             catch_up = P.step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
 
-            free_up_pass_enemy1 = P.finite_axial_outside(self.world.enemy2.position, self.world.friend.position, POSITION_INFLUENCE_RANGE, 1, 2)
-            free_up_pass_enemy2 = P.finite_axial_outside(self.world.enemy1.position, self.world.friend.position, POSITION_INFLUENCE_RANGE, 1, 2)
+            free_up_pass_enemy1 = P.finite_axial_outside(self.world.enemy2.position, self.world.friend.position, POSITION_INFLUENCE_RANGE, 1.3, 2.5)
+            free_up_pass_enemy2 = P.finite_axial_outside(self.world.enemy1.position, self.world.friend.position, POSITION_INFLUENCE_RANGE, 1.3, 2.5)
 
             # BUILD FIELD AND NEXT POSITION AND DIRECTIONS
             ####################################

@@ -35,7 +35,7 @@ class Commands:
         print("! connect <device_no>")
         self.init()
         self.vision()
-        self.connect()
+        #self.connect()
         #self.highstrategy.main()
 
     def init(self, room_num=1, team_color='yellow', our_color='green', computer_goal=False):
@@ -87,6 +87,9 @@ class Commands:
     def ballindefensearea(self):
         a= self.highstrategy.ballindefensearea()
         print(a)
+
+    def ballwithfriend(self):
+        self.highstrategy.ballwithfriend()
 
     def grab_ball(self):
         self.strategy.grab_ball()

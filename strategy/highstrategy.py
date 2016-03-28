@@ -19,12 +19,14 @@ class StrategyTools:
         y3 = self.world.enemy1.position[1]
         x4 = self.world.enemy2.position[0]
         y4 = self.world.enemy2.position[1]
-
+        x5 = self.world.our_goalX
+        y5 = self.world.our_goalmeanY
         robotposlist = [(x3,y3),
                         (x4,y4)]
-        # TODO: if self.world.enemy1.out.value == False:
+        # TODO: if self.world.enemy1.out[0] == False:
 
         goalx = self.world.their_goalX
+
         highy = self.world.their_goalhighY
         lowy = self.world.their_goallowY
 
@@ -68,7 +70,7 @@ class StrategyTools:
                 return "ATTACK_GOAL"
 
             i = i - 1
-        if self.isSafe3((x1, y1), (x2, y2), robotposlist) and self.world.friend.out.value == 0 and self.retarded_robot((x1, y1), (x2, y2)):
+        if self.isSafe3((x1, y1), (x2, y2), robotposlist) and self.isSafe3 ((x1,y1), (x5,y5), [(x2,y2)]) and self.world.friend.out[0] == 0 and self.retarded_robot((x1, y1), (x2, y2)):
             # print('p')
             return "ATTACK_PASS"
         #print('yolo')
@@ -228,7 +230,7 @@ class StrategyTools:
             enemyposition = self.world.enemy1.position
             #print enemyposition[0]
             #print enemyposition[1]
-            if self.iclosertogoal(enemyposition) or self.world.enemy2.out.value == 1: #TODO: or enemy out of pitch -- done, test!
+            if self.iclosertogoal(enemyposition) or self.world.enemy2.out[0] == 1: #TODO: or enemy out of pitch -- done, test!
                # self.commands.block_goal(1)
                 #print('block goal enemy1')
                 return "ENEMY1_BALL_TAKE_GOAL"
@@ -239,7 +241,7 @@ class StrategyTools:
         elif enemy_no == 2:
             enemyposition = self.world.enemy2.position
            # print enemyposition
-            if self.iclosertogoal(enemyposition) or self.world.enemy1.out.value == 1:  #TODO: or enemy out of pitch -- done, test!
+            if self.iclosertogoal(enemyposition) or self.world.enemy1.out[0] == 1:  #TODO: or enemy out of pitch -- done, test!
                 #self.commands.block_goal(2)
                 #print('block goal enemy2')
                 return "ENEMY2_BALL_TAKE_GOAL"
@@ -394,7 +396,7 @@ class StrategyTools:
         d1 = self.euclideandist((x1,y1),(x,y))
         d2 = self.euclideandist((x2,y2),(x,y))
 
-        if d1*(0.7) < d2 or self.world.friend.out.value == 1:         #TODO: or teamate out of pitch -- done, testing needed
+        if d1*(0.7) < d2 or self.world.friend.out[0] == 1:         #TODO: or teamate out of pitch -- done, testing needed
             return True
         else:
             return False
@@ -411,16 +413,51 @@ class StrategyTools:
         x5 = self.world.their_goalX
         y5 = self.world.their_goalmeanY
 
-        if self.isinbetweenY((x1,y1),(x5,y5),(x3,y3)) :
-            if self.isinbetweenY((x1,y1),(x5,y5),(x4,y4)):
-                return "FREE_BALL_BOTH_GOALSIDE"
-            else:
-                return "FREE_BALL_1_GOALSIDE"
-        else:
-            if self.isinbetweenY((x1,y1),(x5,y5),(x4,y4)):
-                return "FREE_BALL_2_GOALSIDE"
-            else:
+        m0 = (y1-y2)/ (x1-x2)
+        c0 = y1 - m0*x1
+
+        m1 = -m0
+        c1 = y1 - m1*x1
+
+        m2 = -m0
+        c2 = y2 - m2*x2
+
+        midx= x1+x2/2
+        midy = y1+y2/2
+
+        gsv = midy - (m1* midx) - c1
+        gsf = midy - (m2 * midy) - c2
+
+        e1v = y3 - (m1*x3) -c1
+        e2v = y4 - (m1*y4) -c1
+
+        e1f = y3 - (m2*x3) -c2
+        e2f = y4 - (m2*y4) -c2
+
+        if(gsv*e1v > 0 and gsf * e1f>0):
+            if(gsv * e2v > 0 and gsf*e1f>0):
+                print( "FREE_BALL_NONE_GOALSIDE")
                 return "FREE_BALL_NONE_GOALSIDE"
+            else:
+                print( "FREE_BALL_2_GOALSIDE")
+                return "FREE_BALL_2_GOALSIDE"
+        else:
+            if(gsv * e2v > 0 and gsf*e2f>0):
+                print( "FREE_BALL_1_GOALSIDE")
+                return "FREE_BALL_1_GOALSIDE"
+            else:
+                print( "FREE_BALL_BOTH_GOALSIDE")
+                return "FREE_BALL_BOTH_GOALSIDE"
+        # if self.isinbetweenY((x1,y1),(x5,y5),(x3,y3)) :
+        #     if self.isinbetweenY((x1,y1),(x5,y5),(x4,y4)):
+        #         return "FREE_BALL_BOTH_GOALSIDE"
+        #     else:
+        #         return "FREE_BALL_BOTH_GOALSIDE"
+        # else:
+        #     if self.isinbetweenY((x1,y1),(x5,y5),(x4,y4)):
+        #         return "FREE_BALL_2_GOALSIDE"
+        #     else:
+        #         return "FREE_BALL_NONE_GOALSIDE"
 
     def ballwithfriend(self): # trigger on isballinrange
         x1 = self.world.venus.position[0]
@@ -435,7 +472,7 @@ class StrategyTools:
         robotposlist = [(x3,y3),
                         (x4,y4)]
 
-        if self.isSafe3((x2,y2),(x1,y1),robotposlist) and self.world.friend.hasBallInRange.value == 1:
+        if self.isSafe3((x2,y2),(x1,y1),robotposlist) and self.world.friend.hasBallInRange[0] == 1:
             return "RECEIVE_PASS"
             # print('receive pass')
         else:
@@ -488,7 +525,7 @@ class StrategyTools:
         else:
             penalty_point = self.world.defending_right_bot[0]
 
-        return self.world.venus.hasBallInRange.value == 1and not (self.world.venus.position[0] < penalty_point < self.world.ball[0] or self.world.venus.position[0] > penalty_point > self.world.ball[0])
+        return self.world.venus.hasBallInRange[0] == 1 and not (self.world.venus.position[0] < penalty_point < self.world.ball[0] or self.world.venus.position[0] > penalty_point > self.world.ball[0])
         # if((self.world.room_num == 0 and self.world.we_have_computer_goal) or (not self.world.we_have_computer_goal and self.world.room_num == 1 )):
         #     backxup = self.world.goal_right_bot[0]
         #     backyup = self.world.goal_right_bot[1]
@@ -545,20 +582,20 @@ class StrategyTools:
             enemy1 = self.world.enemy1
             enemy2 = self.world.enemy2
            # if self.commands.query_ball():
-            #print(friend.hasBallInRange.value)
-            #print(enemy1.hasBallInRange.value)
-            #print(enemy2.hasBallInRange.value)
+            #print(friend.hasBallInRange[0])
+            #print(enemy1.hasBallInRange[0])
+            #print(enemy2.hasBallInRange[0])
             if self.commands.query_ball():
                 state = self.attackwithball()
-            elif friend.hasBallInRange.value == 0 and enemy1.hasBallInRange.value == 0 and enemy2.hasBallInRange.value == 0:
+            elif friend.hasBallInRange[0] == 0 and enemy1.hasBallInRange[0] == 0 and enemy2.hasBallInRange[0] == 0:
                 state = self.openball()
-            elif friend.hasBallInRange.value == 1:
+            elif friend.hasBallInRange[0] == 1:
                 # friend has the ball
                 state = self.ballwithfriend()
-            elif enemy1.hasBallInRange.value == 1:
+            elif enemy1.hasBallInRange[0] == 1:
                 # enemy1 has the ball
                 state = self.ballwithenemy(1)
-            elif enemy2.hasBallInRange.value == 1:
+            elif enemy2.hasBallInRange[0] == 1:
                 # enemy2 has the ball
                 state = self.ballwithenemy(2)
             elif self.ballindefensearea():

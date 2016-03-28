@@ -108,7 +108,7 @@ class SimpleStrategy:
     def catch_ball(self):
         print("Waiting for the ball to move")
 
-        #while not self.world.ball_moving.value:
+        #while not self.world.ball_moving[0]:
         #    pass
 
         time.sleep(1)
@@ -161,7 +161,7 @@ class SimpleStrategy:
         block_position = (go_x, go_y)
         angle, motion_length = self.calculate_angle_length(block_position)
 
-        #while not self.world.ball_moving.value:
+        #while not self.world.ball_moving[0]:
         #     pass
 
         #print("The ball is moving")
@@ -179,7 +179,7 @@ class SimpleStrategy:
         print("Blocking enemy " + str(enemy_num))
 
         enemy = self.world.enemy1 if enemy_num == 1 else self.world.enemy2
-        while self.world.ball_moving.value == 0:
+        while self.world.ball_moving[0] == 0:
              pass
         # t = (enemy.position[0]*enemy.orientation[1] - enemy.position[1]*enemy.orientation[0]+
         #      self.world.venus.position[1]*enemy.orientation[0] - self.world.venus.position[0]*enemy.orientation[1])/(self.world.venus.orientation[0]*enemy.orientation[1] - self.world.venus.orientation[1]*enemy.orientation[0])
