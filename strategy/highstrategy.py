@@ -411,16 +411,47 @@ class StrategyTools:
         x5 = self.world.their_goalX
         y5 = self.world.their_goalmeanY
 
-        if self.isinbetweenY((x1,y1),(x5,y5),(x3,y3)) :
-            if self.isinbetweenY((x1,y1),(x5,y5),(x4,y4)):
-                return "FREE_BALL_BOTH_GOALSIDE"
-            else:
-                return "FREE_BALL_1_GOALSIDE"
-        else:
-            if self.isinbetweenY((x1,y1),(x5,y5),(x4,y4)):
-                return "FREE_BALL_2_GOALSIDE"
-            else:
+        m0 = (y1-y2)/ (x1-x2)
+        c0 = y1 - m0*x1
+
+        m1 = -m0
+        c1 = y1 - m1*x1
+
+        m2 = -m0
+        c2 = y2 - m2*x2
+
+        midx= x1+x2/2
+        midy = y1+y2/2
+
+        gsv = midy - (m1* midx) - c1
+        gsf = midy - (m2 * midy) - c2
+
+        e1v = y3 - (m1*x3) -c1
+        e2v = y4 - (m1*y4) -c1
+
+        e1f = y3 - (m2*x3) -c2
+        e2f = y4 - (m2*y4) -c2
+
+        if(gsv*e1v > 0 and gsf * e1f>0):
+            if(gsv * e2v > 0 and gsf*e1f>0):
                 return "FREE_BALL_NONE_GOALSIDE"
+            else:
+                return "FREE_BALL_2_GOALSIDE"
+        else:
+            if(gsv * e2v > 0 and gsf*e1f>0):
+                return "FREE_BALL_1_GOALSIDE"
+            else:
+                return "FREE_BALL_BOTH_GOALSIDE"
+        # if self.isinbetweenY((x1,y1),(x5,y5),(x3,y3)) :
+        #     if self.isinbetweenY((x1,y1),(x5,y5),(x4,y4)):
+        #         return "FREE_BALL_BOTH_GOALSIDE"
+        #     else:
+        #         return "FREE_BALL_BOTH_GOALSIDE"
+        # else:
+        #     if self.isinbetweenY((x1,y1),(x5,y5),(x4,y4)):
+        #         return "FREE_BALL_2_GOALSIDE"
+        #     else:
+        #         return "FREE_BALL_NONE_GOALSIDE"
 
     def ballwithfriend(self): # trigger on isballinrange
         x1 = self.world.venus.position[0]
@@ -488,7 +519,7 @@ class StrategyTools:
         else:
             penalty_point = self.world.defending_right_bot[0]
 
-        return self.world.venus.hasBallInRange.value == 1and not (self.world.venus.position[0] < penalty_point < self.world.ball[0] or self.world.venus.position[0] > penalty_point > self.world.ball[0])
+        return self.world.venus.hasBallInRange.value == 1 and not (self.world.venus.position[0] < penalty_point < self.world.ball[0] or self.world.venus.position[0] > penalty_point > self.world.ball[0])
         # if((self.world.room_num == 0 and self.world.we_have_computer_goal) or (not self.world.we_have_computer_goal and self.world.room_num == 1 )):
         #     backxup = self.world.goal_right_bot[0]
         #     backyup = self.world.goal_right_bot[1]
