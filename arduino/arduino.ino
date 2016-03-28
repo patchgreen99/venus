@@ -6,7 +6,7 @@
 
 #define ROTARY_SLAVE_ADDRESS 5
 #define ROTARY_COUNT 5
-#define ROTARY_REQUEST_INTERVAL 30
+#define ROTARY_REQUEST_INTERVAL 5
 
 #define RECEIVER_SLAVE_ADDRESS 69
 #define BALL_SENSOR_ANALOG_PORT 0
@@ -50,11 +50,12 @@ timer_callback stopMotorCallbacks[] = {
  * by an amount of rotary units.
  */
 int positions[ROTARY_COUNT];
-int targetPositions[ROTARY_COUNT];
+//int targetPositions[ROTARY_COUNT];
+int targetPosition;
 
 /* Whether motors are moving in any way */
 bool moving[ROTARY_COUNT];
-
+/*
 struct Job {
   bool pause;
   int target;
@@ -69,7 +70,7 @@ bool pauseFinished;
 int head;
 int tail;
 int count;
-
+*/
 int params[MAX_PARAMS];
 int paramCount;
 
@@ -89,9 +90,9 @@ void setup() {
   sc.addCommand("M", moveTimeUnits);
   sc.addCommand("R", moveRotaryUnits);
   sc.addCommand("V", moveForever);
-  sc.addCommand("J", scheduleJob);
-  sc.addCommand("P", schedulePause);
-  sc.addCommand("F", flushJobs);
+  //sc.addCommand("J", scheduleJob);
+  //sc.addCommand("P", schedulePause);
+  //sc.addCommand("F", flushJobs);
   //sc.addCommand("Z", stopSome);
   sc.addCommand("S", stopAll);
   sc.addCommand("I", areAllStopped);
@@ -164,7 +165,7 @@ void stopMotor4() { stopMotor(4); }
 /* Callback that stops motors after they moved for some rotary units */
 void rotaryTimerCallback() {
   updateRotaryPositions();
-  
+  /*
   bool stopping = running && (jobs[head].pause && pauseFinished || !jobs[head].pause && finished(positions[jobs[head].master], jobs[head].target));
   bool starting = !running && count > 0 || stopping && count > 1;
   
@@ -183,12 +184,12 @@ void rotaryTimerCallback() {
       stopMotor(i);
       
       // Moving motors in other direction hoping to stop them quickly
-      /*if (jobs[head].powers[i] > 0) {
-        motorBackward(i, 100);
-      } else {
-        motorForward(i, 100);
-      }
-      timer.setTimeout(400, stopMotorCallbacks[i]);*/
+      //if (jobs[head].powers[i] > 0) {
+      //  motorBackward(i, 100);
+      //} else {
+      //  motorForward(i, 100);
+      //}
+      //timer.setTimeout(400, stopMotorCallbacks[i]);
     }
   }
   
@@ -207,8 +208,8 @@ void rotaryTimerCallback() {
   }
   
   running = running && !stopping || starting;
-  
-  for (int i = 0; i < ROTARY_COUNT; ++i) {
+  */
+  /*for (int i = 0; i < ROTARY_COUNT; ++i) {
     if (finished(positions[i], targetPositions[i])) {
       motorAllStop();
       for (int j = 0; j < ROTARY_COUNT; ++j) {
@@ -217,12 +218,28 @@ void rotaryTimerCallback() {
         targetPositions[j] = 0;
       }
     }
+  }*/
+  
+  if (targetPosition) {
+    int sum = 0;
+    for (int i = 0; i < 4; ++i) {
+      sum += abs(positions[i]);
+    }
+    
+    if (sum >= 4 * targetPosition) {
+      motorAllStop();
+      targetPosition = 0;
+      for (int j = 0; j < 4; ++j) {
+        moving[j] = false;
+        positions[j] = 0;
+      }
+    }
   }
 }
 
-void setPauseFinished() {
+/*void setPauseFinished() {
   pauseFinished = true;
-}
+}*/
 
 void updateRotaryPositions() {
   // Request motor position deltas from rotary slave board
@@ -234,10 +251,10 @@ void updateRotaryPositions() {
   }
 }
 
-bool finished(int position, int targetPosition) {
+/*bool finished(int position, int targetPosition) {
   return targetPosition > 0 && position >= targetPosition ||
          targetPosition < 0 && position <= targetPosition;
-}
+}*/
 
 /* Returns true if the command should be ignored in case
  * it is a duplicate command or bad checksum */
@@ -306,17 +323,11 @@ void moveRotaryUnits() {
   }
   
   int p = 0;
-  int target = params[p++];
+  targetPosition = params[p++];
   
   int motor = params[p++];
   int power = params[p++];
   positions[motor] = 0;
-  
-  if (power > 0) {
-    targetPositions[motor] = target;
-  } else {
-    targetPositions[motor] = -target;
-  }
   
   runMotor(motor, power);
 
@@ -328,7 +339,7 @@ void moveRotaryUnits() {
     runMotor(motor, power);
   }
 }
-
+/*
 void scheduleJob() {
   if (count == MAX_JOB_COUNT) {
     // No more space in the job queue
@@ -394,7 +405,7 @@ void flushJobs() {
     count = 1;
     tail = (head + 1) % MAX_JOB_COUNT;
   }
-}
+}*/
 
 /*void stopSome() {
   if (ignore()) {

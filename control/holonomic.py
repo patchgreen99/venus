@@ -112,15 +112,15 @@ class Commands:
         s = sign(x)
         x = abs(x)
 
-        # Calibrated for the holonomic robot on 27 March
+        # Calibrated for the holonomic robot on 28 March
         if x > 90:
-            x = 0.8133333333 * x - 29.0
+            x = 0.8533333333 * x - 14.0
         else:
-            x = 0.0028306977 * (x ** 2) + 0.2889794061 * x
+            x = 0.0013556864 * (x ** 2) + 0.5740597895 * x
         x = int(x)
 
         if x > 0:
-            self.protocol.move(x, [(0, -90 * s), (1, -90 * s), (2, -90 * s), (3, -90 * s)], wait=True)
+            self.protocol.move(x, [(0, -80 * s), (1, -80 * s), (2, -80 * s), (3, -80 * s)], wait=True)
 
     def s(self):
         self.protocol.stop()

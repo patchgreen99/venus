@@ -3,6 +3,8 @@ import time
 import numpy as np
 
 CENTIMETERS_TO_PIXELS = (300.0 / 639.0)
+PITCH_ROWS = 480 #pixels
+PITCH_COLS = 640 #pixels
 
 def sign(x):
     return 1 if x >= 0 else -1
@@ -87,10 +89,10 @@ class SimpleStrategy:
     def goal(self):
         angle, motion_length = self.calculate_angle_length_goal()
         turn, d = self.shot_correction(angle)
+        print "Turning %d deg" % turn
         self.commands.c(turn)
         self.commands.ee(d)
         self.commands.g()
-        #exit(0)
 
     def pass_ball(self):
         friend_pos = np.array([self.world.friend.position[0], self.world.friend.position[1]])
@@ -147,17 +149,39 @@ class SimpleStrategy:
             #print("Ball is " + str(length))
 
     def shot_correction(self, angle):
-        if -90 <= angle <= 0:
-            turn = (90+angle)
-            d = -1
-        elif angle < -90:
-            turn = -(-angle - 90)
-            d = -1
-        elif 0 < angle <= 90:
-            turn = -(90-angle)
-            d = 1
-        elif angle > 90:
-            turn = (angle-90)
-            d = 1
+        if self.world.room_num == 0 and self.world.we_have_computer_goal or self.world.room_num == 1 and not self.world.we_have_computer_goal:
+            if self.world.venus.position[1] < PITCH_ROWS/2.0: # TOP
+                correction = 90
+                if -correction <= angle <= 0:
+                    print "CASE A"
+                    turn = -(correction-angle)
+                elif angle < -correction:
+                    print "CASE B"
+                    turn = (180+angle)+correction
+                elif 0 < angle <= correction:
+                    print "CASE C"
+                    turn = -(correction-angle)
+                elif angle > correction:
+                    print "CASE D"
+                    turn = (180-angle)
+                d = 1
+            else:
+                correction = 90
+                if -correction <= angle <= 0:
+                    print "CASE A"
+                    turn = correction-angle
+                elif angle < -correction:
+                    print "CASE B"
+                    turn = (correction+angle)
+                elif 0 < angle <= correction:
+                    print "CASE C"
+                    turn = (correction+angle)
+                elif angle > correction:
+                    print "CASE D"
+                    turn = -(correction+(180-angle))
+                d = -1
+
+        else:
+            print "not done yet"
 
         return turn, d
