@@ -75,6 +75,11 @@ class StrategyTools:
             return "ATTACK_PASS"
         #print('yolo')
         print "No nice shot"
+        if(self.isSafe3((x1,y1) , (0,y1) , robotposlist)):
+            self.simple.kick_to_point(0,y1)
+        else:
+            self.simple.kick_to_point(300,y1)
+
         self.commands.goal()
         #self.commands.x(500)
         #time.sleep(1)
