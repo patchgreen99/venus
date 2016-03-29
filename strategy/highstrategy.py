@@ -607,7 +607,7 @@ class StrategyTools:
             # if(last_state != state):
 
             if last_state == "ENEMY1_BALL_TAKE_GOAL" or last_state == "ENEMY2_BALL_TAKE_GOAL" or last_state == "ENEMY_BALL_TAKE_PASS":
-                while self.world.ball_velocity > 2.5:
+                while math.sqrt(self.world.ball_velocity[0]**2 + self.world.ball_velocity[1]**2) > 2.5:
                     state = "BLOCK_BALL"
                     self.game.mid(state, False)
             else:
