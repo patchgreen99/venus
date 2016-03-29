@@ -75,7 +75,7 @@ class StrategyTools:
             return "ATTACK_PASS"
         #print('yolo')
         print "No nice shot"
-        #self.commands.c(20)
+        self.commands.goal()
         #self.commands.x(500)
         #time.sleep(1)
         #self.commands.g()
@@ -120,9 +120,9 @@ class StrategyTools:
             distance1 = self.euclideandist(pt1, rb)
             distance2 = self.euclideandist(pt2, rb)
             distance3 = self.euclideandist(pt1, pt2)
+            distance4 = self.euclideandist(pt1,pt2)
 
-            if (abs((distance1 + distance2) - distance3) < 20):
-                # Object is on the line.
+            if (abs((distance1 + distance2) - distance3) < 20) and distance4 < 5 :
                 return False
         return True
 
