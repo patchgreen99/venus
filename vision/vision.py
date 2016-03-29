@@ -174,8 +174,8 @@ class Vision:
         status, frame = self.capture.read()
         #cv2.imwrite("test6.jpg", frame)
         #frame = cv2.imread("test.jpg")
-        imgOriginal = self.step(frame)
-        #imgOriginal = frame
+        #imgOriginal = self.step(frame)
+        imgOriginal = frame
         #blur = imgOriginal
         blur = cv2.GaussianBlur(imgOriginal, (3, 3), 2) #todo: what values are best
 #########################################################################################################################################
@@ -353,22 +353,22 @@ class Vision:
                         position = robots_pos[positionIndex]
                         # todo Danger hard coded
                         if positionIndex == 0:
-                            if math.sqrt((position[0]-self.world.ball[0])**2 + (position[1]-self.world.ball[1])**2) < 60: # todo: this is different!
+                            if math.sqrt((position[0]-self.world.ball[0])**2 + (position[1]-self.world.ball[1])**2) < 40: # todo: this is different!
                                 self.world.venus.hasBallInRange[0] = 1
                             else:
                                 self.world.venus.hasBallInRange[0] = 0
                         if positionIndex == 1:
-                            if math.sqrt((position[0]-self.world.ball[0])**2 + (position[1]-self.world.ball[1])**2) < 60:
+                            if math.sqrt((position[0]-self.world.ball[0])**2 + (position[1]-self.world.ball[1])**2) < 40:
                                 self.world.friend.hasBallInRange[0] = 1
                             else:
                                 self.world.friend.hasBallInRange[0] = 0
                         if positionIndex == 2:
-                            if math.sqrt((position[0]-self.world.ball[0])**2 + (position[1]-self.world.ball[1])**2) < 60:
+                            if math.sqrt((position[0]-self.world.ball[0])**2 + (position[1]-self.world.ball[1])**2) < 40:
                                 self.world.enemy1.hasBallInRange[0] = 1
                             else:
                                 self.world.enemy1.hasBallInRange[0] = 0
                         if positionIndex == 3:
-                            if math.sqrt((position[0]-self.world.ball[0])**2 + (position[1]-self.world.ball[1])**2) < 60:
+                            if math.sqrt((position[0]-self.world.ball[0])**2 + (position[1]-self.world.ball[1])**2) < 40:
                                 self.world.enemy2.hasBallInRange[0] = 1
                             else:
                                 self.world.enemy2.hasBallInRange[0] = 0

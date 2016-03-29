@@ -412,8 +412,10 @@ class StrategyTools:
         y4 = self.world.enemy2.position[1]
         x5 = self.world.their_goalX
         y5 = self.world.their_goalmeanY
-
-        m0 = (y1-y2)/ (x1-x2)
+        if(x1-x2!= 0):
+            m0 = (y1-y2)/ (x1-x2)
+        else:
+            m0 = 1000
         c0 = y1 - m0*x1
 
         m1 = -m0
@@ -606,12 +608,7 @@ class StrategyTools:
                 state = self.openball()
             # if(last_state != state):
 
-            if last_state == "ENEMY1_BALL_TAKE_GOAL" or last_state == "ENEMY2_BALL_TAKE_GOAL" or last_state == "ENEMY_BALL_TAKE_PASS":
-                while math.sqrt(self.world.ball_velocity[0]**2 + self.world.ball_velocity[1]**2) > 2.5:
-                    state = "BLOCK_BALL"
-                    self.game.mid(state, False)
-            else:
-                self.game.mid(state, False)
+            self.game.mid(state, False)
             last_state = state
             print(state)
             #last_state = state
