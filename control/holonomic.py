@@ -11,10 +11,10 @@ from strategy.world import World
 from strategy.game import Game
 from vision.vision import Vision
 
-FRONT_RIGHT = 0
-BACK_RIGHT = 1
-BACK_LEFT = 2
-FRONT_LEFT = 3
+FRONT_RIGHT = 3
+BACK_RIGHT = 0
+BACK_LEFT = 1
+FRONT_LEFT = 2
 MOTOR_GRAB = 4
 MOTOR_KICK = 5
 
@@ -43,7 +43,7 @@ class Commands:
     def hs(self):
         self.highstrategy.main()
 
-    def init(self, room_num=1, team_color='yellow', our_color='pink', computer_goal=True):
+    def init(self, room_num=0, team_color='blue', our_color='green', computer_goal=True):
         print("init: Room: %s, team color: %s, our single spot color: %s, computer goal: %s" %
               (room_num, team_color, our_color, computer_goal))
         self.world = World(int(room_num), team_color, our_color, computer_goal)
@@ -92,6 +92,9 @@ class Commands:
 
         movement = movement.round()
         print movement
+        s = np.sign(movement)
+        movement = s*((40*abs(movement))/100 + 60)
+        print movement
         self.protocol.move_forever([(0, int(movement[0])), (1, int(movement[1])), (2, int(movement[2])), (3, int(movement[3])), ])
         #self.protocol.move(20, [(0, movement[0]), (1, movement[1]), (2, movement[2]), (3, movement[3]), ], wait=True)
 
@@ -116,7 +119,6 @@ class Commands:
 
     def ballwithfriend(self):
         self.highstrategy.ballwithfriend()
-
 
     def f(self, x):
         """Move forward, negative x means backward"""
@@ -218,4 +220,18 @@ class Commands:
             print "2: enemy1"
         if self.world.enemy2.hasBallInRange[0]:
             print "3: enemy2"
+
+    def rr(self):
+        self.protocol.move_forever([(0, 70), (1, -100), (2, -70), (3, 100), ])
+
+
+
+    def stopped(self):
+        self.protocol.block_until_stop()
+        print("Now it has stopped")
+
+    def v(self):
+        while True:
+            print self.world.ball_velocity[0]
+
 

@@ -74,9 +74,9 @@ class Game:
 
             ball_field = P.radial(self.world.ball, 1, -100)# -5
 
-            friend_field = P.solid_field(self.world.friend.position, 1, 15, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy1_field = P.solid_field(self.world.enemy1.position, 1, 15, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy2_field = P.solid_field(self.world.enemy2.position, 1, 15, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            friend_field = P.solid_field(self.world.friend.position, 1, 10, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy1_field = P.solid_field(self.world.enemy1.position, 1, 10, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy2_field = P.solid_field(self.world.enemy2.position, 1, 10, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
 
             advance = P.step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
             catch_up = P.step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
@@ -96,7 +96,7 @@ class Game:
             # MOTION
             #######################################
             if sim is False:
-                if potential.get_potential() < -0.75:
+                if potential.get_potential() < -0.7:
                     print("HAS BALL IN RANGE")
                     self.commands.s()
                     time.sleep(.5)
@@ -311,14 +311,19 @@ class Game:
             #####################################
             ball_field = P.radial(self.world.ball, 1, 0)
 
-            friend_field = P.solid_field(self.world.friend.position, 1, 20, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy1_field = P.solid_field(self.world.enemy1.position, 1, 20, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy2_field = P.solid_field(self.world.enemy2.position, 1, 20, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            friend_field = P.solid_field(self.world.friend.position, 1, 30, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy1_field = P.solid_field(self.world.enemy1.position, 1, 30, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy2_field = P.solid_field(self.world.enemy2.position, 1, 30, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
 
             advance = P.step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
             catch_up = P.step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
 
-            block_goal_enemy1 = P.finite_axial_inside(self.world.enemy1.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, -2)
+            block_goal_enemy1 = P.finite_axial_inside(self.world.enemy1.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, -5)
+
+            if math.sqrt(self.world.ball_velocity[0]**2 + self.world.ball_velocity[1]**2) > 5:
+                block_ball = P.infinite_axial_outside((self.world.ball[0], self.world.ball[0]), (self.world.ball[0] + self.world.ball_velocity[0], self.world.ball[0] + self.world.ball_velocity[0]), 1000, 1, -20)
+            else:
+                block_ball = P.infinite_axial_outside((self.world.ball[0], self.world.ball[0]), (self.world.ball[0] + self.world.ball_velocity[0], self.world.ball[0] + self.world.ball_velocity[0]), 1000, 1, 0)
 
             # BUILD FIELD AND NEXT POSITION AND DIRECTIONS
             ####################################
@@ -326,7 +331,7 @@ class Game:
             self.current_point = (self.world.venus.position[0], self.world.venus.position[1])
             self.current_direction = (self.world.venus.orientation[0], self.world.venus.orientation[1])
 
-            potentials = [ball_field, friend_field, enemy1_field, enemy2_field, block_goal_enemy1, advance, catch_up]
+            potentials = [ball_field, friend_field, enemy1_field, enemy2_field, block_goal_enemy1, advance, catch_up, block_ball]
             potential = Potential(self.current_point, self.current_direction, self.world, potentials)
 
             # MOTION
@@ -353,14 +358,19 @@ class Game:
             #####################################
             ball_field = P.radial(self.world.ball, 1, 0)
 
-            friend_field = P.solid_field(self.world.friend.position, 1, 20, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy1_field = P.solid_field(self.world.enemy1.position, 1, 20, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy2_field = P.solid_field(self.world.enemy2.position, 1, 20, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            friend_field = P.solid_field(self.world.friend.position, 1, 30, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy1_field = P.solid_field(self.world.enemy1.position, 1, 30, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy2_field = P.solid_field(self.world.enemy2.position, 1, 30, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
 
             advance = P.step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
             catch_up = P.step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
 
-            block_goal_enemy2 = P.finite_axial_inside(self.world.enemy2.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, -2)
+            block_goal_enemy2 = P.finite_axial_inside(self.world.enemy2.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, -5)
+
+            if math.sqrt(self.world.ball_velocity[0]**2 + self.world.ball_velocity[1]**2) > 5:
+                block_ball = P.infinite_axial_outside((self.world.ball[0], self.world.ball[0]), (self.world.ball[0] + self.world.ball_velocity[0], self.world.ball[0] + self.world.ball_velocity[0]), 1000, 1, -20)
+            else:
+                block_ball = P.infinite_axial_outside((self.world.ball[0], self.world.ball[0]), (self.world.ball[0] + self.world.ball_velocity[0], self.world.ball[0] + self.world.ball_velocity[0]), 1000, 1, 0)
 
             # BUILD FIELD AND NEXT POSITION AND DIRECTIONS
             ####################################
@@ -368,7 +378,7 @@ class Game:
             self.current_point = (self.world.venus.position[0], self.world.venus.position[1])
             self.current_direction = (self.world.venus.orientation[0], self.world.venus.orientation[1])
 
-            potentials = [ball_field, friend_field, enemy1_field, enemy2_field, block_goal_enemy2,  advance, catch_up]
+            potentials = [ball_field, friend_field, enemy1_field, enemy2_field, block_goal_enemy2,  advance, catch_up, block_ball]
             potential = Potential(self.current_point, self.current_direction, self.world, potentials)
 
             # MOTION
@@ -396,14 +406,19 @@ class Game:
             #####################################
             ball_field = P.radial(self.world.ball, 1, 0)
 
-            friend_field = P.solid_field(self.world.friend.position, 1, 15, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy1_field = P.solid_field(self.world.enemy1.position, 1, 15, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy2_field = P.solid_field(self.world.enemy2.position, 1, 15, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            friend_field = P.solid_field(self.world.friend.position, 1, 30, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy1_field = P.solid_field(self.world.enemy1.position, 1, 30, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy2_field = P.solid_field(self.world.enemy2.position, 1, 30, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
 
             advance = P.step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
             catch_up = P.step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
 
-            block_pass = P.finite_axial_inside(self.world.enemy1.position, self.world.enemy2.position, 1, -2)
+            block_pass = P.finite_axial_inside(self.world.enemy1.position, self.world.enemy2.position, 1, -5)
+
+            if math.sqrt(self.world.ball_velocity[0]**2 + self.world.ball_velocity[1]**2) > 5:
+                block_ball = P.infinite_axial_outside((self.world.ball[0], self.world.ball[0]), (self.world.ball[0] + self.world.ball_velocity[0], self.world.ball[0] + self.world.ball_velocity[0]), 1000, 1, -20)
+            else:
+                block_ball = P.infinite_axial_outside((self.world.ball[0], self.world.ball[0]), (self.world.ball[0] + self.world.ball_velocity[0], self.world.ball[0] + self.world.ball_velocity[0]), 1000, 1, 0)
 
             # BUILD FIELD AND NEXT POSITION AND DIRECTIONS
             ####################################
@@ -411,7 +426,7 @@ class Game:
             self.current_point = (self.world.venus.position[0], self.world.venus.position[1])
             self.current_direction = (self.world.venus.orientation[0], self.world.venus.orientation[1])
 
-            potentials = [ball_field, friend_field, enemy1_field, enemy2_field, block_pass, advance, catch_up]
+            potentials = [ball_field, friend_field, enemy1_field, enemy2_field, block_pass, advance, catch_up, block_ball]
             potential = Potential(self.current_point, self.current_direction, self.world, potentials)
 
             # MOTION

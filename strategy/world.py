@@ -36,7 +36,7 @@ class World:
 
         self.ball = Array('i', [NO_VALUE, NO_VALUE]) # in pixels
         self.ball_velocity = Array('d', [NO_VALUE, NO_VALUE]) # pixels per frame
-        self.ball_moving = Array('i', [NO_VALUE])
+        self.ball_moving = Array('i', [0])
         self.venus = Robot()
         self.friend = Robot()
         self.enemy1 = Robot()

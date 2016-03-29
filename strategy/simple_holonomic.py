@@ -106,45 +106,33 @@ class SimpleStrategy:
 
     def catch_ball(self):
         print("Waiting for the ball to move")
-
-
-        angle, length = self.calculate_angle_length_ball()
+        angle, length = self.calculate_angle_length(self.world.friend.position)
         print("Turning " + str(angle) + " deg, releasing grabber")
         self.commands.c(angle)
 
         self.commands.o()
         # speed in cm per frame
-
         #t = time.time()
 
-        angle, length = self.calculate_angle_length_ball()
-        ball_moved = False
-        vel = math.sqrt(self.world.ball_velocity[0]**2 + self.world.ball_velocity[1]**2)
-        while length > 24 and (not ball_moved or vel > 5):
+        angle, length = self.calculate_angle_length(self.world.friend.position)
+        vel = math.sqrt(self.world.ball_velocity[0]**2 + self.world.ball_velocity[1]**2)/6.0
 
-            print "Velocity is", vel
-            if vel > 10:
-                print "Ball moved above threshold"
-                ball_moved = True
+        already_fast = False
 
+        print "Velocity %d " % vel
+        while length > 24:
             angle, length = self.calculate_angle_length_ball()
-            print("Ball is " + str(length))
+            print("Ball is " + str(vel))
+            vel = math.sqrt(self.world.ball_velocity[0]**2 + self.world.ball_velocity[1]**2)/6.0
+            if vel > 3.5:
+                already_fast = True
 
-            vel = math.sqrt(self.world.ball_velocity[0]**2 + self.world.ball_velocity[1]**2)
+            if vel < 3.5 and already_fast:
+                break
 
         print("The ball is " + str(length) + " m away, " + str(angle) + " deg")
 
         self.commands.g()
-        #time.sleep(1)
-        #self.commands.g(150)
-
-        #angle, length = self.calculate_angle_length_ball()
-        #print("The ball is " + str(length) + " m away")
-        #while length > 18:
-            #self.grab_ball()
-            #time.sleep(1)
-            #angle, length = self.calculate_angle_length_ball()
-            #print("Ball is " + str(length))
 
     def shot_correction(self, angle):
         if self.world.room_num == 0 and self.world.we_have_computer_goal or self.world.room_num == 1 and not self.world.we_have_computer_goal:
@@ -158,7 +146,7 @@ class SimpleStrategy:
                 d = -1
             else:
                 print angle
-                correction = 65
+                correction = 80
                 if angle < 0:
                     turn = 180 + angle + correction
                 else:
@@ -168,7 +156,7 @@ class SimpleStrategy:
         else:
             if self.world.venus.position[1] < PITCH_ROWS/2.0: # TOP#
                 print angle
-                correction = 65
+                correction = 80
                 if angle < 0:
                     turn = 180 + angle + correction
                 else:

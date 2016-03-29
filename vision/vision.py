@@ -286,15 +286,15 @@ class Vision:
             # Draw balls trajectory
             delta_x = self.trajectory_list[len(self.trajectory_list) - 1][0] - self.trajectory_list[0][0]
             if abs(delta_x) > 10:
-                self.world.ball_moving[0] = True
+                self.world.ball_moving[0] = 1
                 future_x = self.trajectory_list[len(self.trajectory_list) - 1][0] + delta_x
                 m = (self.trajectory_list[len(self.trajectory_list) - 1][1] - self.trajectory_list[0][1]) / float(delta_x)
                 future_y = (future_x - self.trajectory_list[0][0]) * m + self.trajectory_list[0][1]
-                self.world.ball_velocity[0] = (future_x - self.world.ball[0])/6.0
-                self.world.ball_velocity[1] = (future_y - self.world.ball[1])/6.0
+                self.world.ball_velocity[0] = (future_x - self.world.ball[0])
+                self.world.ball_velocity[1] = (future_y - self.world.ball[1])
                 cv2.line(imgOriginal, (int(self.trajectory_list[len(self.trajectory_list) - 1][0]), int(self.trajectory_list[len(self.trajectory_list) - 1][1])), (int(future_x), int(future_y)), COLORS['red'], 1)
             else:
-                self.world.ball_moving[0] = False
+                self.world.ball_moving[0] = 0
 
             # Draw robots
             for robot_id, robot in enumerate([self.world.venus, self.world.friend, self.world.enemy1, self.world.enemy2]):
