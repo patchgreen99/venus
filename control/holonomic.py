@@ -43,7 +43,7 @@ class Commands:
     def hs(self):
         self.highstrategy.main()
 
-    def init(self, room_num=1, team_color='blue', our_color='green', computer_goal=False):
+    def init(self, room_num=1, team_color='blue', our_color='green', computer_goal=True):
         print("init: Room: %s, team color: %s, our single spot color: %s, computer goal: %s" %
               (room_num, team_color, our_color, computer_goal))
         self.world = World(int(room_num), team_color, our_color, computer_goal)
@@ -139,25 +139,9 @@ class Commands:
 
         # Calibrated for the holonomic robot on 28 March
         if x > 90:
-            x = 0.8133333333 * x - 29.0
+            x = 0.8833333333 * x - 34.5
         else:
-            x = 0.0028306977 * (x ** 2) + 0.2889794061 * x
-        x = int(x)
-
-        if x > 0:
-            self.protocol.move(x, [(0, -80 * s), (1, -80 * s), (2, -80 * s), (3, -80 * s)], wait=True)
-
-    def c_for_spinkick(self, x):
-        """Rotate clockwise, negative x means counter-clockwise"""
-        x = int(x)
-        s = sign(x)
-        x = abs(x)
-
-        # Calibrated for the holonomic robot on 28 March
-        if x > 90:
-            x = 0.8533333333 * x - 14.0
-        else:
-            x = 0.0013556864 * (x ** 2) + 0.5740597895 * x
+            x = 0.001561131 * (x ** 2) + 0.3969892473 * x
         x = int(x)
 
         if x > 0:
