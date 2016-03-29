@@ -396,7 +396,7 @@ class StrategyTools:
         d1 = self.euclideandist((x1,y1),(x,y))
         d2 = self.euclideandist((x2,y2),(x,y))
 
-        if d1*(0.7) < d2 or self.world.friend.out[0] == 1:         #TODO: or teamate out of pitch -- done, testing needed
+        if d1*(0.5) < d2 or self.world.friend.out[0] == 1:         #TODO: or teamate out of pitch -- done, testing needed
             return True
         else:
             return False
@@ -589,17 +589,17 @@ class StrategyTools:
             #print(enemy2.hasBallInRange[0])
             if self.commands.query_ball():
                 state = self.attackwithball()
-            elif friend.hasBallInRange[0] == 0 and enemy1.hasBallInRange[0] == 0 and enemy2.hasBallInRange[0] == 0:
-                state = self.openball()
-            elif friend.hasBallInRange[0] == 1:
-                # friend has the ball
-                state = self.ballwithfriend()
             elif enemy1.hasBallInRange[0] == 1:
                 # enemy1 has the ball
                 state = self.ballwithenemy(1)
             elif enemy2.hasBallInRange[0] == 1:
                 # enemy2 has the ball
                 state = self.ballwithenemy(2)
+            elif friend.hasBallInRange[0] == 0 and enemy1.hasBallInRange[0] == 0 and enemy2.hasBallInRange[0] == 0:
+                state = self.openball()
+            elif friend.hasBallInRange[0] == 1:
+                # friend has the ball
+                state = self.ballwithfriend()
             elif self.ballindefensearea():
                 # enemy2 has the ball
                 state = self.ballwithenemy(1)
