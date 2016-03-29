@@ -175,6 +175,7 @@ class Vision:
         #cv2.imwrite("test6.jpg", frame)
         #frame = cv2.imread("test.jpg")
         imgOriginal = self.step(frame)
+        #imgOriginal = frame
         #blur = imgOriginal
         blur = cv2.GaussianBlur(imgOriginal, (3, 3), 2) #todo: what values are best
 #########################################################################################################################################
