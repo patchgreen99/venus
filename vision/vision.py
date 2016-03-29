@@ -286,7 +286,7 @@ class Vision:
 
             # Draw balls trajectory
             delta_x = self.trajectory_list[len(self.trajectory_list) - 1][0] - self.trajectory_list[0][0]
-            if abs(delta_x) > 3:
+            if abs(delta_x) > 50:
                 self.world.ball_moving[0] = 1
                 future_x = self.trajectory_list[len(self.trajectory_list) - 1][0] + delta_x
                 m = (self.trajectory_list[len(self.trajectory_list) - 1][1] - self.trajectory_list[0][1]) / float(delta_x)

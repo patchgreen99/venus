@@ -43,7 +43,7 @@ class Commands:
     def hs(self):
         self.highstrategy.main()
 
-    def init(self, room_num=1, team_color='yellow', our_color='green', computer_goal=False):
+    def init(self, room_num=1, team_color='blue', our_color='green', computer_goal=True):
         print("init: Room: %s, team color: %s, our single spot color: %s, computer goal: %s" %
               (room_num, team_color, our_color, computer_goal))
         self.world = World(int(room_num), team_color, our_color, computer_goal)
@@ -139,6 +139,22 @@ class Commands:
 
         # Calibrated for the holonomic robot on 28 March
         if x > 90:
+            x = 0.8133333333 * x - 29.0
+        else:
+            x = 0.0028306977 * (x ** 2) + 0.2889794061 * x
+        x = int(x)
+
+        if x > 0:
+            self.protocol.move(x, [(0, -80 * s), (1, -80 * s), (2, -80 * s), (3, -80 * s)], wait=True)
+
+    def c_for_spinkick(self, x):
+        """Rotate clockwise, negative x means counter-clockwise"""
+        x = int(x)
+        s = sign(x)
+        x = abs(x)
+
+        # Calibrated for the holonomic robot on 28 March
+        if x > 90:
             x = 0.8533333333 * x - 14.0
         else:
             x = 0.0013556864 * (x ** 2) + 0.5740597895 * x
@@ -224,14 +240,30 @@ class Commands:
     def rr(self):
         self.protocol.move_forever([(0, 70), (1, -100), (2, -70), (3, 100), ])
 
-
-
     def stopped(self):
         self.protocol.block_until_stop()
         print("Now it has stopped")
 
     def v(self):
         while True:
-            print self.world.ball_velocity[0]
+            #print "---"
+            #print self.world.ball_velocity[0], self.world.ball_velocity[1]
+            print math.sqrt(self.world.ball_velocity[0]**2 + self.world.ball_velocity[1]**2)/6.0
 
+    def j(self):
+        angle, motion_length = self.strategy.calculate_angle_length_ball()
+        print angle, motion_length
+        self.c(angle)
 
+    def b(self):
+        last = self.world.ball_moving[0]
+        i = 0
+        while True:
+            this = self.world.ball_moving[0]
+            if last == 0 and this == 1:
+                print "\a%d Started moving" % i
+                i += 1
+            elif last == 1 and this == 0:
+                print "\a%d Stopped moving" % i
+                i += 1
+            last = this

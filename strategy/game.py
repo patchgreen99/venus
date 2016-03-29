@@ -111,7 +111,7 @@ class Game:
                     angle, motion_length = self.calculate_angle_length_ball()
                     self.commands.f(motion_length-6) # todo hack
                     self.commands.g()
-                    time.sleep(.6)
+                    time.sleep(1)
                     # todo need to implement considering objects
                     if self.commands.query_ball() or self.commands.query_ball():
                         print("It thinks it has the ball")
