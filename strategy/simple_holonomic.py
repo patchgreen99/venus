@@ -138,9 +138,6 @@ class SimpleStrategy:
 
     def shot_correction(self, angle):
 
-        one_correction = 43
-        two_correction = 60
-
         if self.world.room_num == 0 and self.world.we_have_computer_goal or self.world.room_num == 1 and not self.world.we_have_computer_goal:
             if PITCH_ROWS/4.0 <= self.world.venus.position[1] < PITCH_ROWS/2.0: # TOP#
                 print "1TOP"
@@ -180,25 +177,41 @@ class SimpleStrategy:
                 d = -1
 
         else:
-            '''
-            if self.world.venus.position[1] < PITCH_ROWS/2.0: # TOP#
-                print "3TOP"
+            if PITCH_ROWS/4.0 <= self.world.venus.position[1] < PITCH_ROWS/2.0: # TOP#
+                print "1TOP"
                 print angle
-                correction = two_correction
+                correction = 65
                 if angle < 0:
                     turn = 180 + angle + correction
                 else:
                     turn = angle + 180 + correction
                 d = 1
-            else:
-                print "3BOTTOM"
+            elif PITCH_ROWS/2.0 <= self.world.venus.position[1] < 3.0*PITCH_ROWS/4.0:
+                print "1BOTTOM"
                 print angle
-                correction = one_correction
+                correction = 60
                 if angle < 0:
                     turn = -(180 - angle + correction)
                 else:
                     turn = -(-angle + 180 + correction)
                 d = -1
-            '''
+            elif self.world.venus.position[1] < PITCH_ROWS/4.0: # TOP#
+                print "2TOP"
+                print angle
+                correction = 70
+                if angle < 0:
+                    turn = -(180 - angle + correction)
+                else:
+                    turn = -(-angle + 180 + correction)
+                d = -1
+            elif 3.0*PITCH_ROWS/4.0 <= self.world.venus.position[1]:
+                print "2BOTTOM"
+                print angle
+                correction = 75
+                if angle < 0:
+                    turn = 180 + angle + correction
+                else:
+                    turn = angle + 180 + correction
+                d = 1
 
         return turn, d
