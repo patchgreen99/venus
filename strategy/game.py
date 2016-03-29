@@ -48,6 +48,8 @@ class Game:
             pass
         elif state == "RECEIVE_PASS":
             pass
+        elif state == "BLOCK_BALL":
+            pass
         elif state == "FREE_BALL_2_GOALSIDE":
             pass
         elif state == "FREE_BALL_1_GOALSIDE":
@@ -320,18 +322,13 @@ class Game:
 
             block_goal_enemy1 = P.finite_axial_inside(self.world.enemy1.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, -5)
 
-            if math.sqrt(self.world.ball_velocity[0]**2 + self.world.ball_velocity[1]**2) > 5:
-                block_ball = P.infinite_axial_outside((self.world.ball[0], self.world.ball[0]), (self.world.ball[0] + self.world.ball_velocity[0], self.world.ball[0] + self.world.ball_velocity[0]), 1000, 1, -20)
-            else:
-                block_ball = P.infinite_axial_outside((self.world.ball[0], self.world.ball[0]), (self.world.ball[0] + self.world.ball_velocity[0], self.world.ball[0] + self.world.ball_velocity[0]), 1000, 1, 0)
-
             # BUILD FIELD AND NEXT POSITION AND DIRECTIONS
             ####################################
             # todo too reliant on vision, must pick what to use for look ahead
             self.current_point = (self.world.venus.position[0], self.world.venus.position[1])
             self.current_direction = (self.world.venus.orientation[0], self.world.venus.orientation[1])
 
-            potentials = [ball_field, friend_field, enemy1_field, enemy2_field, block_goal_enemy1, advance, catch_up, block_ball]
+            potentials = [ball_field, friend_field, enemy1_field, enemy2_field, block_goal_enemy1, advance, catch_up]
             potential = Potential(self.current_point, self.current_direction, self.world, potentials)
 
             # MOTION
@@ -367,18 +364,13 @@ class Game:
 
             block_goal_enemy2 = P.finite_axial_inside(self.world.enemy2.position, (self.world.our_goalX,self.world.our_goalmeanY), 1, -5)
 
-            if math.sqrt(self.world.ball_velocity[0]**2 + self.world.ball_velocity[1]**2) > 5:
-                block_ball = P.infinite_axial_outside((self.world.ball[0], self.world.ball[0]), (self.world.ball[0] + self.world.ball_velocity[0], self.world.ball[0] + self.world.ball_velocity[0]), 1000, 1, -20)
-            else:
-                block_ball = P.infinite_axial_outside((self.world.ball[0], self.world.ball[0]), (self.world.ball[0] + self.world.ball_velocity[0], self.world.ball[0] + self.world.ball_velocity[0]), 1000, 1, 0)
-
             # BUILD FIELD AND NEXT POSITION AND DIRECTIONS
             ####################################
             # todo too reliant on vision, must pick what to use for look ahead
             self.current_point = (self.world.venus.position[0], self.world.venus.position[1])
             self.current_direction = (self.world.venus.orientation[0], self.world.venus.orientation[1])
 
-            potentials = [ball_field, friend_field, enemy1_field, enemy2_field, block_goal_enemy2,  advance, catch_up, block_ball]
+            potentials = [ball_field, friend_field, enemy1_field, enemy2_field, block_goal_enemy2,  advance, catch_up]
             potential = Potential(self.current_point, self.current_direction, self.world, potentials)
 
             # MOTION
@@ -415,10 +407,43 @@ class Game:
 
             block_pass = P.finite_axial_inside(self.world.enemy1.position, self.world.enemy2.position, 1, -5)
 
-            if math.sqrt(self.world.ball_velocity[0]**2 + self.world.ball_velocity[1]**2) > 5:
-                block_ball = P.infinite_axial_outside((self.world.ball[0], self.world.ball[0]), (self.world.ball[0] + self.world.ball_velocity[0], self.world.ball[0] + self.world.ball_velocity[0]), 1000, 1, -20)
+            # BUILD FIELD AND NEXT POSITION AND DIRECTIONS
+            ####################################
+            # todo too reliant on vision, must pick what to use for look ahead
+            self.current_point = (self.world.venus.position[0], self.world.venus.position[1])
+            self.current_direction = (self.world.venus.orientation[0], self.world.venus.orientation[1])
+
+            potentials = [ball_field, friend_field, enemy1_field, enemy2_field, block_pass, advance, catch_up]
+            potential = Potential(self.current_point, self.current_direction, self.world, potentials)
+
+            # MOTION
+            #######################################
+
+            if sim is False:
+                self.current_force = potential.get_force()
+                #print self.current_force
+                bearing = self.calculate_angle(self.current_force)
+                #print bearing
+                self.commands.move(bearing, 0)
+            ########################################
+
+            # TESTING
+            ########################################
             else:
-                block_ball = P.infinite_axial_outside((self.world.ball[0], self.world.ball[0]), (self.world.ball[0] + self.world.ball_velocity[0], self.world.ball[0] + self.world.ball_velocity[0]), 1000, 1, 0)
+                potential.map()
+            ########################################
+
+            ###########################################################################################################################################
+
+        elif state == "BLOCK_BALL":
+            # ON
+            #####################################
+
+            friend_field = P.solid_field(self.world.friend.position, 1, 30, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy1_field = P.solid_field(self.world.enemy1.position, 1, 30, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy2_field = P.solid_field(self.world.enemy2.position, 1, 30, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+
+            block_ball = P.infinite_axial_outside(self.world.ball, (self.world.ball[0] + self.world.ball_velocity[0], self.world.ball[0] + self.world.ball_velocity[0]), 1000,  1, -100)
 
             # BUILD FIELD AND NEXT POSITION AND DIRECTIONS
             ####################################
@@ -426,7 +451,7 @@ class Game:
             self.current_point = (self.world.venus.position[0], self.world.venus.position[1])
             self.current_direction = (self.world.venus.orientation[0], self.world.venus.orientation[1])
 
-            potentials = [ball_field, friend_field, enemy1_field, enemy2_field, block_pass, advance, catch_up, block_ball]
+            potentials = [friend_field, enemy1_field, enemy2_field, block_ball]
             potential = Potential(self.current_point, self.current_direction, self.world, potentials)
 
             # MOTION
@@ -467,27 +492,6 @@ class Game:
             else:
                 print "This should not happen"
 
-    ###########################################################################################################################################################
-    # EXITING STATE
-    ###########################################################################################################################################################
-    def exit(self, state):
-
-        if state == "FREE_BALL_YOURS":
-            pass
-        elif state == "FREE_BALL_2_GOALSIDE":
-            pass
-        elif state == "FREE_BALL_1_GOALSIDE":
-            pass
-        elif state == "FREE_BALL_BOTH_GOALSIDE":
-            pass
-        elif state == "FREE_BALL_NONE_GOALSIDE":
-            pass
-        elif state == "ENEMY1_BALL_TAKE_GOAL":
-            pass
-        elif state == "ENEMY2_BALL_TAKE_GOAL":
-            pass
-        elif state == "ENEMY_BALL_TAKE_PASS":
-            pass
 
     ############################################################################################################################################################
 
