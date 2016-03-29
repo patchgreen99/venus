@@ -605,7 +605,14 @@ class StrategyTools:
                 # open ball!
                 state = self.openball()
             # if(last_state != state):
-            self.game.mid(state, False)
+
+            if last_state == "ENEMY1_BALL_TAKE_GOAL" or last_state == "ENEMY2_BALL_TAKE_GOAL" or last_state == "ENEMY_BALL_TAKE_PASS":
+                while self.world.ball_velocity > 2.5:
+                    state = "BLOCK_BALL"
+                    self.game.mid(state, False)
+            else:
+                self.game.mid(state, False)
+            last_state = state
             print(state)
             #last_state = state
 
