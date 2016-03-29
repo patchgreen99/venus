@@ -126,10 +126,10 @@ class SimpleStrategy:
             angle, length = self.calculate_angle_length_ball()
             print("Ball is " + str(vel))
             vel = math.sqrt(self.world.ball_velocity[0]**2 + self.world.ball_velocity[1]**2)/6.0
-            if vel > 3.5:
+            if self.world.ball_moving[0] == 1:
                 already_fast = True
 
-            if vel < 3.5 and already_fast:
+            if self.world.ball_moving[0] == 0 and already_fast:
                 break
 
         print("The ball is " + str(length) + " m away, " + str(angle) + " deg")

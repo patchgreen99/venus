@@ -286,7 +286,7 @@ class Vision:
 
             # Draw balls trajectory
             delta_x = self.trajectory_list[len(self.trajectory_list) - 1][0] - self.trajectory_list[0][0]
-            if abs(delta_x) > 10:
+            if abs(delta_x) > 3:
                 self.world.ball_moving[0] = 1
                 future_x = self.trajectory_list[len(self.trajectory_list) - 1][0] + delta_x
                 m = (self.trajectory_list[len(self.trajectory_list) - 1][1] - self.trajectory_list[0][1]) / float(delta_x)
@@ -353,22 +353,22 @@ class Vision:
                         position = robots_pos[positionIndex]
                         # todo Danger hard coded
                         if positionIndex == 0:
-                            if math.sqrt((position[0]-self.world.ball[0])**2 + (position[1]-self.world.ball[1])**2) < 40: # todo: this is different!
+                            if math.sqrt((position[0]-self.world.ball[0])**2 + (position[1]-self.world.ball[1])**2) < 60: # todo: this is different!
                                 self.world.venus.hasBallInRange[0] = 1
                             else:
                                 self.world.venus.hasBallInRange[0] = 0
                         if positionIndex == 1:
-                            if math.sqrt((position[0]-self.world.ball[0])**2 + (position[1]-self.world.ball[1])**2) < 40:
+                            if math.sqrt((position[0]-self.world.ball[0])**2 + (position[1]-self.world.ball[1])**2) < 60:
                                 self.world.friend.hasBallInRange[0] = 1
                             else:
                                 self.world.friend.hasBallInRange[0] = 0
                         if positionIndex == 2:
-                            if math.sqrt((position[0]-self.world.ball[0])**2 + (position[1]-self.world.ball[1])**2) < 40:
+                            if math.sqrt((position[0]-self.world.ball[0])**2 + (position[1]-self.world.ball[1])**2) < 60:
                                 self.world.enemy1.hasBallInRange[0] = 1
                             else:
                                 self.world.enemy1.hasBallInRange[0] = 0
                         if positionIndex == 3:
-                            if math.sqrt((position[0]-self.world.ball[0])**2 + (position[1]-self.world.ball[1])**2) < 40:
+                            if math.sqrt((position[0]-self.world.ball[0])**2 + (position[1]-self.world.ball[1])**2) < 60:
                                 self.world.enemy2.hasBallInRange[0] = 1
                             else:
                                 self.world.enemy2.hasBallInRange[0] = 0

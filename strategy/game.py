@@ -99,7 +99,8 @@ class Game:
             #######################################
             if sim is False:
                 angle, motion_length = self.calculate_angle_length_ball()
-                if motion_length < 32:
+                print "moving = " + str(self.world.ball_moving[0])
+                if motion_length < 38 and self.world.ball_moving[0] == 0 and potential.get_potential() < -0.5:
                     print("HAS BALL IN RANGE")
                     self.commands.s()
                     time.sleep(.5)
@@ -108,7 +109,7 @@ class Game:
                     self.commands.c(angle)
 
                     angle, motion_length = self.calculate_angle_length_ball()
-                    self.commands.f(motion_length-8) # todo hack
+                    self.commands.f(motion_length-6) # todo hack
                     self.commands.g()
                     time.sleep(.6)
                     # todo need to implement considering objects
@@ -314,9 +315,9 @@ class Game:
             #####################################
             ball_field = P.radial(self.world.ball, 1, 0)
 
-            friend_field = P.solid_field(self.world.friend.position, 1, 30, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy1_field = P.solid_field(self.world.enemy1.position, 1, 30, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy2_field = P.solid_field(self.world.enemy2.position, 1, 30, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            friend_field = P.solid_field(self.world.friend.position, 1, 45, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy1_field = P.solid_field(self.world.enemy1.position, 1, 45, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy2_field = P.solid_field(self.world.enemy2.position, 1, 45, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
 
             advance = P.step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
             catch_up = P.step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
@@ -349,6 +350,15 @@ class Game:
             elif sim:
                 potential.map()
             ########################################
+            elif (self.world.enemy1.hasBallInRange[0] == 0 and self.world.enemy2.hasBallInRange[0] == 0) or self.world.ball_moving[0] == 1:
+                ball_field = P.radial(self.world.ball, 1, -100)
+                potentials = [ball_field, friend_field, enemy1_field, enemy2_field, block_goal_enemy1, advance, catch_up]
+                potential = Potential(self.current_point, self.current_direction, self.world, potentials)
+                self.current_force = potential.get_force()
+                #print self.current_force
+                bearing = self.calculate_angle(self.current_force)
+                #print bearing
+                self.commands.move(bearing, 0)
             else:
                 self.commands.s()
                 self.commands.o()
@@ -362,9 +372,9 @@ class Game:
             #####################################
             ball_field = P.radial(self.world.ball, 1, 0)
 
-            friend_field = P.solid_field(self.world.friend.position, 1, 30, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy1_field = P.solid_field(self.world.enemy1.position, 1, 30, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy2_field = P.solid_field(self.world.enemy2.position, 1, 30, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            friend_field = P.solid_field(self.world.friend.position, 1, 45, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy1_field = P.solid_field(self.world.enemy1.position, 1, 45, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy2_field = P.solid_field(self.world.enemy2.position, 1, 45, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
 
             advance = P.step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
             catch_up = P.step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
@@ -399,6 +409,15 @@ class Game:
                 potential.map()
 
             ########################################
+            elif (self.world.enemy1.hasBallInRange[0] == 0 and self.world.enemy2.hasBallInRange[0] == 0) or self.world.ball_moving[0] == 1:
+                ball_field = P.radial(self.world.ball, 1, -100)
+                potentials = [ball_field, friend_field, enemy1_field, enemy2_field, block_goal_enemy2,  advance, catch_up]
+                potential = Potential(self.current_point, self.current_direction, self.world, potentials)
+                self.current_force = potential.get_force()
+                #print self.current_force
+                bearing = self.calculate_angle(self.current_force)
+                #print bearing
+                self.commands.move(bearing, 0)
             else:
                 self.commands.s()
                 self.commands.o()
@@ -413,9 +432,9 @@ class Game:
             #####################################
             ball_field = P.radial(self.world.ball, 1, 0)
 
-            friend_field = P.solid_field(self.world.friend.position, 1, 30, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy1_field = P.solid_field(self.world.enemy1.position, 1, 30, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy2_field = P.solid_field(self.world.enemy2.position, 1, 30, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            friend_field = P.solid_field(self.world.friend.position, 1, 45, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy1_field = P.solid_field(self.world.enemy1.position, 1, 45, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy2_field = P.solid_field(self.world.enemy2.position, 1, 45, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
 
             advance = P.step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
             catch_up = P.step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
@@ -448,6 +467,15 @@ class Game:
             elif sim:
                 potential.map()
             ########################################
+            elif (self.world.enemy1.hasBallInRange[0] == 0 and self.world.enemy2.hasBallInRange[0] == 0) or self.world.ball_moving[0] == 1:
+                ball_field = P.radial(self.world.ball, 1, -100)
+                potentials = [ball_field, friend_field, enemy1_field, enemy2_field, block_pass, advance, catch_up]
+                potential = Potential(self.current_point, self.current_direction, self.world, potentials)
+                self.current_force = potential.get_force()
+                #print self.current_force
+                bearing = self.calculate_angle(self.current_force)
+                #print bearing
+                self.commands.move(bearing, 0)
             else:
                 self.commands.s()
                 self.commands.o()
