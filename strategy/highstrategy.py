@@ -575,7 +575,7 @@ class StrategyTools:
         start = True
         last_state = "None"
         while True:
-
+            self.world.undistort[0] = 0
             x1 = self.world.venus.position[0]
             y1 = self.world.venus.position[1]
             x2 = self.world.friend.position[0]

@@ -174,8 +174,10 @@ class Vision:
         status, frame = self.capture.read()
         #cv2.imwrite("test6.jpg", frame)
         #frame = cv2.imread("test.jpg")
-        #imgOriginal = self.step(frame)
-        imgOriginal = frame
+        if self.world.undistort[0] == 1:
+            imgOriginal = self.step(frame)
+        else:
+            imgOriginal = frame
         #blur = imgOriginal
         blur = cv2.GaussianBlur(imgOriginal, (3, 3), 2) #todo: what values are best
 #########################################################################################################################################
@@ -287,7 +289,7 @@ class Vision:
             # Draw balls trajectory
             delta_x = self.trajectory_list[len(self.trajectory_list) - 1][0] - self.trajectory_list[0][0]
             delta_y = self.trajectory_list[len(self.trajectory_list) - 1][1] - self.trajectory_list[0][1]
-            if math.sqrt(delta_x**2 + delta_y**2) > 5:
+            if math.sqrt(delta_x**2 + delta_y**2) > 6:
                 self.world.ball_moving[0] = 1
                 future_x = self.trajectory_list[len(self.trajectory_list) - 1][0] + delta_x
                 if float(delta_x) != 0.0:

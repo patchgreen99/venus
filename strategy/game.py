@@ -74,7 +74,7 @@ class Game:
             # ON
             #####################################
 
-            ball_field = P.radial(self.world.ball, 1, -100)# -5
+            ball_field = P.radial(self.world.ball, 1, -200)# -5
 
             friend_field = P.solid_field(self.world.friend.position, 1, 10, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
             enemy1_field = P.solid_field(self.world.enemy1.position, 1, 10, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
@@ -100,7 +100,8 @@ class Game:
             if sim is False:
                 angle, motion_length = self.calculate_angle_length_ball()
                 print "moving = " + str(self.world.ball_moving[0])
-                if motion_length < 38 and self.world.ball_moving[0] == 0 and potential.get_potential() < -0.5:
+                if motion_length < 38 and potential.get_potential() < -0.5:
+                    self.world.undistort[0] = 1
                     print("HAS BALL IN RANGE")
                     self.commands.s()
                     time.sleep(.5)
@@ -109,7 +110,7 @@ class Game:
                     self.commands.c(angle)
 
                     angle, motion_length = self.calculate_angle_length_ball()
-                    self.commands.f(motion_length-6) # todo hack
+                    self.commands.f(motion_length-10) # todo hack
                     self.commands.g()
                     time.sleep(1)
                     # todo need to implement considering objects
@@ -360,6 +361,7 @@ class Game:
                 #print bearing
                 self.commands.move(bearing, 0)
             else:
+                self.world.undistort[0] = 1
                 self.commands.s()
                 self.commands.o()
                 angle, length = self.calculate_angle_length_ball()
@@ -419,6 +421,7 @@ class Game:
                 #print bearing
                 self.commands.move(bearing, 0)
             else:
+                self.world.undistort[0] = 1
                 self.commands.s()
                 self.commands.o()
                 angle, length = self.calculate_angle_length_ball()
@@ -477,6 +480,7 @@ class Game:
                 #print bearing
                 self.commands.move(bearing, 0)
             else:
+                self.world.undistort[0] = 1
                 self.commands.s()
                 self.commands.o()
                 angle, length = self.calculate_angle_length_ball()
@@ -487,18 +491,21 @@ class Game:
        ##############################################################################################
 
         elif state == "ATTACK_PASS":
+            self.world.undistort[0] = 1
             # pass ball to the friend, when attacking
             self.commands.pass_ball()
 
             ###########################################################################################################################################
 
         elif state == "ATTACK_GOAL":
+            self.world.undistort[0] = 1
             # you're in the good position to score
             self.commands.goal()
 
             ###########################################################################################################################################
 
         elif state == "RECEIVE_PASS":
+            self.world.undistort[0] = 1
             # you should be in the good position to catch the ball
             if not self.commands.query_ball():
                 self.commands.catch_ball()
