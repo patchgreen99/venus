@@ -92,7 +92,7 @@ class SimpleStrategy:
         print "Turning %d deg" % turn
         self.commands.c(turn)
         self.commands.g()
-        time.sleep(.1)
+        time.sleep(.5)
         self.commands.ee(d)
         self.commands.g()
 
@@ -102,7 +102,7 @@ class SimpleStrategy:
         print("Turning " + str(angle) + " deg then kicking " + str(motion_length) + " cm")
         turn, d = self.shot_correction(angle)
         self.commands.c(turn)
-        time.sleep(.1)
+        time.sleep(.5)
         self.commands.ee(d)
         self.commands.g()
         #exit(0)
