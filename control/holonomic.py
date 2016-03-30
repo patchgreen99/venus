@@ -137,17 +137,11 @@ class Commands:
         s = sign(x)
         x = abs(x)
 
-        # Calibrated for the holonomic robot on 30 March
-        if s > 0:
-            if x > 90:
-                x = 0.8 * x - 37.0
-            else:
-                x = 0.0015306535 * (x ** 2) + 0.3025825153 * x
+        # Calibrated for the holonomic robot on 28 March
+        if x > 90:
+            x = 0.8533333333 * x - 14.0
         else:
-            if x > 90:
-                x = 0.823333333 * x - 33.5
-            else:
-                x = 0.001206074 * (x ** 2) + 0.3634378289 * x
+            x = 0.0013556864 * (x ** 2) + 0.5740597895 * x
         x = int(x)
 
         if x > 0:
