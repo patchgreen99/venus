@@ -43,7 +43,7 @@ class Commands:
     def hs(self):
         self.highstrategy.main()
 
-    def init(self, room_num=1, team_color='blue', our_color='green', computer_goal=True):
+    def init(self, room_num=1, team_color='blue', our_color='pink', computer_goal=False):
         print("init: Room: %s, team color: %s, our single spot color: %s, computer goal: %s" %
               (room_num, team_color, our_color, computer_goal))
         self.world = World(int(room_num), team_color, our_color, computer_goal)
@@ -137,11 +137,17 @@ class Commands:
         s = sign(x)
         x = abs(x)
 
-        # Calibrated for the holonomic robot on 28 March
-        if x > 90:
-            x = 0.8833333333 * x - 34.5
+        # Calibrated for the holonomic robot on 30 March
+        if s > 0:
+            if x > 90:
+                x = 0.8 * x - 37.0
+            else:
+                x = 0.0015306535 * (x ** 2) + 0.3025825153 * x
         else:
-            x = 0.001561131 * (x ** 2) + 0.3969892473 * x
+            if x > 90:
+                x = 0.823333333 * x - 33.5
+            else:
+                x = 0.001206074 * (x ** 2) + 0.3634378289 * x
         x = int(x)
 
         if x > 0:
