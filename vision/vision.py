@@ -172,8 +172,8 @@ class Vision:
 
     def frame(self):
         status, frame = self.capture.read()
-        cv2.imwrite("ppt1.jpg", frame)
-        frame = cv2.imread("ppt1.jpg")
+        #cv2.imwrite("ppt1.jpg", frame)
+        #frame = cv2.imread("ppt1.jpg")
         if self.world.undistort[0] == 1:
             imgOriginal = self.step(frame)
         else:
