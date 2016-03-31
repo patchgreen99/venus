@@ -79,7 +79,7 @@ class Vision:
             self.min_color_area = {
                     'red': 100.0,
                     'blue': 5000.0,
-                    'yellow': 6000.0,
+                    'yellow': 8000.0,
                     'pink': 2000.0,
                     'green': 2000.0,
                 }
@@ -112,7 +112,7 @@ class Vision:
             self.min_color_area = {
                     'red': 100.0,
                     'blue': 5000.0,
-                    'yellow': 6000.0,
+                    'yellow': 8000.0,
                     'pink': 2000.0,
                     'green': 2000.0,
                 }

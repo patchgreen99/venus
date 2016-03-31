@@ -599,9 +599,9 @@ class StrategyTools:
             #print(friend.hasBallInRange[0])
             #print(enemy1.hasBallInRange[0])
             #print(enemy2.hasBallInRange[0])
-
-
-            if enemy1.hasBallInRange[0] == 1 and enemy1.out[0] == 0:
+            if self.commands.query_ball() and venus.hasBallInRange[0] == 1:
+                state = self.attackwithball()
+            elif enemy1.hasBallInRange[0] == 1 and enemy1.out[0] == 0:
                 # enemy1 has the ball
                 state = self.ballwithenemy(1)
             elif enemy2.hasBallInRange[0] == 1 and enemy2.out[0] == 0:
@@ -618,8 +618,6 @@ class StrategyTools:
             elif not self.commands.query_ball():
                 # open ball!
                 state = self.openball()
-            else:
-                state = self.attackwithball()
             # if(last_state != state):
 
             self.game.mid(state, False)
