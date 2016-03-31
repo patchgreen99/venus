@@ -468,10 +468,12 @@ void handshake() {
 }
 
 void queryBallSensor() {
+  int threshold = atoi(sc.next());
   Wire.requestFrom(BALL_SENSOR_SLAVE_ADDRESS, 1);
   int value = Wire.read();
-  //Serial.println(value);
-  Serial.print(value > 192 ? RESP_DONE : RESP_NEGATIVE);
+  //Serial.print(value);
+  //Serial.println(threshold);
+  Serial.print(value > threshold ? RESP_DONE : RESP_NEGATIVE);
 }
 
 void unknown() {

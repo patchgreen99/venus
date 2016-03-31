@@ -43,7 +43,7 @@ class Commands:
     def hs(self):
         self.highstrategy.main()
 
-    def init(self, room_num=1, team_color='blue', our_color='pink', computer_goal=False):
+    def init(self, room_num=0, team_color='blue', our_color='green', computer_goal=True):
         print("init: Room: %s, team color: %s, our single spot color: %s, computer goal: %s" %
               (room_num, team_color, our_color, computer_goal))
         self.world = World(int(room_num), team_color, our_color, computer_goal)
@@ -203,7 +203,11 @@ class Commands:
         print self.world
 
     def query_ball(self):
-        a = self.protocol.query_ball()
+        if self.world.room_num == 0:
+            threshold = 180
+        else:
+            threshold = 192
+        a = self.protocol.query_ball(threshold)
         print("We have the ball: %s" % a)
         return a
 
@@ -257,3 +261,7 @@ class Commands:
                 print "\a%d Stopped moving" % i
                 i += 1
             last = this
+
+    def gg(self):
+        while True:
+            self.game.mid("FREE_BALL_YOURS", False)

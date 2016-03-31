@@ -3,7 +3,7 @@ import serial
 
 class RobotProtocol:
     def __init__(self, device):
-        self.ser = serial.Serial(device, 115200, timeout=0.1)
+        self.ser = serial.Serial(device, 115200, timeout=0.2)
         self.seq_no = 0
         self.response = None
         self.write('H', error_check=False)
@@ -44,8 +44,8 @@ class RobotProtocol:
     def transfer(self, byte):
         self.write('T', [ord(byte)])
 
-    def query_ball(self):
-        return self.write('A', error_check=False)
+    def query_ball(self, threshold):
+        return self.write('A', [threshold], error_check=False)
 
     def write(self, command, params=None, error_check=True):
         self.ser.reset_input_buffer()

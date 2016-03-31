@@ -78,8 +78,8 @@ class Vision:
 
             self.min_color_area = {
                     'red': 100.0,
-                    'blue': 1000.0,
-                    'yellow': 1000.0,
+                    'blue': 5000.0,
+                    'yellow': 6000.0,
                     'pink': 2000.0,
                     'green': 2000.0,
                 }
@@ -111,8 +111,8 @@ class Vision:
 
             self.min_color_area = {
                     'red': 100.0,
-                    'blue': 1000.0,
-                    'yellow': 1000.0,
+                    'blue': 5000.0,
+                    'yellow': 6000.0,
                     'pink': 2000.0,
                     'green': 2000.0,
                 }
@@ -178,6 +178,7 @@ class Vision:
             imgOriginal = self.step(frame)
         else:
             imgOriginal = frame
+        # imgOriginal = self.step(frame)
         #blur = imgOriginal
         blur = cv2.GaussianBlur(imgOriginal, (3, 3), 2) #todo: what values are best
 #########################################################################################################################################
@@ -289,7 +290,7 @@ class Vision:
             # Draw balls trajectory
             delta_x = self.trajectory_list[len(self.trajectory_list) - 1][0] - self.trajectory_list[0][0]
             delta_y = self.trajectory_list[len(self.trajectory_list) - 1][1] - self.trajectory_list[0][1]
-            if math.sqrt(delta_x**2 + delta_y**2) > 6:
+            if math.sqrt(delta_x**2 + delta_y**2) > 8:
                 self.world.ball_moving[0] = 1
                 future_x = self.trajectory_list[len(self.trajectory_list) - 1][0] + delta_x
                 if float(delta_x) != 0.0:

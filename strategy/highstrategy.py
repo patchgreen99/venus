@@ -73,12 +73,19 @@ class StrategyTools:
         if self.isSafe3((x1, y1), (x2, y2), robotposlist) and self.isSafe3 ((x1,y1), (x5,y5), [(x2,y2)]) and self.world.friend.out[0] == 0 and self.retarded_robot((x1, y1), (x2, y2)):
             print('p')
             return "ATTACK_PASS"
-        #print('yolo')
+        print('yolo')
         print "No nice shot"
-        if(self.isSafe3((x1,y1) , (0,y1) , robotposlist)):
-            self.simple.kick_to_point(0,y1)
+
+        if self.world.we_have_computer_goal and self.world.room_num == 1 or not self.world.we_have_computer_goal and self.world.room_num == 0:
+            if(self.isSafe3((x1,y1) , (640,0) , robotposlist)):
+                self.simple.kick_to_point(640,0)
+            else:
+                self.simple.kick_to_point(640,480)
         else:
-            self.simple.kick_to_point(300,y1)
+            if(self.isSafe3((x1,y1) , (0,0) , robotposlist)):
+                self.simple.kick_to_point(0,0)
+            else:
+                self.simple.kick_to_point(0,480)
 
         self.commands.goal()
         #self.commands.x(500)
@@ -592,25 +599,27 @@ class StrategyTools:
             #print(friend.hasBallInRange[0])
             #print(enemy1.hasBallInRange[0])
             #print(enemy2.hasBallInRange[0])
-            if self.commands.query_ball():
-                state = self.attackwithball()
-            elif enemy1.hasBallInRange[0] == 1:
+
+
+            if enemy1.hasBallInRange[0] == 1 and enemy1.out[0] == 0:
                 # enemy1 has the ball
                 state = self.ballwithenemy(1)
-            elif enemy2.hasBallInRange[0] == 1:
+            elif enemy2.hasBallInRange[0] == 1 and enemy2.out[0] == 0:
                 # enemy2 has the ball
                 state = self.ballwithenemy(2)
             elif friend.hasBallInRange[0] == 0 and enemy1.hasBallInRange[0] == 0 and enemy2.hasBallInRange[0] == 0:
                 state = self.openball()
-            elif friend.hasBallInRange[0] == 1:
+            elif friend.hasBallInRange[0] == 1 and friend.out[0] == 0:
                 # friend has the ball
                 state = self.ballwithfriend()
             elif self.ballindefensearea():
                 # enemy2 has the ball
                 state = self.ballwithenemy(1)
-            else:
+            elif not self.commands.query_ball():
                 # open ball!
                 state = self.openball()
+            else:
+                state = self.attackwithball()
             # if(last_state != state):
 
             self.game.mid(state, False)
