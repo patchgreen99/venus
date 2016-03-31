@@ -91,10 +91,8 @@ class Commands:
         movement = np.multiply(100.0/factor, movement)
 
         movement = movement.round()
-        print movement
         s = np.sign(movement)
         movement = s*((40*abs(movement))/100 + 60)
-        print movement
         self.protocol.move_forever([(0, int(movement[0])), (1, int(movement[1])), (2, int(movement[2])), (3, int(movement[3])), ])
         #self.protocol.move(20, [(0, movement[0]), (1, movement[1]), (2, movement[2]), (3, movement[3]), ], wait=True)
 
@@ -197,7 +195,7 @@ class Commands:
         x = int(x)
         s = sign(x)
         self.protocol.move(400, [(4, -100)], time=True)
-        self.protocol.move(100, [(0, -100 * s), (1, -100 * s), (2, -100 * s), (3, -100 * s)], wait=True)
+        self.protocol.move(200, [(0, -100 * s), (1, -100 * s), (2, -100 * s), (3, -100 * s)], wait=True)
 
     def w(self):
         print self.world

@@ -25,6 +25,8 @@ class World:
         self.other_color = 'green' if our_color == 'pink' else 'pink'
         self.we_have_computer_goal = we_have_computer_goal
         self.undistort = Array('i', [0])
+        self.sensor = False
+        self.kicked = False
 
         if self.room_num == 1:
             target = open('vision/pitch1.txt', 'r')

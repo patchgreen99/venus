@@ -99,24 +99,32 @@ class Game:
             #######################################
             if sim is False:
                 angle, motion_length = self.calculate_angle_length_ball()
-                print "moving = " + str(self.world.ball_moving[0])
-                if motion_length < 40 and potential.get_potential() < -0.65:
+                #print "moving = " + str(self.world.ball_moving[0])
+                if motion_length < 40 and potential.get_potential() < -0.7:
+                    self.world.sensor = True
                     self.world.undistort[0] = 1
                     print("HAS BALL IN RANGE")
                     self.commands.s()
-                    time.sleep(.5)
+                    #time.sleep(.5)
                     angle, motion_length = self.calculate_angle_length_ball()
                     self.commands.o()
                     self.commands.c(angle)
 
                     angle, motion_length = self.calculate_angle_length_ball()
-                    self.commands.f(motion_length-3) # todo hack
+
+                    if PITCH_COLS/4.0 <= self.world.venus.position[0] <= 3.0*PITCH_COLS/4.0:
+                        #print "FIX A"
+                        fix = 6
+                    else:
+                        #print "FIX B"
+                        fix = 2
+                    self.commands.f(motion_length - fix)  # todo hack
                     self.commands.g()
-                    time.sleep(1)
+                    #time.sleep(1)
                     # todo need to implement considering objects
-                    if self.commands.query_ball() or self.commands.query_ball():
-                        print("It thinks it has the ball")
-                        #exit(0)
+                    #if self.commands.query_ball() or self.commands.query_ball():
+                    #    print("It thinks it has the ball")
+                    #    #exit(0)
                 else:
                     self.current_force = potential.get_force()
                     #print self.current_force
@@ -316,9 +324,9 @@ class Game:
             #####################################
             ball_field = P.radial(self.world.ball, 1, 0)
 
-            friend_field = P.solid_field(self.world.friend.position, 1, 45, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy1_field = P.solid_field(self.world.enemy1.position, 1, 45, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy2_field = P.solid_field(self.world.enemy2.position, 1, 45, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            friend_field = P.solid_field(self.world.friend.position, 1, 60, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy1_field = P.solid_field(self.world.enemy1.position, 1, 60, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy2_field = P.solid_field(self.world.enemy2.position, 1, 60, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
 
             advance = P.step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
             catch_up = P.step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
@@ -374,9 +382,9 @@ class Game:
             #####################################
             ball_field = P.radial(self.world.ball, 1, 0)
 
-            friend_field = P.solid_field(self.world.friend.position, 1, 45, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy1_field = P.solid_field(self.world.enemy1.position, 1, 45, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy2_field = P.solid_field(self.world.enemy2.position, 1, 45, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            friend_field = P.solid_field(self.world.friend.position, 1, 60, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy1_field = P.solid_field(self.world.enemy1.position, 1, 60, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy2_field = P.solid_field(self.world.enemy2.position, 1, 60, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
 
             advance = P.step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
             catch_up = P.step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
@@ -435,9 +443,9 @@ class Game:
             #####################################
             ball_field = P.radial(self.world.ball, 1, 0)
 
-            friend_field = P.solid_field(self.world.friend.position, 1, 45, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy1_field = P.solid_field(self.world.enemy1.position, 1, 45, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
-            enemy2_field = P.solid_field(self.world.enemy2.position, 1, 45, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            friend_field = P.solid_field(self.world.friend.position, 1, 60, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy1_field = P.solid_field(self.world.enemy1.position, 1, 60, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy2_field = P.solid_field(self.world.enemy2.position, 1, 60, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
 
             advance = P.step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
             catch_up = P.step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
@@ -491,6 +499,7 @@ class Game:
        ##############################################################################################
 
         elif state == "ATTACK_PASS":
+            self.world.kicked = True
             self.world.undistort[0] = 1
             # pass ball to the friend, when attacking
             self.commands.pass_ball()
@@ -498,6 +507,7 @@ class Game:
             ###########################################################################################################################################
 
         elif state == "ATTACK_GOAL":
+            self.world.kicked = True
             self.world.undistort[0] = 1
             # you're in the good position to score
             self.commands.goal()
@@ -505,12 +515,10 @@ class Game:
             ###########################################################################################################################################
 
         elif state == "RECEIVE_PASS":
+            self.world.sensor = True
             self.world.undistort[0] = 1
             # you should be in the good position to catch the ball
-            if not self.commands.query_ball():
-                self.commands.catch_ball()
-            else:
-                print "This should not happen"
+            self.commands.catch_ball()
 
 
     ############################################################################################################################################################

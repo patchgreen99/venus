@@ -172,8 +172,8 @@ class Vision:
 
     def frame(self):
         status, frame = self.capture.read()
-        #cv2.imwrite("test6.jpg", frame)
-        #frame = cv2.imread("test.jpg")
+        cv2.imwrite("ppt1.jpg", frame)
+        frame = cv2.imread("ppt1.jpg")
         if self.world.undistort[0] == 1:
             imgOriginal = self.step(frame)
         else:
@@ -191,8 +191,8 @@ class Vision:
             for color in colors:
                 if color in data.keys():
                     if color == 'red':
-                        hmax = data['maroon']['min']
-                        hmin = data['maroon']['max']
+                        hmin = data['maroon']['min']
+                        hmax = data['maroon']['max']
                         lmin = data['red']['min']
                         lmax = data['red']['max']
                         self.color_ranges[color] = [((lmin[0], lmin[1], lmin[2]), (lmax[0], lmax[1], lmax[2])),
@@ -346,7 +346,7 @@ class Vision:
             for i in range(0, len(circles['red'])-1):
                 its_robot = False
                 for position in robots_pos:
-                    if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 25: #todo Danger hard coded
+                    if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 22: #todo Danger hard coded
                         its_robot = True
                 if not its_robot:
                     found = True
