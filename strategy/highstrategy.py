@@ -485,12 +485,12 @@ class StrategyTools:
 
         robotposlist = [(x3,y3),
                         (x4,y4)]
-
-        if self.isSafe3((x2,y2),(x1,y1),robotposlist) and self.world.friend.hasBallInRange[0] == 1:
-            return "RECEIVE_PASS"
+        #todo taken pass out
+        #if self.isSafe3((x2,y2),(x1,y1),robotposlist) and self.world.friend.hasBallInRange[0] == 1:
+         #   return "RECEIVE_PASS"
             # print('receive pass')
-        else:
-            return self.bestpositioncase()
+        #else:
+        return self.bestpositioncase()
 
     def get_pass_goal_position(self):
         pass
@@ -599,14 +599,15 @@ class StrategyTools:
             #print(friend.hasBallInRange[0])
             #print(enemy1.hasBallInRange[0])
             #print(enemy2.hasBallInRange[0])
-            if self.commands.query_ball() and venus.hasBallInRange[0] == 1:
-                state = self.attackwithball()
-            elif enemy1.hasBallInRange[0] == 1 and enemy1.out[0] == 0:
+
+            if enemy1.hasBallInRange[0] == 1 and enemy1.out[0] == 0:
                 # enemy1 has the ball
                 state = self.ballwithenemy(1)
             elif enemy2.hasBallInRange[0] == 1 and enemy2.out[0] == 0:
                 # enemy2 has the ball
                 state = self.ballwithenemy(2)
+            elif self.commands.query_ball():
+                state = self.attackwithball()
             elif friend.hasBallInRange[0] == 0 and enemy1.hasBallInRange[0] == 0 and enemy2.hasBallInRange[0] == 0:
                 state = self.openball()
             elif friend.hasBallInRange[0] == 1 and friend.out[0] == 0:

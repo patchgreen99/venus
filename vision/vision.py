@@ -77,8 +77,8 @@ class Vision:
             target.close()
 
             self.min_color_area = {
-                    'red': 100.0,
-                    'blue': 5000.0,
+                    'red': 2000.0,
+                    'blue': 1200000.0,
                     'yellow': 8000.0,
                     'pink': 2000.0,
                     'green': 2000.0,
@@ -110,8 +110,8 @@ class Vision:
             target.close()
 
             self.min_color_area = {
-                    'red': 100.0,
-                    'blue': 5000.0,
+                    'red': 2000.0,
+                    'blue': 1200000.0,
                     'yellow': 8000.0,
                     'pink': 2000.0,
                     'green': 2000.0,
