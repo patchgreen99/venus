@@ -108,6 +108,7 @@ class SimpleStrategy:
         #exit(0)
 
     def catch_ball(self):
+        time.sleep(.5)
         print("Waiting for the ball to move")
         angle, length = self.calculate_angle_length(self.world.friend.position)
         print("Turning " + str(angle) + " deg, releasing grabber")
@@ -118,20 +119,23 @@ class SimpleStrategy:
         #t = time.time()
 
         angle, length = self.calculate_angle_length(self.world.friend.position)
-        vel = math.sqrt(self.world.ball_velocity[0]**2 + self.world.ball_velocity[1]**2)/6.0
+        #vel = math.sqrt(self.world.ball_velocity[0]**2 + self.world.ball_velocity[1]**2)/6.0
 
         already_fast = False
 
-        print "Velocity %d " % vel
-        while length > 24:
-            angle, length = self.calculate_angle_length_ball()
-            print("Ball is " + str(vel))
-            vel = math.sqrt(self.world.ball_velocity[0]**2 + self.world.ball_velocity[1]**2)/6.0
+        #print "Velocity %d " % vel
+        while length > 32:
             if self.world.ball_moving[0] == 1:
                 already_fast = True
 
             if self.world.ball_moving[0] == 0 and already_fast:
                 break
+
+            angle, length = self.calculate_angle_length_ball()
+            self.commands.c(angle)
+            self.commands.o()
+            #print("Ball is " + str(vel))
+            #vel = math.sqrt(self.world.ball_velocity[0]**2 + self.world.ball_velocity[1]**2)/6.0
 
         print("The ball is " + str(length) + " m away, " + str(angle) + " deg")
 
@@ -222,7 +226,7 @@ class SimpleStrategy:
                      correction = 120
                 else:
                     print "2.2.2 BOTTOM"
-                    correction = 125
+                    correction = 120
                 if angle < 0:
                     turn = 180 + angle + correction
                 else:

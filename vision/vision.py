@@ -290,7 +290,7 @@ class Vision:
             # Draw balls trajectory
             delta_x = self.trajectory_list[len(self.trajectory_list) - 1][0] - self.trajectory_list[0][0]
             delta_y = self.trajectory_list[len(self.trajectory_list) - 1][1] - self.trajectory_list[0][1]
-            if math.sqrt(delta_x**2 + delta_y**2) > 8:
+            if math.sqrt(delta_x**2 + delta_y**2) > 2:
                 self.world.ball_moving[0] = 1
                 future_x = self.trajectory_list[len(self.trajectory_list) - 1][0] + delta_x
                 if float(delta_x) != 0.0:

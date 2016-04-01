@@ -132,9 +132,8 @@ class StrategyTools:
             distance1 = self.euclideandist(pt1, rb)
             distance2 = self.euclideandist(pt2, rb)
             distance3 = self.euclideandist(pt1, pt2)
-            distance4 = self.euclideandist(pt1,pt2)
 
-            if (abs((distance1 + distance2) - distance3) < 20) and distance4 < 5 :
+            if abs((distance1 + distance2) - distance3) < 20:
                 return False
         return True
 
@@ -408,7 +407,8 @@ class StrategyTools:
         d1 = self.euclideandist((x1,y1),(x,y))
         d2 = self.euclideandist((x2,y2),(x,y))
 
-        if d1*(0.5) < d2 or self.world.friend.out[0] == 1:         #TODO: or teamate out of pitch -- done, testing needed
+        #if d1*(0.7) > d2 or self.world.friend.out[0] == 1
+        if d2 >= 90:         #TODO: or teamate out of pitch -- done, testing needed
             return True
         else:
             return False
@@ -486,11 +486,10 @@ class StrategyTools:
         robotposlist = [(x3,y3),
                         (x4,y4)]
         #todo taken pass out
-        #if self.isSafe3((x2,y2),(x1,y1),robotposlist) and self.world.friend.hasBallInRange[0] == 1:
-         #   return "RECEIVE_PASS"
-            # print('receive pass')
-        #else:
-        return self.bestpositioncase()
+        if self.isSafe3((x2,y2),(x1,y1),robotposlist) and self.world.friend.hasBallInRange[0] == 1:
+            return "RECEIVE_PASS"
+        else:
+            return self.bestpositioncase()
 
     def get_pass_goal_position(self):
         pass
@@ -599,7 +598,7 @@ class StrategyTools:
             #print(friend.hasBallInRange[0])
             #print(enemy1.hasBallInRange[0])
             #print(enemy2.hasBallInRange[0])
-            if self.world.sensor and not self.world.kicked and self.commands.query_ball() and (last_state == "FREE_BALL_YOURS" or last_state  == "RECEIVE_PASS"):
+            if self.world.sensor and (venus.hasBallInRange[0] == 1 or not self.world.kicked) and self.commands.query_ball() and (last_state == "FREE_BALL_YOURS" or last_state  == "RECEIVE_PASS"):
                 state = self.attackwithball()
             elif enemy1.hasBallInRange[0] == 1 and enemy1.out[0] == 0:
                 # enemy1 has the ball

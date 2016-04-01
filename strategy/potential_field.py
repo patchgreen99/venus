@@ -36,11 +36,22 @@ class Potential:
 
             self.last_square = last_square
             self.last_direction = last_direction
+            if (self.world.room_num == 0 and not self.world.we_have_computer_goal  or self.world.room_num == 1 and self.world.we_have_computer_goal) and self.world.ball[0] < 3*PITCH_COLS/4:
+                self.top_wall = g.step_field(self.world.pitch_top_left, (self.world.pitch_top_right[0]-self.world.pitch_top_left[0], self.world.pitch_top_right[1]-self.world.pitch_top_left[1]), WALL_INFLUENCE, 1, 10) # best with 3 5
+                self.bot_wall = g.step_field(self.world.pitch_bot_left, (self.world.pitch_bot_left[0]-self.world.pitch_bot_right[0], self.world.pitch_bot_left[1]-self.world.pitch_bot_right[1]), WALL_INFLUENCE, 1, 10)
+                self.right_wall = g.step_field(self.world.pitch_top_right, (self.world.pitch_bot_right[0] - self.world.pitch_top_right[0], self.world.pitch_bot_right[1] - self.world.pitch_top_right[1]), WALL_INFLUENCE, 1, 30)
+                self.left_wall = g.step_field(self.world.pitch_top_left, (self.world.pitch_top_left[0] - self.world.pitch_bot_left[0], self.world.pitch_top_left[1] - self.world.pitch_bot_left[1]), WALL_INFLUENCE, 1, 10)
+            elif (self.world.room_num == 0 and self.world.we_have_computer_goal  or self.world.room_num == 1 and not self.world.we_have_computer_goal) and self.world.ball[0] > 3*PITCH_COLS/4:
+                self.top_wall = g.step_field(self.world.pitch_top_left, (self.world.pitch_top_right[0]-self.world.pitch_top_left[0], self.world.pitch_top_right[1]-self.world.pitch_top_left[1]), WALL_INFLUENCE, 1, 10) # best with 3 5
+                self.bot_wall = g.step_field(self.world.pitch_bot_left, (self.world.pitch_bot_left[0]-self.world.pitch_bot_right[0], self.world.pitch_bot_left[1]-self.world.pitch_bot_right[1]), WALL_INFLUENCE, 1, 10)
+                self.right_wall = g.step_field(self.world.pitch_top_right, (self.world.pitch_bot_right[0] - self.world.pitch_top_right[0], self.world.pitch_bot_right[1] - self.world.pitch_top_right[1]), WALL_INFLUENCE, 1, 10)
+                self.left_wall = g.step_field(self.world.pitch_top_left, (self.world.pitch_top_left[0] - self.world.pitch_bot_left[0], self.world.pitch_top_left[1] - self.world.pitch_bot_left[1]), WALL_INFLUENCE, 1, 30)
+            else:
+                self.top_wall = g.step_field(self.world.pitch_top_left, (self.world.pitch_top_right[0]-self.world.pitch_top_left[0], self.world.pitch_top_right[1]-self.world.pitch_top_left[1]), WALL_INFLUENCE, 1, 10) # best with 3 5
+                self.bot_wall = g.step_field(self.world.pitch_bot_left, (self.world.pitch_bot_left[0]-self.world.pitch_bot_right[0], self.world.pitch_bot_left[1]-self.world.pitch_bot_right[1]), WALL_INFLUENCE, 1, 10)
+                self.right_wall = g.step_field(self.world.pitch_top_right, (self.world.pitch_bot_right[0] - self.world.pitch_top_right[0], self.world.pitch_bot_right[1] - self.world.pitch_top_right[1]), WALL_INFLUENCE, 1, 10)
+                self.left_wall = g.step_field(self.world.pitch_top_left, (self.world.pitch_top_left[0] - self.world.pitch_bot_left[0], self.world.pitch_top_left[1] - self.world.pitch_bot_left[1]), WALL_INFLUENCE, 1, 10)
 
-            self.top_wall = g.step_field(self.world.pitch_top_left, (self.world.pitch_top_right[0]-self.world.pitch_top_left[0], self.world.pitch_top_right[1]-self.world.pitch_top_left[1]), WALL_INFLUENCE, 1, 10) # best with 3 5
-            self.bot_wall = g.step_field(self.world.pitch_bot_left, (self.world.pitch_bot_left[0]-self.world.pitch_bot_right[0], self.world.pitch_bot_left[1]-self.world.pitch_bot_right[1]), WALL_INFLUENCE, 1, 10)
-            self.right_wall = g.step_field(self.world.pitch_top_right, (self.world.pitch_bot_right[0] - self.world.pitch_top_right[0], self.world.pitch_bot_right[1] - self.world.pitch_top_right[1]), WALL_INFLUENCE, 1, 10)
-            self.left_wall = g.step_field(self.world.pitch_top_left, (self.world.pitch_top_left[0] - self.world.pitch_bot_left[0], self.world.pitch_top_left[1] - self.world.pitch_bot_left[1]), WALL_INFLUENCE, 1, 10)
 
             # use 1, 100
             if world.we_have_computer_goal and world.room_num == 1 or not world.we_have_computer_goal and world.room_num == 0: # there goal is on the right
@@ -65,7 +76,7 @@ class Potential:
         def nothing(self, x):
             pass
 
-        def map(self):
+        def map(self, con):
             heat_map = self.get_heat_map()
             x = np.arange(PITCH_COLS)
             y = np.arange(PITCH_ROWS)
@@ -95,13 +106,18 @@ class Potential:
 
             #fig, ax = plt.subplots()
             # M = np.hypot(U[::20, ::20], -V[::20, ::20])
-            plt.quiver(X[::15, ::15], Y[::15, ::15], dx[::15, ::15], -dy[::15, ::15], headwidth=5)
+            plt.quiver(X[::15, ::15], Y[::15, ::15], dx[::15, ::15], -dy[::15, ::15], headwidth=5, minshaft=4)
             #plt.colorbar()
             plt.axis([-10, PITCH_COLS+10, -10, PITCH_ROWS+10])
+            robX = [self.world.venus.position[0],self.world.friend.position[0], self.world.enemy1.position[0], self.world.enemy2.position[0] ]
+            robY = [self.world.venus.position[1],self.world.friend.position[1], self.world.enemy1.position[1], self.world.enemy2.position[1] ]
+            ax.scatter(robX, robY, marker='o', c='b', s=40, color='k')
             ax.invert_yaxis()
             ax.xaxis.tick_top()
 
-            fig.show()
+            #fig.show()
+            plt.savefig('ggraph/graph%03d.jpg' % con)
+	    plt.clf()
 
         def build_field(self):
             for potential in self.potential_list:

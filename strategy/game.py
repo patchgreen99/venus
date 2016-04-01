@@ -105,7 +105,7 @@ class Game:
                     self.world.undistort[0] = 1
                     print("HAS BALL IN RANGE")
                     self.commands.s()
-                    #time.sleep(.5)
+                    time.sleep(.5)
                     angle, motion_length = self.calculate_angle_length_ball()
                     self.commands.o()
                     self.commands.c(angle)
@@ -114,13 +114,13 @@ class Game:
 
                     if PITCH_COLS/4.0 <= self.world.venus.position[0] <= 3.0*PITCH_COLS/4.0:
                         #print "FIX A"
-                        fix = 6
+                        fix = 7
                     else:
                         #print "FIX B"
                         fix = 2
                     self.commands.f(motion_length - fix)  # todo hack
                     self.commands.g()
-                    #time.sleep(1)
+                    time.sleep(.5)
                     # todo need to implement considering objects
                     #if self.commands.query_ball() or self.commands.query_ball():
                     #    print("It thinks it has the ball")
@@ -157,9 +157,15 @@ class Game:
             advance = P.step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), POSITION_INFLUENCE_RANGE, 1, 0)
             catch_up = P.step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), POSITION_INFLUENCE_RANGE, 1, 0)
 
-            free_up_pass_enemy1 = P.finite_axial_outside(self.world.enemy1.position, self.world.friend.position, POSITION_INFLUENCE_RANGE, 1.3, 2.5)
-            free_up_goal_enemy2 = P.finite_axial_outside(self.world.enemy2.position, (self.world.their_goalX, self.world.their_goalmeanY), POSITION_INFLUENCE_RANGE, 1.3, 2.5)
+            if self.world.enemy1.out[0] == 0:
+                free_up_pass_enemy1 = P.finite_axial_outside(self.world.enemy1.position, self.world.friend.position, POSITION_INFLUENCE_RANGE, 1.3, 2.5)
+            else:
+                free_up_pass_enemy1 = P.finite_axial_outside(self.world.enemy1.position, self.world.friend.position, POSITION_INFLUENCE_RANGE, 1.3, 0)
 
+            if self.world.enemy2.out[0] == 0:
+                free_up_goal_enemy2 = P.finite_axial_outside(self.world.enemy2.position, (self.world.their_goalX, self.world.their_goalmeanY), POSITION_INFLUENCE_RANGE, 1.3, 2.5)
+            else:
+                free_up_goal_enemy2 = P.finite_axial_outside(self.world.enemy2.position, (self.world.their_goalX, self.world.their_goalmeanY), POSITION_INFLUENCE_RANGE, 1.3, 0)
             # BUILD FIELD AND NEXT POSITION AND DIRECTIONS
             ####################################
             # todo too reliant on vision, must pick what to use for look ahead
@@ -200,9 +206,15 @@ class Game:
             advance = P.step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
             catch_up = P.step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
 
-            free_up_pass_enemy2 = P.finite_axial_outside(self.world.enemy1.position, self.world.friend.position, POSITION_INFLUENCE_RANGE, 1.3, 2.5)
-            free_up_goal_enemy1 = P.finite_axial_outside(self.world.enemy2.position, (self.world.their_goalX, self.world.their_goalmeanY), POSITION_INFLUENCE_RANGE, 1.3, 2.5)
+            if self.world.enemy2.out[0] == 0:
+                free_up_pass_enemy2 = P.finite_axial_outside(self.world.enemy1.position, self.world.friend.position, POSITION_INFLUENCE_RANGE, 1.3, 2.5)
+            else:
+                free_up_pass_enemy2 = P.finite_axial_outside(self.world.enemy1.position, self.world.friend.position, POSITION_INFLUENCE_RANGE, 1.3, 0)
 
+            if self.world.enemy1.out[0] == 0:
+                free_up_goal_enemy1 = P.finite_axial_outside(self.world.enemy2.position, (self.world.their_goalX, self.world.their_goalmeanY), POSITION_INFLUENCE_RANGE, 1.3, 2.5)
+            else:
+                free_up_goal_enemy1 = P.finite_axial_outside(self.world.enemy2.position, (self.world.their_goalX, self.world.their_goalmeanY), POSITION_INFLUENCE_RANGE, 1.3, 0)
 
             # BUILD FIELD AND NEXT POSITION AND DIRECTIONS
             ####################################
@@ -244,8 +256,15 @@ class Game:
             advance = P.step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
             catch_up = P.step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
 
-            free_up_goal_enemy2 = P.finite_axial_outside(self.world.enemy1.position, (self.world.their_goalX, self.world.their_goalmeanY), POSITION_INFLUENCE_RANGE, 1.3, 2.5)
-            free_up_goal_enemy1 = P.finite_axial_outside(self.world.enemy2.position, (self.world.their_goalX, self.world.their_goalmeanY), POSITION_INFLUENCE_RANGE, 1.3, 2.5)
+            if self.world.enemy2.out[0] == 0:
+                free_up_goal_enemy2 = P.finite_axial_outside(self.world.enemy1.position, (self.world.their_goalX, self.world.their_goalmeanY), POSITION_INFLUENCE_RANGE, 1.3, 2.5)
+            else:
+                free_up_goal_enemy2 = P.finite_axial_outside(self.world.enemy1.position, (self.world.their_goalX, self.world.their_goalmeanY), POSITION_INFLUENCE_RANGE, 1.3, 0)
+
+            if self.world.enemy1.out[0] == 0:
+                free_up_goal_enemy1 = P.finite_axial_outside(self.world.enemy2.position, (self.world.their_goalX, self.world.their_goalmeanY), POSITION_INFLUENCE_RANGE, 1.3, 2.5)
+            else:
+                free_up_goal_enemy1 = P.finite_axial_outside(self.world.enemy2.position, (self.world.their_goalX, self.world.their_goalmeanY), POSITION_INFLUENCE_RANGE, 1.3, 2.5)
 
             # BUILD FIELD AND NEXT POSITION AND DIRECTIONS
             ####################################
@@ -287,8 +306,15 @@ class Game:
             advance = P.step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
             catch_up = P.step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
 
-            free_up_pass_enemy1 = P.finite_axial_outside(self.world.enemy2.position, self.world.friend.position, POSITION_INFLUENCE_RANGE, 1.3, 2.5)
-            free_up_pass_enemy2 = P.finite_axial_outside(self.world.enemy1.position, self.world.friend.position, POSITION_INFLUENCE_RANGE, 1.3, 2.5)
+            if self.world.enemy1.out[0] == 0:
+                free_up_pass_enemy1 = P.finite_axial_outside(self.world.enemy2.position, self.world.friend.position, POSITION_INFLUENCE_RANGE, 1.3, 2.5)
+            else:
+                free_up_pass_enemy1 = P.finite_axial_outside(self.world.enemy2.position, self.world.friend.position, POSITION_INFLUENCE_RANGE, 1.3, 0)
+
+            if self.world.enemy2.out[0] == 0:
+                free_up_pass_enemy2 = P.finite_axial_outside(self.world.enemy1.position, self.world.friend.position, POSITION_INFLUENCE_RANGE, 1.3, 2.5)
+            else:
+                free_up_pass_enemy2 = P.finite_axial_outside(self.world.enemy1.position, self.world.friend.position, POSITION_INFLUENCE_RANGE, 1.3, 0)
 
             # BUILD FIELD AND NEXT POSITION AND DIRECTIONS
             ####################################

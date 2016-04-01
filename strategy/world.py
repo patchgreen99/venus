@@ -8,7 +8,7 @@ class Robot:
     def __init__(self):
         self.position = Array('i', [NO_VALUE, NO_VALUE])
         self.orientation = Array('d', [NO_VALUE, NO_VALUE])
-        self.out = Array('i', [NO_VALUE])
+        self.out = Array('i', [1])
         self.hasBallInRange = Array('i', [0])
 
     def __str__(self):
