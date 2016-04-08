@@ -1,0 +1,18 @@
+\contentsline {section}{\numberline {1}System Architecture}{2}
+\contentsline {section}{\numberline {2}Hardware components}{3}
+\contentsline {subsection}{\numberline {2.1}Wheels}{3}
+\contentsline {subsection}{\numberline {2.2}Kicker}{4}
+\contentsline {subsection}{\numberline {2.3}Grabber}{5}
+\contentsline {section}{\numberline {3}Documentation of the code}{5}
+\contentsline {subsection}{\numberline {3.1}Communications}{5}
+\contentsline {subsection}{\numberline {3.2}Arduino}{5}
+\contentsline {subsection}{\numberline {3.3}PC}{6}
+\contentsline {subsection}{\numberline {3.4}Vision}{6}
+\contentsline {subsubsection}{\numberline {3.4.1}Calibration}{6}
+\contentsline {subsubsection}{\numberline {3.4.2}Finding the robots}{7}
+\contentsline {subsubsection}{\numberline {3.4.3}Finding the ball}{7}
+\contentsline {subsection}{\numberline {3.5}Planning}{8}
+\contentsline {subsection}{\numberline {3.6}Strategy}{8}
+\contentsline {section}{\numberline {4}Sensors}{8}
+\contentsline {subsection}{\numberline {4.1}Rotary encoder board}{8}
+\contentsline {subsection}{\numberline {4.2}IR sensor}{9}

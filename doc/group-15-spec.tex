@@ -5,29 +5,56 @@
 \usepackage{graphicx}
 \usepackage{parskip}
 \usepackage{titling}
-
+\usepackage[utf8]{inputenc}
 \graphicspath{ {images/} }
-
-\title{Technical Specification}
-\author{SDP Group 15-H}
-
 \begin{document}
+\begin{titlepage}
+    \begin{center}
+        \vspace*{1cm}
+        
+        \Huge
+        \textbf{Technical Specification}
+        
+        \vspace{0.5cm}
+        \LARGE
+        SDP Group 15-H
+        
+        \vspace{1.5cm}
+        \normalsize
+        Julijonas Kikutis\\ 
+		Patrick Green\\
+		Aseem Narang\\
+		Ankit Sonkar\\
+		David McArthur\\
+		Emilia Bogdanova
+        
+        \vfill
+        
+        
+        \vspace{0.8cm}
+        
+        \begin{figure}
+    	\vspace*{-3em}
+    	\centering
+    	\includegraphics[scale=.30]{logo.png}
+		\end{figure}
+        
+        \Large
+        University of Edinburgh\\
+        
+    \end{center}
+\end{titlepage}
 
-\begin{figure}
-    \vspace*{-3em}
-    \centering
-    \includegraphics[scale=.18]{logo.png}
-\end{figure}
+\tableofcontents
 
-\setlength{\droptitle}{-4em}
-\maketitle
+\newpage
 
 \section{System Architecture}
 
 Venus has gone through several stages of changes. The earliest prototype had four regular wheels as seen in Figure \ref{fig:robot0}. This made us realise that we have to keep in mind the space
 constraints when building the base as we need to accommodate not only the motors
 for the wheels but also the kicking and grabbing mechanism. 
-\\The next more sophisticated design was a robot with four powerful kickers that used elastics as seen in Figure \ref{fig:robot3}. The idea was to stretch elastics for all four kickers using the star shape element on top of the robot as seen in the picture and then release, this gave a lot of energy to the ball. However, this design had a disadvantage because the robot was not able to kick the ball for varying distances, which was an essential requirement for the first milestone. Moreover, the dimensions of the robot were exceeding the maximum size limits and the speed of the ball was exceeding the one allowed in the game rules. 
+\\The next, more sophisticated design, was a robot with four powerful kickers that used elastics as seen in Figure \ref{fig:robot3}. The idea was to stretch elastics for all four kickers using the star shape element on top of the robot as seen in the picture and then release. This gave a lot of energy to the ball. However, this design had a disadvantage because the robot was not able to kick the ball for varying distances, which was an essential requirement for the first milestone. Moreover, the dimensions of the robot were exceeding the maximum size limits and the speed of the ball was exceeding the one allowed in the game rules. 
 
 \begin{figure}[h]
 	\centering
@@ -48,9 +75,9 @@ for the wheels but also the kicking and grabbing mechanism.
 
 Taking all the disadvantages of previous designs into account we came up with a new design as seen in Figures \ref{fig:open} and \ref{fig:closed}. Advantage of this design is that it is simple and at the same time the robot can still move fast enough to play football and the power of the kicks can be precisely controlled. 
 
-The grabbing mechanism of the latest design went through two iterations of development.
+The grabbing mechanism for this design went through two iterations of development.
 The first grabber we developed was falling down on the ball in order to catch it, thus was deemed not suitable because it obstructed the ball more than it was allowed by the football game rules. Venus also had difficulties at placing the ball in front of the kicker at initial kicking position, because the grabber pushed it
-too far inside the kicker. Thus, the grabber was replaced by the newest design depicted in Figure \ref{fig:open} which has two symmetrical grabbers that interlock when the robot is moving to conserve space and are able to reach a more distant ball.
+too far inside the kicker. Thus, the grabber was replaced by the newer design depicted in Figure \ref{fig:open} which has two symmetrical grabbers that interlock when the robot is moving to conserve space and are able to reach a more distant ball.
 
 \begin{figure}[ht]
 	\centering
@@ -69,6 +96,7 @@ too far inside the kicker. Thus, the grabber was replaced by the newest design d
 	\end{minipage}
 \end{figure}
 
+After playing the first friendly, we have realized that Venus isn't fast enough comparing to other robots. We decided to start the design from scratch again. Our latest design has four holonomic wheels, which allow Venus to move fast and also in different directions (Figure FIGURE). We had also refused of using any kickers, because none of the kickers we thought of, could fit with four NXT motors. Venus kicks using its grabber and spinning action. The design of the grabber hasn't changed much from the previous time. 
 
 When we were satisfied with the look of Venus, we also made all cables look neat using elastics. We also ensured that we can still access the battery pack and Arduino board if needed as seen in Figure \ref{fig:battery}.
 
@@ -76,7 +104,7 @@ When we were satisfied with the look of Venus, we also made all cables look neat
 	\centering
 	\begin{minipage}[b]{.48\textwidth}
         \centering
-		\includegraphics[scale=.065,angle=-90]{battery.jpg}
+		\includegraphics[scale=.065]{battery1.jpg}
 		\caption{Battery pack easily accessible}
 		\label{fig:battery}
 	\end{minipage}
@@ -91,17 +119,19 @@ When we were satisfied with the look of Venus, we also made all cables look neat
 \end{figure}
 
 
-\section{Hardware}
+\section{Hardware components}
 
 \subsection{Wheels}
-The current design has two main driving wheels and one holonomic wheel placed sideways at the back which allows the robot to turn as well as does not cause problems moving backwards and
-forwards due to its holonomic property. All three wheels are powered by NXT motors.
+Could you be more descriptive? i.e. why you decided to build it like that ? Why mixture of wheel types ? How the robot can turn? what kind of problems you were trying to omit ? It is a far to short and vague description.  Since your robot has four holonomic wheels now, could you describe why it is a four-wheeled robot now? What is the main feature, advantage of the holonomic property? What is exactly this property.  What are NXT motors ? how they work?
+
+
+The current design has four holonomic wheels, which allows Venus to move in any direction. All wheels are powered by NXT motors.
 \subsection{Kicker}
 Even though the idea of the kicker that uses elastics was appealing as this made
 the kick more powerful, it was almost impossible to predict the distance the
-ball will travel. Because of that the new design has a
-kicker that is powered by an NXT motor with gears. The kicker operates by going backwards inside the robot from the starting low position as seen in Figures \ref{fig:kicker}-\ref{fig:kicker_back} and then kicks
-forwards and touches the ball.
+ball will travel. Because of that the newer design had a
+kicker that was powered by an NXT motor with gears. The kicker operated by going backwards inside the robot from the starting low position as seen in Figures \ref{fig:kicker}-\ref{fig:kicker_back} and then kicked
+forwards and touched the ball.
 \begin{figure}[ht]
 	\centering
 	\begin{minipage}[b]{.3\textwidth}
@@ -126,8 +156,17 @@ forwards and touches the ball.
 	\end{minipage}
 	
 \end{figure}
+
+Our newest design doesn't have a kicker. The kick is made by turning  the robot and opening the grabber at the same time. This creates a momentum necessary to make a kick (Figure \ref{fig:kick_action}). 
+\begin{figure}
+    \includegraphics[scale=.7]{kick}
+    \caption{High level diagram of how the kick is performed}
+    \label{fig:kick_action}
+\end{figure}
+
+
 \subsection{Grabber}
-The grabber consists of two symmetric parts placed one a bit above the other and is placed on the sides of the front part of the robot. They interlock when the robot needs to catch the ball and we also keep them in a closed position during movements without the ball. We open the grabber only before catching. This ensures that the grabber don't get broken against other robots or walls. The grabber is powered by a single Electric Technic Mini-Motor 9v with gears as seen on Figure \ref{fig:gears}. We have used two bevel gears in order to be able to move grabbers with motor being on top of the robot. 
+The grabber for the previous design consisted of two symmetric parts placed one a bit above the other and was placed on the sides of the front part of the robot (Figure \ref{fig:gears}). They interlocked when the robot needs to catch the ball and we also kept them in a closed position during movements without the ball. We opened the grabber only before catching. This ensured that the grabber don't get broken against other robots or walls. We have used two bevel gears in order to be able to move grabbers with motor being on top of the robot. The current design of the grabber doesn't differ much and can be seen in Figure FIGURE. The grabber is powered by a single Electric Technic Mini-Motor 9v with gears.
 
 \section{Documentation of the code}
 
