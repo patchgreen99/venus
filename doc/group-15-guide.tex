@@ -53,16 +53,16 @@ To clone the repository, execute in terminal:
 $ git clone https://github.com/julijonas/venus.git
 \end{lstlisting}
 
-Then go to the root directory of the project and create a Python virtual environment:
+Then go to the root directory of the project and create a Python virtual environment which will contain a local copy of the libraries needed for this project:
 \begin{lstlisting}
 $ cd venus
 $ virtualenv --system-site-packages env
 $ source env/bin/activate
 \end{lstlisting}
 
-Install the libraries (currently there is only pyserial 3.0.1 that needs to be installed):
+Install the \textit{pyserial} libraries which is used to send data through RF stick.
 \begin{lstlisting}
-$ pip install -r requirements.txt
+$ pip install pyserial
 \end{lstlisting}
 
 To open the Arduino IDE, execute:
@@ -75,7 +75,7 @@ You'll need to add three libraries which can be found under \texttt{arduino/} in
 Sketch -> Import Library... -> Add Library... and choose the library folder you want to import.
 \end{lstlisting}
 
-\section{Overview of the robot}
+\section{Hardware overview}
 
 At this stage of the course, we can say that the hardware part of our robot is done. Venus is a three wheels robot. There are two main driving wheels and one holonomic wheel placed sideways at the back which allows the robot to turn as well as does not cause problems moving backwards and forwards due to its holonomic property. All wheels are powered by NXT motors. 
 \\There is also a kicker that is powered by a NXT motor with gears. The kicker operates by going backwards inside the robot from the starting low position and then kicks the ball forwards.
@@ -91,7 +91,7 @@ the new batteries into the battery pack. Easy!
 
 \section{Running instructions}
 
-Run the command in the terminal from the project root directory if you haven't done so already:
+Run the command in the terminal from the project root directory if it has not been done already to enter the Python virtual environment:
 \begin{lstlisting}
 source env/bin/activate
 \end{lstlisting}

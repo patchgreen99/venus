@@ -2,7 +2,7 @@
 \usepackage[margin=.9in]{geometry}
 \usepackage{graphicx}
 \usepackage{parskip}
-\usepackage{titling}
+%\usepackage{titling}
 \usepackage[utf8]{inputenc}
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric, arrows}
@@ -56,7 +56,7 @@
 
 \newpage
 
-\section{System Architecture}
+\section{System architecture}
 
 Venus has gone through several stages of changes. The earliest prototype had four regular wheels as seen in Figure \ref{fig:robot0}. This made us realise that we have to keep in mind the space
 constraints when building the base as we need to accommodate not only the motors
@@ -178,6 +178,14 @@ The grabber for the previous design consisted of two symmetric parts placed one 
 
 \section{Documentation of the code}
 
+The high-level overview of the system structure can be found in Figure \ref{fig:strategy}. It is not fully implemented yet.
+
+\begin{figure}
+    \includegraphics[scale=.7]{Diagram2}
+    \caption{High level diagram of the system structure}
+    \label{fig:strategy}
+\end{figure}
+
 \subsection{Communications}
 
 The communication interface between the Arduino and PC is low level as
@@ -188,6 +196,9 @@ motors on, and sets the specified timeouts to stop them.
 The messages are human-readable, newline-terminated and tokens inside them are
 separated by spaces. The specified motor power can be negative, in which case it means backwards direction. Each message which changes the state of the robot has a sequence number and checksum that are checked in the Arduino. The messages used in the
 protocol are listed in Table \ref{tab:messages}.
+
+The communication messages are constructed in \texttt{Protocol} class in \texttt{protocol.py} and used in motion functions in \texttt{holonomic.py}.
+The PC currently provides a simple command line interface. We use commands specified in the user guide such as \texttt{f 100} meaning 'go forwards 100 meters' that are mapped to communication messages, in our python code. We then are able to run this code from the command line.
 
 \begin{table}[h!]
 \centering
@@ -279,11 +290,6 @@ allows the robot to receive commands asynchronously, that is, a command is not
 blocking during its execution and the PC software could, for example, send another command simultaneously to engage the kicker while the robot is in motion.
 The message handling is defined in \texttt{arduino/arduino.ino} file.
 
-\subsection{PC}
-
-The communication messages are constructed in \texttt{Protocol} class in \texttt{protocol.py} and used in motion functions in \texttt{holonomic.py}.
-The PC currently provides a simple command line interface. We use commands specified in the user guide such as \texttt{f 100} meaning 'go forwards 100 meters' that are mapped to communication messages, in our python code. We then are able to run this code from the command line.
-
 \subsection{Vision}
 
 In our opinion, the vision is our unique feature of this project. We have built the whole system from scratch without borrowing any code from previous years. This allowed us to implement things we might not have been able to do with an existing system. 
@@ -320,18 +326,9 @@ This ensures that we are able to detect robots even if at some point we cannot d
 
 We restrict the number of circles of each color we want to detect, e.g. 2 blue, 2 yellow, 8 green etc. For red, it is 9, because we are likely to think that pink is red. If at any point we are not able to see any red spots, we decide that the ball is underneath one of the robots or not on the pitch. If we can see the spot that is not part of the robots detected earlier, we store ball's position as a stack that has centres of mass of the ball for the last 6 frames (every time new value comes in, last one is popped). We check the first and the last values in this stack. If their difference is more than 10 pixels, then the ball is moving and we draw its trajectory.  
 
-\subsection{Planning}
-
-TBD
-
 \subsection{Strategy}
 
-The high-level overview of the system structure can be found in Figure \ref{fig:strategy}. It is not fully implemented yet.
-\begin{figure}
-    \includegraphics[scale=.7]{Diagram2}
-    \caption{High level diagram of the system structure}
-    \label{fig:strategy}
-\end{figure}
+table with all states
 
 \section{Sensors}
 \subsection{Rotary encoder board}
