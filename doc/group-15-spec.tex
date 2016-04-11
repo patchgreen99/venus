@@ -8,6 +8,8 @@
 \usetikzlibrary{shapes.geometric, arrows}
 \graphicspath{ {images/} }
 
+\tikzstyle{module} = [rectangle, rounded corners, minimum width=2cm, minimum height=1.2cm,text centered, draw=black, fill=red!30, text width=3.5cm]
+
 \tikzstyle{startstop} = [rectangle, rounded corners, minimum width=1.5cm, minimum height=.8cm,text centered, draw=black, fill=red!30]
 \tikzstyle{io} = [trapezium, trapezium left angle=70, trapezium right angle=110, minimum width=1cm, minimum height=.8cm, text centered, draw=black, fill=blue!30, inner sep=.2cm]
 \tikzstyle{process} = [rectangle, minimum width=3cm, minimum height=.8cm, text centered, draw=black, fill=orange!30, text width=3.5cm]
@@ -178,27 +180,56 @@ The grabber for the previous design consisted of two symmetric parts placed one 
 
 \section{Documentation of the code}
 
-The high-level overview of the system structure can be found in Figure \ref{fig:strategy}. It is not fully implemented yet.
+\begin{figure}[ht!]
+\centering
+\begin{tikzpicture}[node distance=1.7cm]
 
-\begin{figure}
-    \includegraphics[scale=.7]{Diagram2}
-    \caption{High level diagram of the system structure}
-    \label{fig:strategy}
+\node (main) [module] {\textit{main.py}};
+\node (prompt) [module, below of=main] {\textit{run\_prompt} in \textit{prompt.py}};
+\draw [arrow] (main) -- (prompt);
+\node (commands) [module, below of=prompt] {Commands in \textit{holonomic.py}};
+\draw [arrow] (prompt) -- (commands);
+\node (protocol) [module, left of=commands, xshift=-2.8cm] {Protocol in \textit{protocol.py}};
+\draw [arrow] (commands) -- (protocol);
+\node (serial) [module, left of=protocol, xshift=-2.8cm] {External \textit{serial} module};
+\draw [arrow] (protocol) -- (serial);
+
+\node (world) [module, below of=commands, yshift=-1.7cm] {Shared state in \textit{world.py}};
+\draw [arrow] (commands) -- (world);
+
+\node (vision) [module, right of=commands, xshift=2.8cm] {Vision in \textit{vision.py} (separate process)};
+\draw [arrow] (commands) -- (vision);
+\draw [arrow] (vision.320) |- ++(0, -2.792cm) -- (world);
+
+\node (moves) [module, below of=commands, xshift=2.5cm, text width=3.8cm] {Simple moves in \textit{simple\_holonomic.py}};
+\draw [arrow, <->] (commands) -- (moves);
+
+\node (state) [module, below of=commands, xshift=-2.3cm] {State machine in \textit{highstrategy.py}};
+\draw [arrow, <->] (commands) -- (state);
+\draw [arrow] (state) -- (moves);
+\draw [arrow] (state) -- (world);
+
+\node (game) [module, below of=commands, xshift=-7.1cm] {Field definitions of states in \textit{game.py}};
+\draw [arrow, <->] (commands) -- (game);
+\draw [arrow] (state) -- (game);
+\draw [arrow] (game) -- (world);
+\node (field) [module, below of=game] {Collection of fields in \textit{potential\_field.py}};
+\draw [arrow] (game) -- (field);
+\node (pot) [module, below of=field] {Individual fields in \textit{potentials.py}};
+\draw [arrow] (field) -- (pot);
+
+\end{tikzpicture}
+\caption{Dependency graph of Python modules in the system}
+\label{fig:overview}
 \end{figure}
+
+The code is subdivided into several Python modules as seen in Figure \ref{fig:overview}. The module \textit{main} is used to launch the \textit{prompt} module. The commands in the prompt are provided by the \textit{commands} module. It creates instances of protocol, vision, and state machine objects from the respective modules. The vision object is run on a separate thread to process frames asynchronously with constantly updated shared world state kept in a \textit{World} object. At the same time the prompt is provided for the user. The command to run the strategy is called \texttt{hs}. This command constantly queries the state machine in the \textit{highstrategy} module. The state machine checks the world state to decide which state it is currently in and then performs the associated action. It is done either by handing over the execution to \textit{game} module to construct a potential field and perform the best action based on it or performing a predefined move from the \textit{simple\_holonomic} module.
+
+All code except the colour calibration user interface in the \textit{vision} module is an original work. Libraries used are \textit{pyserial}, \textit{numpy}, \textit{scipy}, and \textit{OpenCV}.
 
 \subsection{Communications}
 
-The communication interface between the Arduino and PC is low level as
-the PC decides and specifies the individual motor numbers and rotary encoder
-value or time duration for which they will be powered. Then the Arduino
-sends acknowledgement to the PC about the arrival of the command, turns the
-motors on, and sets the specified timeouts to stop them.
-The messages are human-readable, newline-terminated and tokens inside them are
-separated by spaces. The specified motor power can be negative, in which case it means backwards direction. Each message which changes the state of the robot has a sequence number and checksum that are checked in the Arduino. The messages used in the
-protocol are listed in Table \ref{tab:messages}.
-
-The communication messages are constructed in \texttt{Protocol} class in \texttt{protocol.py} and used in motion functions in \texttt{holonomic.py}.
-The PC currently provides a simple command line interface. We use commands specified in the user guide such as \texttt{f 100} meaning 'go forwards 100 meters' that are mapped to communication messages, in our python code. We then are able to run this code from the command line.
+The communication interface between the Arduino and PC is low level as the PC decides and specifies the individual motor numbers and rotary encoder value or time duration for which they will be powered. Then the Arduino sends acknowledgement to the PC about the arrival of the command, turns the motors on, and sets the specified timeouts to stop them. The messages are human-readable, newline-terminated and tokens inside them are separated by spaces. The specified motor power can be negative, in which case it means backwards direction. Each message which changes the state of the robot has a sequence number and checksum that are checked in the Arduino. The messages used in the protocol are listed in Table \ref{tab:messages}. The communication messages are constructed in the \textit{Protocol} class using methods named after the corresponding message in \texttt{control/protocol.py} and these are used in the motion commands in \texttt{control/holonomic.py}.
 
 \begin{table}[h!]
 \centering
@@ -277,10 +308,9 @@ The PC currently provides a simple command line interface. We use commands speci
 \label{fig:flow}
 \end{figure}
 
-The Arduino code uses the \textit{SerialCommand} library to buffer and tokenize the
-commands received over the serial link.
-\\Messages changing the world state are sent with a sequence number and checksum which is the sum of all the parameters following it. If the sequence number matches the one from the last command, acknowledgement is sent but no further work is performed for the duplicate message. This handles the situation arising when an acknowledgement from the Arduino does not reach the PC and and the PC generates a duplicate message. If the checksum does not match, the Arduino code ignores the message and does not send an acknowledgement, thus forcing the PC to send the same message again.
-\\In case of the motor move command, the motors are started immediately using the \textit{SDPArduino} library. Then the Arduino schedules when to stop the motors and there are two methods to perform that: either a time value or rotary encoder value. The flowchart for these two methods, along with querying the light sensor, are detailed in Figure \ref{fig:flow}.
+The Arduino code uses the \textit{SerialCommand} library to buffer and tokenize the commands received over the serial link. Messages changing the world state are sent with a sequence number and checksum which is the sum of all the parameters following it. If the sequence number matches the one from the last command, acknowledgement is sent but no further work is performed for the duplicate message. This handles the situation arising when an acknowledgement from the Arduino does not reach the PC and and the PC generates a duplicate message. If the checksum does not match, the Arduino code ignores the message and does not send an acknowledgement, thus forcing the PC to send the same message again.
+
+If any of the motor move commands are sent, the motors are started immediately using the \textit{SDPArduino} library. Then the Arduino schedules when to stop the motors and there are two methods to perform that: either a time value or rotary encoder value. The flowchart for these two methods, along with querying the light sensor, are detailed in Figure \ref{fig:flow}.
 In the case of the time value, a timeout is set to stop each single motor using
 \textit{setTimeout} from the \textit{SimpleTimer} library.
 In the case of rotary encoder value, \textit{setInterval} is used which calls
@@ -288,7 +318,9 @@ a function every 5 ms that queries the rotary encoder board and stops the motors
 when the average of all four motor rotary encoder values reaches the target value. These approaches using timers
 allows the robot to receive commands asynchronously, that is, a command is not
 blocking during its execution and the PC software could, for example, send another command simultaneously to engage the kicker while the robot is in motion.
-The message handling is defined in \texttt{arduino/arduino.ino} file.
+The Arduino message handling is located in \texttt{arduino/arduino.ino} file.
+
+A buffer of upcoming motor jobs has also been implemented in the Arduino code to ensure continuous motion but it was deemed unnecessary as vision could issue new commands quickly enough without the robot coming to halt. The current implementation also never stops a motor when a new command arrives for the same motor, instead it just executes the new command, ensuring continuous motion.
 
 \subsection{Vision}
 
@@ -333,21 +365,31 @@ table with all states
 \section{Sensors}
 \subsection{Rotary encoder board}
 
-Each NXT motor is connected to the rotary encoder board. This way the
-information about the amount of rotations the motor has performed since the last query
-is available for the Arduino code. Every 5 ms the board is queried
-whether the target value has been reached. After the average of the
-rotary values of all four motors becomes greater or equal to the target
-value, the motors are stopped.
+Each NXT motor is connected to the rotary encoder board which is depicted in Figure \ref{fig:rotary}. The connections in the anticlockwise order from the top are: the I2C bus to the Arduino, back right motor, back left motor, front left motor, and front right motor. Using this board the information about the amount of rotations the motor has performed since the last query is available for the Arduino code as a separate integer for every motor. Every 5 ms the board is queried whether the target value has been reached. After the average of the rotary values of all four motors becomes greater or equal to the target value, the motors are stopped.
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[scale=.1]{rotary1}
+\caption{The rotary encoder board}
+\label{fig:rotary}
+\end{figure}
 
 \subsection{Light sensor}
 
-The light sensor is located above the grabber. It is used to check whether
+The light sensor is located above the grabber as seen in Figure \ref{fig:sensor}. It is used to check whether
 the robot has successfully acquired the ball after grabbing. The sensor
 provides an integer value that increases the greater the distance to the
 nearest object in its direct line of sight is. Then the Arduino compares the integer
-to a predefined threshold corresponding to the red ball. Sometimes, a white
+to a predefined threshold corresponding to the red ball. Sometimes a white
 line inside the pitch can be mistaken for the ball due to their similar sensor
-values.
+values. An IR sensor was also tested and its returned values were deemed less reliable than
+those of the light sensor.
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[scale=.1]{sensor1}
+\caption{The light sensor with the ball grabbed}
+\label{fig:sensor}
+\end{figure}
 
 \end{document}

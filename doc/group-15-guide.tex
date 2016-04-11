@@ -1,23 +1,23 @@
-\documentclass[12pt]{article}
-\usepackage[a4paper,bindingoffset=0.2in,
-            left=1in,right=1in,top=1in,bottom=1in,
-            footskip=.25in]{geometry}
+\documentclass[a4paper,12pt]{article}
+\usepackage[a4paper,margin=1in]{geometry}
 \title{User Guide}
 \author{SDP Group 15-H}
 \usepackage{listings}
 \usepackage{color}
 \usepackage{graphicx}
 \usepackage{parskip}
-\usepackage{titling}
+%\usepackage{titling}
+\usepackage{array}
+\usepackage{soul}
 
 \graphicspath{ {images/} }
 
 \definecolor{dkgreen}{rgb}{0,0.6,0}
 \definecolor{gray}{rgb}{0.5,0.5,0.5}
 \definecolor{mauve}{rgb}{0.58,0,0.82}
+\definecolor{lightgray}{rgb}{0.95,0.95,0.95}
 
-\lstset{frame=tb,
-  language=bash,
+\lstset{
   aboveskip=3mm,
   belowskip=3mm,
   showstringspaces=false,
@@ -30,8 +30,12 @@
   stringstyle=\color{mauve},
   breaklines=true,
   breakatwhitespace=true,
-  tabsize=3
+  tabsize=3,
+  backgroundcolor=\color{lightgray}
 }
+
+\sethlcolor{lightgray}
+\newcommand{\hg}[1]{\hl{\ttfamily #1}}
 
 \begin{document}
 
@@ -41,12 +45,12 @@
     \includegraphics[scale=.18]{logo.png}
 \end{figure}
 
-\setlength{\droptitle}{-4em}
+%\setlength{\droptitle}{-4em}
 \maketitle
 
 \section{Installation}
 
-\subsection{Cloning the repository and setting up}
+\subsection{Cloning the repository and setting up} \label{setup}
 
 To clone the repository, execute in terminal:
 \begin{lstlisting}
@@ -60,20 +64,29 @@ $ virtualenv --system-site-packages env
 $ source env/bin/activate
 \end{lstlisting}
 
-Install the \textit{pyserial} libraries which is used to send data through RF stick.
+Install the \textit{pyserial} library which is used to send data to Arduino through RF stick:
 \begin{lstlisting}
 $ pip install pyserial
 \end{lstlisting}
 
-To open the Arduino IDE, execute:
+To set the persistent radio chip configuration for a new Arduino board, connect to the PC with an USB cable, execute \hg{screen /dev/tty0} in terminal, and enter the following commands substituting the appropriate group number and radio frequency band:
+
 \begin{lstlisting}
-$ arduino
++++
+ATID0015
+ATAC
+ATRP1
+ATAC
+ATCN80
+ATAC
+ATWR
+ARDN
 \end{lstlisting}
 
-You'll need to add three libraries which can be found under \texttt{arduino/} in the project directory: \textit{ArduinoSerialCommand}, \textit{SDPArduino}, \textit{SimpleTimer}. In order to add a library, go to:
-\begin{lstlisting}
-Sketch -> Import Library... -> Add Library... and choose the library folder you want to import.
-\end{lstlisting}
+To close \hg{screen}, press \textit{Ctrl+A} and then \textit{X}. The identical steps have to be performed for a new RF stick.
+
+To program the Arduino to receive and execute messages, open the Arduino IDE by executing \hg{arduino} in terminal. You'll need to add three libraries which can be found under \texttt{arduino/} in the project directory: \textit{ArduinoSerialCommand}, \textit{SDPArduino}, \textit{SimpleTimer}. In order to add a library, go to
+\hg{Sketch -> Import Library... -> Add Library...} and choose the library directory you want to import. Then open the Arduino file \texttt{arduino/arduino.ino} using \hg{File -> Open...} and upload it to the board using \hg{File -> Upload}.
 
 \section{Hardware overview}
 
@@ -89,112 +102,151 @@ First thing you would need to do to be able to communicate to Venus, is to conne
 In order to swap the batteries, take them out, put them to charge and insert
 the new batteries into the battery pack. Easy!
 
-\section{Running instructions}
+\section{Software overview}
 
-Run the command in the terminal from the project root directory if it has not been done already to enter the Python virtual environment:
-\begin{lstlisting}
-source env/bin/activate
-\end{lstlisting}
-Then, in order to be able to send commands the robot:
-\begin{lstlisting}
-python main.py
-\end{lstlisting}
-Executing \textit{main.py} makes a connection to the RF stick and to the vision feed automatically. After that you should be able to send commands to the robot (make sure the RF stick is plugged in).
-In order to change the room of the pitch (0 - 3.D03, 1 - 3.D04) and colors of your robot, change hard-coded values in \textit{vision} method in \textit{/control/commands.py}. For example if you are in room 3.D04 and your robot has yellow team-color and one green dot, change as follows:
-\begin{lstlisting}
-def vision(self, room_num=1, team_color='yellow', our_color='green')
-\end{lstlisting}
-\bigskip
+\subsection{Running instructions}
 
-\textbf{NB} In case you make changes to Arduino code, you should upload your changes to the board!
-\bigskip
-
-The list of possible commands is below (this is for milestone 3 and some basic commands, will be changed later):
-\bigskip
-\begin{itemize}
-
-\item To move forward and turn (negative values will change the direction):
+Run the following command in the terminal from the project root directory if it has not been done already to enable the Python virtual environment which contains the required libraries:
 \begin{lstlisting}
-f <distance>
-c <degrees>
+$ source env/bin/activate
 \end{lstlisting}
 
-\item To engage the grabber:
+In order to set the room containing the pitch, colors of the robot, and side of the goal, change the hard-coded parameters of \textit{init} method in \textit{control/holonomic.py} as detailed in Table \ref{tab:params}.
+For example, if the room is 3.D04, the robot has the yellow team color and one green-coloured dot, and the robot is defending the goal closer to the computers, the line would be:
 \begin{lstlisting}
-g
+def init(self, room_num=1, team_color='yellow', our_color='green', computer_goal=True):
 \end{lstlisting}
 
-\item To kick the ball:
+\begin{table}[h!]
+\centering
+\begin{tabular}{ | l | l | l | l | l | l | l | l | }
+    \cline{1-2} \cline{4-4} \cline{6-6} \cline{8-8}
+    Room & \texttt{room\_num} & & \texttt{team\_color} & & \texttt{our\_color} & & \texttt{computer\_goal} \\ 
+    \cline{1-2} \cline{4-4} \cline{6-6} \cline{8-8}
+    3.D03 & 0 & & 'yellow' & & 'green' & & True \\ 
+    \cline{1-2} \cline{4-4} \cline{6-6} \cline{8-8}
+    3.D04 & 1 & & 'blue' & & 'pink' & & False \\ 
+    \cline{1-2} \cline{4-4} \cline{6-6} \cline{8-8}
+\end{tabular}
+\caption{Allowed parameters for the \textit{init} method}
+\label{tab:params}
+\end{table}
+
+Then ensure that the RF stick is plugged in. To start the application, make connections to the RF stick, vision feed, and get access to the command prompt, execute the following line:
 \begin{lstlisting}
-kick <distance>
+$ python main.py
 \end{lstlisting}
 
-\item To release the grabber (two modes):
-\begin{lstlisting}
-open_narrow
-open_wide
-\end{lstlisting}
+\textbf{NB}: In case you make changes to the Arduino code, you should upload your changes to the board as detailed in Section \ref{setup}.
 
-\item To stop all the motors:
-\begin{lstlisting}
-s
-\end{lstlisting}
+Then the operator of the robot can start entering the commands. The main command is \hg{hs} which starts the strategy. The listing of all commands is provided in Table \ref{tab:commands}.
 
-\item For catching the ball:
-\\The robot detects where the ball is, turns in that direction and opens the grabber. When the ball is kicked towards the robot, it grabs it. In case the ball bounces off, the robot starts moving in order to grab the ball.
-\bigskip
+\begin{table}[h!]
+\centering
+\begin{tabular}{ | p{9cm} | p{6.2cm} | }
+    \hline
+    Constantly run the strategy state machine &
+    \small{\texttt{hs}} \\ \hline
+%    Set configuration values &
+%    \small{\texttt{init room\_num team\_color our\_color computer\_goal}} \\ \hline
+%    Connect to the RF stick &
+%    \small{\texttt{connect}} \\ \hline
+%    Start the vision &
+%    \small{\texttt{vision}} \\ \hline
+    Output a picture of the potential field of the state &
+    \small{\texttt{map state\_name}} \\ \hline
+    Perform a holonomic motion (angles in degrees) &
+    \small{\texttt{move direction\_angle turn\_angle}} \\ \hline
+    Move forward (in cm, negative means backward) &
+    \small{\texttt{f distance}} \\ \hline
+    Rotate clockwise (in degrees, negative means anticlockwise) &
+    \small{\texttt{c angle}} \\ \hline
+    Stop all motors &
+    \small{\texttt{s}} \\ \hline
+    Open the grabber &
+    \small{\texttt{o}} \\ \hline
+    Close the grabber &
+    \small{\texttt{g}} \\ \hline
+    Perform a spin kick &
+    \small{\texttt{ee}} \\ \hline
+    Print world state &
+    \small{\texttt{w}} \\ \hline
+    Query light sensor &
+    \small{\texttt{query\_ball}} \\ \hline
+    Pass the ball to the teammate &
+    \small{\texttt{pass\_ball}} \\ \hline
+    Catch the ball coming from the teammate &
+    \small{\texttt{catch\_ball}} \\ \hline
+    Kick the ball to the goal &
+    \small{\texttt{goal}} \\ \hline
+    Exit the application &
+    \small{\texttt{exit}} \\ \hline
+\end{tabular}
+\caption{Commands available for the operator of the robot}
+\label{tab:commands}
+\end{table}
 
-\begin{lstlisting}
-catch_ball
-\end{lstlisting}
-\newpage
+To catch the ball from the teammate, the robot turns towards the teammate and opens its grabber. When the ball is kicked towards the robot, the ball is grabbed. In case the ball bounces off, the robot starts moving to grab the ball. To pass the ball to the teammate, the robot turns towards the teammate and kicks the ball. The kick distance of the ball is calculated so that the ball can successfully reach the teammate.
 
-\item To catch the ball and then pass it to the teammate:
-\\Venus turns towards the ball and opens the grabber, then when it grabs the ball, it turns to the teammate robot and kicks the ball (the distance by which the ball should be kicked is calculated such that the ball can reach the teammate robot).
-\begin{lstlisting}
-catch_pass
-\end{lstlisting}
+\subsection{Calibration of the vision} \label{calibration}
 
-\item To intercept the ball that is passed between two opposite team robots:
-\\The robot goes to the closest point from itself on the line between two enemy robots.
-\begin{lstlisting}
-intercept
-\end{lstlisting}
+copy over from spec
 
-\item To block the goal:
-\begin{lstlisting}
-block_goal
-\end{lstlisting}
+\subsection{Handling} \label{handling}
 
-Later, this part should look more like what should be done in order to fully prepare robot for the game, and things like commands/strategy will be described in the technical specifications.
+Handle the robot with care. It is advisable not to lose the top plate during the game. It can be secured properly to the robot using Blu-Tack. Before playing a match, ensure that the spin-kick, going forward, and turning are calibrated. It can be done by repeatedly executing the respective commands with different input values, changing the data points in the \texttt{calibration.ods} spreadsheet, and changing the equations in \texttt{ee}, \texttt{f}, and \texttt{c} methods in \texttt{control/holonomic.py} to respective new computed equations from the spreadsheet. Another important action is checking whether the light sensor threshold correctly identifies the grabbed ball and lack thereof. The threshold is defined in \texttt{query\_ball} method in \texttt{control/holonomic.py}.
 
-\end{itemize}
+\textbf{NB}: If another robot is doing the kick-off in a game, do not start the strategy by typing \hg{hs} before that robot performs the kick-off.
 
 \section{Troubleshooting guide}
-\textbf{Problem 1} When trying to upload the code to the Arduino board, you get the error message below.
+
+\textbf{Problem 1}: When uploading the code to the Arduino board, the following error message appears:
 \begin{lstlisting}
 processing.app.SerialNotFoundException: Serial port '<port>' not found. Did you select the right one from the Tools > Serial Port menu?
 \end{lstlisting}
 
+\textbf{Solution}: Make sure you are not running the Python application at the same time or have not opened the serial interface any other way when the changes are being uploaded. The Arduino IDE is only able to program the Arduino when the serial interface of the RF stick or Arduino itself is registered as \texttt{/dev/ttyACM0} on the PC. If there are other programs accessing \texttt{/dev/ttyACM0} and the RF stick or USB cable is unplugged and plugged again, the "new" device is issued \texttt{/dev/ttyACM1} instead by the Linux kernel.
+
 \bigskip
 
-\textbf{Solution}  It can't detect the Arduino board. Make sure it's connected to the computer through the RF stick or the cable. If it is, disconnect and connect again, or power the board off and on again. The Arduino IDE is only able to program the Arduino when the serial interface of the RF stick or Arduino itself is registered as \texttt{/dev/ttyACM0} on the PC, that is, zeroth device. Also, make sure you are not running 'python control/control.py' or have not opened the serial interface any other way when you're uploading the changes.
+\textbf{Problem 2}: When sending commands the robot does not respond to any commands although it should move.
+
+\textbf{Solution}: Power cycle the Arduino board.
+
 \bigskip
 
-\textbf{Problem 2} When sending commands the robot doesn't do anything and you're sure it should move.
-\\\textbf{Solution} Power the Arduino board off and on again.
+\textbf{Problem 3}: The distortion and color ranges vary on different machines and pitches.
+
+\textbf{Solution}: Recalibrate the vision system as detailed in Section \ref{calibration}.
+
 \bigskip
 
-\textbf{Problem 3} We cannot distinguish robots on the video frames, because they are flipping.
+\textbf{Problem 4}: The spin kick is not reliable.
 
-\textbf{Solution} We have implemented a probabilistic way of detecting robots, so that we can see them even when not all colors are detected (more details on that in technical specifications).
+\textbf{Solution}: Recalibrate the spin kick as detailed in Section \ref{handling}.
+
 \bigskip
 
-\textbf{Problem 4} The distortion varies on different machines/pitches.
-\\\textbf{Solution} It is still ongoing problem, we are working to make it more accurate.
+\textbf{Problem 5}: The Python application cannot connect to the RF stick because the RF stick has registered itself as \texttt{/dev/ttyACM1}.
+
+\textbf{Solution}: Either close all programs that have handles to \texttt{/dev/ttyACM0} and reconnect the RF stick or change the \texttt{device\_no} parameter in the \texttt{connect} method in \texttt{control/holonomic.py} to 1 and restart the Python application.
+
 \bigskip
 
-\textbf{Problem 5} The kicker is not reliable. Sometimes the kick is not straight.
-\\\textbf{Solution} It is still ongoing problem, we are working to make it more accurate.
+\textbf{Problem 6}: The robot moves unusually slow.
+
+\textbf{Solution}: Change the battery set to a fully charged one.
+
+\bigskip
+
+\textbf{Problem 7}: The commands are evidently sent but the robot does not move.
+
+\textbf{Solution}: Power cycle the Arduino. If that does not help, change the battery set to a fully charged one.
+
+\bigskip
+
+\textbf{Problem 8}: The freshly charged batteries are hot.
+
+\textbf{Solution}: Do not put such battery set into the Arduino as the motions will not be reliable. Wait for them to cool down and obtain another set instead.
 
 \end{document}
