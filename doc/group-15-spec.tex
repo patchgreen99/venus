@@ -8,6 +8,8 @@
 \usetikzlibrary{shapes.geometric, arrows}
 \graphicspath{ {images/} }
 
+\tikzstyle{module} = [rectangle, rounded corners, minimum width=2cm, minimum height=1.2cm,text centered, draw=black, fill=red!30, text width=3.5cm]
+
 \tikzstyle{startstop} = [rectangle, rounded corners, minimum width=1.5cm, minimum height=.8cm,text centered, draw=black, fill=red!30]
 \tikzstyle{io} = [trapezium, trapezium left angle=70, trapezium right angle=110, minimum width=1cm, minimum height=.8cm, text centered, draw=black, fill=blue!30, inner sep=.2cm]
 \tikzstyle{process} = [rectangle, minimum width=3cm, minimum height=.8cm, text centered, draw=black, fill=orange!30, text width=3.5cm]
@@ -178,13 +180,50 @@ The grabber for the previous design consisted of two symmetric parts placed one 
 
 \section{Documentation of the code}
 
-The high-level overview of the system structure can be found in Figure \ref{fig:strategy}. It is not fully implemented yet.
+\begin{figure}[ht!]
+\centering
+\begin{tikzpicture}[node distance=1.7cm]
 
-\begin{figure}
-    \includegraphics[scale=.7]{Diagram2}
-    \caption{High level diagram of the system structure}
-    \label{fig:strategy}
+\node (main) [module] {\textit{main.py}};
+\node (prompt) [module, below of=main] {\textit{run\_prompt} in \textit{prompt.py}};
+\draw [arrow] (main) -- (prompt);
+\node (commands) [module, below of=prompt] {Commands in \textit{holonomic.py}};
+\draw [arrow] (prompt) -- (commands);
+\node (protocol) [module, left of=commands, xshift=-2.8cm] {Protocol in \textit{protocol.py}};
+\draw [arrow] (commands) -- (protocol);
+\node (serial) [module, left of=protocol, xshift=-2.8cm] {External \textit{serial} module};
+\draw [arrow] (protocol) -- (serial);
+
+\node (world) [module, below of=commands, yshift=-1.7cm] {Shared state in \textit{world.py}};
+\draw [arrow] (commands) -- (world);
+
+\node (vision) [module, right of=commands, xshift=2.8cm] {Vision in \textit{vision.py} (separate process)};
+\draw [arrow] (commands) -- (vision);
+\draw [arrow] (vision.320) |- ++(0, -2.792cm) -- (world);
+
+\node (moves) [module, below of=commands, xshift=2.5cm, text width=3.8cm] {Simple moves in \textit{simple\_holonomic.py}};
+\draw [arrow, <->] (commands) -- (moves);
+
+\node (state) [module, below of=commands, xshift=-2.3cm] {State machine in \textit{highstrategy.py}};
+\draw [arrow, <->] (commands) -- (state);
+\draw [arrow] (state) -- (moves);
+\draw [arrow] (state) -- (world);
+
+\node (game) [module, below of=commands, xshift=-7.1cm] {Field definitions of states in \textit{game.py}};
+\draw [arrow, <->] (commands) -- (game);
+\draw [arrow] (state) -- (game);
+\draw [arrow] (game) -- (world);
+\node (field) [module, below of=game] {Collection of fields in \textit{potential\_field.py}};
+\draw [arrow] (game) -- (field);
+\node (pot) [module, below of=field] {Individual fields in \textit{potentials.py}};
+\draw [arrow] (field) -- (pot);
+
+\end{tikzpicture}
+\caption{Dependency graph of Python modules in the system}
+\label{fig:overview}
 \end{figure}
+
+The code is subdivided into several Python modules as seen in Figure \ref{fig:overview}. The module \textit{main} is used to launch the \textit{prompt} module. The commands in the prompt are provided by the \textit{commands} module. It creates instances of protocol, vision, and state machine objects from the respective modules. The vision object is run on a separate thread to process frames asynchronously with constantly updated shared world state kept in a \textit{World} object. At the same time the prompt is provided for the user. The command to run the strategy is called \texttt{hs} and it constantly queries the state machine in the \textit{highstrategy} module. The state machine checks the world state to decide which state it is currently in and then performs the associated action. It is done either by handing over the execution to \textit{game} module to construct a potential field and perform the best action based on it or performing a predefined move from the \textit{simple\_holonomic} module. 
 
 \subsection{Communications}
 
