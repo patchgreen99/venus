@@ -8,15 +8,16 @@
 \usepackage{color}
 \usepackage{graphicx}
 \usepackage{parskip}
-\usepackage{titling}
+%\usepackage{titling}
 
 \graphicspath{ {images/} }
 
 \definecolor{dkgreen}{rgb}{0,0.6,0}
 \definecolor{gray}{rgb}{0.5,0.5,0.5}
 \definecolor{mauve}{rgb}{0.58,0,0.82}
+\definecolor{lightgray}{rgb}{0.95,0.95,0.95}
 
-\lstset{frame=tb,
+\lstset{%frame=tb,
   language=bash,
   aboveskip=3mm,
   belowskip=3mm,
@@ -30,7 +31,8 @@
   stringstyle=\color{mauve},
   breaklines=true,
   breakatwhitespace=true,
-  tabsize=3
+  tabsize=3,
+  backgroundcolor=\color{lightgray}
 }
 
 \begin{document}
@@ -41,7 +43,7 @@
     \includegraphics[scale=.18]{logo.png}
 \end{figure}
 
-\setlength{\droptitle}{-4em}
+%\setlength{\droptitle}{-4em}
 \maketitle
 
 \section{Installation}
