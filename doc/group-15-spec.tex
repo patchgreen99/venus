@@ -225,6 +225,8 @@ The grabber for the previous design consisted of two symmetric parts placed one 
 
 The code is subdivided into several Python modules as seen in Figure \ref{fig:overview}. The module \textit{main} is used to launch the \textit{prompt} module. The commands in the prompt are provided by the \textit{commands} module. It creates instances of protocol, vision, and state machine objects from the respective modules. The vision object is run on a separate thread to process frames asynchronously with constantly updated shared world state kept in a \textit{World} object. At the same time the prompt is provided for the user. The command to run the strategy is called \texttt{hs}. This command constantly queries the state machine in the \textit{highstrategy} module. The state machine checks the world state to decide which state it is currently in and then performs the associated action. It is done either by handing over the execution to \textit{game} module to construct a potential field and perform the best action based on it or performing a predefined move from the \textit{simple\_holonomic} module.
 
+All code except the colour calibration user interface in the \textit{vision} module is an original work. Libraries used are \textit{pyserial}, \textit{numpy}, \textit{scipy}, and \textit{OpenCV}.
+
 \subsection{Communications}
 
 The communication interface between the Arduino and PC is low level as the PC decides and specifies the individual motor numbers and rotary encoder value or time duration for which they will be powered. Then the Arduino sends acknowledgement to the PC about the arrival of the command, turns the motors on, and sets the specified timeouts to stop them. The messages are human-readable, newline-terminated and tokens inside them are separated by spaces. The specified motor power can be negative, in which case it means backwards direction. Each message which changes the state of the robot has a sequence number and checksum that are checked in the Arduino. The messages used in the protocol are listed in Table \ref{tab:messages}. The communication messages are constructed in the \textit{Protocol} class using methods named after the corresponding message in \texttt{control/protocol.py} and these are used in the motion commands in \texttt{control/holonomic.py}.
@@ -316,7 +318,9 @@ a function every 5 ms that queries the rotary encoder board and stops the motors
 when the average of all four motor rotary encoder values reaches the target value. These approaches using timers
 allows the robot to receive commands asynchronously, that is, a command is not
 blocking during its execution and the PC software could, for example, send another command simultaneously to engage the kicker while the robot is in motion.
-The message handling is defined in \texttt{arduino/arduino.ino} file.
+The Arduino message handling is located in \texttt{arduino/arduino.ino} file.
+
+A buffer of upcoming motor jobs has also been implemented in the Arduino code to ensure continuous motion but it was deemed unnecessary as vision could issue new commands quickly enough without the robot coming to halt. The current implementation also never stops a motor when a new command arrives for the same motor, instead it just executes the new command, ensuring continuous motion.
 
 \subsection{Vision}
 
@@ -372,12 +376,20 @@ Each NXT motor is connected to the rotary encoder board which is depicted in Fig
 
 \subsection{Light sensor}
 
-The light sensor is located above the grabber. It is used to check whether
+The light sensor is located above the grabber as seen in Figure \ref{fig:sensor}. It is used to check whether
 the robot has successfully acquired the ball after grabbing. The sensor
 provides an integer value that increases the greater the distance to the
 nearest object in its direct line of sight is. Then the Arduino compares the integer
-to a predefined threshold corresponding to the red ball. Sometimes, a white
+to a predefined threshold corresponding to the red ball. Sometimes a white
 line inside the pitch can be mistaken for the ball due to their similar sensor
-values.
+values. An IR sensor was also tested and its returned values were deemed less reliable than
+those of the light sensor.
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[scale=.1]{sensor1}
+\caption{The light sensor with the ball grabbed}
+\label{fig:sensor}
+\end{figure}
 
 \end{document}
