@@ -1,33 +1,67 @@
-\documentclass[12pt]{article}
-\usepackage[a4paper,bindingoffset=0.2in,
-            left=1in,right=1in,top=1in,bottom=1in,
-            footskip=.25in]{geometry}
+\documentclass[a4paper,12pt]{article}
+\usepackage[margin=.9in]{geometry}
 \usepackage{graphicx}
 \usepackage{parskip}
-\usepackage{titling}
-
+%\usepackage{titling}
+\usepackage[utf8]{inputenc}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows}
 \graphicspath{ {images/} }
 
-\title{Technical Specification}
-\author{SDP Group 15-H}
+\tikzstyle{startstop} = [rectangle, rounded corners, minimum width=1.5cm, minimum height=.8cm,text centered, draw=black, fill=red!30]
+\tikzstyle{io} = [trapezium, trapezium left angle=70, trapezium right angle=110, minimum width=1cm, minimum height=.8cm, text centered, draw=black, fill=blue!30, inner sep=.2cm]
+\tikzstyle{process} = [rectangle, minimum width=3cm, minimum height=.8cm, text centered, draw=black, fill=orange!30, text width=3.5cm]
+\tikzstyle{decision} = [diamond, minimum width=3cm, minimum height=.8cm, text centered, draw=black, fill=green!30, text width=1.8cm, aspect=1.8, inner sep=0]
+\tikzstyle{arrow} = [thick,->,>=stealth]
 
 \begin{document}
+\begin{titlepage}
+    \begin{center}
+        \vspace*{1cm}
+        
+        \Huge
+        \textbf{Technical Specification}
+        
+        \vspace{0.5cm}
+        \LARGE
+        SDP Group 15-H
+        
+        \vspace{1.5cm}
+        \normalsize
+        Julijonas Kikutis\\ 
+		Patrick Green\\
+		Aseem Narang\\
+		Ankit Sonkar\\
+		David McArthur\\
+		Emilia Bogdanova
+        
+        \vfill
+        
+        
+        \vspace{0.8cm}
+        
+        \begin{figure}
+    	\vspace*{-3em}
+    	\centering
+    	\includegraphics[scale=.30]{logo.png}
+		\end{figure}
+        
+        \Large
+        University of Edinburgh\\
+        
+    \end{center}
+\end{titlepage}
 
-\begin{figure}
-    \vspace*{-3em}
-    \centering
-    \includegraphics[scale=.18]{logo.png}
-\end{figure}
+\tableofcontents
 
-\setlength{\droptitle}{-4em}
-\maketitle
+\newpage
 
-\section{System Architecture}
+\section{System architecture}
 
 Venus has gone through several stages of changes. The earliest prototype had four regular wheels as seen in Figure \ref{fig:robot0}. This made us realise that we have to keep in mind the space
 constraints when building the base as we need to accommodate not only the motors
 for the wheels but also the kicking and grabbing mechanism. 
-\\The next more sophisticated design was a robot with four powerful kickers that used elastics as seen in Figure \ref{fig:robot3}. The idea was to stretch elastics for all four kickers using the star shape element on top of the robot as seen in the picture and then release, this gave a lot of energy to the ball. However, this design had a disadvantage because the robot was not able to kick the ball for varying distances, which was an essential requirement for the first milestone. Moreover, the dimensions of the robot were exceeding the maximum size limits and the speed of the ball was exceeding the one allowed in the game rules. 
+\\The next, more sophisticated design, was a robot with four powerful kickers that used elastics as seen in Figure \ref{fig:robot3}. The idea was to stretch elastics for all four kickers using the star shape element on top of the robot as seen in the picture and then release. This gave a lot of energy to the ball. However, this design had a disadvantage because the robot was not able to kick the ball for varying distances, which was an essential requirement for the first milestone. Moreover, the dimensions of the robot were exceeding the maximum size limits and the speed of the ball was exceeding the one allowed in the game rules. 
 
 \begin{figure}[h]
 	\centering
@@ -48,9 +82,9 @@ for the wheels but also the kicking and grabbing mechanism.
 
 Taking all the disadvantages of previous designs into account we came up with a new design as seen in Figures \ref{fig:open} and \ref{fig:closed}. Advantage of this design is that it is simple and at the same time the robot can still move fast enough to play football and the power of the kicks can be precisely controlled. 
 
-The grabbing mechanism of the latest design went through two iterations of development.
+The grabbing mechanism for this design went through two iterations of development.
 The first grabber we developed was falling down on the ball in order to catch it, thus was deemed not suitable because it obstructed the ball more than it was allowed by the football game rules. Venus also had difficulties at placing the ball in front of the kicker at initial kicking position, because the grabber pushed it
-too far inside the kicker. Thus, the grabber was replaced by the newest design depicted in Figure \ref{fig:open} which has two symmetrical grabbers that interlock when the robot is moving to conserve space and are able to reach a more distant ball.
+too far inside the kicker. Thus, the grabber was replaced by the newer design depicted in Figure \ref{fig:open} which has two symmetrical grabbers that interlock when the robot is moving to conserve space and are able to reach a more distant ball.
 
 \begin{figure}[ht]
 	\centering
@@ -69,6 +103,7 @@ too far inside the kicker. Thus, the grabber was replaced by the newest design d
 	\end{minipage}
 \end{figure}
 
+After playing the first friendly, we have realized that Venus isn't fast enough comparing to other robots. We decided to start the design from scratch again. Our latest design has four holonomic wheels, which allow Venus to move fast and also in different directions (Figure FIGURE). We had also refused of using any kickers, because none of the kickers we thought of, could fit with four NXT motors. Venus kicks using its grabber and spinning action. The design of the grabber hasn't changed much from the previous time. 
 
 When we were satisfied with the look of Venus, we also made all cables look neat using elastics. We also ensured that we can still access the battery pack and Arduino board if needed as seen in Figure \ref{fig:battery}.
 
@@ -76,7 +111,7 @@ When we were satisfied with the look of Venus, we also made all cables look neat
 	\centering
 	\begin{minipage}[b]{.48\textwidth}
         \centering
-		\includegraphics[scale=.065,angle=-90]{battery.jpg}
+		\includegraphics[scale=.065]{battery1.jpg}
 		\caption{Battery pack easily accessible}
 		\label{fig:battery}
 	\end{minipage}
@@ -91,17 +126,20 @@ When we were satisfied with the look of Venus, we also made all cables look neat
 \end{figure}
 
 
-\section{Hardware}
+\section{Hardware components}
 
 \subsection{Wheels}
-The current design has two main driving wheels and one holonomic wheel placed sideways at the back which allows the robot to turn as well as does not cause problems moving backwards and
-forwards due to its holonomic property. All three wheels are powered by NXT motors.
+Could you be more descriptive? i.e. why you decided to build it like that ? Why mixture of wheel types ? How the robot can turn? what kind of problems you were trying to omit ? It is a far to short and vague description.  Since your robot has four holonomic wheels now, could you describe why it is a four-wheeled robot now? What is the main feature, advantage of the holonomic property? What is exactly this property.  What are NXT motors ? how they work?
+
+
+The current design has four holonomic wheels, which allows Venus to move in any direction. All wheels are powered by NXT motors.
+
 \subsection{Kicker}
 Even though the idea of the kicker that uses elastics was appealing as this made
 the kick more powerful, it was almost impossible to predict the distance the
-ball will travel. Because of that the new design has a
-kicker that is powered by an NXT motor with gears. The kicker operates by going backwards inside the robot from the starting low position as seen in Figures \ref{fig:kicker}-\ref{fig:kicker_back} and then kicks
-forwards and touches the ball.
+ball will travel. Because of that the newer design had a
+kicker that was powered by an NXT motor with gears. The kicker operated by going backwards inside the robot from the starting low position as seen in Figures \ref{fig:kicker}-\ref{fig:kicker_back} and then kicked
+forwards and touched the ball.
 \begin{figure}[ht]
 	\centering
 	\begin{minipage}[b]{.3\textwidth}
@@ -126,54 +164,131 @@ forwards and touches the ball.
 	\end{minipage}
 	
 \end{figure}
+
+Our newest design doesn't have a kicker. The kick is made by turning  the robot and opening the grabber at the same time. This creates a momentum necessary to make a kick (Figure \ref{fig:kick_action}). 
+\begin{figure}
+    \includegraphics[scale=.7]{kick}
+    \caption{High level diagram of how the kick is performed}
+    \label{fig:kick_action}
+\end{figure}
+
+
 \subsection{Grabber}
-The grabber consists of two symmetric parts placed one a bit above the other and is placed on the sides of the front part of the robot. They interlock when the robot needs to catch the ball and we also keep them in a closed position during movements without the ball. We open the grabber only before catching. This ensures that the grabber don't get broken against other robots or walls. The grabber is powered by a single Electric Technic Mini-Motor 9v with gears as seen on Figure \ref{fig:gears}. We have used two bevel gears in order to be able to move grabbers with motor being on top of the robot. 
+The grabber for the previous design consisted of two symmetric parts placed one a bit above the other and was placed on the sides of the front part of the robot (Figure \ref{fig:gears}). They interlocked when the robot needs to catch the ball and we also kept them in a closed position during movements without the ball. We opened the grabber only before catching. This ensured that the grabber don't get broken against other robots or walls. We have used two bevel gears in order to be able to move grabbers with motor being on top of the robot. The current design of the grabber doesn't differ much and can be seen in Figure FIGURE. The grabber is powered by a single Electric Technic Mini-Motor 9v with gears.
 
 \section{Documentation of the code}
 
+The high-level overview of the system structure can be found in Figure \ref{fig:strategy}. It is not fully implemented yet.
+
+\begin{figure}
+    \includegraphics[scale=.7]{Diagram2}
+    \caption{High level diagram of the system structure}
+    \label{fig:strategy}
+\end{figure}
+
 \subsection{Communications}
 
-The communication interface between the Arduino and PC is low level, that is,
+The communication interface between the Arduino and PC is low level as
 the PC decides and specifies the individual motor numbers and rotary encoder
-values or time durations for which they are going to be powered. Then the robot
-turns the motors on, sets the timeouts to stop them, and notifies the PC about
-finishing starting the motors.
-\\The messages are human-readable, newline-terminated and tokens inside them are
-separated by spaces. The following messages are available:
+value or time duration for which they will be powered. Then the Arduino
+sends acknowledgement to the PC about the arrival of the command, turns the
+motors on, and sets the specified timeouts to stop them.
+The messages are human-readable, newline-terminated and tokens inside them are
+separated by spaces. The specified motor power can be negative, in which case it means backwards direction. Each message which changes the state of the robot has a sequence number and checksum that are checked in the Arduino. The messages used in the
+protocol are listed in Table \ref{tab:messages}.
 
+The communication messages are constructed in \texttt{Protocol} class in \texttt{protocol.py} and used in motion functions in \texttt{holonomic.py}.
+The PC currently provides a simple command line interface. We use commands specified in the user guide such as \texttt{f 100} meaning 'go forwards 100 meters' that are mapped to communication messages, in our python code. We then are able to run this code from the command line.
+
+\begin{table}[h!]
+\centering
 \begin{tabular}{ | l | l | }
     \hline
     Rotate the motors for $n$ ms &
-    \texttt{M <n> <motorCount> <no> <power>...} \\ \hline
-    Rotate the motors until $n$ rotary value &
-    \texttt{R <n> <motorCount> <no> <power>...} \\ \hline
+    \small{\texttt{M seqNo checksum n motorNo power...}} \\ \hline
+    Rotate the motors for $n$ rotary values &
+    \small{\texttt{R seqNo checksum n motorNo power...}} \\ \hline
+    Rotate the motors indefinitely &
+    \small{\texttt{V seqNo checksum motorNo power...}} \\ \hline
     Stop all motors &
-    \texttt{S} \\ \hline
+    \small{\texttt{S seqNo checksum}} \\ \hline
+    Return \texttt{D} if all motors are stopped &
+    \small{\texttt{I}} \\ \hline
+    Handshake, reset the sequence number &
+    \small{\texttt{H}} \\ \hline
+    Query light sensor, return \texttt{D} or \texttt{N} &
+    \small{\texttt{A threshold}} \\ \hline
     Transfer a byte to I2C bus &
-    \texttt{T <byteInDecimalASCII>} \\ \hline
+    \small{\texttt{T byteInDecimalASCII}} \\ \hline
 \end{tabular}
-
-The specified motor power can be negative, in which case it means backwards
-direction.
+\caption{Messages available in the protocol}
+\label{tab:messages}
+\end{table}
 
 \subsection{Arduino}
 
-Arduino code uses \textit{SDPArduino} library to interact with the motors.
-It also uses \textit{SerialCommand} library to buffer and tokenize the
-commands received over the serial link. As seen before, there are two methods to
-specify when to stop the motor: either time value or rotary encoder value.
-In the case of time value a timeout is set to stop each single motor using
+\begin{figure}[ht!]
+\centering
+\begin{tikzpicture}[node distance=1.2cm]
+
+\node (inCmd) [io] {Read command and arguments with \textit{SerialCommand}};
+\node (decType) [decision, below of=inCmd, yshift=-.7cm] {Type of command};
+\draw [arrow] (inCmd) -- (decType);
+
+\node (decCheck1) [decision, left of=decType, xshift=-4cm] {Check checksum};
+\draw [arrow] (decType) -- node [anchor=south, text width=3cm, text centered] {Move for rotary value (\texttt{R})} (decCheck1);
+\node (stop1) [startstop, below of=decCheck1, xshift=-2cm] {Stop};
+\draw [arrow] (decCheck1) -- node [anchor=south east, yshift=-.1cm, xshift=-.1cm] {Invalid} (stop1);
+\node (motors1) [process, below of=decCheck1, yshift=-1.3cm, text width=3.5cm] {Start motors with \textit{SDPArduino}};
+\draw [arrow] (decCheck1) -- node [anchor=east] {Valid} (motors1);
+\node (target) [process, below of=motors1] {Set target average};
+\draw [arrow] (motors1) -- (target);
+\node (decTarget) [decision, below of=target, yshift=-1cm] {Is target reached?};
+\draw [arrow, dashed] (target) -- node [anchor=west] {On next timeout} (decTarget);
+\draw [arrow] (decTarget.west) |- node [anchor=east, xshift=-.4cm, yshift=.5cm] {No} ++(-.3cm, 0)
+                               |- ++(0, 1.2cm)
+                               -- ++(1.9cm, 0);
+\node (stopMotors1) [process, below of=decTarget, yshift=-.5cm] {Stop motors};
+\draw [arrow] (decTarget) -- node [anchor=east] {Yes} (stopMotors1);
+
+
+\node (decCheck2) [decision, below of=decType, yshift=-1.2cm] {Check checksum};
+\draw [arrow] (decType) -- node [anchor=east] {Move for time value (\texttt{M})} (decCheck2);
+\node (stop2) [startstop, below of=decCheck2, xshift=-2cm] {Stop};
+\draw [arrow] (decCheck2) -- node [anchor=south east, yshift=-.1cm, xshift=-.1cm] {Invalid} (stop2);
+\node (motors2) [process, below of=decCheck2, yshift=-1.3cm, text width=3.5cm] {Start motors with \textit{SDPArduino}};
+\draw [arrow] (decCheck2) -- node [anchor=east] {Valid} (motors2);
+\node (timeouts) [process, below of=motors2] {Set timeouts};
+\draw [arrow] (motors2) -- (timeouts);
+\node (stopMotors2) [process, below of=timeouts, yshift=-.3cm] {Stop motors};
+\draw [arrow, dashed] (timeouts) -- node [anchor=west] {After timeout expires} (stopMotors2);
+
+\node (req) [io, right of=decType, xshift=4cm, text width=2.5cm] {Request from digital port};
+\draw [arrow] (decType) -- node [anchor=south, text width=3cm, text centered] {Query sensor (\texttt{A})} (req);
+\node (decComp) [decision, below of=req, yshift=-1.2cm] {value $>$ threshold};
+\draw [arrow] (req) -- (decComp);
+\node (sendD) [io, below of=decComp, xshift=-1.5cm, yshift=-.5cm] {Send \texttt{D}};
+\draw [arrow] (decComp) -- node [anchor=south east] {Yes} (sendD);
+\node (sendN) [io, below of=decComp, xshift=1.5cm, yshift=-.5cm] {Send \texttt{N}};
+\draw [arrow] (decComp) -- node [anchor=south west] {No} (sendN);
+
+\end{tikzpicture}
+\caption{Flowchart of message processing in the Arduino}
+\label{fig:flow}
+\end{figure}
+
+The Arduino code uses the \textit{SerialCommand} library to buffer and tokenize the
+commands received over the serial link.
+\\Messages changing the world state are sent with a sequence number and checksum which is the sum of all the parameters following it. If the sequence number matches the one from the last command, acknowledgement is sent but no further work is performed for the duplicate message. This handles the situation arising when an acknowledgement from the Arduino does not reach the PC and and the PC generates a duplicate message. If the checksum does not match, the Arduino code ignores the message and does not send an acknowledgement, thus forcing the PC to send the same message again.
+\\In case of the motor move command, the motors are started immediately using the \textit{SDPArduino} library. Then the Arduino schedules when to stop the motors and there are two methods to perform that: either a time value or rotary encoder value. The flowchart for these two methods, along with querying the light sensor, are detailed in Figure \ref{fig:flow}.
+In the case of the time value, a timeout is set to stop each single motor using
 \textit{setTimeout} from the \textit{SimpleTimer} library.
-In the case of rotary encoder value \textit{setInterval} is used which calls
-a callback that queries the rotary encoder board each 30 ms and stops the motors
-that reached the target rotary encoder value. These approaches using timers
+In the case of rotary encoder value, \textit{setInterval} is used which calls
+a function every 5 ms that queries the rotary encoder board and stops the motors
+when the average of all four motor rotary encoder values reaches the target value. These approaches using timers
 allows the robot to receive commands asynchronously, that is, a command is not
-blocking during its execution and the PC software could, for example, decide
-to engage the kicker while the robot is in motion.
-
-\subsection{PC}
-
-The PC currently provides a simple command line interface. We use commands specified in the user guide such as \texttt{f 100} meaning 'go forwards 100 meters' that are mapped to communication messages, in our python code. We then are able to run this code from the command line.  
+blocking during its execution and the PC software could, for example, send another command simultaneously to engage the kicker while the robot is in motion.
+The message handling is defined in \texttt{arduino/arduino.ino} file.
 
 \subsection{Vision}
 
@@ -211,29 +326,28 @@ This ensures that we are able to detect robots even if at some point we cannot d
 
 We restrict the number of circles of each color we want to detect, e.g. 2 blue, 2 yellow, 8 green etc. For red, it is 9, because we are likely to think that pink is red. If at any point we are not able to see any red spots, we decide that the ball is underneath one of the robots or not on the pitch. If we can see the spot that is not part of the robots detected earlier, we store ball's position as a stack that has centres of mass of the ball for the last 6 frames (every time new value comes in, last one is popped). We check the first and the last values in this stack. If their difference is more than 10 pixels, then the ball is moving and we draw its trajectory.  
 
-\subsection{Planning}
-
-TBD
-
 \subsection{Strategy}
 
-The high-level overview of the system structure can be found in Figure \ref{fig:strategy}. It is not fully implemented yet.
-\begin{figure}
-    \includegraphics[scale=.7]{Diagram2}
-    \caption{High level diagram of the system structure}
-    \label{fig:strategy}
-\end{figure}
+table with all states
 
 \section{Sensors}
 \subsection{Rotary encoder board}
 
 Each NXT motor is connected to the rotary encoder board. This way the
-information about how many rotations the motor performed since the last query
-is available for the Arduino code. Every 30 ms we query the board and
-check whether we have reached the target value. After the rotary value becomes
-greater or equal to the target value, the appropriate motor is stopped.
+information about the amount of rotations the motor has performed since the last query
+is available for the Arduino code. Every 5 ms the board is queried
+whether the target value has been reached. After the average of the
+rotary values of all four motors becomes greater or equal to the target
+value, the motors are stopped.
 
-\subsection{IR sensor}
+\subsection{Light sensor}
 
-TBD
+The light sensor is located above the grabber. It is used to check whether
+the robot has successfully acquired the ball after grabbing. The sensor
+provides an integer value that increases the greater the distance to the
+nearest object in its direct line of sight is. Then the Arduino compares the integer
+to a predefined threshold corresponding to the red ball. Sometimes, a white
+line inside the pitch can be mistaken for the ball due to their similar sensor
+values.
+
 \end{document}
