@@ -372,12 +372,14 @@ table with all states
 \section{Sensors}
 \subsection{Rotary encoder board}
 
-Each NXT motor is connected to the rotary encoder board. This way the
-information about the amount of rotations the motor has performed since the last query
-is available for the Arduino code. Every 5 ms the board is queried
-whether the target value has been reached. After the average of the
-rotary values of all four motors becomes greater or equal to the target
-value, the motors are stopped.
+Each NXT motor is connected to the rotary encoder board which is depicted in Figure \ref{fig:rotary}. The connections in the anticlockwise order from the top are: the I2C bus to the Arduino, back right motor, back left motor, front left motor, and front right motor. Using this board the information about the amount of rotations the motor has performed since the last query is available for the Arduino code as a separate integer for every motor. Every 5 ms the board is queried whether the target value has been reached. After the average of the rotary values of all four motors becomes greater or equal to the target value, the motors are stopped.
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[scale=.1]{rotary1}
+\caption{The rotary encoder board}
+\label{fig:rotary}
+\end{figure}
 
 \subsection{Light sensor}
 
