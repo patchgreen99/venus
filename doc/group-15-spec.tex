@@ -223,21 +223,11 @@ The grabber for the previous design consisted of two symmetric parts placed one 
 \label{fig:overview}
 \end{figure}
 
-The code is subdivided into several Python modules as seen in Figure \ref{fig:overview}. The module \textit{main} is used to launch the \textit{prompt} module. The commands in the prompt are provided by the \textit{commands} module. It creates instances of protocol, vision, and state machine objects from the respective modules. The vision object is run on a separate thread to process frames asynchronously with constantly updated shared world state kept in a \textit{World} object. At the same time the prompt is provided for the user. The command to run the strategy is called \texttt{hs} and it constantly queries the state machine in the \textit{highstrategy} module. The state machine checks the world state to decide which state it is currently in and then performs the associated action. It is done either by handing over the execution to \textit{game} module to construct a potential field and perform the best action based on it or performing a predefined move from the \textit{simple\_holonomic} module. 
+The code is subdivided into several Python modules as seen in Figure \ref{fig:overview}. The module \textit{main} is used to launch the \textit{prompt} module. The commands in the prompt are provided by the \textit{commands} module. It creates instances of protocol, vision, and state machine objects from the respective modules. The vision object is run on a separate thread to process frames asynchronously with constantly updated shared world state kept in a \textit{World} object. At the same time the prompt is provided for the user. The command to run the strategy is called \texttt{hs}. This command constantly queries the state machine in the \textit{highstrategy} module. The state machine checks the world state to decide which state it is currently in and then performs the associated action. It is done either by handing over the execution to \textit{game} module to construct a potential field and perform the best action based on it or performing a predefined move from the \textit{simple\_holonomic} module.
 
 \subsection{Communications}
 
-The communication interface between the Arduino and PC is low level as
-the PC decides and specifies the individual motor numbers and rotary encoder
-value or time duration for which they will be powered. Then the Arduino
-sends acknowledgement to the PC about the arrival of the command, turns the
-motors on, and sets the specified timeouts to stop them.
-The messages are human-readable, newline-terminated and tokens inside them are
-separated by spaces. The specified motor power can be negative, in which case it means backwards direction. Each message which changes the state of the robot has a sequence number and checksum that are checked in the Arduino. The messages used in the
-protocol are listed in Table \ref{tab:messages}.
-
-The communication messages are constructed in \texttt{Protocol} class in \texttt{protocol.py} and used in motion functions in \texttt{holonomic.py}.
-The PC currently provides a simple command line interface. We use commands specified in the user guide such as \texttt{f 100} meaning 'go forwards 100 meters' that are mapped to communication messages, in our python code. We then are able to run this code from the command line.
+The communication interface between the Arduino and PC is low level as the PC decides and specifies the individual motor numbers and rotary encoder value or time duration for which they will be powered. Then the Arduino sends acknowledgement to the PC about the arrival of the command, turns the motors on, and sets the specified timeouts to stop them. The messages are human-readable, newline-terminated and tokens inside them are separated by spaces. The specified motor power can be negative, in which case it means backwards direction. Each message which changes the state of the robot has a sequence number and checksum that are checked in the Arduino. The messages used in the protocol are listed in Table \ref{tab:messages}. The communication messages are constructed in the \textit{Protocol} class using methods named after the corresponding message in \texttt{control/protocol.py} and these are used in the motion commands in \texttt{control/holonomic.py}.
 
 \begin{table}[h!]
 \centering
@@ -316,10 +306,9 @@ The PC currently provides a simple command line interface. We use commands speci
 \label{fig:flow}
 \end{figure}
 
-The Arduino code uses the \textit{SerialCommand} library to buffer and tokenize the
-commands received over the serial link.
-\\Messages changing the world state are sent with a sequence number and checksum which is the sum of all the parameters following it. If the sequence number matches the one from the last command, acknowledgement is sent but no further work is performed for the duplicate message. This handles the situation arising when an acknowledgement from the Arduino does not reach the PC and and the PC generates a duplicate message. If the checksum does not match, the Arduino code ignores the message and does not send an acknowledgement, thus forcing the PC to send the same message again.
-\\In case of the motor move command, the motors are started immediately using the \textit{SDPArduino} library. Then the Arduino schedules when to stop the motors and there are two methods to perform that: either a time value or rotary encoder value. The flowchart for these two methods, along with querying the light sensor, are detailed in Figure \ref{fig:flow}.
+The Arduino code uses the \textit{SerialCommand} library to buffer and tokenize the commands received over the serial link. Messages changing the world state are sent with a sequence number and checksum which is the sum of all the parameters following it. If the sequence number matches the one from the last command, acknowledgement is sent but no further work is performed for the duplicate message. This handles the situation arising when an acknowledgement from the Arduino does not reach the PC and and the PC generates a duplicate message. If the checksum does not match, the Arduino code ignores the message and does not send an acknowledgement, thus forcing the PC to send the same message again.
+
+If any of the motor move commands are sent, the motors are started immediately using the \textit{SDPArduino} library. Then the Arduino schedules when to stop the motors and there are two methods to perform that: either a time value or rotary encoder value. The flowchart for these two methods, along with querying the light sensor, are detailed in Figure \ref{fig:flow}.
 In the case of the time value, a timeout is set to stop each single motor using
 \textit{setTimeout} from the \textit{SimpleTimer} library.
 In the case of rotary encoder value, \textit{setInterval} is used which calls
