@@ -7,6 +7,7 @@
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric, arrows}
 \graphicspath{ {images/} }
+\newcommand{\mybox}[2]{{\color{#1}\fbox{\normalcolor#2}}}
 
 \tikzstyle{module} = [rectangle, rounded corners, minimum width=2cm, minimum height=1.2cm,text centered, draw=black, fill=red!30, text width=3.5cm]
 
@@ -132,6 +133,34 @@ When we were satisfied with the look of Venus, we also made all cables look neat
 
 \subsection{Wheels}
 Could you be more descriptive? i.e. why you decided to build it like that ? Why mixture of wheel types ? How the robot can turn? what kind of problems you were trying to omit ? It is a far to short and vague description.  Since your robot has four holonomic wheels now, could you describe why it is a four-wheeled robot now? What is the main feature, advantage of the holonomic property? What is exactly this property.  What are NXT motors ? how they work?
+\includegraphics[scale=.5]{holonomics.png}
+HERE IS THE CODE JUST MAKE SENSE OF IT\newline\newline
+def move(self, direction, angle):
+        dir = int(direction)
+        ang = int(angle)
+        if dir < 0:
+            d = 45 - dir
+        else:
+            d = -(dir - 45)
+
+        a = -math.radians(ang)
+        dir = math.radians(d)
+        idea = np.array([np.cos(dir), np.sin(dir), a])
+        rad = 0.1
+        m = np.array([[1, 0, rad],
+                      [0, -1, rad],
+                      [-1, 0, rad],
+                      [0, 1, rad]])
+
+        movement = np.dot(m, idea)
+        sizes = np.fabs(movement)
+        factor = np.amax(sizes)
+        movement = np.multiply(100.0/factor, movement)
+
+        movement = movement.round()
+        s = np.sign(movement)
+        movement = s*((40*abs(movement))/100 + 60)
+        self.protocol.move\_forever([(0, int(movement[0])), (1, int(movement[1])), (2, int(movement[2])), (3, int(movement[3])), ])
 
 
 The current design has four holonomic wheels, which allows Venus to move in any direction. All wheels are powered by NXT motors.
@@ -172,7 +201,9 @@ Our newest design doesn't have a kicker. The kick is made by turning  the robot 
     \includegraphics[scale=.7]{kick}
     \caption{High level diagram of how the kick is performed}
     \label{fig:kick_action}
-\end{figure}
+\end{figure}\newline
+\includegraphics[scale=.5]{goodkick.png}\newline
+\includegraphics[scale=.5]{badkick.png}
 
 
 \subsection{Grabber}
@@ -328,39 +359,106 @@ In our opinion, the vision is our unique feature of this project. We have built 
 \\In order to be able to detect robots and the ball, we go through the following steps:
 
 \begin{enumerate}
-\item For the relevant room (0 or 1) read files containing the following data: brightness, contrast,     saturation, hue values (room0.txt), minimum and maximum HSV values for each color that we want to detect (color0.txt), distortion (dist0.txt). 
-\item The image from the video feed is blurred (using \textit{cv2.GaussianBlur}) and the mask is created (there is a possibility of calibration if some colors are not detected well enough).
-\item We draw circles of relevant colors that are in the mask except red (the ball).
-\item Find the ball.
-\item Find robots.
+\item The dictionary of values considered in the camera settings (Brightness, Contrast, Hue and Saturation) are read from room?.txt, pitch dimensions read from pitch?.txt and color thresholds are read from color?.txt.
+\item The camera is capped by the previous settings and a frame is read and Gaussian blurred to create more solid features.
+\item A unique application to speed up the feed is the variable world.undistort which lets the strategy decide whether to remove the barrel distortion or not.
+\item All color thresholds are added to the same mask and kmeans is used to group together the various spots in the image.
+\item The color is then found from the center pixel of the cluster and the spot is either kept or removed depending on the minimum area for that color which varies as some colors are harder to see.
+\item The individual methods required for finding the robots and ball are then implemented and outline bellow.
+\item When the vision system is exited through the escape key the most recent calibration values are saved and can be used on the next run and the current camera settings defined by the slider bars are saved also.
 \end{enumerate}
 
 \subsubsection{Calibration}
-When the video feed is opened, there are bars on the top that allow you to adjust brightness, hue, saturation and contrast. There is also a bar that is called 'calibration', which takes boolean values 0 or 
-1. If you want to calibrate, you just need to move this bar to the right. 
-\\When calibration mode is chosen another frame is opened, (it is a picture of the pitch captured when you entered this mode). In the top left corner, there is a ball representing the color that is currently being calibrated. In order to calibrate, you need to click on the pixels of this color. If the values that are read when you click do not match those expected for this color, they are discarded. With each new click a HSV values are stored, when calibration is finished, the range of all clicks is calculated for each color. This means you need to click multiple times in order to get a better result. This range is then stored to a file color0.txt overwriting anything else that was there before. We have minimum and maximum values for all colors except red, which has four values, because of the HSV cone. 
-\\If you want to switch color, press 'q'. After all colors are done, the calibration mode is exited automatically. 
+When the video feed is opened, there are bars on the top that allow you to adjust brightness, hue, saturation and contrast. To calibrate, you only need to move this bar to the right. 
+\\FUN
 
 \subsubsection{Finding the robots}
-Once we have detected all the colors, we try to decide where the actual robots are. In order to do that we need all robots to be on the pitch in the beginning when we run the code. 
-\\There is a list of four robots we need to detect. We sort all colors we detected by their size (from biggest to lowest). Then for each robot, we check the following:
-
-\begin{enumerate}
-\item If we see all the colors on approximately right distances (given in rules) from each other, it is a perfect case and we say we have detected the robot.
-\item If we can see the centre and the spot that is in bottom left corner (the one that differs from others), then we know the centre of mass, and we draw an orientation vector by rotating the line between centre and the spot we detected.
-\item If we only can detect a centre spot, then we draw an orientation vector that we have seen in previous frame.
-\item If there are three spots of the same color, then the centre of mass is calculated by taking the centre of two furthest from each other points. It is not exact, but gives a good approximation. The orientation vector is then drawed through the centre of mass and the middle point of two front spots.
-\end{enumerate}
-This ensures that we are able to detect robots even if at some point we cannot detect all the colors. Apart from the above steps, we also check that the centre of mass is on the reasonable distance from where it was in the last frame (to avoid robots flipping). Furthermore, if we have found the robot of one type (say our teammate), then we restrict it from finding another one. 
-\\When the robots are found we draw a box around them (green for Venus and yellow for teammate red for opposite team) and label with a number from 0 to 3, where 0 is Venus, 1 is our teammate and 3,4 are opposite team robots. 
-
+Due to the varying light intensities over the pitch we built a very mailable method of capturing robots. The robot id's are pre-defined and dependent on our choice of center and corner spot. \newline
+\begin{center}
+\includegraphics[scale=0.5]{ex1.jpg}\newline
+\end{center}
+Firstly there are 2 independent ways a robots data can be captured \newline \newline
+\begin{minipage}{0.2\textwidth}
+\includegraphics[scale=0.7]{3spot.jpg}
+\end{minipage}
+\begin{minipage}{0.8\textwidth}\raggedleft   
+THE 3 SPOT METHOD: finds the largest of three distances between spots, it then draws a vector from the mid point of this distance to the spot not included in the maximum distance. The orientation is then computable by rotating this vector a fixed amount. The robot center is calculated using the average of the spot centres.
+\end{minipage}\newline \newline
+\begin{minipage}{0.2\textwidth}
+\includegraphics[scale=0.7]{2spot.jpg}
+\end{minipage}
+\begin{minipage}{0.8\textwidth}\raggedleft 
+THE 2 SPOT METHOD: As each spot is distinguishable, it can therefore construct a vector between the team spot (center spot) and the corner spot and rotate it a fixed amount to find the orientation. The robot center is calculated using the team spot center. 
+\end{minipage}\newline \newline
+As there will always be 2 robots with the same configurations required for the methods above the algorithm requires some robot id's to be found with more information. As you can see above robots on identical teams will have the same two spot configuration and for the three spot method the robots 0,2 and 1,3 will have the same configuration. To solve this we firstly group the spots together into potential robots in order of descending areas. We the run the groups through several filters for each robot id accepting the groups if there exists a specific numbers of coloured spots. Each spot that is found is circled in its respective color on the vision feed.\newline\newline
+\begin{minipage}{0.7\textwidth}
+\includegraphics[scale=0.5]{filter1.jpg}\newline\newline
+\includegraphics[scale=0.5]{filter2.jpg}
+\end{minipage}
+\begin{minipage}{0.3\textwidth}\raggedleft 
+\mybox{black}{FILTER 1} To pass into here it must have a correct team spot and no other visible team color. It must also have more than one of its three spot color.\newline\newline
+\mybox{yellow}{FILTER 2} To pass into here it must have a correct team spot. It also must have more than one of its three spot color or less than 2 of its corner spot color.\newline\newline
+\mybox{violet}{FILTER 3} To pass into here no team spot is required , it must only have more than one of its three spot color or less than 2 of its corner spot color.
+\end{minipage}\newline\newline 
+As each id is found its corresponding filters are blocked  and its position is noted so that a robot is not found in the same place of one that is already found. Once any group of spots gets through a filter of a given id, the id of that robot is then updated using either the 3 spot or 2 spot method depending on what information you have. If any robot is not found it keeps its original position. To handle cases where robots are lifted off the pitch the system creates a ghost robot on the vision marked in blue. This tells the strategy to remove that robot id's contribution to the game but in the vision thread the robot continues existing on the pitch.
 \subsubsection{Finding the ball}
-
-We restrict the number of circles of each color we want to detect, e.g. 2 blue, 2 yellow, 8 green etc. For red, it is 9, because we are likely to think that pink is red. If at any point we are not able to see any red spots, we decide that the ball is underneath one of the robots or not on the pitch. If we can see the spot that is not part of the robots detected earlier, we store ball's position as a stack that has centres of mass of the ball for the last 6 frames (every time new value comes in, last one is popped). We check the first and the last values in this stack. If their difference is more than 10 pixels, then the ball is moving and we draw its trajectory.  
-
+The algorithm looks for 10 red spots and checks through them in order of descending area. To prevent a pink being misclassified as the ball each red spot is checked to see if it exist close to the robot centres. As the robots can shield the ball from view we include a method which determines whether a specific robot is in range of the ball. If so, when the ball is shielded an imaginary ball is placed along that robots orientation vector until it is found. This method is in place for all robots but Venus as we use our sensor to determine whether we have it.
 \subsection{Strategy}
-
-table with all states
+\subsubsection{Potential Fields}
+Our strategy relies on the physical properties of a potential field. This meant we were able to compound together separate tasks that the robot was to undertake with ease, such as avoiding others and grabbing a ball. We implemented each interaction with a physical objects as a charged electron would interact with varies charged objects. Through this we were able to to swerve in front kicks and navigate mazes of objects fast and efficiently. 
+\subsubsection{State Machine}
+\begin{tabular}{|l|l|l|}
+\hline
+State & Trigger &  \\ \hline
+$FREE\_BALL\_YOURS$ &  &  \\ \hline
+$ENEMY\_BALL\_TAKE\_PASS$ &  &  \\ \hline
+$ENEMY1\_BALL\_TAKE\_GOAL$ &  &  \\ \hline
+$ENEMY2\_BALL\_TAKE\_GOAL$ &  &  \\ \hline
+$FREE\_BALL\_NONE\_GOALSIDE$ &  &  \\ \hline
+$FREE\_BALL\_1\_GOALSIDE$ &  &  \\ \hline
+$FREE\_BALL\_2\_GOALSIDE$ &  &  \\ \hline
+$FREE\_BALL\_BOTH\_GOALSIDE$ &  &  \\ \hline
+$ATTACK\_PASS$ &  &  \\ \hline
+$ATTACK\_GOAL$ &  &  \\ \hline
+$RECIEVE\_PASS$ &  &  \\ \hline
+\end{tabular}
+\subsubsection{State Fields}
+$FREE\_BALL\_YOURS$ \newline \newline
+\begin{minipage}{0.4\textwidth}
+\includegraphics[scale=0.3]{v3.jpg}
+\end{minipage}
+\begin{minipage}{0.4\textwidth}
+\includegraphics[height=80mm,width=135mm]{p3.jpg}
+\end{minipage}\newline\newline
+$ENEMY\_BALL\_TAKE\_PASS$ \newline \newline
+\begin{minipage}{0.4\textwidth}
+\includegraphics[scale=0.3]{v1_2.jpg}
+\end{minipage}
+\begin{minipage}{0.4\textwidth}
+\includegraphics[height=80mm,width=135mm]{p1.jpg}
+\end{minipage}\newline\newline
+$ENEMY2\_BALL\_TAKE\_GOAL (ENEMY1\_BALL\_TAKE\_GOAL)$ \newline \newline
+\begin{minipage}{0.4\textwidth}
+\includegraphics[scale=0.3]{v1_2.jpg}
+\end{minipage}
+\begin{minipage}{0.4\textwidth}
+\includegraphics[height=80mm,width=135mm]{p2.jpg}
+\end{minipage}\newline\newline
+$FREE\_BALL\_NONE\_GOALSIDE$ \newline \newline
+\begin{minipage}{0.4\textwidth}
+\includegraphics[scale=0.3]{v4.jpg}
+\end{minipage}
+\begin{minipage}{0.4\textwidth}
+\includegraphics[height=80mm,width=135mm]{p4.jpg}
+\end{minipage}\newline\newline
+$FREE\_BALL\_BOTH\_GOALSIDE (FREE\_BALL\_1\_GOALSIDE, FREE\_BALL\_2\_GOALSIDE)$ \newline \newline
+\begin{minipage}{0.4\textwidth}
+\includegraphics[scale=0.3]{v5.jpg}
+\end{minipage}
+\begin{minipage}{0.4\textwidth}
+\includegraphics[height=80mm,width=135mm]{p5.jpg}
+\end{minipage}\newline\newline
+ 
 
 \section{Sensors}
 \subsection{Rotary encoder board}
