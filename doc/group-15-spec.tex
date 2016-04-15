@@ -63,113 +63,21 @@
 
 \section{System architecture}
 
-Venus has gone through several stages of changes. The earliest prototype had four regular wheels as seen in Figure \ref{fig:robot0}. This made us realise that we have to keep in mind the space
-constraints when building the base as we need to accommodate not only the motors
-for the wheels but also the kicking and grabbing mechanism. 
-\\The next, more sophisticated design, was a robot with four powerful kickers that used elastics as seen in Figure \ref{fig:robot3}. The idea was to stretch elastics for all four kickers using the star shape element on top of the robot as seen in the picture and then release. This gave a lot of energy to the ball. However, this design had a disadvantage because the robot was not able to kick the ball for varying distances, which was an essential requirement for the first milestone. Moreover, the dimensions of the robot were exceeding the maximum size limits and the speed of the ball was exceeding the one allowed in the game rules. 
-
-\begin{figure}[h]
-	\centering
-	\begin{minipage}[b]{.48\textwidth}
-        \centering
-		\includegraphics[scale=.18]{robot0.jpg}
-		\caption{The first prototype}
-		\label{fig:robot0}
-	\end{minipage}
-	~
-	\begin{minipage}[b]{.48\textwidth}
-        \centering
-		\includegraphics[scale=.65]{robot3.jpg}
-		\caption{The robot with four kickers}
-		\label{fig:robot3}
-	\end{minipage}
-\end{figure}
-
-Taking all the disadvantages of previous designs into account we came up with a new design as seen in Figures \ref{fig:open} and \ref{fig:closed}. Advantage of this design is that it is simple and at the same time the robot can still move fast enough to play football and the power of the kicks can be precisely controlled. 
-
-The grabbing mechanism for this design went through two iterations of development.
-The first grabber we developed was falling down on the ball in order to catch it, thus was deemed not suitable because it obstructed the ball more than it was allowed by the football game rules. Venus also had difficulties at placing the ball in front of the kicker at initial kicking position, because the grabber pushed it
-too far inside the kicker. Thus, the grabber was replaced by the newer design depicted in Figure \ref{fig:open} which has two symmetrical grabbers that interlock when the robot is moving to conserve space and are able to reach a more distant ball.
-
-\begin{figure}[ht]
-	\centering
-	\begin{minipage}[b]{.48\textwidth}
-        \centering
-		\includegraphics[scale=0.065, angle=-90]{closed_front.jpg}
-		\caption{With grabber in closed position}
-		\label{fig:closed}
-	\end{minipage}
-	~
-	\begin{minipage}[b]{.48\textwidth}
-        \centering
-		\includegraphics[scale=0.065, angle=-90]{grab_open.jpg}
-		\caption{With grabber in open position}
-		\label{fig:open}
-	\end{minipage}
-\end{figure}
-
-After playing the first friendly, we have realized that Venus isn't fast enough comparing to other robots. We decided to start the design from scratch again. Our latest design has four holonomic wheels, which allow Venus to move fast and also in different directions (Figure FIGURE). We had also refused of using any kickers, because none of the kickers we thought of, could fit with four NXT motors. Venus kicks using its grabber and spinning action. The design of the grabber hasn't changed much from the previous time. 
-
-When we were satisfied with the look of Venus, we also made all cables look neat using elastics. We also ensured that we can still access the battery pack and Arduino board if needed as seen in Figure \ref{fig:battery}.
-
-%\begin{figure}
-%	\centering
-%	\begin{minipage}[b]{.48\textwidth}
-%        \centering
-%		\includegraphics[scale=.065]{battery1.jpg}
-%		\caption{Battery pack easily accessible}
-%		\label{fig:battery}
-%	\end{minipage}
-%	~
-%	\begin{minipage}[b]{.48\textwidth}
-%        \centering
-%		\includegraphics[scale=.065,angle=-90]{gears.jpg}
-%		\caption{Gears for the grabber}
-%		\label{fig:gears}
-%	\end{minipage}
-%	
-%\end{figure}
-
-\subsection{Old Kicker}
-Even though the idea of the kicker that uses elastics was appealing as this made
-the kick more powerful, it was almost impossible to predict the distance the
-ball will travel. Because of that the newer design had a
-kicker that was powered by an NXT motor with gears. The kicker operated by going backwards inside the robot from the starting low position as seen in Figures \ref{fig:kicker}-\ref{fig:kicker_back} and then kicked
-forwards and touched the ball.
-%\begin{figure}[ht]
-%	\centering
-%	\begin{minipage}[b]{.3\textwidth}
-%       \centering
-%		\includegraphics[scale=0.04, angle=-90]{kick_front.jpg}
-%		\caption{Kicker in still position}
-%		\label{fig:kicker}
-%	\end{minipage}
-%	~
-%	\begin{minipage}[b]{.3\textwidth}
-%       \centering
-%		\includegraphics[scale=0.04, angle=-90]{kick_middle.jpg}
-%		\caption{Kicker starts going back}
-%		
-%	\end{minipage}
-%	~
-%	\begin{minipage}[b]{.3\textwidth}
-%       \centering
-%		\includegraphics[scale=0.04, angle=-90]{kick_back.jpg}
-%		\caption{Kicker in the back position}
-%		\label{fig:kicker_back}
-%	\end{minipage}	
-%\end{figure}
-
 \section{Hardware components}
-\subsection{Wheels}
+
+\subsection{Motors}
+
+\subsection{Chassis Structure}
+
+\subsection{Holonomics}
 \begin{figure}
 \centering
 \includegraphics[scale=.5]{holonomics.png}
-\caption{Visualisation of the calculation of the driving components}
+\caption{Visualisation of the calculating the motor power components}
 \label{fig:components}
 \end{figure}
 
-Holonomic motion was an obvious choice for the final robot. After calculating the desired direction the angle between that and the orientation is used to compute the driving components needed for the Arduino as seen in Figure \ref{fig:components}. The matrix multiplication below was used to extract the driving speeds and then each speed was scaled up by a factor of $100$ divided by the absolute maximum of the four motor powers.
+Holonomic motion was an obvious choice for the final robot. It enabled fast motion in any direction meaning the robot could respond very  to a change in play. It also was perfectly suited to a strategy using potential fields as an optimal direction would be output and implemented instantly using the firmware. The motion was constructed by calculating the angle between the desired direction  and the robot orientation. This was used to compute the driving components that are sent to the Arduino as seen in Figure \ref{fig:components}. The matrix multiplication below was used to extract the driving powers and then each power was scaled up by a factor of $100$ divided by the absolute maximum of the four motor powers.
 
 $$\begin{pmatrix}
 \text{MOTOR 0}\\ 
@@ -188,11 +96,12 @@ $$\begin{pmatrix}
 \sin(45-x)
 \end{pmatrix}$$
 
+\subsection{Weight Distribution}
 
 \subsection{Grabber}
 The grabber consists of two symmetric parts placed one slightly above the other. To keep the robot within dimensions the grabber arms overlap enabling a large span but still within regulations when closed. A symmetric gear system is used so that both arms are opened and closed at the same time. Unlike the original design, the arm axles were placed closer together so that the grabbed ball would always be in the same position increasing the reliability of the sensor and the kick.
 
-\subsection{Kicking}
+\subsection{Kicker}
 
 %(Figure \ref{fig:kick_action}). 
 %\begin{figure}
@@ -217,8 +126,8 @@ The grabber consists of two symmetric parts placed one slightly above the other.
 \end{minipage}
 \end{figure}
 
-Our newest design does not have a kicker. The kick is made by turning the robot instead and opening the grabber at the same time.
-The robot rotates in the intended kick direction when it is aligning itself with the goal. In doing this the centrifugal force holds the ball towards the end of the grabber and the ball is in contact with the claw that will apply the kicking force. This increases the accuracy of the kick. As the error margin of the kick is asymmetric and biased towards undershooting, the kick is initiated in different directions in different positions on the pitch. The $y$ dimension is split into four segments: $0$, $\frac{1}{4}$, $\frac{1}{2}$, and $\frac{3}{4}$. In Figures \ref{fig:correct} and \ref{fig:incorrect} the robots demonstrate each segment and its correct and incorrect kick directions. This kicking mechanism is not only more powerful than the previous design but it is also able to confuse the defence strategies of opponents tournament\footnote{Footage of one such example of a confusing spin kick available at \url{https://youtu.be/VJLo2x2gdGk}.}.
+Our newest design does not have a kicker. The kick is made by turning the robot instead and opening the grabber at the same time. The main incentive of this design was to reduce asymmetric weight distribution which would have been catastrophic to optimising the holonomic movement. The robot rotates in the intended kick direction when it is aligning itself with the goal. In doing this the centrifugal force holds the ball towards the end of the grabber and the ball is in contact with the claw that will apply the kicking force. This increases the accuracy of the kick. As the error margin of the kick is asymmetric and biased towards undershooting, the kick is initiated in different directions in different positions on the pitch. The $y$ dimension is split into four segments: $0$, $\frac{1}{4}$, $\frac{1}{2}$, and $\frac{3}{4}$. In Figures \ref{fig:correct} and \ref{fig:incorrect} the robots demonstrate each segment and its correct and incorrect kick directions. This kicking mechanism is not only more powerful than the previous design but it is also able to confuse the defence strategies of opponents tournament\footnote{Footage of one such example of a confusing spin kick is available at \url{https://youtu.be/VJLo2x2gdGk}.}.
+
 
 \section{Documentation of the code}
 
@@ -435,95 +344,144 @@ To pass into here no team spot is required, it must only have more than one of i
 
 \medskip
 
-As each id is found its corresponding filters are blocked  and its position is noted so that a robot is not found in the same place as one that is already found. Once any group of spots gets through a filter of a given id, the id of that robot is then updated using either the 3 spot or 2 spot method depending on what information you have. If any robot is not found it keeps its original position. To handle cases where robots are lifted off the pitch the system creates a ghost robot on the vision marked in blue. This tells the strategy to remove that robot id's contribution to the game but in the vision thread the robot continues existing on the pitch.
+As each identity is found, its corresponding filters are blocked and its position is noted so that a robot does not get detected in the same place as the one that is already detected. Once any group of spots gets through a filter of a given identity, the identity of that robot is then updated using either the three spot or two spot method depending on what information is available. If a robot is not found, it keeps its original position. To handle cases where robots are lifted off the pitch, the system creates a ghost robot marked in blue on the vision feed. This tells the strategy to ignore the contribution to the game of that robot but the robot continues existing on the pitch in the vision thread.
 
 \subsubsection{Finding the ball}
-The algorithm looks for 10 red spots and checks through them in order of descending area. To prevent a pink being misclassified as the ball each red spot is checked to see if it exist close to the robot centres. As the robots can shield the ball from view we include a method which determines whether a specific robot is in range of the ball. If so, when the ball is shielded an imaginary ball is placed along that robots orientation vector until it is found. This method is in place for all robots but Venus as we use our sensor to determine whether we have it.
+
+The algorithm looks for 10 red spots and checks through them in the order of descending area. To prevent a pink being misclassified as the ball, each red spot is checked whether it exists close to the centres of the robots. As the robots can shield the ball from view, a method is used which determines whether a specific robot is in range of the ball. If so, when the ball is shielded, an imaginary ball is placed along the orientation vector of that robot until the ball is found. This method is in place for all robots except for Venus because the sensor is being used instead to determine whether Venus has the ball.
 
 \subsection{Strategy}
-\subsubsection{Potential Fields}
 
-Our strategy relies on the physical properties of a potential field. This meant we were able to compound together separate tasks that the robot was to undertake with ease, such as avoiding others and grabbing a ball. We implemented each interaction with a physical objects as a charged electron would interact with varies charged objects. Through this we were able to to swerve in front kicks and navigate mazes of objects fast and efficiently. 
+\subsubsection{Potential fields}
 
-\subsubsection{State Machine}
+The strategy relies on the physical properties of a potential field. This makes it possible to compound together separate tasks that the robot has to undertake with ease, such as avoiding others and grabbing a ball, at the same time. Each interaction is implemented using the same behaviour as a charged electron would have when interacting with various physical objects of different charges. Using this it is possible to swerve in front of the kicks and navigate mazes of objects fast and efficiently. 
 
-\begin{tabular}{|l|l|l|}
+\subsubsection{State machine}
+
+As seen in Table \ref{tab:machine} bla bla
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{ | l | l | }
 \hline
-State & Trigger\\ \hline
-$FREE\_BALL\_YOURS$ &  \\ \hline
-$ENEMY\_BALL\_TAKE\_PASS$ &  \\ \hline
-$ENEMY1\_BALL\_TAKE\_GOAL$ &  \\ \hline
-$ENEMY2\_BALL\_TAKE\_GOAL$ &  \\ \hline
-$FREE\_BALL\_NONE\_GOALSIDE$ &  \\ \hline
-$FREE\_BALL\_1\_GOALSIDE$ &  \\ \hline
-$FREE\_BALL\_2\_GOALSIDE$ &  \\ \hline
-$FREE\_BALL\_BOTH\_GOALSIDE$ &  \\ \hline
-$ATTACK\_PASS$ &  \\ \hline
-$ATTACK\_GOAL$ &   \\ \hline
-$RECIEVE\_PASS$ &  \\ \hline
+\textbf{State} & \textbf{Trigger} \\ \hline
+\texttt{FREE\_BALL\_YOURS} & \\ \hline
+\texttt{ENEMY\_BALL\_TAKE\_PASS} &  \\ \hline
+\texttt{ENEMY1\_BALL\_TAKE\_GOAL} &  \\ \hline
+\texttt{ENEMY2\_BALL\_TAKE\_GOAL} &  \\ \hline
+\texttt{FREE\_BALL\_NONE\_GOALSIDE} &  \\ \hline
+\texttt{FREE\_BALL\_1\_GOALSIDE} &  \\ \hline
+\texttt{FREE\_BALL\_2\_GOALSIDE} &  \\ \hline
+\texttt{FREE\_BALL\_BOTH\_GOALSIDE} &  \\ \hline
+\texttt{ATTACK\_PASS} &  \\ \hline
+\texttt{ATTACK\_GOAL} &   \\ \hline
+\texttt{RECEIVE\_PASS} &  \\ \hline
 \end{tabular}
+\caption{States available in the strategy system}
+\label{tab:machine}
+\end{table}
 
-\subsubsection{State Fields}
+\subsubsection{State fields}
 
-The graphs bellow contain a quiver plot of vectors in the direction of forces in a grid of points on top of a heat map of the fields potential at a given point. It is plotted using the command '$map\quad STATE\_NAME$' and is ideal for fast testing of new fields.\newline\newline
-\rule{\textwidth}{1pt}\newline
-$FREE\_BALL\_YOURS$ \newline \newline
+The following graphs were plotted using the command \texttt{map STATE\_NAME} which is ideal for visualisation and quick testing of newly defined fields. The graphs below contain quiver plots of the force acting on Venus at a given point in space. This is drawn on top of a heat map of the value of the potential field at a given point. 
+
+\begin{minipage}{\linewidth}
+\rule{\textwidth}{1pt}
+\texttt{FREE\_BALL\_YOURS}\medskip
+
 \begin{minipage}{0.5\textwidth}
-\includegraphics[height=40mm,width=50mm]{v3.jpg}\newline\newline
-FORCES DUE TO OBSTACLES:
-The walls use a $1/r^3$ law on the pitch side of the wall where $r$ is the perpendicular distance to the wall. On the opposite side of the wall we switch to an attractive potential to pull any robots into the pitch $-1/r^3$. An identical field is used in the penalty box however to avoid getting stuck in local minima at the sides the field inside the box pushes the robot to the front and doesn't attract it back over the side it came. As the box is finite any position not perpendicular will exhibit a similar force only r will be the distance to the closest corner. The robots use a $1/r^2$ where are r is the radial distance from the edge of the robot (represented by the solid circle).
+\begin{center}
+\includegraphics[height=40mm,width=50mm]{v3.jpg}\medskip
+\end{center}
+
+\textbf{Forces due to obstacles}:
+The walls exert a force governed by a $1/r^3$ law on the pitch side of the wall where $r$ is the perpendicular distance to the wall. On the opposite side of the wall an attractive potential $-1/r^3$ is used instead to pull any robots into the pitch. An identical field is used in the penalty box, however, to avoid getting stuck in a local minima at the sides, the field inside the box pushes the robot to the front only and does not attract it back over the side it came from. As the box is finite, any position that is not perpendicular will exhibit a similar force, only $r$ will be the distance to the closest corner. The robots use a $1/r^2$ law where $r$ is the radial distance from the edge of the robot represented by the solid circle in red.
 \end{minipage}
-\hspace{.2cm}
+~
 \begin{minipage}{0.5\textwidth}
-\includegraphics[height=70mm,width=115mm]{p3.jpg}
-GRABBING: The ball uses an attractive radial field of $1/r^2$. The amplitude of the field is larger than that for the robot to enable fast navigation. Once a potential of $-4$ is reached we would initiate the grab using specific distance and angle motions using the motor encoders. $-4$ was chosen as it implied the ball was clear of any obstacles as the potential value would be higher.
-\end{minipage}\newline\newline
-\rule{\textwidth}{1pt}\newline
-$ENEMY\_BALL\_TAKE\_PASS$ \newline \newline
-\begin{minipage}{0.5\textwidth}
-\includegraphics[height=40mm,width=50mm]{v1_2.jpg}\newline\newline
-We use a finite axial field to enable smooth motion into the block of the pass from any point in the pitch. the points in question are first rotated so the field is flush with the x axis and the force is calculated using the following equation and rotated back. d is the perpendicular distance, a is the distance to the end with a smaller x value and b the exact opposite.
- $$\Big(\frac{1}{\sqrt{b^2 + d^2}}-\frac{1}{\sqrt{a^2 + d^2}},\frac{b}{d\sqrt{b^2 + d^2}}+\frac{a}{d\sqrt{a^2 + d^2}}\Big)$$
+\includegraphics[height=70mm,width=100mm,trim=65 55 65 35,clip]{p3.jpg}\medskip
+
+\textbf{Grabbing}: The ball uses an attractive radial field of $-1/r^2$. The amplitude of the field is larger than that of the robot to enable fast navigation. Once a potential of $-4$ is reached, the grab is initiated using quantised distance and angle motions enabled by the motor encoders. The $-4$ value has been chosen as it implies the ball is clear of any obstacles as otherwise the potential value would be higher.
 \end{minipage}
-\hspace{.2cm}
+\end{minipage}\medskip
+
+\begin{minipage}{\linewidth}
+\rule{\textwidth}{1pt}
+\texttt{ENEMY\_BALL\_TAKE\_PASS}\medskip
+
 \begin{minipage}{0.5\textwidth}
-\includegraphics[height=70mm,width=115mm]{p1.jpg}\newline\newline
-When Venus's current potential reaches -12 the block is satisfactory and it faces the ball with grabber open. When the ball is shot as it is moving FREE\_BALL\_YOURS will be activated saving the shot. Only when the ball stops, the grab be initiated.
-\end{minipage}\newline\newline
-\rule{\textwidth}{1pt}\newline
-$ENEMY2\_BALL\_TAKE\_GOAL\quad_{(ENEMY1\_BALL\_TAKE\_GOAL)}$ \newline \newline
-\begin{minipage}{0.5\textwidth}
-\includegraphics[height=40mm,width=50mm]{v1_2.jpg}\newline
-The same field is used from the state above but for a block between the goal and an enemy robot. The satisfactory potential for this shot is -14 in order to be sure of blocking the whole goal.
+\begin{center}
+\includegraphics[height=40mm,width=50mm]{v1_2.jpg}\medskip
+\end{center}
+
+\textbf{Blocking pass}: A finite axial field is used to enable smooth motion during the block of a pass from any point in the pitch. The points in question are first rotated so that the field is flush with the x-axis and the force is calculated using the following equation and rotated back. $d$ is the perpendicular distance, $a$ is the parallel distance to the end with the smaller $x$ value and $b$ is similar dimension in the exact opposite direction.
+
+$\left(\frac{1}{\sqrt{b^2 + d^2}}-\frac{1}{\sqrt{a^2 + d^2}},\frac{b}{d\sqrt{b^2 + d^2}}+\frac{a}{d\sqrt{a^2 + d^2}}\right)$
 \end{minipage}
-\hspace{.2cm}
+~
 \begin{minipage}{0.5\textwidth}
-\includegraphics[height=70mm,width=115mm]{p2.jpg}
-\end{minipage}\newline\newline
-\rule{\textwidth}{1pt}\newline
-$FREE\_BALL\_NONE\_GOALSIDE\quad_{(FREE\_BALL\_1\_GOALSIDE, FREE\_BALL\_2\_GOALSIDE)}$ \newline \newline
-\begin{minipage}{0.5\textwidth}
-\includegraphics[height=40mm,width=50mm]{v4.jpg}\newline
-Given you team mate is either fetching or has the ball you want to find the best position to receive a pass. We add 2 fields in order to implement this: \begin {enumerate}\item the shadowed array blocking the pass \item the shadowed array blocking a goal\end{enumerate} This image is representing a double blocked pass. We use an identical field to that in the defence states however we place one end at the start of the shadow and the other 3 pitch lengths away. This is so Venus is repelled perpendicular to the shadow and also forward around the enemy robots if needs be.
+\includegraphics[height=70mm,width=100mm,trim=65 55 65 35,clip]{p1.jpg}\medskip
+
+\textbf{Interceptions}: When the current potential of Venus reaches $-12$, the block is satisfactory and the robot faces the ball with its grabber open. When the ball is shot as it is moving, the \texttt{FREE\_BALL\_YOURS} state is activated causing an attraction to the moving ball.
 \end{minipage}
-\hspace{.2cm}
+\end{minipage}\medskip
+
+\begin{minipage}{\linewidth}
+\rule{\textwidth}{1pt}
+\texttt{ENEMY2\_BALL\_TAKE\_GOAL} $_{\text{(\texttt{ENEMY1\_BALL\_TAKE\_GOAL})}}$\medskip
+
 \begin{minipage}{0.5\textwidth}
-\includegraphics[height=70mm,width=115mm]{p4.jpg}\newline
-Once a satisfactory potential of 6 is reached Venus will turn and wait to except the pass. As the other robots move Venus will keep trying to minimise his potential until a value of 6.
-\end{minipage}\newline\newline
-\rule{\textwidth}{1pt}\newline
-$FREE\_BALL\_BOTH\_GOALSIDE\quad_{(FREE\_BALL\_1\_GOALSIDE, FREE\_BALL\_2\_GOALSIDE)}$ \newline \newline
-\begin{minipage}{0.5\textwidth}
-\includegraphics[height=40mm,width=50mm]{v5.jpg}\newline
-LOCAL MINIMA: In these states Venus can get stuck as enemy players close up to defend the same thing, to deal with this a timer is used so that if an its been sitting in a unsatisfactory potential we remove the least import field, in this case the furthest player blocking the goal. 
+\begin{center}
+\includegraphics[height=40mm,width=50mm]{v1_2.jpg}\medskip
+\end{center}
+
+\textbf{Blocking goal}: The same field is used from the state above but for a block between the goal and an enemy robot. The current satisfactory potential for this block is $-14$ in order to be sure to block the whole goal.
 \end{minipage}
-\hspace{.2cm}
+~
 \begin{minipage}{0.5\textwidth}
-\includegraphics[height=70mm,width=115mm]{p5.jpg}\newline
-As outlined above this graph represents a double blocked goal and the final 2 states not shown are a mixture of this and the one above.
-\end{minipage}\newline\newline
-\rule{\textwidth}{1pt}\newline
- 
+\includegraphics[height=70mm,width=100mm,trim=65 55 65 35,clip]{p2.jpg}\medskip
+\end{minipage}
+\end{minipage}\medskip
+
+\begin{minipage}{\linewidth}
+\rule{\textwidth}{1pt}
+\texttt{FREE\_BALL\_NONE\_GOALSIDE} $_{\text{(\texttt{FREE\_BALL\_1\_GOALSIDE}, \texttt{FREE\_BALL\_2\_GOALSIDE})}}$\medskip
+
+\begin{minipage}{0.5\textwidth}
+\begin{center}
+\includegraphics[height=40mm,width=50mm]{v4.jpg}\medskip
+\end{center}
+
+\textbf{Optimising position}: Given your team mate is either fetching or has the ball you want to find the best position to receive a pass. Two fields are added in order to implement this: \begin{enumerate} \item The shadowed array blocking the pass. \item The shadowed array blocking the goal. \end{enumerate} This state represents a double blocked pass. An identical type of field is used in the defence states, however, one end is placed at the start of the shadow and the other three pitch lengths away. This is so that Venus is repelled perpendicular to the shadow and also parallel around the enemy robots if needs be.
+\end{minipage}
+~
+\begin{minipage}{0.5\textwidth}
+\includegraphics[height=70mm,width=100mm,trim=65 55 65 35,clip]{p4.jpg}\medskip
+
+Once a satisfactory potential of 6 is reached, Venus will turn and wait to except the pass. As the other robots move, Venus will keep trying to minimise his potential until a value of 6 is obtained.
+\end{minipage}
+\end{minipage}\medskip
+
+\begin{minipage}{\linewidth}
+\rule{\textwidth}{1pt}
+\texttt{FREE\_BALL\_BOTH\_GOALSIDE} $_{\text{(\texttt{FREE\_BALL\_1\_GOALSIDE}, \texttt{FREE\_BALL\_2\_GOALSIDE})}}$\medskip
+
+\begin{minipage}{0.5\textwidth}
+\begin{center}
+\includegraphics[height=40mm,width=50mm]{v5.jpg}\medskip
+\end{center}
+
+\textbf{Local minima}: Whilst optimising position Venus can get stuck as enemy players close up to defend the same shot. To deal with this, a timer is used so that if Venus has been sitting in a unsatisfactory potential for too long, we remove the least import field. In this case, the furthest player blocking the goal.
+\end{minipage}
+~
+\begin{minipage}{0.5\textwidth}
+\includegraphics[height=70mm,width=100mm,trim=65 55 65 35,clip]{p5.jpg}\medskip
+
+\textbf{Handling opponents that divide up defensive positions}: As outlined in the state above, this graph represents a double blocked goal and the final two states that are not shown are a mixture of this state and the state above.
+\end{minipage}
+\end{minipage}
+
+\rule{\textwidth}{1pt}
 
 \section{Sensors}
 \subsection{Rotary encoder board}
