@@ -146,6 +146,7 @@ The newest design does not have a kicker. Instead, the kick is made by turning t
 
 \begin{figure}[ht!]
 \centering
+\scalebox{.7}{
 \begin{tikzpicture}[node distance=1.7cm]
 
 \node (main) [module] {\textit{main.py}};
@@ -183,6 +184,7 @@ The newest design does not have a kicker. Instead, the kick is made by turning t
 \draw [arrow] (field) -- (pot);
 
 \end{tikzpicture}
+}
 \caption{Dependency graph of Python modules in the system}
 \label{fig:overview}
 \end{figure}
@@ -224,7 +226,8 @@ The communication interface between the Arduino and PC is low level as the PC de
 
 \begin{figure}[ht!]
 \centering
-\begin{tikzpicture}[node distance=1.2cm]
+\scalebox{.7}{
+\begin{tikzpicture}[node distance=1.2cm,scale=0.1]
 
 \node (inCmd) [io] {Read command and arguments with \textit{SerialCommand}};
 \node (decType) [decision, below of=inCmd, yshift=-.7cm] {Type of command};
@@ -240,9 +243,9 @@ The communication interface between the Arduino and PC is low level as the PC de
 \draw [arrow] (motors1) -- (target);
 \node (decTarget) [decision, below of=target, yshift=-1cm] {Is target reached?};
 \draw [arrow, dashed] (target) -- node [anchor=west] {On next timeout} (decTarget);
-\draw [arrow] (decTarget.west) |- node [anchor=east, xshift=-.4cm, yshift=.5cm] {No} ++(-.3cm, 0)
-                               |- ++(0, 1.2cm)
-                               -- ++(1.9cm, 0);
+\draw [arrow] (decTarget.west) |- node [anchor=east, xshift=-.4cm, yshift=.5cm] {No} ++(-3cm, 0)
+                               |- ++(0, 12cm)
+                               -- ++(19cm, 0);
 \node (stopMotors1) [process, below of=decTarget, yshift=-.5cm] {Stop motors};
 \draw [arrow] (decTarget) -- node [anchor=east] {Yes} (stopMotors1);
 
@@ -268,6 +271,7 @@ The communication interface between the Arduino and PC is low level as the PC de
 \draw [arrow] (decComp) -- node [anchor=south west] {No} (sendN);
 
 \end{tikzpicture}
+}
 \caption{Flowchart of message processing in the Arduino}
 \label{fig:flow}
 \end{figure}
