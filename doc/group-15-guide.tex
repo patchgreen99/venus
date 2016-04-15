@@ -90,17 +90,59 @@ To program the Arduino to receive and execute messages, open the Arduino IDE by 
 
 \section{Hardware overview}
 
-At this stage of the course, we can say that the hardware part of our robot is done. Venus is a three wheels robot. There are two main driving wheels and one holonomic wheel placed sideways at the back which allows the robot to turn as well as does not cause problems moving backwards and forwards due to its holonomic property. All wheels are powered by NXT motors. 
-\\There is also a kicker that is powered by a NXT motor with gears. The kicker operates by going backwards inside the robot from the starting low position and then kicks the ball forwards.
-\\The grabber consists of two parts resembling arms and is placed on the sides of the front part of the robot. It is powered by Electric Technic Mini-Motor 9v with gears. 
+\subsection{Components}
+\subsubsection{Wheels}
+The robot has four holonomic wheels, which are placed in the middle of each side of the robot. The holonomic motion allows the robot to move in any direction. All wheels are powered by NXT motors.
+\subsubsection{Grabber and Kicker}
+The grabber consists of two symmetric parts resembling arms (Figure \ref{fig:grabber}). It is powered by a single Power Functions Medium motor, which is connected to a symmetric gear system. The latter is used to ensure both arms are opened and closed at the same time. The robot does not have a kicker. Instead it opens the grabber while turning to make a kick. In doing this the centrifugal force holds the ball towards the end of the grabber and the ball is in contact with the claw that will apply the kicking force.
 
-\subsection{Use}
+\begin{figure}
+\centering
+\includegraphics[scale=.3]{grabber_close.jpg}
+\caption{The grabber}
+\label{fig:grabber}
+\end{figure}
 
-First thing you would need to do to be able to communicate to Venus, is to connect the RF stick to the machine you are running the commands from. Then after performing steps described in "Running instructions" section, you will be able to operate the robot.
-\\If you make any changes to the Arduino code, you need to upload it before running the commands. Uploading can be done either via RF stick or cable connected to the Arduino board. 
-\\In order to turn the robot on, connect the battery pack to the power board.
-In order to swap the batteries, take them out, put them to charge and insert
-the new batteries into the battery pack. Easy!
+\subsubsection{Rotary encoder board}
+
+Each NXT motor is connected to the rotary encoder board (Figure \ref{fig:rotary}). The connections in the anticlockwise order from the top are: the I2C bus to the Arduino, back right motor, back left motor, front left motor, and front right motor. Using this board the information about the amount of rotations the motor has performed since the last query is available for the Arduino code as a separate integer for every motor. Every 5 ms the board is queried whether the target value has been reached. After the average of the rotary values of all four motors becomes greater or equal to the target value, the motors are stopped.
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[scale=.1]{rotary1}
+\caption{The rotary encoder board}
+\label{fig:rotary}
+\end{figure}
+
+\subsubsection{Light sensor}
+
+The light sensor is located above the grabber (Figure \ref{fig:sensor}). It is used to check whether
+the robot has successfully acquired the ball after grabbing. The sensor
+provides an integer value that increases the greater the distance to the
+nearest object in its direct line of sight is. Then the Arduino compares the integer
+to a predefined threshold corresponding to the red ball. Sometimes a white
+line inside the pitch can be mistaken for the ball due to their similar sensor
+values.
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[scale=.1]{sensor1}
+\caption{The light sensor with the ball grabbed}
+\label{fig:sensor}
+\end{figure}
+
+
+\subsection{Usage}
+
+\subsubsection{Preparation for the match}
+
+In order to turn the robot on, connect the battery pack to the power board. The pack consists of 10 AA rechargable batteries. It is advisable to swap batteries after each match, even if the batteries are not fully discharged at that point. Normally one fully charged battery pack would last for 7-10 minutes. After that the performance of the robot might decrease depending on the amount of actions it made. 
+In order to swap the batteries, take them out, put them to charge and insert the new batteries into the battery pack. Easy!
+
+\subsubsection{RF stick}
+To communicate with Venus the RF stick should be connected to the machine you are running the commands from. Then after performing steps described in "Running instructions" section, you will be able to operate the robot.
+
+If you make any changes in the Arduino code, you need to upload them before running the commands (uploading instructions can be found in the "Installation" section above). Uploading can be done either via RF stick or the USB cable connected to the Arduino board. 
 
 \section{Software overview}
 
