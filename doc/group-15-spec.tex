@@ -57,7 +57,11 @@
     \end{center}
 \end{titlepage}
 
+\cleardoublepage
+\pagenumbering{gobble}
 \tableofcontents
+\cleardoublepage
+\pagenumbering{arabic}
 
 \newpage
 
@@ -67,7 +71,7 @@
 
 \subsection{Motors}
 
-\subsection{Chassis Structure}
+\subsection{Chassis structure}
 
 \subsection{Holonomics}
 \begin{figure}
@@ -96,19 +100,29 @@ $$\begin{pmatrix}
 \sin(45-x)
 \end{pmatrix}$$
 
-\subsection{Weight Distribution}
+\subsection{Weight distribution}
 
 \subsection{Grabber}
-The grabber consists of two symmetric parts placed one slightly above the other. To keep the robot within dimensions the grabber arms overlap enabling a large span but still within regulations when closed. A symmetric gear system is used so that both arms are opened and closed at the same time. Unlike the original design, the arm axles were placed closer together so that the grabbed ball would always be in the same position increasing the reliability of the sensor and the kick.
+
+The grabber consists of two symmetric parts placed one slightly above the other as seen in Figure \ref{fig:new}. To keep the robot within dimensions the grabber arms overlap enabling a large span but still within regulations when closed. A symmetric gear system is used so that both arms are opened and closed at the same time. Unlike the original design shown in Figure \ref{fig:old}, the arm axles were placed closer together so that the grabbed ball would always be in the same position increasing the reliability of the sensor and the kick.
+
+\begin{figure}[ht]
+	\begin{minipage}[b]{.405\textwidth}
+        \centering
+		\includegraphics[scale=0.133]{venus3.jpg}
+		\caption{The current robot}
+		\label{fig:new}
+	\end{minipage}
+	~
+	\begin{minipage}[b]{.59\textwidth}
+        \centering
+		\includegraphics[scale=0.0845]{grab_open1.jpg}
+		\caption{The previous robot with opened grabber}
+		\label{fig:old}
+	\end{minipage}
+\end{figure}
 
 \subsection{Kicker}
-
-%(Figure \ref{fig:kick_action}). 
-%\begin{figure}
-%    \includegraphics[scale=.7]{kick}
-%    \caption{High level diagram of how the kick is performed}
-%    \label{fig:kick_action}
-%\end{figure}\newline
 
 \begin{figure}[ht!]
 \begin{minipage}{0.5\textwidth}
@@ -126,8 +140,7 @@ The grabber consists of two symmetric parts placed one slightly above the other.
 \end{minipage}
 \end{figure}
 
-Our newest design does not have a kicker. The kick is made by turning the robot instead and opening the grabber at the same time. The main incentive of this design was to reduce asymmetric weight distribution which would have been catastrophic to optimising the holonomic movement. The robot rotates in the intended kick direction when it is aligning itself with the goal. In doing this the centrifugal force holds the ball towards the end of the grabber and the ball is in contact with the claw that will apply the kicking force. This increases the accuracy of the kick. As the error margin of the kick is asymmetric and biased towards undershooting, the kick is initiated in different directions in different positions on the pitch. The $y$ dimension is split into four segments: $0$, $\frac{1}{4}$, $\frac{1}{2}$, and $\frac{3}{4}$. In Figures \ref{fig:correct} and \ref{fig:incorrect} the robots demonstrate each segment and its correct and incorrect kick directions. This kicking mechanism is not only more powerful than the previous design but it is also able to confuse the defence strategies of opponents tournament\footnote{Footage of one such example of a confusing spin kick is available at \url{https://youtu.be/VJLo2x2gdGk}.}.
-
+The newest design does not have a kicker. Instead, the kick is made by turning the robot and opening the grabber at the same time. The main incentive of this design was to reduce the asymmetric weight distribution which would have been catastrophic to optimising the holonomic movement. The robot rotates in the intended kick direction when it is aligning itself with the goal. In doing this the centrifugal force holds the ball towards the end of the grabber and the ball is in contact with the claw that will apply the kicking force. This increases the accuracy of the kick. As the error margin of the kick is asymmetric and biased towards undershooting, the kick is initiated in different directions in different positions on the pitch. The $y$ dimension is split into four segments: $0$, $\frac{1}{4}$, $\frac{1}{2}$, and $\frac{3}{4}$. In Figures \ref{fig:correct} and \ref{fig:incorrect} the robots demonstrate each segment and its correct and incorrect kick directions. This kicking mechanism is not only more powerful than the previous design but it is also able to confuse the defence strategies of opponents tournament\footnote{Footage of one such example of a confusing spin kick is available at \url{https://youtu.be/VJLo2x2gdGk}.}.
 
 \section{Documentation of the code}
 
@@ -486,14 +499,23 @@ Once a satisfactory potential of 6 is reached, Venus will turn and wait to excep
 \section{Sensors}
 \subsection{Rotary encoder board}
 
-Each NXT motor is connected to the rotary encoder board which is depicted in Figure \ref{fig:rotary}. The connections in the anticlockwise order from the top are: the I2C bus to the Arduino, back right motor, back left motor, front left motor, and front right motor. Using this board the information about the amount of rotations the motor has performed since the last query is available for the Arduino code as a separate integer for every motor. Every 5 ms the board is queried whether the target value has been reached. After the average of the rotary values of all four motors becomes greater or equal to the target value, the motors are stopped.
-
 \begin{figure}[ht!]
-\centering
-\includegraphics[scale=.1]{rotary1}
+	\begin{minipage}[b]{.49\textwidth}
+        \centering
+\includegraphics[scale=.12]{rotary1}
 \caption{The rotary encoder board}
 \label{fig:rotary}
+	\end{minipage}
+	~
+	\begin{minipage}[b]{.48\textwidth}
+        \centering
+\includegraphics[scale=.1335]{sensor3}
+\caption{The light sensor with the ball}
+\label{fig:sensor}
+	\end{minipage}
 \end{figure}
+
+Each NXT motor is connected to the rotary encoder board which is depicted in Figure \ref{fig:rotary}. The connections in the anticlockwise order from the top are: the I2C bus to the Arduino, back right motor, back left motor, front left motor, and front right motor. Using this board the information about the amount of rotations the motor has performed since the last query is available for the Arduino code as a separate integer for every motor. Every 5 ms the board is queried whether the target value has been reached. After the average of the rotary values of all four motors becomes greater or equal to the target value, the motors are stopped.
 
 \subsection{Light sensor}
 
@@ -505,12 +527,5 @@ to a predefined threshold corresponding to the red ball. Sometimes a white
 line inside the pitch can be mistaken for the ball due to their similar sensor
 values. An IR sensor was also tested and its returned values were deemed less reliable than
 those of the light sensor.
-
-\begin{figure}[ht!]
-\centering
-\includegraphics[scale=.1]{sensor1}
-\caption{The light sensor with the ball grabbed}
-\label{fig:sensor}
-\end{figure}
 
 \end{document}
