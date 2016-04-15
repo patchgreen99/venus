@@ -217,7 +217,7 @@ The grabber consists of two symmetric parts placed one slightly above the other.
 \end{minipage}
 \end{figure}
 
-Our newest design does not have a kicker. The kick is made by turning the robot instead and opening the grabber at the same time. The main incentive of this design was to reduce asymmetric weight distribution which would have been catastrophic to optimising the holonomic movement. The robot rotates in the intended kick direction when it is aligning itself with the goal. In doing this the centrifugal force holds the ball towards the end of the grabber and the ball is in contact with the claw that will apply the kicking force. This increases the accuracy of the kick. As the error margin of the kick is asymmetric and biased towards undershooting, the kick is initiated in different directions in different positions on the pitch. The $y$ dimension is split into four segments: $0$, $\frac{1}{4}$, $\frac{1}{2}$, and $\frac{3}{4}$. In Figures \ref{fig:correct} and \ref{fig:incorrect} the robots demonstrate each segment and its correct and incorrect kick directions. This kicking mechanism is not only more powerful than the previous design but it is also able to confuse the defence strategies of opponents tournament\footnote{Footage of one such example of a confusing spin kick available is at \url{https://youtu.be/VJLo2x2gdGk}.}.
+Our newest design does not have a kicker. The kick is made by turning the robot instead and opening the grabber at the same time. The main incentive of this design was to reduce asymmetric weight distribution which would have been catastrophic to optimising the holonomic movement. The robot rotates in the intended kick direction when it is aligning itself with the goal. In doing this the centrifugal force holds the ball towards the end of the grabber and the ball is in contact with the claw that will apply the kicking force. This increases the accuracy of the kick. As the error margin of the kick is asymmetric and biased towards undershooting, the kick is initiated in different directions in different positions on the pitch. The $y$ dimension is split into four segments: $0$, $\frac{1}{4}$, $\frac{1}{2}$, and $\frac{3}{4}$. In Figures \ref{fig:correct} and \ref{fig:incorrect} the robots demonstrate each segment and its correct and incorrect kick directions. This kicking mechanism is not only more powerful than the previous design but it is also able to confuse the defence strategies of opponents tournament\footnote{Footage of one such example of a confusing spin kick is available at \url{https://youtu.be/VJLo2x2gdGk}.}.
 
 \section{Documentation of the code}
 
@@ -448,6 +448,10 @@ The strategy relies on the physical properties of a potential field. This makes 
 
 \subsubsection{State machine}
 
+As seen in Table \ref{tab:machine} bla bla
+
+\begin{table}[h!]
+\centering
 \begin{tabular}{ | l | l | }
 \hline
 \textbf{State} & \textbf{Trigger} \\ \hline
@@ -463,32 +467,42 @@ The strategy relies on the physical properties of a potential field. This makes 
 \texttt{ATTACK\_GOAL} &   \\ \hline
 \texttt{RECEIVE\_PASS} &  \\ \hline
 \end{tabular}
+\caption{States available in the strategy system}
+\label{tab:machine}
+\end{table}
 
 \subsubsection{State fields}
 
 The following graphs were plotted using the command \texttt{map STATE\_NAME} which is ideal for visualisation and quick testing of newly defined fields. The graphs below contain quiver plots of the force acting on Venus at a given point in space. This is drawn on top of a heat map of the value of the potential field at a given point. 
 
+\begin{minipage}{\linewidth}
 \rule{\textwidth}{1pt}
-\texttt{FREE\_BALL\_YOURS}
+\texttt{FREE\_BALL\_YOURS}\medskip
 
 \begin{minipage}{0.5\textwidth}
-\includegraphics[height=40mm,width=50mm]{v3.jpg}
+\begin{center}
+\includegraphics[height=40mm,width=50mm]{v3.jpg}\medskip
+\end{center}
 
 \textbf{Forces due to obstacles}:
 The walls exert a force governed by a $1/r^3$ law on the pitch side of the wall where $r$ is the perpendicular distance to the wall. On the opposite side of the wall an attractive potential $-1/r^3$ is used instead to pull any robots into the pitch. An identical field is used in the penalty box, however, to avoid getting stuck in a local minima at the sides, the field inside the box pushes the robot to the front only and does not attract it back over the side it came from. As the box is finite, any position that is not perpendicular will exhibit a similar force, only $r$ will be the distance to the closest corner. The robots use a $1/r^2$ law where $r$ is the radial distance from the edge of the robot represented by the solid circle in red.
 \end{minipage}
 ~
 \begin{minipage}{0.5\textwidth}
-\includegraphics[height=70mm,width=100mm,trim=65 30 65 30,clip]{p3.jpg}
+\includegraphics[height=70mm,width=100mm,trim=65 55 65 35,clip]{p3.jpg}\medskip
 
 \textbf{Grabbing}: The ball uses an attractive radial field of $-1/r^2$. The amplitude of the field is larger than that of the robot to enable fast navigation. Once a potential of $-4$ is reached, the grab is initiated using quantised distance and angle motions enabled by the motor encoders. The $-4$ value has been chosen as it implies the ball is clear of any obstacles as otherwise the potential value would be higher.
 \end{minipage}
+\end{minipage}\medskip
 
+\begin{minipage}{\linewidth}
 \rule{\textwidth}{1pt}
-\texttt{ENEMY\_BALL\_TAKE\_PASS}
+\texttt{ENEMY\_BALL\_TAKE\_PASS}\medskip
 
 \begin{minipage}{0.5\textwidth}
-\includegraphics[height=40mm,width=50mm]{v1_2.jpg}
+\begin{center}
+\includegraphics[height=40mm,width=50mm]{v1_2.jpg}\medskip
+\end{center}
 
 \textbf{Blocking pass}: A finite axial field is used to enable smooth motion during the block of a pass from any point in the pitch. The points in question are first rotated so that the field is flush with the x-axis and the force is calculated using the following equation and rotated back. $d$ is the perpendicular distance, $a$ is the parallel distance to the end with the smaller $x$ value and $b$ is similar dimension in the exact opposite direction.
 
@@ -496,53 +510,68 @@ $\left(\frac{1}{\sqrt{b^2 + d^2}}-\frac{1}{\sqrt{a^2 + d^2}},\frac{b}{d\sqrt{b^2
 \end{minipage}
 ~
 \begin{minipage}{0.5\textwidth}
-\includegraphics[height=70mm,width=100mm,trim=65 30 65 30,clip]{p1.jpg}
+\includegraphics[height=70mm,width=100mm,trim=65 55 65 35,clip]{p1.jpg}\medskip
 
 \textbf{Interceptions}: When the current potential of Venus reaches $-12$, the block is satisfactory and the robot faces the ball with its grabber open. When the ball is shot as it is moving, the \texttt{FREE\_BALL\_YOURS} state is activated causing an attraction to the moving ball.
 \end{minipage}
+\end{minipage}\medskip
 
+\begin{minipage}{\linewidth}
 \rule{\textwidth}{1pt}
-\texttt{ENEMY2\_BALL\_TAKE\_GOAL} $_{\text{(\texttt{ENEMY1\_BALL\_TAKE\_GOAL})}}$
+\texttt{ENEMY2\_BALL\_TAKE\_GOAL} $_{\text{(\texttt{ENEMY1\_BALL\_TAKE\_GOAL})}}$\medskip
 
 \begin{minipage}{0.5\textwidth}
-\includegraphics[height=40mm,width=50mm]{v1_2.jpg}
+\begin{center}
+\includegraphics[height=40mm,width=50mm]{v1_2.jpg}\medskip
+\end{center}
 
 \textbf{Blocking goal}: The same field is used from the state above but for a block between the goal and an enemy robot. The current satisfactory potential for this block is $-14$ in order to be sure to block the whole goal.
 \end{minipage}
 ~
 \begin{minipage}{0.5\textwidth}
-\includegraphics[height=70mm,width=100mm,trim=65 30 65 30,clip]{p2.jpg}
+\includegraphics[height=70mm,width=100mm,trim=65 55 65 35,clip]{p2.jpg}\medskip
 \end{minipage}
+\end{minipage}\medskip
 
+\begin{minipage}{\linewidth}
 \rule{\textwidth}{1pt}
-\texttt{FREE\_BALL\_NONE\_GOALSIDE} $_{\text{(\texttt{FREE\_BALL\_1\_GOALSIDE}, \texttt{FREE\_BALL\_2\_GOALSIDE})}}$
+\texttt{FREE\_BALL\_NONE\_GOALSIDE} $_{\text{(\texttt{FREE\_BALL\_1\_GOALSIDE}, \texttt{FREE\_BALL\_2\_GOALSIDE})}}$\medskip
 
 \begin{minipage}{0.5\textwidth}
-\includegraphics[height=40mm,width=50mm]{v4.jpg}
+\begin{center}
+\includegraphics[height=40mm,width=50mm]{v4.jpg}\medskip
+\end{center}
 
 \textbf{Optimising position}: Given your team mate is either fetching or has the ball you want to find the best position to receive a pass. Two fields are added in order to implement this: \begin{enumerate} \item The shadowed array blocking the pass. \item The shadowed array blocking the goal. \end{enumerate} This state represents a double blocked pass. An identical type of field is used in the defence states, however, one end is placed at the start of the shadow and the other three pitch lengths away. This is so that Venus is repelled perpendicular to the shadow and also parallel around the enemy robots if needs be.
 \end{minipage}
 ~
 \begin{minipage}{0.5\textwidth}
-\includegraphics[height=70mm,width=100mm,trim=65 30 65 30,clip]{p4.jpg}
+\includegraphics[height=70mm,width=100mm,trim=65 55 65 35,clip]{p4.jpg}\medskip
 
 Once a satisfactory potential of 6 is reached, Venus will turn and wait to except the pass. As the other robots move, Venus will keep trying to minimise his potential until a value of 6 is obtained.
 \end{minipage}
+\end{minipage}\medskip
 
-\rule{\textwidth}{1pt}\newline
-\texttt{FREE\_BALL\_BOTH\_GOALSIDE} $_{\text{(\texttt{FREE\_BALL\_1\_GOALSIDE}, \texttt{FREE\_BALL\_2\_GOALSIDE})}}$
+\begin{minipage}{\linewidth}
+\rule{\textwidth}{1pt}
+\texttt{FREE\_BALL\_BOTH\_GOALSIDE} $_{\text{(\texttt{FREE\_BALL\_1\_GOALSIDE}, \texttt{FREE\_BALL\_2\_GOALSIDE})}}$\medskip
 
 \begin{minipage}{0.5\textwidth}
-\includegraphics[height=40mm,width=50mm]{v5.jpg}
+\begin{center}
+\includegraphics[height=40mm,width=50mm]{v5.jpg}\medskip
+\end{center}
 
 \textbf{Local minima}: Whilst optimising position Venus can get stuck as enemy players close up to defend the same shot. To deal with this, a timer is used so that if Venus has been sitting in a unsatisfactory potential for too long, we remove the least import field. In this case, the furthest player blocking the goal.
 \end{minipage}
 ~
 \begin{minipage}{0.5\textwidth}
-\includegraphics[height=70mm,width=100mm,trim=65 30 65 30,clip]{p5.jpg}
+\includegraphics[height=70mm,width=100mm,trim=65 55 65 35,clip]{p5.jpg}\medskip
 
 \textbf{Handling opponents that divide up defensive positions}: As outlined in the state above, this graph represents a double blocked goal and the final two states that are not shown are a mixture of this state and the state above.
 \end{minipage}
+\end{minipage}
+
+\rule{\textwidth}{1pt}
 
 \section{Sensors}
 \subsection{Rotary encoder board}
