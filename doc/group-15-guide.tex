@@ -242,7 +242,14 @@ Handle the robot with care. It is advisable not to lose the top plate during the
 \subsubsection{Calibration}
 Before playing a match, ensure that the spin-kick (\texttt{goal} command), going forward (\texttt{f} command), and turning (\texttt{c} command) are calibrated. It can be done by repeatedly executing the respective commands with different input values, changing the data points in the \texttt{calibration.ods} spreadsheet, and changing the equations in \texttt{ee}, \texttt{f}, and \texttt{c} methods in \texttt{control/holonomic.py} to respective new computed equations from the spreadsheet. 
 
-When calibrating the spin-kick the aim is for the robot to be not fully turned towards the goal before the kick. To achieve that, there are different "correction angles" for six main zones of the pitch (Figure FIGURE). These angles can be calibrated in \texttt{strategy/simple\_holonomic.py} in \texttt{shot\_correction} method. The best strategy here would be to place robot with the ball in different sections of one zone and execute the \texttt{goal} command choosing the constant for the angle that achieved the best result.
+When calibrating the spin-kick the aim is for the robot to be not fully turned towards the goal before the kick. To achieve that, there are different "correction angles" for six main zones of the pitch (Figure  \ref{fig:zones}). These angles can be calibrated in \texttt{strategy/simple\_holonomic.py} in \texttt{shot\_correction} method. The best strategy here would be to place robot with the ball in different sections of one zone and execute the \texttt{goal} command choosing the constant for the angle that achieved the best result.
+
+\begin{figure}
+\centering
+\includegraphics[scale=.4]{zones.jpg}
+\caption{Different shooting zones}
+\label{fig:zones}
+\end{figure}
 
 Another important action is checking whether the light sensor threshold correctly identifies the grabbed ball and lack thereof. The threshold is defined in \texttt{query\_ball} method in \texttt{control/holonomic.py}.
 
