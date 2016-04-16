@@ -382,17 +382,17 @@ As seen in Table \ref{tab:machine} bla bla
 \begin{tabular}{ | l | l | }
 \hline
 \textbf{State} & \textbf{Trigger} \\ \hline
-\texttt{FREE\_BALL\_YOURS} & \\ \hline
-\texttt{ENEMY\_BALL\_TAKE\_PASS} &  \\ \hline
-\texttt{ENEMY1\_BALL\_TAKE\_GOAL} &  \\ \hline
-\texttt{ENEMY2\_BALL\_TAKE\_GOAL} &  \\ \hline
+\texttt{FREE\_BALL\_YOURS} & Ball not in range for any Robot\\ \hline
+\texttt{ATTACK\_GOAL} &   venus has ball and Goal shot safe \\ \hline
+\texttt{ATTACK\_PASS} &  venus has ball and Goal shot not safe but pass safe\\ \hline
+\texttt{RECEIVE\_PASS} &  friend has ball and pass safe\\ \hline
+\texttt{ENEMY1\_BALL\_TAKE\_GOAL} &  Enemy has possession and venus closest to guarding goal\\ \hline
+\texttt{ENEMY\_BALL\_TAKE\_PASS} &  Enemy has possession and venus closest to blocking pass\\ \hline
 \texttt{FREE\_BALL\_NONE\_GOALSIDE} &  \\ \hline
 \texttt{FREE\_BALL\_1\_GOALSIDE} &  \\ \hline
 \texttt{FREE\_BALL\_2\_GOALSIDE} &  \\ \hline
 \texttt{FREE\_BALL\_BOTH\_GOALSIDE} &  \\ \hline
-\texttt{ATTACK\_PASS} &  \\ \hline
-\texttt{ATTACK\_GOAL} &   \\ \hline
-\texttt{RECEIVE\_PASS} &  \\ \hline
+
 \end{tabular}
 \caption{States available in the strategy system}
 \label{tab:machine}
