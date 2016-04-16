@@ -8,6 +8,7 @@
 \graphicspath{ {images/} }
 \usepackage{amsmath}
 \usepackage{hyperref}
+\usepackage{wrapfig}
 
 \newcommand{\mybox}[2]{{\color{#1}\fbox{\normalcolor#2}}}
 
@@ -65,23 +66,74 @@
 
 \newpage
 
+\newgeometry{left=.5cm,right=.5cm}
+
 \section{System architecture}
+
+\begin{wrapfigure}{r}{0.7\textwidth}
+  \begin{center}
+    \includegraphics[scale=0.4]{arch1.png}
+  \end{center}
+  \caption{The system architecture of Milestone Venus}
+  \vspace{20pt}
+  \label{fig:milestone}
+\end{wrapfigure}
+
+The system as seen in Figure \ref{fig:milestone} had a simple structure. Commands were complete once a predefined rotary value was obtained. This was used to calibrate four motions not stretching the capabilities of the robot.
+
+\begin{wrapfigure}{r}{0.7\textwidth}
+  \begin{center}
+\includegraphics[scale=0.4]{arch2.png}
+\end{center}
+	\caption{The system architecture of Venus 1.0}
+	\vspace{20pt}
+	\label{fig:venus1}
+\end{wrapfigure}
+
+The updated system in Figure \ref{fig:venus1} used the value of a potential field obtain by summing the contributions of obstacles in the pitch. The robot was modelled as an automaton in a finite grid with each square having its own potential. Using calibrated swerving motions from square to square the pitch could be navigated intelligently. Navigational motions were added to a job list on the Arduino. This ensured the motion was continuous and not affected by lag.
+
+\begin{wrapfigure}{r}{0.7\textwidth}
+  \begin{center}
+\includegraphics[scale=0.4]{arch3.png}
+\end{center}
+	\caption{The system architecture of Venus 2.0}
+	\vspace{20pt}
+	\label{fig:venus2}
+\end{wrapfigure}
+
+\restoregeometry
+
+\begin{figure}[ht]
+	\begin{minipage}[b]{.405\textwidth}
+        \centering
+		\includegraphics[scale=0.133]{venus3.jpg}
+		\caption{Venus 2.0}
+		\label{fig:new}
+	\end{minipage}
+	~
+	\begin{minipage}[b]{.59\textwidth}
+        \centering
+		\includegraphics[scale=0.0845]{grab_open1.jpg}
+		\caption{Venus 1.0}
+		\label{fig:old}
+	\end{minipage}
+\end{figure}
 
 \section{Hardware components}
 
-\subsection{Motors}
-
 \subsection{Chassis structure}
 
-\subsection{Holonomics}
-\begin{figure}
+To obtain more constant torque both designs used the nxt motors for movement. However as the rear wheel in version 1.0 was not powerful enough to swerve the robots orientation with enough granularity, the robot chassis was rethought.  
+
+The final design uses a four wheeled holonomic base instead of our three wheeled one. It enabled fast motion in any direction meaning the robot could respond quickly to a change in play. It also was perfectly suited to a strategy using potential fields as moving in a given optimal direction could implemented instantly. This was harder to do with our three wheeled base as the robot used fixed swerving commands which were not granular enough to cope with maze of obstacles. The only way around this was to rotate on the spot which was too slow for the speed of the game. 
+\begin{figure}[ht!]
 \centering
-\includegraphics[scale=.5]{holonomics.png}
+\includegraphics[scale=.4]{holonomics.png}
 \caption{Visualisation of the calculating the motor power components}
 \label{fig:components}
 \end{figure}
 
-Holonomic motion was an obvious choice for the final robot. It enabled fast motion in any direction meaning the robot could respond very  to a change in play. It also was perfectly suited to a strategy using potential fields as an optimal direction would be output and implemented instantly using the firmware. The motion was constructed by calculating the angle between the desired direction  and the robot orientation. This was used to compute the driving components that are sent to the Arduino as seen in Figure \ref{fig:components}. The matrix multiplication below was used to extract the driving powers and then each power was scaled up by a factor of $100$ divided by the absolute maximum of the four motor powers.
+The motion was constructed by calculating the angle between the desired direction  and the robot orientation. This was used to compute the driving components that are sent to the Arduino as seen in Figure \ref{fig:components}. The matrix multiplication below was used to extract the driving powers and then each power was scaled up by a factor of $100$ divided by the absolute maximum of the four motor powers.
 
 $$\begin{pmatrix}
 \text{MOTOR 0}\\ 
@@ -102,45 +154,29 @@ $$\begin{pmatrix}
 
 \subsection{Weight distribution}
 
-\subsection{Grabber}
+To simplify holonomic calculations, except for the grabber the final robot completely symmetrical in two planes. The majority of the weight coming from the batteries and motors are placed directly in the middle for stability and to evenly distribute the weight between each wheel. The previous design was a lot heavier towards the rear due to the amount of space needed for the kicker causing different forward and backward motion calibrations. This prevented us from obtaining accurate swerving and led to us scraping the chassis structure for the current four wheeled design. 
+
+\subsection{Grabber and kicker}
 
 The grabber consists of two symmetric parts placed one slightly above the other as seen in Figure \ref{fig:new}. To keep the robot within dimensions the grabber arms overlap enabling a large span but still within regulations when closed. A symmetric gear system is used so that both arms are opened and closed at the same time. Unlike the original design shown in Figure \ref{fig:old}, the arm axles were placed closer together so that the grabbed ball would always be in the same position increasing the reliability of the sensor and the kick.
-
-\begin{figure}[ht]
-	\begin{minipage}[b]{.405\textwidth}
-        \centering
-		\includegraphics[scale=0.133]{venus3.jpg}
-		\caption{The current robot}
-		\label{fig:new}
-	\end{minipage}
-	~
-	\begin{minipage}[b]{.59\textwidth}
-        \centering
-		\includegraphics[scale=0.0845]{grab_open1.jpg}
-		\caption{The previous robot with opened grabber}
-		\label{fig:old}
-	\end{minipage}
-\end{figure}
-
-\subsection{Kicker}
 
 \begin{figure}[ht!]
 \begin{minipage}{0.5\textwidth}
 \centering
-\includegraphics[width=80mm,height=100mm]{goodkick.png}
+\includegraphics[width=70mm,height=80mm]{goodkick.png}
 \caption{Correct kick rotation}
 \label{fig:correct}
 \end{minipage}
 ~
 \begin{minipage}{0.5\textwidth}
 \centering
-\includegraphics[width=75mm,height=100mm]{badkick.png}
+\includegraphics[width=60mm,height=80mm]{badkick.png}
 \caption{Incorrect kick rotation}
 \label{fig:incorrect}
 \end{minipage}
 \end{figure}
 
-The newest design does not have a kicker. Instead, the kick is made by turning the robot and opening the grabber at the same time. The main incentive of this design was to reduce the asymmetric weight distribution which would have been catastrophic to optimising the holonomic movement. The robot rotates in the intended kick direction when it is aligning itself with the goal. In doing this the centrifugal force holds the ball towards the end of the grabber and the ball is in contact with the claw that will apply the kicking force. This increases the accuracy of the kick. As the error margin of the kick is asymmetric and biased towards undershooting, the kick is initiated in different directions in different positions on the pitch. The $y$ dimension is split into four segments: $0$, $\frac{1}{4}$, $\frac{1}{2}$, and $\frac{3}{4}$. In Figures \ref{fig:correct} and \ref{fig:incorrect} the robots demonstrate each segment and its correct and incorrect kick directions. This kicking mechanism is not only more powerful than the previous design but it is also able to confuse the defence strategies of opponents tournament\footnote{Footage of one such example of a confusing spin kick is available at \url{https://youtu.be/VJLo2x2gdGk}.}.
+The newest design does not have a kicker. Instead, the kick is made by turning the robot and opening the grabber at the same time. The main incentive of this design was to reduce the asymmetric weight distribution which would have been catastrophic in optimising the holonomic movement. The robot rotates in the intended kick direction when it is aligning itself with the goal. In doing this the centrifugal force holds the ball towards the end of the grabber and the ball is in contact with the claw that will apply the kicking force. This increases the accuracy of the kick. As the error margin of the kick is asymmetric and biased towards undershooting, the kick is initiated in different directions in different positions on the pitch. The $y$ dimension is split into four segments: $0$, $\frac{1}{4}$, $\frac{1}{2}$, and $\frac{3}{4}$. In Figures \ref{fig:correct} and \ref{fig:incorrect} the robots demonstrate each segment and its correct and incorrect kick directions. This kicking mechanism is not only more powerful than the previous design but it is also able to confuse the defence strategies of opponents tournament\footnote{Footage of one such example of a confusing spin kick is available at \url{https://youtu.be/VJLo2x2gdGk}.}.
 
 \section{Documentation of the code}
 
@@ -304,16 +340,19 @@ In order to detect the robots and ball the following steps are executed:
 \item When the vision system is closed using the escape key, the most recent calibration values and the current camera settings defined by the slider bars are saved and can be used on the next execution.
 \end{enumerate}
 
+\subsubsection{Finding the ball}
+
+The algorithm looks for 10 red spots and checks through them in the order of descending area. To prevent a pink being misclassified as the ball, each red spot is checked whether it exists close to the centres of the robots. As the robots can shield the ball from view, a method is used which determines whether a specific robot is in range of the ball. If so, when the ball is shielded, an imaginary ball is placed along the orientation vector of that robot until the ball is found. This method is in place for all robots except for Venus because the sensor is being used instead to determine whether Venus has the ball.
+
 \subsubsection{Finding the robots}
 
-Due to the varying light intensities over the pitch a highly tolerant method of identifying robots is used. The robot identities are pre-defined and dependent on the choice of the center and corner spot as seen in Figure \ref{fig:robots}. Numbers are assigned sequentially to our robot, teammate, first enemy, and second enemy.
-
-\begin{figure}
-\centering
+\begin{minipage}{0.62\textwidth}
+Due to the varying light intensities over the pitch a highly tolerant method of identifying robots is used. The robot identities are pre-defined and dependent on the choice of the center and corner spot as seen on the right. Numbers are assigned sequentially to our robot, teammate, first enemy, and second enemy.
+\end{minipage}
+~
+\begin{minipage}{0.3\textwidth}
 \includegraphics[height=40mm,width=60mm]{ex1.jpg}
-\caption{The four robots marked on the vision feed.}
-\label{fig:robots}
-\end{figure}
+\end{minipage}
 
 There are two independent ways the robot can be identified:
 
@@ -338,8 +377,7 @@ As there will always be two robots with the same plate configuration required fo
 \medskip
 
 \begin{minipage}{0.6\textwidth}
-\includegraphics[height=60mm,width=90mm]{filter1.jpg}\newline\newline
-\includegraphics[height=60mm,width=90mm]{filter2.jpg}
+\includegraphics[height=80mm,width=95mm]{filter2.jpg}
 \end{minipage}
 \begin{minipage}{0.4\textwidth}
 \mybox{black}{FILTER 1} $\{$ \tikz\draw[yellow,fill=yellow] (0, 0) circle (.5ex); \tikz\draw[pink,fill=pink] (0, 0) circle (.5ex); \tikz\draw[pink,fill=pink] (0, 0) circle (.5ex); \tikz\draw[pink,fill=pink] (0, 0) circle (.5ex); $\}$
@@ -363,17 +401,11 @@ To pass into here no team spot is required, it must only have more than one of i
 
 As each identity is found, its corresponding filters are blocked and its position is noted so that a robot does not get detected in the same place as the one that is already detected. Once any group of spots gets through a filter of a given identity, the identity of that robot is then updated using either the three spot or two spot method depending on what information is available. If a robot is not found, it keeps its original position. To handle cases where robots are lifted off the pitch, the system creates a ghost robot marked in blue on the vision feed. This tells the strategy to ignore the contribution to the game of that robot but the robot continues existing on the pitch in the vision thread.
 
-\subsubsection{Finding the ball}
-
-The algorithm looks for 10 red spots and checks through them in the order of descending area. To prevent a pink being misclassified as the ball, each red spot is checked whether it exists close to the centres of the robots. As the robots can shield the ball from view, a method is used which determines whether a specific robot is in range of the ball. If so, when the ball is shielded, an imaginary ball is placed along the orientation vector of that robot until the ball is found. This method is in place for all robots except for Venus because the sensor is being used instead to determine whether Venus has the ball.
-
 \subsection{Strategy}
 
 \subsubsection{Potential fields}
 
 The strategy relies on the physical properties of a potential field. This makes it possible to compound together separate tasks that the robot has to undertake with ease, such as avoiding others and grabbing a ball, at the same time. Each interaction is implemented using the same behaviour as a charged electron would have when interacting with various physical objects of different charges. Using this it is possible to swerve in front of the kicks and navigate mazes of objects fast and efficiently. 
-
-\subsubsection{State machine}
 
 At a higher level our strategy system consists of a state machine which takes in information from the current world state and makes transistions between different states. The states and their triggers can be seen in Table \ref{tab:machine}. Every state has a perticular task. There are 3 states, namely ATTACK GOAL, ATTACK PASS, and RECIEVE PASS with static tasks. Every other state has tasks that are dynamic in nature and they activate certain potential fields to undertake them. 
 
@@ -506,14 +538,14 @@ Once a satisfactory potential of 6 is reached, Venus will turn and wait to excep
 \begin{figure}[ht!]
 	\begin{minipage}[b]{.49\textwidth}
         \centering
-\includegraphics[scale=.12]{rotary1}
+\includegraphics[scale=.08]{rotary1}
 \caption{The rotary encoder board}
 \label{fig:rotary}
 	\end{minipage}
 	~
 	\begin{minipage}[b]{.48\textwidth}
         \centering
-\includegraphics[scale=.1335]{sensor3}
+\includegraphics[scale=.09]{sensor3}
 \caption{The light sensor with the ball}
 \label{fig:sensor}
 	\end{minipage}
