@@ -407,26 +407,24 @@ As each identity is found, its corresponding filters are blocked and its positio
 
 The strategy relies on the physical properties of a potential field. This makes it possible to compound together separate tasks that the robot has to undertake with ease, such as avoiding others and grabbing a ball, at the same time. Each interaction is implemented using the same behaviour as a charged electron would have when interacting with various physical objects of different charges. Using this it is possible to swerve in front of the kicks and navigate mazes of objects fast and efficiently. 
 
-\subsubsection{State machine}
-
-As seen in Table \ref{tab:machine} bla bla
+At a higher level our strategy system consists of a state machine which takes in information from the current world state and makes transistions between different states. The states and their triggers can be seen in Table \ref{tab:machine}. Every state has a perticular task. There are 3 states, namely ATTACK GOAL, ATTACK PASS, and RECIEVE PASS with static tasks. Every other state has tasks that are dynamic in nature and they activate certain potential fields to undertake them. 
 
 \begin{table}[h!]
 \centering
 \begin{tabular}{ | l | l | }
 \hline
 \textbf{State} & \textbf{Trigger} \\ \hline
-\texttt{FREE\_BALL\_YOURS} & \\ \hline
-\texttt{ENEMY\_BALL\_TAKE\_PASS} &  \\ \hline
-\texttt{ENEMY1\_BALL\_TAKE\_GOAL} &  \\ \hline
-\texttt{ENEMY2\_BALL\_TAKE\_GOAL} &  \\ \hline
-\texttt{FREE\_BALL\_NONE\_GOALSIDE} &  \\ \hline
-\texttt{FREE\_BALL\_1\_GOALSIDE} &  \\ \hline
-\texttt{FREE\_BALL\_2\_GOALSIDE} &  \\ \hline
-\texttt{FREE\_BALL\_BOTH\_GOALSIDE} &  \\ \hline
-\texttt{ATTACK\_PASS} &  \\ \hline
-\texttt{ATTACK\_GOAL} &   \\ \hline
-\texttt{RECEIVE\_PASS} &  \\ \hline
+\texttt{FREE\_BALL\_YOURS} & Ball not in range for any Robot\\ \hline
+\texttt{ATTACK\_GOAL} &   Venus has ball and Goal shot safe \\ \hline
+\texttt{ATTACK\_PASS} &  Venus has ball and Goal shot not safe but pass safe\\ \hline
+\texttt{RECEIVE\_PASS} &  Friend has ball and pass safe\\ \hline
+\texttt{ENEMY1\_BALL\_TAKE\_GOAL} &  Enemy has possession and venus closest to guarding goal\\ \hline
+\texttt{ENEMY\_BALL\_TAKE\_PASS} &  Enemy has possession and venus closest to blocking pass\\ \hline
+\texttt{FREE\_BALL\_NONE\_GOALSIDE} & No Enemy between Venus and Attacking goal \\ \hline
+\texttt{FREE\_BALL\_1\_GOALSIDE} & Enemy 1 between Venus and Attacking goal \\ \hline
+\texttt{FREE\_BALL\_2\_GOALSIDE} & Enemy 2 between Venus and Attacking goal \\ \hline
+\texttt{FREE\_BALL\_BOTH\_GOALSIDE} &  Both Enemy between Venus and Attacking goal\\ \hline
+
 \end{tabular}
 \caption{States available in the strategy system}
 \label{tab:machine}
