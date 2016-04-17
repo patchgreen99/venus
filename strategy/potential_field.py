@@ -33,6 +33,7 @@ class Potential:
 
             self.world = world
             self.ball_next_square = False
+            self.con = 0
 
             self.last_square = last_square
             self.last_direction = last_direction
@@ -76,7 +77,7 @@ class Potential:
         def nothing(self, x):
             pass
 
-        def map(self, con):
+        def map(self, num):
             heat_map = self.get_heat_map()
             x = np.arange(PITCH_COLS)
             y = np.arange(PITCH_ROWS)
@@ -116,8 +117,8 @@ class Potential:
             ax.xaxis.tick_top()
 
             #fig.show()
-            plt.savefig('ggraph/graph%03d.jpg' % con)
-	    plt.clf()
+            plt.savefig('graph1/graph%04d.jpg' % num)
+            plt.clf()
 
         def build_field(self):
             for potential in self.potential_list:

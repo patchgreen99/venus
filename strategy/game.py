@@ -39,7 +39,7 @@ class Game:
     ###############################################################################################################################################################
     # ENTERING STATE
     ###############################################################################################################################################################
-    def start(self, state):
+    def start(self, state, num):
         if state == "FREE_BALL_YOURS":
             pass
         elif state == "ATTACK_PASS":
@@ -68,7 +68,7 @@ class Game:
     ################################################################################################################################################################
     # MID STATE
     ################################################################################################################################################################
-    def mid(self, state, sim):
+    def mid(self, state, sim, num):
         if state == "FREE_BALL_YOURS":
 
             # ON
@@ -138,8 +138,7 @@ class Game:
             # TESTING
             ########################################
             else:
-                #potential.map()
-                print potential.get_potential()
+                potential.map(num)
 
             ########################################
 
@@ -189,7 +188,7 @@ class Game:
             # TESTING
             ########################################
             else:
-                potential.map()
+                potential.map(num)
             ########################################
 
             ###########################################################################################################################################
@@ -383,7 +382,7 @@ class Game:
             # TESTING
             ########################################
             elif sim:
-                potential.map()
+                potential.map(num)
             ########################################
             elif (self.world.enemy1.hasBallInRange[0] == 0 and self.world.enemy2.hasBallInRange[0] == 0) or self.world.ball_moving[0] == 1:
                 ball_field = P.radial(self.world.ball, 1, -100)
@@ -442,7 +441,7 @@ class Game:
             # TESTING
             ########################################
             elif sim:
-                potential.map()
+                potential.map(num)
 
             ########################################
             elif (self.world.enemy1.hasBallInRange[0] == 0 and self.world.enemy2.hasBallInRange[0] == 0) or self.world.ball_moving[0] == 1:

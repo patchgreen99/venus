@@ -121,55 +121,21 @@ To program the Arduino to receive and execute messages, open the Arduino IDE by 
 \section{Hardware overview}
 
 \subsection{Components}
-\subsubsection{Wheels}
-The robot has four holonomic wheels, which are placed in the middle of each side of the robot. The holonomic motion allows the robot to move in any direction. All wheels are powered by NXT motors.
+\subsubsection{Motors}
+The wheels are powered by NXT motors on a gear system of $2:1$. A reduction of power of one wheel can be caused by the gears slipping out of line. The driving motors are labelled 0 to 3 from the back right clockwise. Simple motions can be tested using the \texttt{move direction\_angle turn\_angle} command where direction\_angle defines the movement vector and turning\_angle defines the rotation whilst moving on that vector. the gears in the grabber can come out of line as well when crashing so insure that when open the enter arm span occurs. The grab has a motor on one arm and uses a gear ratio of $25:10:10:25$ to ensure each arm is opened at the same rate and in the correct direction. A mini motor is used for this and therefore the actual motion calibrated using a time step and not encoders. Please see the specification for an explanation of the kick. As it relies on timing the open grabber with a spin jammed grabber arms can reduce accuracy.
 
-The grabber consists of two symmetric parts resembling arms (Figure \ref{fig:grabber}). It is powered by a single Power Functions Medium motor, which is connected to a symmetric gear system. The latter is used to ensure both arms are opened and closed at the same time. The kicking works in the following way. 
+\subsubsection{Senors}
 
-%\begin{wrapfigure}{r}{0.5\textwidth}
-%\centering
-%\includegraphics[scale=.3]{grabber_close.jpg}
-%\caption{The grabber}
-%\label{fig:grabber}
-%\end{wrapfigure}
+Each NXT motor is connected to the rotary encoder board see the specification for an image. The connections in the anticlockwise order from the top are: the I2C bus to the Arduino, back right motor, back left motor, front left motor, and front right motor. Using this board the information about the amount of rotations the motor has performed since the last query is available for the Arduino code as a separate integer for every motor. Every 5 ms the board is queried whether the target value has been reached. After the average of the rotary values of all four motors becomes greater or equal to the target value, the motors are stopped. If plugged in incorrectly motors will run continuously regardless of encoder value.
 
-\subsubsection{Rotary encoder board}
-
-Each NXT motor is connected to the rotary encoder board (Figure \ref{fig:rotary}). The connections in the anticlockwise order from the top are: the I2C bus to the Arduino, back right motor, back left motor, front left motor, and front right motor. Using this board the information about the amount of rotations the motor has performed since the last query is available for the Arduino code as a separate integer for every motor. Every 5 ms the board is queried whether the target value has been reached. After the average of the rotary values of all four motors becomes greater or equal to the target value, the motors are stopped.
-
-%\begin{figure}[ht!]
-%\begin{minipage}{0.5\textwidth}
-%\centering
-%\includegraphics[scale=.1]{rotary1}
-%\caption{The rotary encoder board}
-%\label{fig:rotary}
-%\end{minipage}
-%~
-%\begin{minipage}{0.5\textwidth}
-%\centering
-%\includegraphics[scale=.1]{sensor1}
-%\caption{The light sensor with the ball grabbed}
-%\label{fig:sensor}
-%\end{minipage}
-%\end{figure}
-
-\subsubsection{Light sensor}
-
-The light sensor is located above the grabber (Figure \ref{fig:sensor}). It is used to check whether
-the robot has successfully acquired the ball after grabbing. The sensor
-returns a value associated with the reflected colors in its line of sight. Then the Arduino compares that value to a predefined threshold corresponding to the red ball. Sometimes a white
-line inside the pitch can be mistaken for the ball due to their similar sensor
-values.
+The light sensor is located above the grabber. The sensor returns a value associated with the reflected colors in its line of sight. Then the Arduino compares that value to a predefined threshold corresponding to the red ball. Sometimes a white line inside the pitch can be mistaken for the ball noticeable in the games as a random kick whilst in a state of grabbing. Ensure \texttt{query\_ball} is working before playing and adjust the threshold as outline in calibrations.
 
 \subsection{Usage}
 
 \subsubsection{Preparation for the match}
 
-In order to turn the robot on, connect the battery pack to the power board. The pack consists of 10 AA rechargable batteries. It is advisable to swap batteries after each match, even if the batteries are not fully discharged at that point. Normally one fully charged battery pack would last for 7-10 minutes. After that the performance of the robot might decrease depending on the amount of actions it made. 
+In order to turn the robot on, connect the battery pack to the power board. The pack consists of 10 AA rechargable batteries. Normally one fully charged battery pack would last for 7-10 minutes after which noticeable under-turning will occur. Ensure that the battery back is placed directly in the center as a change in weight distribution can cause the need for a recalibration of moving , turning and kicking.
 
-In order to swap the batteries, take them out, put them to charge and insert the new batteries into the battery pack. Easy!
-
-\subsubsection{RF stick}
 To communicate with Venus the RF stick should be connected to the machine you are running the commands from. Then after performing steps described in "Running instructions" section, you will be able to operate the robot.
 
 If you make any changes in the Arduino code, you need to upload them before running the commands (uploading instructions can be found in the "Installation" section above). Uploading can be done either via RF stick or the USB cable connected to the Arduino board. 
@@ -258,30 +224,34 @@ Then the operator of the robot can start entering the commands. The main command
 \label{tab:commands}
 \end{table}
 
-To catch the ball from the teammate, the robot turns towards the teammate and opens its grabber. When the ball is kicked towards the robot, the ball is grabbed. In case the ball bounces off, the robot starts moving to grab the ball. To pass the ball to the teammate, the robot turns towards the teammate and kicks the ball. The kick distance of the ball is calculated so that the ball can successfully reach the teammate.
+\texttt{goal} and \texttt{pass\_ ball} are the robots shooting command. First the optimum orientation of the robot is met. Then a second grab is initiated and the finally kick initiated through the \texttt{ee} command. Sleep is added before the kick to reduce irregularities in motor powers from previous movement. The \texttt{catch\_ball} command moves the robot to face its team mate. A grab is initiated once vision detects that the ball is within a range of 32cm set exactly for that camera speed. If the ball never enters this range and stops moving, vision will also detect this breaking out of the while loop instantly. The \texttt{ee} command instigates a kick by opening the grabber and spinning for an encoder value of 200, in that order. Irregularities in accuracy can come from both running over tape and also battery power.
+
 
 \subsection{Calibration of the vision} \label{calibration}
 
-\begin{minipage}{0.6\textwidth}
-\includegraphics[scale=0.3]{images/calibration1.png}
-\end{minipage}
-\begin{minipage}{0.4\textwidth}   
-\textbf{The three spot method}: Finds the largest of the three distances between spots, then draws a vector from the midpoint of this edge to the spot not included in the edge. The orientation is then computable by rotating this vector by a fixed amount. Then, the robot center is calculated using the average of the spot centres.
+\begin{wrapfigure}{r}{0.25\textwidth}
+\centering
+\includegraphics[scale=0.25]{images/calibration1.png}
+\end{wrapfigure} 
+\textbf{Camera capture settings}: As the images appearance can change between computers you may need to slightly adjust the capture settings. This simple calibration is always more preferable than going for a complete calibration. In which case use the slider bars that pop up on the vision feed each corresponding to a percentage see the image to the left. Brightness and contrast can help make the colors more distinguishable and a larger contrast than brightness works better. Reducing the saturation can help remove unwanted spots from the blurred colors created by the white lines.   
+ 
+\textbf{Color calibration}: To enter this mode the slider bar named calibration must be moved. The first step is to click and the terminal will outline everything that can be calibrated, see image bellow. Each one is activated by pressing a key outlined bellow. For colors it is advised to click on that coloured spot a few times. Be sure to check the terminal to make sure your on the right color. For pitch dimensions a description of how to click each object is added in the terminal. The general convention is any order to mark the goals and for shapes start at the top left and work clockwise. Once you ready to move on press the ESC key. 
+
+\begin{minipage}{0.5\textwidth}
+\centering
+\includegraphics[scale=0.25]{images/calibration2.png}
 \end{minipage}
 ~
-\begin{minipage}{0.6\textwidth}
-\includegraphics[scale=0.3]{images/calibration2.png}
+\begin{minipage}{0.5\textwidth}
+\centering
+\includegraphics[height=200px]{images/calibration3.png}
 \end{minipage}
-\begin{minipage}{0.4\textwidth}
-\textbf{The two spot method}: As each spot is distinguishable, a vector can be constructed between the center spot and the corner spot and rotated a fixed amount to find the orientation. Then, the robot center is calculated using the center spot. 
-\end{minipage}
-~
-\begin{minipage}{0.6\textwidth}
-\includegraphics[scale=0.3]{images/calibration3.png}
-\end{minipage}
-\begin{minipage}{0.4\textwidth}
-\textbf{The two spot method}: As each spot is distinguishable, a vector can be constructed between the center spot and the corner spot and rotated a fixed amount to find the orientation. Then, the robot center is calculated using the center spot. 
-\end{minipage}
+
+\textbf{Fine tuning the colors}: Once the ESC key has been pressed the color thresholds predicted from the clicking can be fine tuned in the window shown above. If nothing is visible, it is advised to reduce saturation and value first before adjusting the hue values. The aim is to see as minimal of spots not in that color as possible and make the actual color as solid as possible. Press the ESC key to move on and eventually the original vision key will be brought up.
+
+\textbf{Green and yellow}: As they can blend together easily it is important that they can be seen clearly so try to reduce the hue threshold of yellow and increase the hue threshold of green as much as possible. 
+
+\textbf{Red and pink}: Sometimes the ball cannot be found so if you enter the calibration and press ESC instantly you will only be adjusting reds thresholds. The tuning window for red requires you to adjust to separate ranges of values so make sure this is done to get as clear spot as possible.  Its similarities with pink can be avoided after calibrating by adjusting the slider bars for the camera capture settings.      
 
 \subsection{Handling} \label{handling}
 
@@ -289,13 +259,14 @@ Handle the robot with care. It is advisable not to lose the top plate during the
 
 \subsubsection{Calibration}
 
+Before playing a match, ensure that the spin-kick (\texttt{goal} command), going forward (\texttt{f} command), and turning (\texttt{c} command) are calibrated. It can be done by repeatedly executing the respective commands with different input values, changing the data points in the \texttt{calibration.ods} spreadsheet, and changing the equations in \texttt{ee}, \texttt{f}, and \texttt{c} methods in \texttt{control/holonomic.py} to respective new computed equations from the spreadsheet. 
+
 \begin{wrapfigure}{r}{0.3\textwidth}
 \centering
 \includegraphics[scale=.4]{zones.jpg}
 \caption{Different shooting zones}
 \label{fig:zones}
 \end{wrapfigure}
-Before playing a match, ensure that the spin-kick (\texttt{goal} command), going forward (\texttt{f} command), and turning (\texttt{c} command) are calibrated. It can be done by repeatedly executing the respective commands with different input values, changing the data points in the \texttt{calibration.ods} spreadsheet, and changing the equations in \texttt{ee}, \texttt{f}, and \texttt{c} methods in \texttt{control/holonomic.py} to respective new computed equations from the spreadsheet. 
 
 When calibrating the spin-kick the aim is for the robot to be not fully turned towards the goal before the kick. To achieve that, there are different "correction angles" for six main zones of the pitch (Figure  \ref{fig:zones}). These angles can be calibrated in \texttt{strategy/simple\_holonomic.py} in \texttt{shot\_correction} method. 
 
@@ -317,28 +288,12 @@ processing.app.SerialNotFoundException: Serial port '<port>' not found. Did you 
 
 \textbf{Solution}: Power cycle the Arduino board.
 
-\textbf{Problem 3}: The distortion and color ranges vary on different machines and pitches.
-
-\textbf{Solution}: Recalibrate the vision system as detailed in Section \ref{calibration}.
-
-\textbf{Problem 4}: The spin kick is not reliable.
-
-\textbf{Solution}: Recalibrate the spin kick as detailed in Section \ref{handling}.
-
-\textbf{Problem 5}: The Python application cannot connect to the RF stick because the RF stick has registered itself as \texttt{/dev/ttyACM1}.
+\textbf{Problem 3}: The Python application cannot connect to the RF stick because the RF stick has registered itself as \texttt{/dev/ttyACM1}.
 
 \textbf{Solution}: Either close all programs that have handles to \texttt{/dev/ttyACM0} and reconnect the RF stick or change the \texttt{device\_no} parameter in the \texttt{connect} method in \texttt{control/holonomic.py} to 1 and restart the Python application.
 
-\textbf{Problem 6}: The robot moves unusually slow.
-
-\textbf{Solution}: Change the battery set to a fully charged one.
-
-\textbf{Problem 7}: The commands are evidently sent but the robot does not move.
+\textbf{Problem 4}: The commands are evidently sent but the robot does not move.
 
 \textbf{Solution}: Power cycle the Arduino. If that does not help, change the battery set to a fully charged one.
-
-\textbf{Problem 8}: The freshly charged batteries are hot.
-
-\textbf{Solution}: Do not put such battery set into the Arduino as the motions will not be reliable. Wait for them to cool down and obtain another set instead.
 
 \end{document}

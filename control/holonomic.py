@@ -37,13 +37,13 @@ class Commands:
         print("! connect <device_no>")
         self.init()
         self.vision()
-        self.connect()
+        #self.connect()
         #self.highstrategy.main()
 
     def hs(self):
         self.highstrategy.main()
 
-    def init(self, room_num=0, team_color='yellow', our_color='green', computer_goal=True):
+    def init(self, room_num=0, team_color='yellow', our_color='pink', computer_goal=False):
         print("init: Room: %s, team color: %s, our single spot color: %s, computer goal: %s" %
               (room_num, team_color, our_color, computer_goal))
         self.world = World(int(room_num), team_color, our_color, computer_goal)
@@ -58,11 +58,12 @@ class Commands:
     def vision(self):
         if not self.vision_process:
             print("vision: Starting vision")
-            self.vision_process = multiprocessing.Process(target=Vision, args=(self.world,))
-            self.vision_process.start()
+            Vision(self, self.world)
+            #self.vision_process = multiprocessing.Process(target=Vision, args=(self.world,))
+            #self.vision_process.start()
 
-    def map(self, state):
-        self.game.mid(state, True)
+    def map(self, state, num):
+        self.game.mid(state, True, num)
 
     def test(self, state):
         while True:

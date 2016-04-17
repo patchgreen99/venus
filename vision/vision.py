@@ -10,7 +10,7 @@ MAX_COLOR_COUNTS = {
     'red': 10,
     'blue': 2,
     'yellow': 10,
-    'pink': 8,
+    'pink': 10,
     'green': 8,
 }
 
@@ -37,12 +37,13 @@ ENEMY_2 = 3
 
 
 class Vision:
-    def __init__(self, world, debug=False):
+    def __init__(self, commands, world, debug=False):
         self.last_angle = [0, 0, 0, 0]
         self.out_counter = [0, 0, 0, 0]
         self.start = 0
         self.debug = debug
         self.world = world
+        self.commands = commands
         self.pressed_key = None
         self.exit_key = None
         self.image = None
@@ -77,7 +78,7 @@ class Vision:
             target.close()
 
             self.min_color_area = {
-                    'red': 2000.0,
+                    'red': 2000000000000000000000000000000000000000000000000000000000000.0,
                     'blue': 1200000.0,
                     'yellow': 8000.0,
                     'pink': 2000.0,
@@ -110,8 +111,8 @@ class Vision:
             target.close()
 
             self.min_color_area = {
-                    'red': 2000.0,
-                    'blue': 1200000.0,
+                    'red': 200.0,
+                    'blue': 100.0,
                     'yellow': 8000.0,
                     'pink': 2000.0,
                     'green': 2000.0,
@@ -132,8 +133,8 @@ class Vision:
 
         ####################################################
 
-        cv2.createTrackbar('BRIGHTNESS', 'Room', 0, 100, self.nothing)
-        cv2.createTrackbar('CONTRAST', 'Room', 0, 100, self.nothing)
+        cv2.createTrackbar('BRIGHTNESS', 'Room', -100, 100, self.nothing)
+        cv2.createTrackbar('CONTRAST', 'Room', -100, 100, self.nothing)
         cv2.createTrackbar('SATURATION', 'Room', 0, 100, self.nothing)
         cv2.createTrackbar('HUE', 'Room', 0, 100, self.nothing)
         cv2.createTrackbar('CALIBRATE', 'Room', 0, 1, self.nothing)
@@ -144,13 +145,14 @@ class Vision:
         cv2.setTrackbarPos('HUE', 'Room', self.hue)
 
         # Only need to create windows at the beginning
-
-        while self.pressed_key != 27:
+        self.picturecounter = 1
+        while self.picturecounter  < 611:
             self.capture.set(cv2.CAP_PROP_BRIGHTNESS, cv2.getTrackbarPos('BRIGHTNESS', 'Room')/100.0)
             self.capture.set(cv2.CAP_PROP_CONTRAST, cv2.getTrackbarPos('CONTRAST', 'Room')/100.0)
             self.capture.set(cv2.CAP_PROP_SATURATION, cv2.getTrackbarPos('SATURATION', 'Room')/100.0)
             self.capture.set(cv2.CAP_PROP_HUE, cv2.getTrackbarPos('HUE', 'Room')/100.0)
             self.frame()
+            self.picturecounter+=1
 
         if self.world.room_num == 0:
             targetFile = open("vision/room0.txt", "w")
@@ -171,13 +173,21 @@ class Vision:
         pass
 
     def frame(self):
-        status, frame = self.capture.read()
+        #status, frame = self.capture.read()
         #cv2.imwrite("ppt1.jpg", frame)
-        #frame = cv2.imread("ppt1.jpg")
-        if self.world.undistort[0] == 1:
-            imgOriginal = self.step(frame)
-        else:
-            imgOriginal = frame
+        name = "%04d"%self.picturecounter
+        #name="0081"
+        frame = cv2.imread("goal/image-"+name+".jpg")
+        #frame += cv2.getTrackbarPos('BRIGHTNESS', 'Room')/100.0
+        frame *= cv2.getTrackbarPos('CONTRAST', 'Room')/100.0
+        frame += cv2.getTrackbarPos('SATURATION', 'Room')-50
+
+        #frame *= 0.2
+
+        #if self.world.undistort[0] == 1:
+        #imgOriginal = self.step(frame)
+        #else:
+        imgOriginal = frame
         # imgOriginal = self.step(frame)
         #blur = imgOriginal
         blur = cv2.GaussianBlur(imgOriginal, (3, 3), 2) #todo: what values are best
@@ -243,7 +253,7 @@ class Vision:
                     else:
                         mask += color_mask
 
-            cv2.imshow('Mask', mask)
+            #cv2.imshow('Mask', mask)
 
             # Label the clusters
             labels, num = measurements.label(mask)
@@ -319,7 +329,9 @@ class Vision:
             if self.start < 10:
                 self.start +=1
             self.pressed_key = cv2.waitKey(2) & 0xFF
-            cv2.imshow('Room', imgOriginal)
+            #cv2.imshow('Room', imgOriginal)
+            print self.picturecounter
+            self.commands.map("FREE_BALL_YOURS", self.picturecounter)
 
     def robot_color(self, r_id, out):
         if out == 1:
@@ -338,6 +350,7 @@ class Vision:
     def getBall(self, circles): #todo look over and test everything in here
         found = False
         robots_pos = [self.world.venus.position, self.world.friend.position, self.world.enemy1.position, self.world.enemy2.position]
+        circles['red'] += circles['pink']
         if len(circles['red']) == 0:
             self.world.ball[0] = self.world.ball[0]
             self.world.ball[1] = self.world.ball[1]
@@ -346,7 +359,7 @@ class Vision:
             for i in range(0, len(circles['red'])-1):
                 its_robot = False
                 for position in robots_pos:
-                    if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 22: #todo Danger hard coded
+                    if math.sqrt((position[0]-circles['red'][i][0])**2 + (position[1]-circles['red'][i][1])**2) < 25: #todo Danger hard coded
                         its_robot = True
                 if not its_robot:
                     found = True
@@ -546,6 +559,11 @@ class Vision:
             elif len(robot[self.world.our_color]) > 1 and not self.flag[3] and len(robot[self.world.other_color]) < 2 :
                 self.findEnemy2(robot)
 
+            #elif len(robot[self.world.our_color]) > 0:
+            #    self.save_robot((robot[self.world.other_color][0][0], robot[self.world.other_color][0][1]), 0, 0)
+            #    self.flag[0] = True
+            #    self.out_counter[0] += 1
+
         # save position from last time
         if self.flag[0] is False:
             angle = math.degrees(math.atan2(self.world.venus.orientation[0], self.world.venus.orientation[1]))
@@ -598,7 +616,7 @@ class Vision:
             if len(robot[self.world.other_color]) == 3:
                 self.three_spot(robot, self.world.other_color, self.world.team_color, self.world.enemy1, 0)
 
-            if len(robot[self.world.our_color]) == 1 and len(robot[self.world.team_color]) == 1 and not self.flag[0]:
+            elif len(robot[self.world.our_color]) == 1 and len(robot[self.world.team_color]) == 1 and not self.flag[0]:
                 if math.sqrt((robot[self.world.team_color][0][0]-self.world.friend.position[0])**2 + (robot[self.world.team_color][0][1]-self.world.friend.position[1])**2) > 50:
                     self.single_spot(robot, self.world.team_color, self.world.our_color, 0)
 
@@ -671,6 +689,10 @@ class Vision:
         self.last_angle[robot_id] = orientation
         robot.position[0] = int(position[0])
         robot.position[1] = int(position[1])
+        if robot_id == 1:
+            robot.position[0] = int(180)
+            robot.position[1] = int(120)
+
         rad = math.radians(orientation)
         robot.orientation[0] = math.sin(rad)
         robot.orientation[1] = math.cos(rad)

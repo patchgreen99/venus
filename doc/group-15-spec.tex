@@ -400,12 +400,6 @@ As each identity is found, its corresponding filters are blocked and its positio
 
 \subsection{Strategy}
 
-\subsubsection{Potential fields}
-
-The strategy relies on the physical properties of a potential field. This makes it possible to compound together separate tasks that the robot has to undertake with ease, such as avoiding others and grabbing a ball, at the same time. Each interaction is implemented using the same behaviour as a charged electron would have when interacting with various physical objects of different charges. Using this it is possible to swerve in front of the kicks and navigate mazes of objects fast and efficiently. 
-
-
-
 \subsubsection{Strategy Tools}
 
 To have a better understanding of the world we use some tools in the strategy which are based on Mathematical procedures. These tools are implemented as methods and are explained below:
@@ -576,17 +570,11 @@ Once a satisfactory potential of 6 is reached, Venus will turn and wait to excep
 	\end{minipage}
 \end{figure}
 
-Each NXT motor is connected to the rotary encoder board which is depicted in Figure \ref{fig:rotary}. The connections in the anticlockwise order from the top are: the I2C bus to the Arduino, back right motor, back left motor, front left motor, and front right motor. Using this board the information about the amount of rotations the motor has performed since the last query is available for the Arduino code as a separate integer for every motor. Every 5 ms the board is queried whether the target value has been reached. After the average of the rotary values of all four motors becomes greater or equal to the target value, the motors are stopped.
+The exact configuration of the encoder board is specified in the user guide. The decision behind using NXT motors as opposed to others was directly due to there encoders. We wanted to keep this function of controlling and stopping movement after specific numbers of rotary values because it worked well for us in our old design. For the grab ball task in particular it is essential that encoders are used as computing conversions between rotary values and cm meant we could deal with grabbing balls from corners and wall also. 
 
 \subsection{Light sensor}
 
-The light sensor is located above the grabber as seen in Figure \ref{fig:sensor}. It is used to check whether
-the robot has successfully acquired the ball after grabbing. The sensor
-provides an integer value that increases the greater the distance to the
-nearest object in its direct line of sight is. Then the Arduino compares the integer
-to a predefined threshold corresponding to the red ball. Sometimes a white
-line inside the pitch can be mistaken for the ball due to their similar sensor
-values. An IR sensor was also tested and its returned values were deemed less reliable than
-those of the light sensor.
+The light sensor functionality is explained in the user-guide and can be seen in Figure \ref{fig:sensor}. Our decision of sensor was a downside to the robot and if built again it would be recommended that a more reliable one is used.
 
 \end{document}
+
