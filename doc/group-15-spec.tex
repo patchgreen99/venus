@@ -402,7 +402,35 @@ As each identity is found, its corresponding filters are blocked and its positio
 
 The strategy relies on the physical properties of a potential field. This makes it possible to compound together separate tasks that the robot has to undertake with ease, such as avoiding others and grabbing a ball, at the same time. Each interaction is implemented using the same behaviour as a charged electron would have when interacting with various physical objects of different charges. Using this it is possible to swerve in front of the kicks and navigate mazes of objects fast and efficiently. 
 
-At a higher level our strategy system consists of a state machine which takes in information from the current world state and makes transistions between different states. The states and their triggers can be seen in Table \ref{tab:machine}. Every state has a perticular task. There are 3 states, namely ATTACK GOAL, ATTACK PASS, and RECIEVE PASS with static tasks. Every other state has tasks that are dynamic in nature and they activate certain potential fields to undertake them. 
+
+
+\subsubsection{Strategy Tools}
+
+To have a better understanding of the world we use some tools in the strategy which are based on Mathematical procedures. These tools are implemented as methods and are explained below:
+
+\paragraph{isSafeKick : }
+
+This method returns a boolean value of whether a kick from a one point to the other would be safe i.e. would not be defended. Mathematical equations are used to determine this. First the equation of the line going through the 2 points is found out. This line is rotated by an angle clockwise and anti-clockwise about the origin of the kick. This angle is taken as a paprameter of the method. Now the co-ordinates of the  enemy robots between the 2 points are substitued in the equations , their signs are checked and a deduction about their position is made. An example can be found in the image:
+
+//PLACEHOLDER OF THE IMAGE//
+
+\paragraph {isCloserToGoal : }
+
+This method was built to check weather a robot should defend a shot on goal or defend a pass when the enemy has ball. The team decided that defending the goal was more important than defending a pass, hence whichever robot in our team was in the best position to defend the goal should be tasked to that and the other robot should defend the pass. This Method returns True if venus is in the best position to defend the goal and false if the friend is. We find the equation of the line to the center of the defending goal to the position of the enemy robot in possesion of the ball. Then we find the perpendicular distance from both venus and friend to that line. The robot which is closer to that line would be in the best position to defend the goal.
+
+\paragraph{hasBallInRange : }
+
+This Method is used to check if a certain robot has the ball close to it and thus deduce that robot would be in possesion of it . The method returns true if the position of the ball is within 15cm of the robot. Note here, for Venus this method is overidden by the check from the IR sensor as it is a more reliable.
+
+\paragraph{goalsideRobots : }
+
+When trying to find the best position to move to recieve a pass it was necessary to know about the enemy robot positions. The most important factor for us was if there were enemy robots in a corridor formed by the line between the two robots of our team, the perpendicular to that line passing through venus and perpendicular passing through friend. The images below help explain this.
+
+//PLACEHOLDER FOR IMAGES//
+
+\subsubsection {State Machine}
+At a higher level our strategy system consists of a state machine which takes in information from the current world state and makes transistions between different states. These states are trigered by information from the strategy tools. The states and their triggers can be seen in Table \ref{tab:machine}. Every state has a perticular task. There are 3 states, namely ATTACK GOAL, ATTACK PASS, and RECIEVE PASS with static tasks. Every other state has tasks that are dynamic in nature and they activate certain potential fields to undertake them. 
+
 
 \begin{table}[h!]
 \centering
@@ -413,12 +441,12 @@ At a higher level our strategy system consists of a state machine which takes in
 \texttt{ATTACK\_GOAL} &   Venus has ball and Goal shot safe \\ \hline
 \texttt{ATTACK\_PASS} &  Venus has ball and Goal shot not safe but pass safe\\ \hline
 \texttt{RECEIVE\_PASS} &  Friend has ball and pass safe\\ \hline
-\texttt{ENEMY1\_BALL\_TAKE\_GOAL} &  Enemy has possession and venus closest to guarding goal\\ \hline
-\texttt{ENEMY\_BALL\_TAKE\_PASS} &  Enemy has possession and venus closest to blocking pass\\ \hline
-\texttt{FREE\_BALL\_NONE\_GOALSIDE} & No Enemy between Venus and Attacking goal \\ \hline
-\texttt{FREE\_BALL\_1\_GOALSIDE} & Enemy 1 between Venus and Attacking goal \\ \hline
-\texttt{FREE\_BALL\_2\_GOALSIDE} & Enemy 2 between Venus and Attacking goal \\ \hline
-\texttt{FREE\_BALL\_BOTH\_GOALSIDE} &  Both Enemy between Venus and Attacking goal\\ \hline
+\texttt{ENEMY1\_BALL\_TAKE\_GOAL} &  Enemy has possession and venus in best position to guard goal\\ \hline
+\texttt{ENEMY\_BALL\_TAKE\_PASS} &  Enemy has possession and friend in best position to guard goal\\ \hline
+\texttt{FREE\_BALL\_NONE\_GOALSIDE} & No Enemy is goalside \\ \hline
+\texttt{FREE\_BALL\_1\_GOALSIDE} & Enemy 1 is goalside \\ \hline
+\texttt{FREE\_BALL\_2\_GOALSIDE} & Enemy 2 is goalside \\ \hline
+\texttt{FREE\_BALL\_BOTH\_GOALSIDE} &  Both Enemy are goalside\\ \hline
 
 \end{tabular}
 \caption{States available in the strategy system}
