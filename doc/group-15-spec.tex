@@ -66,72 +66,53 @@
 
 \newpage
 
-\newgeometry{left=.5cm,right=.5cm}
-
 \section{System architecture}
 
-\begin{wrapfigure}{r}{0.7\textwidth}
+\begin{wrapfigure}{r}{0.55\textwidth}
   \begin{center}
-    \includegraphics[scale=0.4]{arch1.png}
+    \includegraphics[scale=0.35]{arch1.png}
   \end{center}
   \caption{The system architecture of Milestone Venus}
   \vspace{20pt}
   \label{fig:milestone}
 \end{wrapfigure}
-
 The system as seen in Figure \ref{fig:milestone} had a simple structure. Commands were complete once a predefined rotary value was obtained. This was used to calibrate four motions not stretching the capabilities of the robot.
 
-\begin{wrapfigure}{r}{0.7\textwidth}
+The updated system in Figure \ref{fig:venus1} used the value of a potential field obtain by summing the contributions of obstacles in the pitch each having a particular type of field. \begin{wrapfigure}{r}{0.55\textwidth}
   \begin{center}
-\includegraphics[scale=0.4]{arch2.png}
+\includegraphics[scale=0.35]{arch2.png}
 \end{center}
 	\caption{The system architecture of Venus 1.0}
 	\vspace{20pt}
 	\label{fig:venus1}
-\end{wrapfigure}
+\end{wrapfigure} The robot was modelled as an automaton in a finite grid with each square having its own potential. Using calibrated swerving motions from square to square the pitch could be navigated intelligently.
 
-The updated system in Figure \ref{fig:venus1} used the value of a potential field obtain by summing the contributions of obstacles in the pitch. The robot was modelled as an automaton in a finite grid with each square having its own potential. Using calibrated swerving motions from square to square the pitch could be navigated intelligently. Navigational motions were added to a job list on the Arduino. This ensured the motion was continuous and not affected by lag.
-
-\begin{wrapfigure}{r}{0.7\textwidth}
+Navigational motions were added to a job list on the Arduino. This ensured the motion was continuous and not affected by lag. The high level planning was implemented by a state machine controlling on/off switches for each obstacles field and various addition fields imitating behaviours methods like intercept and grab ball. These addition fields worked for a universal spread of situations unlike the method built for milestone venus. The potential fields could be compounded together into states with ease, making high level planning easier to test and modular unlike the set of commands built in milestone venus.
+\begin{wrapfigure}{r}{0.55\textwidth}
   \begin{center}
-\includegraphics[scale=0.4]{arch3.png}
+\includegraphics[scale=0.35]{arch3.png}
 \end{center}
 	\caption{The system architecture of Venus 2.0}
 	\vspace{20pt}
 	\label{fig:venus2}
 \end{wrapfigure}
-
-\restoregeometry
-
-\begin{figure}[ht]
-	\begin{minipage}[b]{.405\textwidth}
-        \centering
-		\includegraphics[scale=0.133]{venus3.jpg}
-		\caption{Venus 2.0}
-		\label{fig:new}
-	\end{minipage}
-	~
-	\begin{minipage}[b]{.59\textwidth}
-        \centering
-		\includegraphics[scale=0.0845]{grab_open1.jpg}
-		\caption{Venus 1.0}
-		\label{fig:old}
-	\end{minipage}
-\end{figure}
+  
+For the final system in Figure \ref{fig:venus2} the first large change was to the robot itself which was redesigned to be four wheeled and holonomoic. Simple motions like kicking and grabbing were implemented using the original wait till the first motion has stopped system right from the beginning. On top of this we added in a move forever method to the firmware which meant we could reach movements as granular as the speed of the communications system. Using this, a planner was built that fed the robot movement trajectories calculated straight from a vector field created using the potential fields in the previous design. This not only made the robot faster but it meant it could deal with more complicated mazes of potentials not capable by venus 1.0 as it could not change directions sharp enough. Also although the move forever function relied on the a lot on vision it still proved more precise than the job list in the previous design as the old robot would often move out of alignment with the grid that its motions were confined too. The final system choice was to relax undistortions of the vision feed to increase the reaction speed of the robot. This removed a lot of lag and meant the robot would only undertake useful tasks and in real time.
 
 \section{Hardware components}
 
 \subsection{Chassis structure}
 
-To obtain more constant torque both designs used the nxt motors for movement. However as the rear wheel in version 1.0 was not powerful enough to swerve the robots orientation with enough granularity, the robot chassis was rethought.  
+To obtain more constant torque both designs used the nxt motors for movement. However as the rear wheel in version 1.0 was not powerful enough to swerve the robots orientation with enough granularity, the robot chassis was rethought.
 
-The final design uses a four wheeled holonomic base instead of our three wheeled one. It enabled fast motion in any direction meaning the robot could respond quickly to a change in play. It also was perfectly suited to a strategy using potential fields as moving in a given optimal direction could implemented instantly. This was harder to do with our three wheeled base as the robot used fixed swerving commands which were not granular enough to cope with maze of obstacles. The only way around this was to rotate on the spot which was too slow for the speed of the game. 
-\begin{figure}[ht!]
-\centering
+\begin{wrapfigure}{r}{0.55\textwidth}
+  \centering
 \includegraphics[scale=.4]{holonomics.png}
 \caption{Visualisation of the calculating the motor power components}
 \label{fig:components}
-\end{figure}
+\end{wrapfigure}  
+
+The final design uses a four wheeled holonomic base instead of our three wheeled one. It enabled fast motion in any direction meaning the robot could respond quickly to a change in play. It also was perfectly suited to a strategy using potential fields as moving in a given optimal direction could implemented instantly. This was harder to do with our three wheeled base as the robot used fixed swerving commands which were not granular enough to cope with maze of obstacles. The only way around this was to rotate on the spot which was too slow for the speed of the game.
 
 The motion was constructed by calculating the angle between the desired direction  and the robot orientation. This was used to compute the driving components that are sent to the Arduino as seen in Figure \ref{fig:components}. The matrix multiplication below was used to extract the driving powers and then each power was scaled up by a factor of $100$ divided by the absolute maximum of the four motor powers.
 
@@ -154,23 +135,37 @@ $$\begin{pmatrix}
 
 \subsection{Weight distribution}
 
-To simplify holonomic calculations, except for the grabber the final robot completely symmetrical in two planes. The majority of the weight coming from the batteries and motors are placed directly in the middle for stability and to evenly distribute the weight between each wheel. The previous design was a lot heavier towards the rear due to the amount of space needed for the kicker causing different forward and backward motion calibrations. This prevented us from obtaining accurate swerving and led to us scraping the chassis structure for the current four wheeled design. 
+To simplify holonomic calculations, except for the grabber the final robot is completely symmetrical in two planes. The majority of the weight coming from the batteries and motors are placed directly in the middle for stability and to evenly distribute the weight between each wheel. The previous design was a lot heavier towards the rear due to the amount of space needed for the kicker causing different forward and backward motion calibrations. This prevented us from obtaining accurate swerving and led to us scraping the chassis structure for the current four wheeled design.
+\begin{figure}[ht]
+	\begin{minipage}[b]{.405\textwidth}
+        \centering
+		\includegraphics[scale=0.1]{venus3.jpg}
+		\caption{Venus 2.0}
+		\label{fig:new}
+	\end{minipage}
+	~
+	\begin{minipage}[b]{.59\textwidth}
+        \centering
+		\includegraphics[scale=0.065]{grab_open1.jpg}
+		\caption{Venus 1.0}
+		\label{fig:old}
+	\end{minipage}
+\end{figure} 
 
 \subsection{Grabber and kicker}
 
 The grabber consists of two symmetric parts placed one slightly above the other as seen in Figure \ref{fig:new}. To keep the robot within dimensions the grabber arms overlap enabling a large span but still within regulations when closed. A symmetric gear system is used so that both arms are opened and closed at the same time. Unlike the original design shown in Figure \ref{fig:old}, the arm axles were placed closer together so that the grabbed ball would always be in the same position increasing the reliability of the sensor and the kick.
-
 \begin{figure}[ht!]
 \begin{minipage}{0.5\textwidth}
 \centering
-\includegraphics[width=70mm,height=80mm]{goodkick.png}
+\includegraphics[width=60mm,height=70mm]{goodkick.png}
 \caption{Correct kick rotation}
 \label{fig:correct}
 \end{minipage}
 ~
 \begin{minipage}{0.5\textwidth}
 \centering
-\includegraphics[width=60mm,height=80mm]{badkick.png}
+\includegraphics[width=50mm,height=70mm]{badkick.png}
 \caption{Incorrect kick rotation}
 \label{fig:incorrect}
 \end{minipage}

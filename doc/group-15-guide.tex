@@ -9,6 +9,8 @@
 %\usepackage{titling}
 \usepackage{array}
 \usepackage{soul}
+\usepackage{hyperref}
+\usepackage{wrapfig}
 
 \graphicspath{ {images/} }
 
@@ -93,44 +95,43 @@ To program the Arduino to receive and execute messages, open the Arduino IDE by 
 \subsection{Components}
 \subsubsection{Wheels}
 The robot has four holonomic wheels, which are placed in the middle of each side of the robot. The holonomic motion allows the robot to move in any direction. All wheels are powered by NXT motors.
-\subsubsection{Grabber and Kicker}
-The grabber consists of two symmetric parts resembling arms (Figure \ref{fig:grabber}). It is powered by a single Power Functions Medium motor, which is connected to a symmetric gear system. The latter is used to ensure both arms are opened and closed at the same time. The robot does not have a kicker. Instead it opens the grabber while turning to make a kick. In doing this the centrifugal force holds the ball towards the end of the grabber and the ball is in contact with the claw that will apply the kicking force.
 
-\begin{figure}
-\centering
-\includegraphics[scale=.3]{grabber_close.jpg}
-\caption{The grabber}
-\label{fig:grabber}
-\end{figure}
+The grabber consists of two symmetric parts resembling arms (Figure \ref{fig:grabber}). It is powered by a single Power Functions Medium motor, which is connected to a symmetric gear system. The latter is used to ensure both arms are opened and closed at the same time. The kicking works in the following way. 
+
+%\begin{wrapfigure}{r}{0.5\textwidth}
+%\centering
+%\includegraphics[scale=.3]{grabber_close.jpg}
+%\caption{The grabber}
+%\label{fig:grabber}
+%\end{wrapfigure}
 
 \subsubsection{Rotary encoder board}
 
 Each NXT motor is connected to the rotary encoder board (Figure \ref{fig:rotary}). The connections in the anticlockwise order from the top are: the I2C bus to the Arduino, back right motor, back left motor, front left motor, and front right motor. Using this board the information about the amount of rotations the motor has performed since the last query is available for the Arduino code as a separate integer for every motor. Every 5 ms the board is queried whether the target value has been reached. After the average of the rotary values of all four motors becomes greater or equal to the target value, the motors are stopped.
 
-\begin{figure}[ht!]
-\centering
-\includegraphics[scale=.1]{rotary1}
-\caption{The rotary encoder board}
-\label{fig:rotary}
-\end{figure}
+%\begin{figure}[ht!]
+%\begin{minipage}{0.5\textwidth}
+%\centering
+%\includegraphics[scale=.1]{rotary1}
+%\caption{The rotary encoder board}
+%\label{fig:rotary}
+%\end{minipage}
+%~
+%\begin{minipage}{0.5\textwidth}
+%\centering
+%\includegraphics[scale=.1]{sensor1}
+%\caption{The light sensor with the ball grabbed}
+%\label{fig:sensor}
+%\end{minipage}
+%\end{figure}
 
 \subsubsection{Light sensor}
 
 The light sensor is located above the grabber (Figure \ref{fig:sensor}). It is used to check whether
 the robot has successfully acquired the ball after grabbing. The sensor
-provides an integer value that increases the greater the distance to the
-nearest object in its direct line of sight is. Then the Arduino compares the integer
-to a predefined threshold corresponding to the red ball. Sometimes a white
+returns a value associated with the reflected colors in its line of sight. Then the Arduino compares that value to a predefined threshold corresponding to the red ball. Sometimes a white
 line inside the pitch can be mistaken for the ball due to their similar sensor
 values.
-
-\begin{figure}[ht!]
-\centering
-\includegraphics[scale=.1]{sensor1}
-\caption{The light sensor with the ball grabbed}
-\label{fig:sensor}
-\end{figure}
-
 
 \subsection{Usage}
 
@@ -233,23 +234,44 @@ To catch the ball from the teammate, the robot turns towards the teammate and op
 
 \subsection{Calibration of the vision} \label{calibration}
 
-copy over from spec
+\begin{minipage}{0.6\textwidth}
+\includegraphics[scale=0.3]{images/calibration1.png}
+\end{minipage}
+\begin{minipage}{0.4\textwidth}   
+\textbf{The three spot method}: Finds the largest of the three distances between spots, then draws a vector from the midpoint of this edge to the spot not included in the edge. The orientation is then computable by rotating this vector by a fixed amount. Then, the robot center is calculated using the average of the spot centres.
+\end{minipage}
+~
+\begin{minipage}{0.6\textwidth}
+\includegraphics[scale=0.3]{images/calibration2.png}
+\end{minipage}
+\begin{minipage}{0.4\textwidth}
+\textbf{The two spot method}: As each spot is distinguishable, a vector can be constructed between the center spot and the corner spot and rotated a fixed amount to find the orientation. Then, the robot center is calculated using the center spot. 
+\end{minipage}
+~
+\begin{minipage}{0.6\textwidth}
+\includegraphics[scale=0.3]{images/calibration3.png}
+\end{minipage}
+\begin{minipage}{0.4\textwidth}
+\textbf{The two spot method}: As each spot is distinguishable, a vector can be constructed between the center spot and the corner spot and rotated a fixed amount to find the orientation. Then, the robot center is calculated using the center spot. 
+\end{minipage}
 
 \subsection{Handling} \label{handling}
 
 Handle the robot with care. It is advisable not to lose the top plate during the game. It can be secured properly to the robot using Blu-Tack. 
 
 \subsubsection{Calibration}
-Before playing a match, ensure that the spin-kick (\texttt{goal} command), going forward (\texttt{f} command), and turning (\texttt{c} command) are calibrated. It can be done by repeatedly executing the respective commands with different input values, changing the data points in the \texttt{calibration.ods} spreadsheet, and changing the equations in \texttt{ee}, \texttt{f}, and \texttt{c} methods in \texttt{control/holonomic.py} to respective new computed equations from the spreadsheet. 
 
-When calibrating the spin-kick the aim is for the robot to be not fully turned towards the goal before the kick. To achieve that, there are different "correction angles" for six main zones of the pitch (Figure  \ref{fig:zones}). These angles can be calibrated in \texttt{strategy/simple\_holonomic.py} in \texttt{shot\_correction} method. The best strategy here would be to place robot with the ball in different sections of one zone and execute the \texttt{goal} command choosing the constant for the angle that achieved the best result.
-
-\begin{figure}
+\begin{wrapfigure}{r}{0.3\textwidth}
 \centering
 \includegraphics[scale=.4]{zones.jpg}
 \caption{Different shooting zones}
 \label{fig:zones}
-\end{figure}
+\end{wrapfigure}
+Before playing a match, ensure that the spin-kick (\texttt{goal} command), going forward (\texttt{f} command), and turning (\texttt{c} command) are calibrated. It can be done by repeatedly executing the respective commands with different input values, changing the data points in the \texttt{calibration.ods} spreadsheet, and changing the equations in \texttt{ee}, \texttt{f}, and \texttt{c} methods in \texttt{control/holonomic.py} to respective new computed equations from the spreadsheet. 
+
+When calibrating the spin-kick the aim is for the robot to be not fully turned towards the goal before the kick. To achieve that, there are different "correction angles" for six main zones of the pitch (Figure  \ref{fig:zones}). These angles can be calibrated in \texttt{strategy/simple\_holonomic.py} in \texttt{shot\_correction} method. 
+
+The best strategy here would be to place robot with the ball in different sections of one zone and execute the \texttt{goal} command choosing the constant for the angle that achieved the best result.
 
 Another important action is checking whether the light sensor threshold correctly identifies the grabbed ball and lack thereof. The threshold is defined in \texttt{query\_ball} method in \texttt{control/holonomic.py}.
 
@@ -261,46 +283,31 @@ Another important action is checking whether the light sensor threshold correctl
 \begin{lstlisting}
 processing.app.SerialNotFoundException: Serial port '<port>' not found. Did you select the right one from the Tools > Serial Port menu?
 \end{lstlisting}
-
 \textbf{Solution}: Make sure you are not running the Python application at the same time or have not opened the serial interface any other way when the changes are being uploaded. The Arduino IDE is only able to program the Arduino when the serial interface of the RF stick or Arduino itself is registered as \texttt{/dev/ttyACM0} on the PC. If there are other programs accessing \texttt{/dev/ttyACM0} and the RF stick or USB cable is unplugged and plugged again, the "new" device is issued \texttt{/dev/ttyACM1} instead by the Linux kernel.
-
-\bigskip
 
 \textbf{Problem 2}: When sending commands the robot does not respond to any commands although it should move.
 
 \textbf{Solution}: Power cycle the Arduino board.
 
-\bigskip
-
 \textbf{Problem 3}: The distortion and color ranges vary on different machines and pitches.
 
 \textbf{Solution}: Recalibrate the vision system as detailed in Section \ref{calibration}.
-
-\bigskip
 
 \textbf{Problem 4}: The spin kick is not reliable.
 
 \textbf{Solution}: Recalibrate the spin kick as detailed in Section \ref{handling}.
 
-\bigskip
-
 \textbf{Problem 5}: The Python application cannot connect to the RF stick because the RF stick has registered itself as \texttt{/dev/ttyACM1}.
 
 \textbf{Solution}: Either close all programs that have handles to \texttt{/dev/ttyACM0} and reconnect the RF stick or change the \texttt{device\_no} parameter in the \texttt{connect} method in \texttt{control/holonomic.py} to 1 and restart the Python application.
-
-\bigskip
 
 \textbf{Problem 6}: The robot moves unusually slow.
 
 \textbf{Solution}: Change the battery set to a fully charged one.
 
-\bigskip
-
 \textbf{Problem 7}: The commands are evidently sent but the robot does not move.
 
 \textbf{Solution}: Power cycle the Arduino. If that does not help, change the battery set to a fully charged one.
-
-\bigskip
 
 \textbf{Problem 8}: The freshly charged batteries are hot.
 
