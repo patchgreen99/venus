@@ -68,36 +68,38 @@
 
 \section{System architecture}
 
-\begin{wrapfigure}{r}{0.55\textwidth}
-  \begin{center}
-    \includegraphics[scale=0.35]{arch1.png}
-  \end{center}
-  \caption{The system architecture of Milestone Venus}
-  \vspace{20pt}
+\begin{wrapfigure}{r}[1.8cm]{10.7cm}
+  \vspace{-12pt}
+  \includegraphics[scale=0.35]{arch1.png}
+  \vspace{-24pt}
+  \caption{The architecture of Milestone Venus}
   \label{fig:milestone}
+  \vspace{-18pt}
 \end{wrapfigure}
-The system as seen in Figure \ref{fig:milestone} had a simple structure. Commands were complete once a predefined rotary value was obtained. This was used to calibrate four motions not stretching the capabilities of the robot.
+The oldest system called the Milestone Venus had a simple structure as seen in Figure \ref{fig:milestone}. Commands were complete once a predefined rotary value was obtained. This was used to calibrate the four motions and did not stretch the capabilities of the robot.
 
-The updated system in Figure \ref{fig:venus1} used the value of a potential field obtain by summing the contributions of obstacles in the pitch each having a particular type of field. \begin{wrapfigure}{r}{0.55\textwidth}
-  \begin{center}
-\includegraphics[scale=0.35]{arch2.png}
-\end{center}
-	\caption{The system architecture of Venus 1.0}
-	\vspace{20pt}
-	\label{fig:venus1}
-\end{wrapfigure} The robot was modelled as an automaton in a finite grid with each square having its own potential. Using calibrated swerving motions from square to square the pitch could be navigated intelligently.
+The updated system in Figure \ref{fig:venus1} used the value of a potential field obtained by summing up the contributions of all obstacles in the pitch each having a particular type of a field.
+\begin{wrapfigure}{r}[1.8cm]{10.7cm}
+  \vspace{-15pt}
+  \includegraphics[scale=0.35]{arch2.png}
+  \vspace{-24pt}
+  \caption{The architecture of Venus 1.0}
+  \label{fig:venus1}
+  \vspace{-18pt}
+\end{wrapfigure}
+The robot was modelled as an automaton in a finite grid with each square having its own potential. Using calibrated swerving motions from square to square the pitch could be navigated intelligently.
 
-Navigational motions were added to a job list on the Arduino. This ensured the motion was continuous and not affected by lag. The high level planning was implemented by a state machine controlling on/off switches for each obstacles field and various addition fields imitating behaviours methods like intercept and grab ball. These addition fields worked for a universal spread of situations unlike the method built for milestone venus. The potential fields could be compounded together into states with ease, making high level planning easier to test and modular unlike the set of commands built in milestone venus.
-\begin{wrapfigure}{r}{0.55\textwidth}
-  \begin{center}
-\includegraphics[scale=0.35]{arch3.png}
-\end{center}
-	\caption{The system architecture of Venus 2.0}
-	\vspace{20pt}
-	\label{fig:venus2}
+Navigational motions were added to a job list on the Arduino. This ensured that the motion was continuous and not affected by lag. The high level planning was implemented by a state machine that controlled the on/off switches for each obstacle field and various addition fields imitating behaviour methods such as intercept and grab ball. These addition fields worked for all possible situations in the game unlike the method built for the Milestone Venus. The potential fields could be compounded together into states without difficulties, making high level planning easier to test and modular unlike the set of commands built in the Milestone Venus.
+\begin{wrapfigure}{r}[1.8cm]{10.7cm}
+  \vspace{-15pt}
+  \includegraphics[scale=0.35]{arch3.png}
+  \vspace{-24pt}
+  \caption{The system architecture of Venus 2.0}
+  \label{fig:venus2}
+  \vspace{-18pt}
 \end{wrapfigure}
   
-For the final system in Figure \ref{fig:venus2} the first large change was to the robot itself which was redesigned to be four wheeled and holonomoic. Simple motions like kicking and grabbing were implemented using the original wait till the first motion has stopped system right from the beginning. On top of this we added in a move forever method to the firmware which meant we could reach movements as granular as the speed of the communications system. Using this, a planner was built that fed the robot movement trajectories calculated straight from a vector field created using the potential fields in the previous design. This not only made the robot faster but it meant it could deal with more complicated mazes of potentials not capable by venus 1.0 as it could not change directions sharp enough. Also although the move forever function relied on the a lot on vision it still proved more precise than the job list in the previous design as the old robot would often move out of alignment with the grid that its motions were confined too. The final system choice was to relax undistortions of the vision feed to increase the reaction speed of the robot. This removed a lot of lag and meant the robot would only undertake useful tasks and in real time.
+For the final system in Figure \ref{fig:venus2} the first large change was to the robot itself which was redesigned to be four wheel holonomic. Simple motions like kicking and grabbing were implemented using the original system that waits until the first motion has stopped. On top of this, the move forever method was added to the firmware, which meant that movements as granular as the latency of the communications system could be achieved. Using this, a planner was built that provided the movement trajectories of the robots calculated straight from a vector field that were created using the potential fields from the previous design. This not only made the robot faster but it meant that it could deal with more complicated mazes of potentials not capable by the Venus 1.0 as previously it could not change the directions sharp enough. Also, although the move forever function relied solely on the vision, it still proved more precise than the job scheduling from the previous design as the old robot would often move out of alignment with the grid to which its motions were confined. Moreover, the final system relaxed the undistortion of the vision feed to increase the reaction speed of the robot because it removed a lot of lag.
 
 \section{Hardware components}
 
