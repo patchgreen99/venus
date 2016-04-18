@@ -37,13 +37,12 @@ ENEMY_2 = 3
 
 
 class Vision:
-    def __init__(self, commands, world, debug=False):
+    def __init__(self, world, debug=False):
         self.last_angle = [0, 0, 0, 0]
         self.out_counter = [0, 0, 0, 0]
         self.start = 0
         self.debug = debug
         self.world = world
-        self.commands = commands
         self.pressed_key = None
         self.exit_key = None
         self.image = None
@@ -78,8 +77,8 @@ class Vision:
             target.close()
 
             self.min_color_area = {
-                    'red': 2000000000000000000000000000000000000000000000000000000000000.0,
-                    'blue': 1200000.0,
+                    'red': 200.0,
+                    'blue': 1200.0,
                     'yellow': 8000.0,
                     'pink': 2000.0,
                     'green': 2000.0,
@@ -145,14 +144,14 @@ class Vision:
         cv2.setTrackbarPos('HUE', 'Room', self.hue)
 
         # Only need to create windows at the beginning
-        self.picturecounter = 1
-        while self.picturecounter  < 611:
+        #self.picturecounter = 1
+        while self.pressed_key != 27:
             self.capture.set(cv2.CAP_PROP_BRIGHTNESS, cv2.getTrackbarPos('BRIGHTNESS', 'Room')/100.0)
             self.capture.set(cv2.CAP_PROP_CONTRAST, cv2.getTrackbarPos('CONTRAST', 'Room')/100.0)
             self.capture.set(cv2.CAP_PROP_SATURATION, cv2.getTrackbarPos('SATURATION', 'Room')/100.0)
             self.capture.set(cv2.CAP_PROP_HUE, cv2.getTrackbarPos('HUE', 'Room')/100.0)
             self.frame()
-            self.picturecounter+=1
+            #self.picturecounter+=1
 
         if self.world.room_num == 0:
             targetFile = open("vision/room0.txt", "w")
@@ -173,21 +172,21 @@ class Vision:
         pass
 
     def frame(self):
-        #status, frame = self.capture.read()
+        status, frame = self.capture.read()
         #cv2.imwrite("ppt1.jpg", frame)
-        name = "%04d"%self.picturecounter
+        #name = "%04d"%self.picturecounter
         #name="0081"
-        frame = cv2.imread("goal/image-"+name+".jpg")
+        #frame = cv2.imread("goal/image-"+name+".jpg")
         #frame += cv2.getTrackbarPos('BRIGHTNESS', 'Room')/100.0
-        frame *= cv2.getTrackbarPos('CONTRAST', 'Room')/100.0
-        frame += cv2.getTrackbarPos('SATURATION', 'Room')-50
+        #frame *= cv2.getTrackbarPos('CONTRAST', 'Room')/100.0
+        #frame += cv2.getTrackbarPos('SATURATION', 'Room')-50
 
         #frame *= 0.2
 
-        #if self.world.undistort[0] == 1:
-        #imgOriginal = self.step(frame)
-        #else:
-        imgOriginal = frame
+        if self.world.undistort[0] == 1:
+            imgOriginal = self.step(frame)
+        else:
+            imgOriginal = frame
         # imgOriginal = self.step(frame)
         #blur = imgOriginal
         blur = cv2.GaussianBlur(imgOriginal, (3, 3), 2) #todo: what values are best
@@ -253,7 +252,7 @@ class Vision:
                     else:
                         mask += color_mask
 
-            #cv2.imshow('Mask', mask)
+            cv2.imshow('Mask', mask)
 
             # Label the clusters
             labels, num = measurements.label(mask)
@@ -329,9 +328,9 @@ class Vision:
             if self.start < 10:
                 self.start +=1
             self.pressed_key = cv2.waitKey(2) & 0xFF
-            #cv2.imshow('Room', imgOriginal)
-            print self.picturecounter
-            self.commands.map("FREE_BALL_YOURS", self.picturecounter)
+            cv2.imshow('Room', imgOriginal)
+            #print self.picturecounter
+            #self.commands.map("FREE_BALL_YOURS", self.picturecounter)
 
     def robot_color(self, r_id, out):
         if out == 1:

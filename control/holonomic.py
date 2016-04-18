@@ -58,9 +58,8 @@ class Commands:
     def vision(self):
         if not self.vision_process:
             print("vision: Starting vision")
-            Vision(self, self.world)
-            #self.vision_process = multiprocessing.Process(target=Vision, args=(self.world,))
-            #self.vision_process.start()
+            self.vision_process = multiprocessing.Process(target=Vision, args=(self.world,))
+            self.vision_process.start()
 
     def map(self, state, num):
         self.game.mid(state, True, num)
