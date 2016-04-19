@@ -68,38 +68,32 @@
 
 \section{System architecture}
 
-\begin{wrapfigure}{r}[1.8cm]{14cm}
-  \vspace{-12pt}
-  \includegraphics[scale=0.4]{arch1.png}
-  %\vspace{-24pt}
-  \caption{The architecture of Milestone Venus}
-  \label{fig:milestone}
-  \vspace{-18pt}
-\end{wrapfigure}
 The oldest system called the Milestone Venus had a simple structure as seen in Figure \ref{fig:milestone}. Commands were complete once a predefined rotary value was obtained. This was used to calibrate the four motions and did not stretch the capabilities of the robot.
 
-The updated system in Figure \ref{fig:venus1} used the value of a potential field obtained by summing up the contributions of all obstacles in the pitch each having a particular type of a field.
-\begin{wrapfigure}{r}[1.8cm]{14cm}
-  \vspace{-15pt}
+\begin{figure}[ht!]
+  \centering
+  \includegraphics[scale=0.4]{arch1.png}
+  \caption{The architecture of Milestone Venus}
+  \label{fig:milestone}
+\end{figure}
+
+The updated system in Figure \ref{fig:venus1} used the value of a potential field obtained by summing up the contributions of all obstacles in the pitch each having a particular type of a field. The robot was modelled as an automaton in a finite grid with each square having its own potential. Using calibrated swerving motions from square to square the pitch could be navigated intelligently. Navigational motions were added to a job list on the Arduino. This ensured that the motion was continuous and not affected by lag. The high level planning was implemented by a state machine that controlled the on/off switches for each obstacles field and various addition fields imitating behaviours such as intercept and grab ball. These addition fields worked for all possible situations in the game unlike the method built for the Milestone Venus. The potential fields could be compounded together into states without difficulties, making high level planning easier to test and modular unlike the set of commands built in the Milestone Venus.
+
+\begin{figure}[ht!]
+  \centering
   \includegraphics[scale=0.4]{arch2.png}
-  %\vspace{-24pt}
   \caption{The architecture of Venus 1.0}
   \label{fig:venus1}
-  \vspace{-18pt}
-\end{wrapfigure}
-The robot was modelled as an automaton in a finite grid with each square having its own potential. Using calibrated swerving motions from square to square the pitch could be navigated intelligently.
-
-Navigational motions were added to a job list on the Arduino. This ensured that the motion was continuous and not affected by lag. The high level planning was implemented by a state machine that controlled the on/off switches for each obstacles field and various addition fields imitating behaviours such as intercept and grab ball. These addition fields worked for all possible situations in the game unlike the method built for the Milestone Venus. The potential fields could be compounded together into states without difficulties, making high level planning easier to test and modular unlike the set of commands built in the Milestone Venus.
-\begin{wrapfigure}{r}[1.8cm]{14cm}
-  \vspace{-15pt}
-  \includegraphics[scale=0.4]{arch3.png}
-  %\vspace{-24pt}
-  \caption{The system architecture of Venus 2.0}
-  \label{fig:venus2}
-  \vspace{-18pt}
-\end{wrapfigure}
+\end{figure}  
   
 For the final system in Figure \ref{fig:venus2} the first large change was to the robot itself which was redesigned to be four wheel holonomic. After re-calibrations with encoders simple motions like kicking and grabbing were implemented using the original system that waits until the first motion has stopped. On top of this, the move forever method was added to the firmware, which meant that movements as granular as the latency of the communications system could be achieved. Using this, a planner was built that provided the movement trajectories of the robot to be calculated straight from a vector field created from our potential fields in the previous design. This not only made the robot faster but it meant that it could deal with more complicated mazes of potentials not capable by the Venus 1.0 as previously it could not change direction sharp enough. Also, although the move forever function relied solely on the vision, it still proved more precise than the job scheduling from the previous design as the old robot would often move out of alignment with the grid to which its motions were confined. Moreover, the final system relaxed the undistortion of the vision feed to increase the reaction speed of the robot. By removing its lag it was able to keep up more accurately with the pace of the game.
+
+\begin{figure}[ht!]
+  \centering
+  \includegraphics[scale=0.4]{arch3.png}
+  \caption{The system architecture of Venus 2.0}
+  \label{fig:venus2}
+\end{figure}
 
 \section{Hardware components}
 
@@ -107,9 +101,9 @@ For the final system in Figure \ref{fig:venus2} the first large change was to th
 
 To obtain more constant torque both designs used the nxt motors for movement. However as the rear wheel in version 1.0 was not powerful enough to swerve the robots orientation with enough granularity, the robot chassis was rethought.
 
-\begin{wrapfigure}{r}{0.4\textwidth}
+\begin{wrapfigure}{r}{0.5\textwidth}
   \centering
-\includegraphics[scale=.3]{holonomics.png}
+\includegraphics[scale=.4]{holonomics.png}
 \caption{Visualisation of the calculating the motor power components}
 \label{fig:components}
 \end{wrapfigure}  
@@ -172,6 +166,31 @@ The grabber consists of two symmetric parts placed one slightly above the other 
 \end{figure}
 
 The newest design does not have a kicker. Instead, the kick is made by turning the robot and opening the grabber at the same time. The main incentive of this design was to reduce the asymmetric weight distribution which would have been catastrophic in optimising the holonomic movement. The robot rotates in the intended kick direction when it is aligning itself with the goal. In doing this the centrifugal force holds the ball towards the end of the grabber and the ball is in contact with the claw that will apply the kicking force. This increases the accuracy of the kick as the ball always starts in a similar position. As the error margin of the kick is asymmetric and biased towards undershooting, the kick is initiated in different directions in different positions on the pitch. The $y$ dimension is split into four segments: $0$, $\frac{1}{4}$, $\frac{1}{2}$, and $\frac{3}{4}$. In Figures \ref{fig:correct} and \ref{fig:incorrect} the robots demonstrate each segment and its correct and incorrect kick directions. This kicking mechanism is not only more powerful than the previous design but it is also able to confuse the defence strategies of opponents tournament\footnote{Footage of one such example of a confusing spin kick is available at \url{https://youtu.be/VJLo2x2gdGk}.}.
+
+\subsection{Sensors}
+
+\begin{figure}[ht!]
+	\begin{minipage}[b]{.49\textwidth}
+        \centering
+\includegraphics[scale=.07]{rotary1}
+\caption{The rotary encoder board}
+\label{fig:rotary}
+	\end{minipage}
+	~
+	\begin{minipage}[b]{.48\textwidth}
+        \centering
+\includegraphics[scale=.08]{sensor3}
+\caption{The light sensor with the ball}
+\label{fig:sensor}
+	\end{minipage}
+\end{figure}
+\textbf{Rotary encoder board}
+
+The exact configuration of the rotary encoder board is specified in the User Guide. The decision behind using NXT motors as opposed to other motors was directly because the NXT motors are the only ones that have encoders. Controlling and stopping movement after specific numbers of rotary values was retained between the iterations of the design because it worked well. Also, the usage of encoders is essential for the ball grabbing task, because the computation of precise conversions between the rotary values and centimetres allowed the robot to grab ball from corners of the pitch and near walls.
+
+\textbf{Light sensor}
+
+The light sensor functionality is explained in the User Guide and can be seen in Figure \ref{fig:sensor}. The decision to use this particular sensor was a downside to the robot and in case the robot is built again it would be recommended that a more reliable one is used instead.
 
 \section{Documentation of the code}
 
@@ -321,31 +340,6 @@ The Arduino message handling is located in \texttt{arduino/arduino.ino} file.
 
 A buffer of upcoming motor jobs has also been implemented in the Arduino code to ensure continuous motion but it was deemed unnecessary as vision could issue new commands quickly enough without the robot coming to halt. The current implementation also never stops a motor when a new command arrives for the same motor, instead it just executes the new command, ensuring continuous motion.
 
-\section{Sensors}
-
-\begin{figure}[ht!]
-	\begin{minipage}[b]{.49\textwidth}
-        \centering
-\includegraphics[scale=.07]{rotary1}
-\caption{The rotary encoder board}
-\label{fig:rotary}
-	\end{minipage}
-	~
-	\begin{minipage}[b]{.48\textwidth}
-        \centering
-\includegraphics[scale=.08]{sensor3}
-\caption{The light sensor with the ball}
-\label{fig:sensor}
-	\end{minipage}
-\end{figure}
-\textbf{Rotary encoder board}
-
-The exact configuration of the encoder board is specified in the user guide. The decision behind using NXT motors as opposed to others was directly due to there encoders. We wanted to keep this function of controlling and stopping movement after specific numbers of rotary values because it worked well for us in our old design. For the grab ball task in particular it is essential that encoders are used as computing conversions between rotary values and cm meant we could deal with grabbing balls from corners and wall also. 
-
-\textbf{Light Sensor}
-
-The light sensor functionality is explained in the user-guide and can be seen in Figure \ref{fig:sensor}. Our decision of sensor was a downside to the robot and if built again it would be recommended that a more reliable one is used.
-
 \subsection{Vision}
 
 In order to detect the robots and ball the following steps are executed:
@@ -366,15 +360,17 @@ The algorithm looks for 10 red spots and checks through them in the order of des
 
 \subsubsection{Finding the robots}
 
-\begin{minipage}{0.62\textwidth}
-Due to the varying light intensities over the pitch a highly tolerant method of identifying robots is used. The robot identities are pre-defined and dependent on the choice of the center and corner spot as seen on the right. Numbers are assigned sequentially to our robot, teammate, first enemy, and second enemy.
-\end{minipage}
-~
-\begin{minipage}{0.3\textwidth}
-\includegraphics[height=40mm,width=60mm]{ex1.jpg}
-\end{minipage}
+\begin{wrapfigure}{r}{6.5cm}
+\includegraphics[width=6.5cm]{ex1.jpg}
+\vspace{-0.7cm}
+\caption{The vision feed with robots enumerated}
+\label{fig:nums}
+\vspace{-2cm}
+\end{wrapfigure}
+Due to the varying light intensities over the pitch a highly tolerant method of identifying robots is used. The robot identities are pre-defined and dependent on the choice of the center and corner spot as seen on the right. Numbers are assigned sequentially to our robot, teammate, first enemy, and second enemy as seen in Figure \ref{fig:nums}.
 
 There are two independent ways the robot can be identified:
+\vspace{1.7cm}
 
 \begin{minipage}{0.2\textwidth}
 \includegraphics[scale=0.7]{3spot.jpg}
@@ -423,38 +419,34 @@ As each identity is found, its corresponding filters are blocked and its positio
 
 \subsection{Strategy}
 
-\subsubsection{Higher Strategy}
+\subsubsection{Higher-level strategy}
 
-At a higher level our strategy system consists of a list of states, triggered in a specific order of priority. The states and their triggers can be seen in Table \ref{tab:machine}.To have a better understanding of the world we use the following tools in the to trigger the states:
+At a higher level the strategy system consists of a list of states, triggered in a specific order of priority. The states and their triggers can be seen in Table \ref{tab:machine}. To have a better understanding of the world the following methods are used to trigger the states.
 
-\textbf{isSafeKick:}
-First the intended ball trajectory vector is calculated. Second two more vectors are calculated between the source of the kick and each individual defending robot. Using a dot product the angle between these two vectors and the trajectory is calculated. The method returns True if this angle is less than a certain angle which is taken as a parameter to the method. 
+\textbf{isSafeKick}: First, the intended ball trajectory vector is calculated. Second, two more vectors are calculated between the source of the kick and each individual defending robot. Using a dot product the angle between these two vectors and the trajectory is calculated. The method returns true if this angle is less than a certain angle which is taken as a parameter to the method. 
 
-\textbf{isCloserToGoal:}
-This Method returns True if venus is in the best position to defend the goal and false if the friend is. We find the equation of the line to the center of the defending goal to the position of the enemy robot in possession of the ball. Then we find the perpendicular distance from both venus and our team mate to that line. If the robots do not lye perpendicular we use the distance to the attacking enemy instead. The method returns True if venus is in the best position to defend goal.
+\textbf{isCloserToGoal}: This method returns true if Venus is in the best position to defend the goal and false if the team mate is. The equation of the line from the center of the defending goal to the position of the enemy robot in possession of the ball is calculated. Then the perpendicular distance from both Venus and our team mate to that line is obtained. If the robots are not situated perpendicular, the distance to the attacking enemy is used instead. The method returns true if Venus is in the best position to defend the goal.
 
-\textbf{hasBallInRange:}
-This Method is used to check if a certain robot has the ball close to it and thus deduce that robot would be in possession of it. The method returns true if the position of the ball is within 15cm of the robot. Note here, for Venus this method is overridden by the check from the IR sensor as it is a more reliable.
+\textbf{hasBallInRange}: The method returns true if the position of the ball is within 15 cm of a robot. Note that for Venus this method is overridden by the check from the light sensor as that is more reliable.
 
-\textbf{goalsideRobots:}
-When trying to find the best position to move to receive a pass it was necessary to know about the enemy robot positions. To deduce whether they were not going to influence the pass a vector is constructed between both our team mate and venus. Two vectors perpendicular to this line are then constructed that pass through venus and our team mate respectively. These two vectors construct a channel and if an enemy robot lies within this channel it is not 'goalside'.   
+\textbf{goalsideRobots}: When trying to find the best position to move to receive a pass it is necessary to know about the positions of the enemies. To deduce whether they are not going to influence the pass, a vector is built between both our team mate and Venus. Two vectors perpendicular to this line are then constructed that pass through Venus and our team mate, respectively. These two vectors form a channel and if an enemy robot lies within this channel it is not considered 'goal-side'.
 
 \begin{table}[h!]
 \centering
-\begin{tabular}{ | l | l | l | }
-\hline
+\begin{tabular}{  l | l | p{9cm}  }
+
 \textbf{Priority} & \textbf{State} & \textbf{Trigger} \\ \hline
-\texttt{1} &\texttt{ATTACK\_GOAL} &   Venus has ball and goal \textbf{isSafeKick} is True for venus\\ \hline
-\texttt{2} & \texttt{ATTACK\_PASS} &  \shortstack{Venus has ball and goal \textbf{isSafeKick} is False\\ and \textbf{isSafeKick} is True for passing to friend}\\ \hline
-\texttt{3} & \texttt{ENEMY1\_BALL\_TAKE\_GOAL} &  Enemy 1 has ball and venus \textbf{isCloserToGoal}\\ \hline
-\texttt{4} & \texttt{ENEMY2\_BALL\_TAKE\_GOAL} &  Enemy has ball and venus \textbf{isCloserToGoal}\\ \hline
-\texttt{5} & \texttt{ENEMY\_BALL\_TAKE\_PASS} &  Enemy has ball and friend \textbf{isCloserToGoal}\\ \hline
-\texttt{6} & \texttt{FREE\_BALL\_YOURS} & \textbf{hasBallInRange} False for every robot\\ \hline
-\texttt{7} & \texttt{RECEIVE\_PASS} &  Friend \textbf{hasBallInRange} and pass \textbf{isSafeKick} for friend\\ \hline
-\texttt{8} & \texttt{FREE\_BALL\_NONE\_GOALSIDE} & No Enemy is in \textbf{goalsideRobots} \\ \hline
-\texttt{8} & \texttt{FREE\_BALL\_1\_GOALSIDE} & Enemy 1 is in \textbf{goalsideRobots} \\ \hline
-\texttt{8} & \texttt{FREE\_BALL\_2\_GOALSIDE} & Enemy 2 is in \textbf{goalsideRobots} \\ \hline
-\texttt{8} & \texttt{FREE\_BALL\_BOTH\_GOALSIDE} &  Both Enemy are in \textbf{goalsideRobots}\\ \hline
+\texttt{1} &\texttt{ATTACK\_GOAL} & Venus has ball and goal \textbf{isSafeKick} is true for Venus\\ \hline
+\texttt{2} & \texttt{ATTACK\_PASS} &  Venus has ball and goal \textbf{isSafeKick} is false and pass \textbf{isSafeKick} is true for Venus\\ \hline
+\texttt{3} & \texttt{ENEMY1\_BALL\_TAKE\_GOAL} &  Enemy 1 has ball and Venus \textbf{isCloserToGoal}\\ \hline
+\texttt{4} & \texttt{ENEMY2\_BALL\_TAKE\_GOAL} &  Enemy has ball and Venus \textbf{isCloserToGoal}\\ \hline
+\texttt{5} & \texttt{ENEMY\_BALL\_TAKE\_PASS} &  Enemy has ball and team mate \textbf{isCloserToGoal}\\ \hline
+\texttt{6} & \texttt{FREE\_BALL\_YOURS} & \textbf{hasBallInRange} is false for every robot\\ \hline
+\texttt{7} & \texttt{RECEIVE\_PASS} &  Friend \textbf{hasBallInRange} and pass \textbf{isSafeKick} for team mate\\ \hline
+\texttt{8} & \texttt{FREE\_BALL\_NONE\_GOALSIDE} & No enemy is in \textbf{goalsideRobots} \\ \hline
+\texttt{9} & \texttt{FREE\_BALL\_1\_GOALSIDE} & Enemy 1 is in \textbf{goalsideRobots} \\ \hline
+\texttt{10} & \texttt{FREE\_BALL\_2\_GOALSIDE} & Enemy 2 is in \textbf{goalsideRobots} \\ \hline
+\texttt{11} & \texttt{FREE\_BALL\_BOTH\_GOALSIDE} &  Both enemies are in \textbf{goalsideRobots}\\ 
 
 \end{tabular}
 \caption{States available in the strategy system}
@@ -463,7 +455,7 @@ When trying to find the best position to move to receive a pass it was necessary
 
 \subsubsection{Potential fields}
 
-The following graphs were plotted using the command \texttt{map STATE\_NAME} which is ideal for visualisation and quick testing of newly defined fields. The graphs below contain quiver plots of the force acting on Venus at a given point in space. This is drawn on top of a heat map of the value of the potential field at a given point. 
+The following graphs were plotted using the command \texttt{map STATE\_NAME} which is ideal for visualisation and quick testing of newly defined fields. The graphs below contain quiver plots of the force acting on Venus at a given point in space. This is drawn on top of a heat map of the value of the potential field at a given point\footnote{Footage of an evolving field paired up with a vision feed can be found at \url{https://patrickgreen.me/robotics.html}.}. 
 
 \begin{minipage}{\linewidth}
 \rule{\textwidth}{1pt}
