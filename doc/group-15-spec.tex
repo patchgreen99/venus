@@ -428,10 +428,10 @@ As each identity is found, its corresponding filters are blocked and its positio
 At a higher level our strategy system consists of a list of states, triggered in a specific order of priority. The states and their triggers can be seen in Table \ref{tab:machine}.To have a better understanding of the world we use the following tools in the to trigger the states:
 
 \textbf{isSafeKick:}
-First the intended ball trajectory vector is calculated. Second two more vectors are calculated between the source of the kick and each individual defending robot. Using a dot product the angle between these two vectors and the trajectory is calculated. The method returns True if this angle is less than 30 degrees. 
+First the intended ball trajectory vector is calculated. Second two more vectors are calculated between the source of the kick and each individual defending robot. Using a dot product the angle between these two vectors and the trajectory is calculated. The method returns True if this angle is less than a certain angle which is taken as a parameter to the method. 
 
 \textbf{isCloserToGoal:}
-This Method returns True if venus is in the best position to defend the goal and false if the friend is. We find the equation of the line to the center of the defending goal to the position of the enemy robot in possession of the ball. Then we find the perpendicular distance from both venus and our team mate to that line. If the robots do not lye perpendicular we use the distance to the attacking enemy instead. The method returns the best positioned robot.
+This Method returns True if venus is in the best position to defend the goal and false if the friend is. We find the equation of the line to the center of the defending goal to the position of the enemy robot in possession of the ball. Then we find the perpendicular distance from both venus and our team mate to that line. If the robots do not lye perpendicular we use the distance to the attacking enemy instead. The method returns True if venus is in the best position to defend goal.
 
 \textbf{hasBallInRange:}
 This Method is used to check if a certain robot has the ball close to it and thus deduce that robot would be in possession of it. The method returns true if the position of the ball is within 15cm of the robot. Note here, for Venus this method is overridden by the check from the IR sensor as it is a more reliable.
