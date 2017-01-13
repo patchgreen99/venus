@@ -44,7 +44,7 @@ class Commands:
     def hs(self):
         self.highstrategy.main()
 
-    def init(self, room_num=0, team_color='yellow', our_color='green', computer_goal=False):
+    def init(self, room_num=1, team_color='yellow', our_color='green', computer_goal=True):
         print("init: Room: %s, team color: %s, our single spot color: %s, computer goal: %s" %
               (room_num, team_color, our_color, computer_goal))
         self.world = World(int(room_num), team_color, our_color, computer_goal)
@@ -167,7 +167,7 @@ class Commands:
         self.protocol.move(400, [(4, -100)], time=True, wait=True)
 
     def g(self):
-        self.protocol.move(500, [(4, 80)], time=True, wait=True)
+        self.protocol.move(800, [(4, 80)], time=True, wait=True)
 
     def ss(self, x):
         x = int(x)
