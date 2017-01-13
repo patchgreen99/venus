@@ -6,10 +6,11 @@ NO_VALUE = -1
 
 class Robot:
     def __init__(self):
-        self.position = [NO_VALUE, NO_VALUE]
-        self.orientation = [NO_VALUE, NO_VALUE]
-        self.out = [1]
-        self.hasBallInRange = [0]
+       self.position = Array('i', [NO_VALUE, NO_VALUE])
+       self.orientation = Array('d', [NO_VALUE, NO_VALUE])
+       self.out = Array('i', [NO_VALUE])
+       self.out = Array('i', [1])
+       self.hasBallInRange = Array('i', [0])
 
     def __str__(self):
         return "(pos: {} {}, ori: {}, out: {}, hasBallInRange: {})".format(self.position[0], self.position[1],
@@ -37,17 +38,14 @@ class World:
         self.read_pitch(data)
         target.close()
 
-        self.ball = [NO_VALUE, NO_VALUE] # in pixels
-        self.ball_velocity = [NO_VALUE, NO_VALUE] # pixels per frame
-        self.ball_moving = [0]
+        self.ball = Array('i', [NO_VALUE, NO_VALUE])
+        self.ball_velocity = Array('d', [NO_VALUE, NO_VALUE])
+        self.ball_moving = Array('i', [0])
         self.venus = Robot()
         self.friend = Robot()
         self.enemy1 = Robot()
         self.enemy2 = Robot()
         self.grabber_open = False
-        self.friend.position = [160,120]
-        self.enemy1.position = [80,360]
-        self.enemy2.position = [560,260]
 
     def __str__(self):
         return "World state: ball {} {} {}, future ball {} {}, venus {}, friend {}, enemy1 {}, enemy2 {}".format(

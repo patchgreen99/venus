@@ -34,11 +34,11 @@ class Commands:
         print("! vision")
         print("! connect <device_no>")
         self.init()
-        self.vision()
-        #self.connect()
+        #self.vision()
+        self.connect()
         #self.highstrategy.main()
 
-    def init(self, room_num=1, team_color='yellow', our_color='green', computer_goal=False):
+    def init(self, room_num=1, team_color='yellow', our_color='pink', computer_goal=False):
         print("init: Room: %s, team color: %s, our single spot color: %s, computer goal: %s" %
               (room_num, team_color, our_color, computer_goal))
         self.world = World(int(room_num), team_color, our_color, computer_goal)
@@ -387,11 +387,13 @@ class Commands:
         # Not using rotary encoders, granularity too low
         self.protocol.move(x, [(2, 100)], time=True)
 
-    def g(self, x=-300):
+    def g(self, x=-400):
         """Grab, positive x means release"""
         x = int(x)
         # This motor does not have rotary encoders
         self.world.grabber_open = x > 0
+        self.protocol.move(abs(x), [(MOTOR_GRAB, 100 * sign(x))], time=True)
+        time.sleep(1)
         self.protocol.move(abs(x), [(MOTOR_GRAB, 100 * sign(x))], time=True)
 
     def open_wide(self):

@@ -688,9 +688,6 @@ class Vision:
         self.last_angle[robot_id] = orientation
         robot.position[0] = int(position[0])
         robot.position[1] = int(position[1])
-        if robot_id == 1:
-            robot.position[0] = int(180)
-            robot.position[1] = int(120)
 
         rad = math.radians(orientation)
         robot.orientation[0] = math.sin(rad)

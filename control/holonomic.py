@@ -9,6 +9,7 @@ from strategy.simple_holonomic import SimpleStrategy
 from strategy.highstrategy import StrategyTools
 from strategy.world import World
 from strategy.game import Game
+#from vision2.sender import *
 from vision.vision import Vision
 
 FRONT_RIGHT = 3
@@ -37,13 +38,13 @@ class Commands:
         print("! connect <device_no>")
         self.init()
         self.vision()
-        #self.connect()
+        self.connect()
         #self.highstrategy.main()
 
     def hs(self):
         self.highstrategy.main()
 
-    def init(self, room_num=0, team_color='yellow', our_color='pink', computer_goal=False):
+    def init(self, room_num=0, team_color='yellow', our_color='green', computer_goal=False):
         print("init: Room: %s, team color: %s, our single spot color: %s, computer goal: %s" %
               (room_num, team_color, our_color, computer_goal))
         self.world = World(int(room_num), team_color, our_color, computer_goal)
@@ -124,7 +125,7 @@ class Commands:
         s = sign(x)
         x = abs(x)
         # Calibrated for the holonomic robot on 27 March, only forward
-        x = 5.3169850194 * x - 14.9575723714
+        x = 5.3169850194 * x - 12
         x = int(x)
         if x > 0:
             self.protocol.move(x, [(0, 100 * s), (1, -100 * s), (2, -100 * s), (3, 100 * s)], wait=True)
@@ -166,7 +167,7 @@ class Commands:
         self.protocol.move(400, [(4, -100)], time=True, wait=True)
 
     def g(self):
-        self.protocol.move(400, [(4, 80)], time=True, wait=True)
+        self.protocol.move(500, [(4, 80)], time=True, wait=True)
 
     def ss(self, x):
         x = int(x)
@@ -194,7 +195,7 @@ class Commands:
     def ee(self, x):
         x = int(x)
         s = sign(x)
-        self.protocol.move(400, [(4, -100)], time=True)
+        self.protocol.move(500, [(4, -100)], time=True)
         self.protocol.move(200, [(0, -100 * s), (1, -100 * s), (2, -100 * s), (3, -100 * s)], wait=True)
 
     def w(self):
@@ -219,6 +220,11 @@ class Commands:
         self.strategy.goal()
 
     def who(self):
+        print "venus " + str(self.world.venus)
+        print "friend " + str(self.world.friend)
+        print "enemy1 " + str(self.world.enemy1)
+        print "enemy2 " + str(self.world.enemy2)
+
         print "Who has the ball?"
         if self.world.venus.hasBallInRange[0]:
             print "0: venus"

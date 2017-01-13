@@ -107,6 +107,17 @@ class SimpleStrategy:
         self.commands.g()
         #exit(0)
 
+    def kick_to_point(self, x, y):
+        pos = np.array([x,y])
+        angle, motion_length = self.calculate_angle_length(pos)
+        print("Turning " + str(angle) + " deg then kicking " + str(motion_length) + " cm")
+        turn, d = self.shot_correction(angle)
+        self.commands.c(turn)
+        time.sleep(.5)
+        self.commands.ee(d)
+        self.commands.g()
+        #exit(0)
+
     def catch_ball(self):
         time.sleep(.5)
         print("Waiting for the ball to move")

@@ -526,6 +526,10 @@ class Game:
         elif state == "ATTACK_PASS":
             self.world.kicked = True
             self.world.undistort[0] = 1
+            # get away from wall
+            bearing = self.calculate_angle(self.current_force)
+            #print bearing
+            self.commands.move(bearing, 0)
             # pass ball to the friend, when attacking
             self.commands.pass_ball()
 
@@ -534,6 +538,10 @@ class Game:
         elif state == "ATTACK_GOAL":
             self.world.kicked = True
             self.world.undistort[0] = 1
+            # get away from wall
+            bearing = self.calculate_angle(self.current_force)
+            #print bearing
+            self.commands.move(bearing, 0)
             # you're in the good position to score
             self.commands.goal()
 
