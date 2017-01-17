@@ -25,7 +25,7 @@ class World:
         self.enemy_color = 'yellow' if team_color == 'blue' else 'blue'
         self.other_color = 'green' if our_color == 'pink' else 'pink'
         self.we_have_computer_goal = we_have_computer_goal
-        self.undistort = [0]
+        self.undistort = [1]
         self.sensor = False
         self.kicked = False
 

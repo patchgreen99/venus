@@ -44,7 +44,7 @@ class Commands:
     def hs(self):
         self.highstrategy.main()
 
-    def init(self, room_num=1, team_color='yellow', our_color='green', computer_goal=True):
+    def init(self, room_num=1, team_color='yellow', our_color='green', computer_goal=False):
         print("init: Room: %s, team color: %s, our single spot color: %s, computer goal: %s" %
               (room_num, team_color, our_color, computer_goal))
         self.world = World(int(room_num), team_color, our_color, computer_goal)
@@ -96,6 +96,37 @@ class Commands:
         movement = s*((40*abs(movement))/100 + 60)
         self.protocol.move_forever([(0, int(movement[0])), (1, int(movement[1])), (2, int(movement[2])), (3, int(movement[3])), ])
         #self.protocol.move(20, [(0, movement[0]), (1, movement[1]), (2, movement[2]), (3, movement[3]), ], wait=True)
+
+    def singlemove(self, direction, angle): # direction is between our orientation and where we want to go
+        dir = int(direction)
+        ang = int(angle)
+        if dir < 0:
+            d = 45 - dir
+        else:
+            d = -(dir - 45)
+
+        a = -math.radians(ang)
+        dir = math.radians(d)
+        idea = np.array([np.cos(dir), np.sin(dir), a])
+        rad = 0.1
+        m = np.array([[1, 0, rad],
+                      [0, -1, rad],
+                      [-1, 0, rad],
+                      [0, 1, rad]])
+
+        movement = np.dot(m, idea)
+        sizes = np.fabs(movement)
+        factor = np.amax(sizes)
+        movement = np.multiply(100.0/factor, movement)
+
+        movement = movement.round()
+        s = np.sign(movement)
+        movement = s*((40*abs(movement))/100 + 60)
+
+        awayfromwall = 1
+        self.protocol.move(awayfromwall, [(0, int(movement[0])), (1, int(movement[1])), (2, int(movement[2])), (3, int(movement[3])), ], wait=True)
+        #self.protocol.move(20, [(0, movement[0]), (1, movement[1]), (2, movement[2]), (3, movement[3]), ], wait=True)
+
 
     def penalty_attack(self, clockno):
         self.highstrategy.penalty_attack(clockno)

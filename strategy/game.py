@@ -121,6 +121,7 @@ class Game:
                     self.commands.f(motion_length - fix)  # todo hack
                     self.commands.g()
                     time.sleep(.5)
+
                     # todo need to implement considering objects
                     #if self.commands.query_ball() or self.commands.query_ball():
                     #    print("It thinks it has the ball")
@@ -175,6 +176,9 @@ class Game:
             potential = Potential(self.current_point, self.current_direction, self.world, potentials)
 
             # MOTION
+            
+            
+            
             #######################################
             if sim is False:
                 self.current_force = potential.get_force()
@@ -526,10 +530,33 @@ class Game:
         elif state == "ATTACK_PASS":
             self.world.kicked = True
             self.world.undistort[0] = 1
-            # get away from wall
+
+            ball_field = P.radial(self.world.ball, 1, -200)# -5
+
+            friend_field = P.solid_field(self.world.friend.position, 1, 15, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy1_field = P.solid_field(self.world.enemy1.position, 1, 15, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy2_field = P.solid_field(self.world.enemy2.position, 1, 15, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+
+            advance = P.step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
+            catch_up = P.step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
+
+
+            # BUILD FIELD AND NEXT POSITION AND DIRECTIONS
+            ####################################
+            # todo too reliant on vision, must pick what to use for look ahead
+
+            self.current_point = (self.world.venus.position[0], self.world.venus.position[1])
+            self.current_direction = (self.world.venus.orientation[0], self.world.venus.orientation[1])
+
+            potentials = [ball_field, friend_field, enemy1_field, enemy2_field, advance, catch_up] #todo add advance and catch up
+            potential = Potential(self.current_point, self.current_direction, self.world, potentials)
+
+            self.current_force = potential.get_force()
+            #print self.current_force
             bearing = self.calculate_angle(self.current_force)
             #print bearing
-            self.commands.move(bearing, 0)
+            self.commands.singlemove(bearing, 0)
+
             # pass ball to the friend, when attacking
             self.commands.pass_ball()
 
@@ -538,10 +565,34 @@ class Game:
         elif state == "ATTACK_GOAL":
             self.world.kicked = True
             self.world.undistort[0] = 1
-            # get away from wall
+
+            ball_field = P.radial(self.world.ball, 1, -200)# -5
+
+            friend_field = P.solid_field(self.world.friend.position, 1, 15, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy1_field = P.solid_field(self.world.enemy1.position, 1, 15, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+            enemy2_field = P.solid_field(self.world.enemy2.position, 1, 15, ROBOT_SIZE, ROBOT_INFLUENCE_SIZE)
+
+            advance = P.step_field(self.world.friend.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
+            catch_up = P.step_field(self.world.venus.position, rotate_vector(-90, get_play_direction(self.world)[0], get_play_direction(self.world)[1]), 2000, 1, 0)
+
+
+            # BUILD FIELD AND NEXT POSITION AND DIRECTIONS
+            ####################################
+            # todo too reliant on vision, must pick what to use for look ahead
+
+            self.current_point = (self.world.venus.position[0], self.world.venus.position[1])
+            self.current_direction = (self.world.venus.orientation[0], self.world.venus.orientation[1])
+
+            potentials = [ball_field, friend_field, enemy1_field, enemy2_field, advance, catch_up] #todo add advance and catch up
+            potential = Potential(self.current_point, self.current_direction, self.world, potentials)
+
+            self.current_force = potential.get_force()
+            #print self.current_force
             bearing = self.calculate_angle(self.current_force)
             #print bearing
-            self.commands.move(bearing, 0)
+            self.commands.singlemove(bearing, 0)
+
+            # get away from wall
             # you're in the good position to score
             self.commands.goal()
 

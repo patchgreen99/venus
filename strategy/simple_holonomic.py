@@ -161,7 +161,7 @@ class SimpleStrategy:
 
             if PITCH_ROWS/4.0 <= self.world.venus.position[1] < PITCH_ROWS/2.0: # TOP#
                 print "1TOP"
-                correction = 50
+                correction = 75
                 if angle < 0:
                     turn = -(180 - angle + correction)
                 else:
@@ -169,7 +169,7 @@ class SimpleStrategy:
                 d = -1
             elif PITCH_ROWS/2.0 <= self.world.venus.position[1] < 3.0*PITCH_ROWS/4.0:
                 print "1BOTTOMA" # checked
-                correction = 40
+                correction = 70
                 if angle < 0:
                     turn = 180 + angle + correction
                 else:
@@ -178,10 +178,10 @@ class SimpleStrategy:
             elif self.world.venus.position[1] < PITCH_ROWS/4.0: # TOP#
                 if 1.0*PITCH_COLS/4.0 <= self.world.venus.position[0]:
                     print "2.1 TOPAAA"
-                    correction = 60
+                    correction = 75
                 else:
-                    print "2.2 TOP"
-                    correction = 65
+                    print "2.2 TOPA"
+                    correction = 85
                 if angle < 0:
                     turn = 180 + angle + correction
                 else:
@@ -193,7 +193,7 @@ class SimpleStrategy:
                  #   correction = 60
                 #else:
                 #    print "2.2 BOTTOM"
-                correction = 70 # checked
+                correction = 75 # checked
                 if angle < 0:
                     turn = -(180 - angle + correction)
                 else:

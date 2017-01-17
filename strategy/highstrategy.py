@@ -281,6 +281,8 @@ class StrategyTools:
             midy = (liney1 + liney2) / 2
             adist = self.euclideandist((x1,y1),(midx,midy))
             bdist = self.euclideandist((x2,y2),(midx,midy))
+
+
             if adist>bdist:
                 return True
             else:
@@ -407,11 +409,13 @@ class StrategyTools:
         d1 = self.euclideandist((x1,y1),(x,y))
         d2 = self.euclideandist((x2,y2),(x,y))
 
+        # todo I always closer to the ball
         #if d1*(0.7) > d2 or self.world.friend.out[0] == 1
-        if d2 >= 90:         #TODO: or teamate out of pitch -- done, testing needed
-            return True
-        else:
-            return False
+        # if d2 >= 90:         #TODO: or teamate out of pitch -- done, testing needed
+        #     return True
+        # else:
+        #     return False
+        return True
 
     def bestpositioncase(self):
         x1 = self.world.venus.position[0]
@@ -485,11 +489,11 @@ class StrategyTools:
 
         robotposlist = [(x3,y3),
                         (x4,y4)]
-        #todo taken pass out
-        if self.isSafe3((x2,y2),(x1,y1),robotposlist) and self.world.friend.hasBallInRange[0] == 1:
-            return "RECEIVE_PASS"
-        else:
-            return self.bestpositioncase()
+        #todo taken RECIEVE_PASS out
+        # if self.isSafe3((x2,y2),(x1,y1),robotposlist) and self.world.friend.hasBallInRange[0] == 1:
+        #     return "RECEIVE_PASS"
+        # else:
+        return self.bestpositioncase()
 
     def get_pass_goal_position(self):
         pass
