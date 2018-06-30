@@ -3,7 +3,7 @@
 
 ## Setup
 
-    git clone https://github.com/julijonas/venus.git
+    git clone https://github.com/patchgreen99/venus.git
     cd venus
     virtualenv --system-site-packages env
     source env/bin/activate
